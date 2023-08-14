@@ -2,9 +2,9 @@
 
 JavaDoc for various Minecraft modding APIs.  
 
-* [Forge (1.1 - 1.7.10)](forge/index.html)
-* [ModLoader (a1.1.2_01 - 1.6.2)](modloader/index.html)
-* [ModLoaderMP (b1.4_01 - 1.5.2)](modloadermp/index.html)
+* [Forge (1.1 - 1.7.10)](forge/index.md)
+* [ModLoader (a1.1.2_01 - 1.6.2)](modloader/index.md)
+* [ModLoaderMP (b1.4_01 - 1.5.2)](modloadermp/index.md)
 
 ## About
 
