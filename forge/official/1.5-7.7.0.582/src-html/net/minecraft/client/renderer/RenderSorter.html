@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.util.Comparator;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.entity.EntityLiving;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>@SideOnly(Side.CLIENT)<a name="line.8"></a>
+<span class="sourceLineNo">009</span>public class RenderSorter implements Comparator<a name="line.9"></a>
+<span class="sourceLineNo">010</span>{<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    /** The entity (usually the player) that the camera is inside. */<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    private EntityLiving baseEntity;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public RenderSorter(EntityLiving par1EntityLiving)<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    {<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.baseEntity = par1EntityLiving;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    }<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public int doCompare(WorldRenderer par1WorldRenderer, WorldRenderer par2WorldRenderer)<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    {<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        if (par1WorldRenderer.isInFrustum &amp;&amp; !par2WorldRenderer.isInFrustum)<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        {<a name="line.22"></a>
+<span class="sourceLineNo">023</span>            return 1;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        }<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        else if (par2WorldRenderer.isInFrustum &amp;&amp; !par1WorldRenderer.isInFrustum)<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        {<a name="line.26"></a>
+<span class="sourceLineNo">027</span>            return -1;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        }<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        else<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>            double d0 = (double)par1WorldRenderer.distanceToEntitySquared(this.baseEntity);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>            double d1 = (double)par2WorldRenderer.distanceToEntitySquared(this.baseEntity);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>            return d0 &lt; d1 ? 1 : (d0 &gt; d1 ? -1 : (par1WorldRenderer.chunkIndex &lt; par2WorldRenderer.chunkIndex ? 1 : -1));<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        }<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    }<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>    public int compare(Object par1Obj, Object par2Obj)<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        return this.doCompare((WorldRenderer)par1Obj, (WorldRenderer)par2Obj);<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    }<a name="line.40"></a>
+<span class="sourceLineNo">041</span>}<a name="line.41"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

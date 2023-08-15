@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.Random;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.util.MathHelper;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>public class NoiseGeneratorOctaves extends NoiseGenerator<a name="line.6"></a>
+<span class="sourceLineNo">007</span>{<a name="line.7"></a>
+<span class="sourceLineNo">008</span>    /**<a name="line.8"></a>
+<span class="sourceLineNo">009</span>     * Collection of noise generation functions.  Output is combined to produce different octaves of noise.<a name="line.9"></a>
+<span class="sourceLineNo">010</span>     */<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    private NoiseGeneratorPerlin[] generatorCollection;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    private int octaves;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public NoiseGeneratorOctaves(Random par1Random, int par2)<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    {<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.octaves = par2;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        this.generatorCollection = new NoiseGeneratorPerlin[par2];<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>        for (int j = 0; j &lt; par2; ++j)<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        {<a name="line.20"></a>
+<span class="sourceLineNo">021</span>            this.generatorCollection[j] = new NoiseGeneratorPerlin(par1Random);<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        }<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    }<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /**<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     * pars:(par2,3,4=noiseOffset ; so that adjacent noise segments connect) (pars5,6,7=x,y,zArraySize),(pars8,10,12 =<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     * x,y,z noiseScale)<a name="line.27"></a>
+<span class="sourceLineNo">028</span>     */<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public double[] generateNoiseOctaves(double[] par1ArrayOfDouble, int par2, int par3, int par4, int par5, int par6, int par7, double par8, double par10, double par12)<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        if (par1ArrayOfDouble == null)<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        {<a name="line.32"></a>
+<span class="sourceLineNo">033</span>            par1ArrayOfDouble = new double[par5 * par6 * par7];<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        }<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        else<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        {<a name="line.36"></a>
+<span class="sourceLineNo">037</span>            for (int k1 = 0; k1 &lt; par1ArrayOfDouble.length; ++k1)<a name="line.37"></a>
+<span class="sourceLineNo">038</span>            {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>                par1ArrayOfDouble[k1] = 0.0D;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>            }<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        }<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>        double d3 = 1.0D;<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>        for (int l1 = 0; l1 &lt; this.octaves; ++l1)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>            double d4 = (double)par2 * d3 * par8;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            double d5 = (double)par3 * d3 * par10;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            double d6 = (double)par4 * d3 * par12;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            long i2 = MathHelper.floor_double_long(d4);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            long j2 = MathHelper.floor_double_long(d6);<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            d4 -= (double)i2;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            d6 -= (double)j2;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            i2 %= 16777216L;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            j2 %= 16777216L;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            d4 += (double)i2;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            d6 += (double)j2;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            this.generatorCollection[l1].populateNoiseArray(par1ArrayOfDouble, d4, d5, d6, par5, par6, par7, par8 * d3, par10 * d3, par12 * d3, d3);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            d3 /= 2.0D;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        }<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>        return par1ArrayOfDouble;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    }<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>    /**<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     * Bouncer function to the main one with some default arguments.<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     */<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    public double[] generateNoiseOctaves(double[] par1ArrayOfDouble, int par2, int par3, int par4, int par5, double par6, double par8, double par10)<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        return this.generateNoiseOctaves(par1ArrayOfDouble, par2, 10, par3, par4, 1, par5, par6, 1.0D, par8);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    }<a name="line.71"></a>
+<span class="sourceLineNo">072</span>}<a name="line.72"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

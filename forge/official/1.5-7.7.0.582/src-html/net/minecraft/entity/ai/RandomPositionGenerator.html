@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.entity.ai;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.Random;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.entity.EntityCreature;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.util.MathHelper;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.util.Vec3;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class RandomPositionGenerator<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    /**<a name="line.10"></a>
+<span class="sourceLineNo">011</span>     * used to store a driection when the user passes a point to move towards or away from. WARNING: NEVER THREAD SAFE.<a name="line.11"></a>
+<span class="sourceLineNo">012</span>     * MULTIPLE findTowards and findAway calls, will share this var<a name="line.12"></a>
+<span class="sourceLineNo">013</span>     */<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    private static Vec3 staticVector = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);<a name="line.14"></a>
+<span class="sourceLineNo">015</span><a name="line.15"></a>
+<span class="sourceLineNo">016</span>    /**<a name="line.16"></a>
+<span class="sourceLineNo">017</span>     * finds a random target within par1(x,z) and par2 (y) blocks<a name="line.17"></a>
+<span class="sourceLineNo">018</span>     */<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public static Vec3 findRandomTarget(EntityCreature par0EntityCreature, int par1, int par2)<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    {<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        return findRandomTargetBlock(par0EntityCreature, par1, par2, (Vec3)null);<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    }<a name="line.22"></a>
+<span class="sourceLineNo">023</span><a name="line.23"></a>
+<span class="sourceLineNo">024</span>    /**<a name="line.24"></a>
+<span class="sourceLineNo">025</span>     * finds a random target within par1(x,z) and par2 (y) blocks in the direction of the point par3<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     */<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    public static Vec3 findRandomTargetBlockTowards(EntityCreature par0EntityCreature, int par1, int par2, Vec3 par3Vec3)<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    {<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        staticVector.xCoord = par3Vec3.xCoord - par0EntityCreature.posX;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        staticVector.yCoord = par3Vec3.yCoord - par0EntityCreature.posY;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        staticVector.zCoord = par3Vec3.zCoord - par0EntityCreature.posZ;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        return findRandomTargetBlock(par0EntityCreature, par1, par2, staticVector);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    }<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>    /**<a name="line.35"></a>
+<span class="sourceLineNo">036</span>     * finds a random target within par1(x,z) and par2 (y) blocks in the reverse direction of the point par3<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     */<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    public static Vec3 findRandomTargetBlockAwayFrom(EntityCreature par0EntityCreature, int par1, int par2, Vec3 par3Vec3)<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        staticVector.xCoord = par0EntityCreature.posX - par3Vec3.xCoord;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        staticVector.yCoord = par0EntityCreature.posY - par3Vec3.yCoord;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        staticVector.zCoord = par0EntityCreature.posZ - par3Vec3.zCoord;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        return findRandomTargetBlock(par0EntityCreature, par1, par2, staticVector);<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    }<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>    /**<a name="line.46"></a>
+<span class="sourceLineNo">047</span>     * searches 10 blocks at random in a within par1(x,z) and par2 (y) distance, ignores those not in the direction of<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * par3Vec3, then points to the tile for which creature.getBlockPathWeight returns the highest number<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     */<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    private static Vec3 findRandomTargetBlock(EntityCreature par0EntityCreature, int par1, int par2, Vec3 par3Vec3)<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        Random random = par0EntityCreature.getRNG();<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        boolean flag = false;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        int k = 0;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        int l = 0;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        int i1 = 0;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        float f = -99999.0F;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        boolean flag1;<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>        if (par0EntityCreature.hasHome())<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            double d0 = (double)(par0EntityCreature.getHomePosition().getDistanceSquared(MathHelper.floor_double(par0EntityCreature.posX), MathHelper.floor_double(par0EntityCreature.posY), MathHelper.floor_double(par0EntityCreature.posZ)) + 4.0F);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            double d1 = (double)(par0EntityCreature.getMaximumHomeDistance() + (float)par1);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            flag1 = d0 &lt; d1 * d1;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        }<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        else<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            flag1 = false;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        }<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>        for (int j1 = 0; j1 &lt; 10; ++j1)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            int k1 = random.nextInt(2 * par1) - par1;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            int l1 = random.nextInt(2 * par2) - par2;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            int i2 = random.nextInt(2 * par1) - par1;<a name="line.75"></a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span>            if (par3Vec3 == null || (double)k1 * par3Vec3.xCoord + (double)i2 * par3Vec3.zCoord &gt;= 0.0D)<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            {<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                k1 += MathHelper.floor_double(par0EntityCreature.posX);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                l1 += MathHelper.floor_double(par0EntityCreature.posY);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                i2 += MathHelper.floor_double(par0EntityCreature.posZ);<a name="line.81"></a>
+<span class="sourceLineNo">082</span><a name="line.82"></a>
+<span class="sourceLineNo">083</span>                if (!flag1 || par0EntityCreature.isWithinHomeDistance(k1, l1, i2))<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                    float f1 = par0EntityCreature.getBlockPathWeight(k1, l1, i2);<a name="line.85"></a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span>                    if (f1 &gt; f)<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                    {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                        f = f1;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                        k = k1;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                        l = l1;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                        i1 = i2;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                        flag = true;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                    }<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                }<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            }<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        }<a name="line.97"></a>
+<span class="sourceLineNo">098</span><a name="line.98"></a>
+<span class="sourceLineNo">099</span>        if (flag)<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            return par0EntityCreature.worldObj.getWorldVec3Pool().getVecFromPool((double)k, (double)l, (double)i1);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        }<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        else<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            return null;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        }<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>}<a name="line.108"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

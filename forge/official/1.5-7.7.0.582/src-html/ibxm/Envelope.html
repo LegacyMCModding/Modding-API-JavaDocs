@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a name="line.1"></a>
+<span class="sourceLineNo">002</span>package ibxm;<a name="line.2"></a>
+<span class="sourceLineNo">003</span><a name="line.3"></a>
+<span class="sourceLineNo">004</span>public class Envelope {<a name="line.4"></a>
+<span class="sourceLineNo">005</span>    public boolean sustain, looped;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>    private int sustain_tick, loop_start_tick, loop_end_tick;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>    private int[] ticks, ampls;<a name="line.7"></a>
+<span class="sourceLineNo">008</span><a name="line.8"></a>
+<span class="sourceLineNo">009</span>    public Envelope() {<a name="line.9"></a>
+<span class="sourceLineNo">010</span>        set_num_points( 1 );<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    }<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public void set_num_points( int num_points ) {<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        int point;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        if( num_points &lt;= 0 ) {<a name="line.15"></a>
+<span class="sourceLineNo">016</span>            num_points = 1;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        }<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        ticks = new int[ num_points ];<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        ampls = new int[ num_points ];<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        set_point( 0, 0, 0, false );<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    }<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    /* When you set a point, all subsequent points are reset. */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public void set_point( int point, int tick, int ampl, boolean delta ) {<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        if( point &gt;= 0 &amp;&amp; point &lt; ticks.length ) {<a name="line.25"></a>
+<span class="sourceLineNo">026</span>            if( point == 0 ) {<a name="line.26"></a>
+<span class="sourceLineNo">027</span>                tick = 0;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>            }<a name="line.28"></a>
+<span class="sourceLineNo">029</span>            if( point &gt; 0 ) {<a name="line.29"></a>
+<span class="sourceLineNo">030</span>                if( delta ) tick += ticks[ point - 1 ];<a name="line.30"></a>
+<span class="sourceLineNo">031</span>                if( tick &lt;= ticks[ point - 1 ] ) {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>                    System.out.println( "Envelope: Point not valid (" + tick + " &lt;= " + ticks[ point - 1 ] + ")");<a name="line.32"></a>
+<span class="sourceLineNo">033</span>                    tick = ticks[ point - 1 ] + 1;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>                }<a name="line.34"></a>
+<span class="sourceLineNo">035</span>            }<a name="line.35"></a>
+<span class="sourceLineNo">036</span>            ticks[ point ] = tick;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>            ampls[ point ] = ampl;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>            point += 1;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>            while( point &lt; ticks.length ) {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>                ticks[ point ] = ticks[ point - 1 ] + 1;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>                ampls[ point ] = 0;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>                point += 1;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>            }<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        }<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    }<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>    public void set_sustain_point( int point ) {<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        if( point &lt; 0 ) {<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            point = 0;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        }<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        if( point &gt;= ticks.length ) {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            point = ticks.length - 1;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        }<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        sustain_tick = ticks[ point ];<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    }<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    public void set_loop_points( int start, int end ) {<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        if( start &lt; 0 ) {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            start = 0;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        }<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        if( start &gt;= ticks.length ) {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            start = ticks.length - 1;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        }<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        if( end &lt; start || end &gt;= ticks.length ) {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            end = start;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        }<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        loop_start_tick = ticks[ start ];<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        loop_end_tick = ticks[ end ];<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    }<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>    public int next_tick( int tick, boolean key_on ) {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        tick = tick + 1;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        if( looped &amp;&amp; tick &gt;= loop_end_tick ) {<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            tick = loop_start_tick;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        }<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        if( sustain &amp;&amp; key_on &amp;&amp; tick &gt;= sustain_tick ) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            tick = sustain_tick;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        }<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        return tick;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    }<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>    public int calculate_ampl( int tick ) {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        int idx, point, delta_t, delta_a, ampl;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        ampl = ampls[ ticks.length - 1 ];<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        if( tick &lt; ticks[ ticks.length - 1 ] ) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            point = 0;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            for( idx = 1; idx &lt; ticks.length; idx++ ) {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                if( ticks[ idx ] &lt;= tick ) {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                    point = idx;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                }<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            }<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            delta_t = ticks[ point + 1 ] - ticks[ point ];<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            delta_a = ampls[ point + 1 ] - ampls[ point ];<a name="line.93"></a>
+<span class="sourceLineNo">094</span>            ampl = ( delta_a &lt;&lt; IBXM.FP_SHIFT ) / delta_t;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            ampl = ampl * ( tick - ticks[ point ] ) &gt;&gt; IBXM.FP_SHIFT;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            ampl = ampl + ampls[ point ];<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        }<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        return ampl;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    }<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    <a name="line.100"></a>
+<span class="sourceLineNo">101</span>    public void dump() {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        int idx, tick;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        for( idx = 0; idx &lt; ticks.length; idx++ ) {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            System.out.println( ticks[ idx ] + ", " + ampls[ idx ] );<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        }<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        for( tick = 0; tick &lt; 222; tick++ ) {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>            System.out.print( calculate_ampl( tick ) + ", " );<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        }<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    }<a name="line.109"></a>
+<span class="sourceLineNo">110</span>}<a name="line.110"></a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

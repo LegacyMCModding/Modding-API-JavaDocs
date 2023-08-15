@@ -1,0 +1,430 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.item;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.util.List;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.block.Block;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.block.material.MapColor;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.entity.Entity;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.entity.player.EntityPlayer;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.network.packet.Packet;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.network.packet.Packet131MapData;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.util.MathHelper;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.world.World;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.world.chunk.Chunk;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.world.storage.MapData;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.world.storage.MapInfo;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>public class ItemMap extends ItemMapBase<a name="line.18"></a>
+<span class="sourceLineNo">019</span>{<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    protected ItemMap(int par1)<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    {<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        super(par1);<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        this.setHasSubtypes(true);<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    }<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    @SideOnly(Side.CLIENT)<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    public static MapData getMPMapData(short par0, World par1World)<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    {<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        String s = "map_" + par0;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        MapData mapdata = (MapData)par1World.loadItemData(MapData.class, s);<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>        if (mapdata == null)<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        {<a name="line.33"></a>
+<span class="sourceLineNo">034</span>            mapdata = new MapData(s);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>            par1World.setItemData(s, mapdata);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        }<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>        return mapdata;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    }<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public MapData getMapData(ItemStack par1ItemStack, World par2World)<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        String s = "map_" + par1ItemStack.getItemDamage();<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        MapData mapdata = (MapData)par2World.loadItemData(MapData.class, s);<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>        if (mapdata == null &amp;&amp; !par2World.isRemote)<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        {<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            par1ItemStack.setItemDamage(par2World.getUniqueDataId("map"));<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            s = "map_" + par1ItemStack.getItemDamage();<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            mapdata = new MapData(s);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            mapdata.scale = 3;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            int i = 128 * (1 &lt;&lt; mapdata.scale);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            mapdata.xCenter = Math.round((float)par2World.getWorldInfo().getSpawnX() / (float)i) * i;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            mapdata.zCenter = Math.round((float)(par2World.getWorldInfo().getSpawnZ() / i)) * i;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            mapdata.dimension = par2World.provider.dimensionId;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            mapdata.markDirty();<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            par2World.setItemData(s, mapdata);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        }<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>        return mapdata;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    }<a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62"></a>
+<span class="sourceLineNo">063</span>    public void updateMapData(World par1World, Entity par2Entity, MapData par3MapData)<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        if (par1World.provider.dimensionId == par3MapData.dimension &amp;&amp; par2Entity instanceof EntityPlayer)<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            short short1 = 128;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            short short2 = 128;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            int i = 1 &lt;&lt; par3MapData.scale;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            int j = par3MapData.xCenter;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            int k = par3MapData.zCenter;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            int l = MathHelper.floor_double(par2Entity.posX - (double)j) / i + short1 / 2;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            int i1 = MathHelper.floor_double(par2Entity.posZ - (double)k) / i + short2 / 2;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            int j1 = 128 / i;<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>            if (par1World.provider.hasNoSky)<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>                j1 /= 2;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>            }<a name="line.79"></a>
+<span class="sourceLineNo">080</span><a name="line.80"></a>
+<span class="sourceLineNo">081</span>            MapInfo mapinfo = par3MapData.func_82568_a((EntityPlayer)par2Entity);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            ++mapinfo.field_82569_d;<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>            for (int k1 = l - j1 + 1; k1 &lt; l + j1; ++k1)<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>                if ((k1 &amp; 15) == (mapinfo.field_82569_d &amp; 15))<a name="line.86"></a>
+<span class="sourceLineNo">087</span>                {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                    int l1 = 255;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                    int i2 = 0;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                    double d0 = 0.0D;<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>                    for (int j2 = i1 - j1 - 1; j2 &lt; i1 + j1; ++j2)<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                    {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                        if (k1 &gt;= 0 &amp;&amp; j2 &gt;= -1 &amp;&amp; k1 &lt; short1 &amp;&amp; j2 &lt; short2)<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                        {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>                            int k2 = k1 - l;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                            int l2 = j2 - i1;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                            boolean flag = k2 * k2 + l2 * l2 &gt; (j1 - 2) * (j1 - 2);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                            int i3 = (j / i + k1 - short1 / 2) * i;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>                            int j3 = (k / i + j2 - short2 / 2) * i;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>                            int[] aint = new int[Block.blocksList.length];<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                            Chunk chunk = par1World.getChunkFromBlockCoords(i3, j3);<a name="line.102"></a>
+<span class="sourceLineNo">103</span><a name="line.103"></a>
+<span class="sourceLineNo">104</span>                            if (!chunk.isEmpty())<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                            {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                                int k3 = i3 &amp; 15;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                                int l3 = j3 &amp; 15;<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                                int i4 = 0;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                                double d1 = 0.0D;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                                int j4;<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                                int k4;<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                                int l4;<a name="line.112"></a>
+<span class="sourceLineNo">113</span>                                int i5;<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>                                if (par1World.provider.hasNoSky)<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                                {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                                    j4 = i3 + j3 * 231871;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                                    j4 = j4 * j4 * 31287121 + j4 * 11;<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>                                    if ((j4 &gt;&gt; 20 &amp; 1) == 0)<a name="line.120"></a>
+<span class="sourceLineNo">121</span>                                    {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                                        aint[Block.dirt.blockID] += 10;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>                                    }<a name="line.123"></a>
+<span class="sourceLineNo">124</span>                                    else<a name="line.124"></a>
+<span class="sourceLineNo">125</span>                                    {<a name="line.125"></a>
+<span class="sourceLineNo">126</span>                                        aint[Block.stone.blockID] += 10;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                                    }<a name="line.127"></a>
+<span class="sourceLineNo">128</span><a name="line.128"></a>
+<span class="sourceLineNo">129</span>                                    d1 = 100.0D;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                                }<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                                else<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                                {<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                                    for (j4 = 0; j4 &lt; i; ++j4)<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                                    {<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                                        for (k4 = 0; k4 &lt; i; ++k4)<a name="line.135"></a>
+<span class="sourceLineNo">136</span>                                        {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>                                            l4 = chunk.getHeightValue(j4 + k3, k4 + l3) + 1;<a name="line.137"></a>
+<span class="sourceLineNo">138</span>                                            int j5 = 0;<a name="line.138"></a>
+<span class="sourceLineNo">139</span><a name="line.139"></a>
+<span class="sourceLineNo">140</span>                                            if (l4 &gt; 1)<a name="line.140"></a>
+<span class="sourceLineNo">141</span>                                            {<a name="line.141"></a>
+<span class="sourceLineNo">142</span>                                                boolean flag1;<a name="line.142"></a>
+<span class="sourceLineNo">143</span><a name="line.143"></a>
+<span class="sourceLineNo">144</span>                                                do<a name="line.144"></a>
+<span class="sourceLineNo">145</span>                                                {<a name="line.145"></a>
+<span class="sourceLineNo">146</span>                                                    flag1 = true;<a name="line.146"></a>
+<span class="sourceLineNo">147</span>                                                    j5 = chunk.getBlockID(j4 + k3, l4 - 1, k4 + l3);<a name="line.147"></a>
+<span class="sourceLineNo">148</span><a name="line.148"></a>
+<span class="sourceLineNo">149</span>                                                    if (j5 == 0)<a name="line.149"></a>
+<span class="sourceLineNo">150</span>                                                    {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>                                                        flag1 = false;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>                                                    }<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                                                    else if (l4 &gt; 0 &amp;&amp; j5 &gt; 0 &amp;&amp; Block.blocksList[j5].blockMaterial.materialMapColor == MapColor.airColor)<a name="line.153"></a>
+<span class="sourceLineNo">154</span>                                                    {<a name="line.154"></a>
+<span class="sourceLineNo">155</span>                                                        flag1 = false;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>                                                    }<a name="line.156"></a>
+<span class="sourceLineNo">157</span><a name="line.157"></a>
+<span class="sourceLineNo">158</span>                                                    if (!flag1)<a name="line.158"></a>
+<span class="sourceLineNo">159</span>                                                    {<a name="line.159"></a>
+<span class="sourceLineNo">160</span>                                                        --l4;<a name="line.160"></a>
+<span class="sourceLineNo">161</span><a name="line.161"></a>
+<span class="sourceLineNo">162</span>                                                        if (l4 &lt;= 0)<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                                                        {<a name="line.163"></a>
+<span class="sourceLineNo">164</span>                                                            break;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                                                        }<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>                                                        j5 = chunk.getBlockID(j4 + k3, l4 - 1, k4 + l3);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                                                    }<a name="line.168"></a>
+<span class="sourceLineNo">169</span>                                                }<a name="line.169"></a>
+<span class="sourceLineNo">170</span>                                                while (l4 &gt; 0 &amp;&amp; !flag1);<a name="line.170"></a>
+<span class="sourceLineNo">171</span><a name="line.171"></a>
+<span class="sourceLineNo">172</span>                                                if (l4 &gt; 0 &amp;&amp; j5 != 0 &amp;&amp; Block.blocksList[j5].blockMaterial.isLiquid())<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                                                {<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                                                    i5 = l4 - 1;<a name="line.174"></a>
+<span class="sourceLineNo">175</span>                                                    boolean flag2 = false;<a name="line.175"></a>
+<span class="sourceLineNo">176</span>                                                    int k5;<a name="line.176"></a>
+<span class="sourceLineNo">177</span><a name="line.177"></a>
+<span class="sourceLineNo">178</span>                                                    do<a name="line.178"></a>
+<span class="sourceLineNo">179</span>                                                    {<a name="line.179"></a>
+<span class="sourceLineNo">180</span>                                                        k5 = chunk.getBlockID(j4 + k3, i5--, k4 + l3);<a name="line.180"></a>
+<span class="sourceLineNo">181</span>                                                        ++i4;<a name="line.181"></a>
+<span class="sourceLineNo">182</span>                                                    }<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                                                    while (i5 &gt; 0 &amp;&amp; k5 != 0 &amp;&amp; Block.blocksList[k5].blockMaterial.isLiquid());<a name="line.183"></a>
+<span class="sourceLineNo">184</span>                                                }<a name="line.184"></a>
+<span class="sourceLineNo">185</span>                                            }<a name="line.185"></a>
+<span class="sourceLineNo">186</span><a name="line.186"></a>
+<span class="sourceLineNo">187</span>                                            d1 += (double)l4 / (double)(i * i);<a name="line.187"></a>
+<span class="sourceLineNo">188</span>                                            ++aint[j5];<a name="line.188"></a>
+<span class="sourceLineNo">189</span>                                        }<a name="line.189"></a>
+<span class="sourceLineNo">190</span>                                    }<a name="line.190"></a>
+<span class="sourceLineNo">191</span>                                }<a name="line.191"></a>
+<span class="sourceLineNo">192</span><a name="line.192"></a>
+<span class="sourceLineNo">193</span>                                i4 /= i * i;<a name="line.193"></a>
+<span class="sourceLineNo">194</span>                                j4 = 0;<a name="line.194"></a>
+<span class="sourceLineNo">195</span>                                k4 = 0;<a name="line.195"></a>
+<span class="sourceLineNo">196</span><a name="line.196"></a>
+<span class="sourceLineNo">197</span>                                for (l4 = 0; l4 &lt; Block.blocksList.length; ++l4)<a name="line.197"></a>
+<span class="sourceLineNo">198</span>                                {<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                                    if (aint[l4] &gt; j4)<a name="line.199"></a>
+<span class="sourceLineNo">200</span>                                    {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>                                        k4 = l4;<a name="line.201"></a>
+<span class="sourceLineNo">202</span>                                        j4 = aint[l4];<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                                    }<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                                }<a name="line.204"></a>
+<span class="sourceLineNo">205</span><a name="line.205"></a>
+<span class="sourceLineNo">206</span>                                double d2 = (d1 - d0) * 4.0D / (double)(i + 4) + ((double)(k1 + j2 &amp; 1) - 0.5D) * 0.4D;<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                                byte b0 = 1;<a name="line.207"></a>
+<span class="sourceLineNo">208</span><a name="line.208"></a>
+<span class="sourceLineNo">209</span>                                if (d2 &gt; 0.6D)<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                                {<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                                    b0 = 2;<a name="line.211"></a>
+<span class="sourceLineNo">212</span>                                }<a name="line.212"></a>
+<span class="sourceLineNo">213</span><a name="line.213"></a>
+<span class="sourceLineNo">214</span>                                if (d2 &lt; -0.6D)<a name="line.214"></a>
+<span class="sourceLineNo">215</span>                                {<a name="line.215"></a>
+<span class="sourceLineNo">216</span>                                    b0 = 0;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                                }<a name="line.217"></a>
+<span class="sourceLineNo">218</span><a name="line.218"></a>
+<span class="sourceLineNo">219</span>                                i5 = 0;<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>                                if (k4 &gt; 0)<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                                {<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                                    MapColor mapcolor = Block.blocksList[k4].blockMaterial.materialMapColor;<a name="line.223"></a>
+<span class="sourceLineNo">224</span><a name="line.224"></a>
+<span class="sourceLineNo">225</span>                                    if (mapcolor == MapColor.waterColor)<a name="line.225"></a>
+<span class="sourceLineNo">226</span>                                    {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>                                        d2 = (double)i4 * 0.1D + (double)(k1 + j2 &amp; 1) * 0.2D;<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                                        b0 = 1;<a name="line.228"></a>
+<span class="sourceLineNo">229</span><a name="line.229"></a>
+<span class="sourceLineNo">230</span>                                        if (d2 &lt; 0.5D)<a name="line.230"></a>
+<span class="sourceLineNo">231</span>                                        {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>                                            b0 = 2;<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                                        }<a name="line.233"></a>
+<span class="sourceLineNo">234</span><a name="line.234"></a>
+<span class="sourceLineNo">235</span>                                        if (d2 &gt; 0.9D)<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                                        {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                                            b0 = 0;<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                                        }<a name="line.238"></a>
+<span class="sourceLineNo">239</span>                                    }<a name="line.239"></a>
+<span class="sourceLineNo">240</span><a name="line.240"></a>
+<span class="sourceLineNo">241</span>                                    i5 = mapcolor.colorIndex;<a name="line.241"></a>
+<span class="sourceLineNo">242</span>                                }<a name="line.242"></a>
+<span class="sourceLineNo">243</span><a name="line.243"></a>
+<span class="sourceLineNo">244</span>                                d0 = d1;<a name="line.244"></a>
+<span class="sourceLineNo">245</span><a name="line.245"></a>
+<span class="sourceLineNo">246</span>                                if (j2 &gt;= 0 &amp;&amp; k2 * k2 + l2 * l2 &lt; j1 * j1 &amp;&amp; (!flag || (k1 + j2 &amp; 1) != 0))<a name="line.246"></a>
+<span class="sourceLineNo">247</span>                                {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>                                    byte b1 = par3MapData.colors[k1 + j2 * short1];<a name="line.248"></a>
+<span class="sourceLineNo">249</span>                                    byte b2 = (byte)(i5 * 4 + b0);<a name="line.249"></a>
+<span class="sourceLineNo">250</span><a name="line.250"></a>
+<span class="sourceLineNo">251</span>                                    if (b1 != b2)<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                                    {<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                                        if (l1 &gt; j2)<a name="line.253"></a>
+<span class="sourceLineNo">254</span>                                        {<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                                            l1 = j2;<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                                        }<a name="line.256"></a>
+<span class="sourceLineNo">257</span><a name="line.257"></a>
+<span class="sourceLineNo">258</span>                                        if (i2 &lt; j2)<a name="line.258"></a>
+<span class="sourceLineNo">259</span>                                        {<a name="line.259"></a>
+<span class="sourceLineNo">260</span>                                            i2 = j2;<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                                        }<a name="line.261"></a>
+<span class="sourceLineNo">262</span><a name="line.262"></a>
+<span class="sourceLineNo">263</span>                                        par3MapData.colors[k1 + j2 * short1] = b2;<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                                    }<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                                }<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                            }<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                        }<a name="line.267"></a>
+<span class="sourceLineNo">268</span>                    }<a name="line.268"></a>
+<span class="sourceLineNo">269</span><a name="line.269"></a>
+<span class="sourceLineNo">270</span>                    if (l1 &lt;= i2)<a name="line.270"></a>
+<span class="sourceLineNo">271</span>                    {<a name="line.271"></a>
+<span class="sourceLineNo">272</span>                        par3MapData.setColumnDirty(k1, l1, i2);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>                    }<a name="line.273"></a>
+<span class="sourceLineNo">274</span>                }<a name="line.274"></a>
+<span class="sourceLineNo">275</span>            }<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        }<a name="line.276"></a>
+<span class="sourceLineNo">277</span>    }<a name="line.277"></a>
+<span class="sourceLineNo">278</span><a name="line.278"></a>
+<span class="sourceLineNo">279</span>    /**<a name="line.279"></a>
+<span class="sourceLineNo">280</span>     * Called each tick as long the item is on a player inventory. Uses by maps to check if is on a player hand and<a name="line.280"></a>
+<span class="sourceLineNo">281</span>     * update it's contents.<a name="line.281"></a>
+<span class="sourceLineNo">282</span>     */<a name="line.282"></a>
+<span class="sourceLineNo">283</span>    public void onUpdate(ItemStack par1ItemStack, World par2World, Entity par3Entity, int par4, boolean par5)<a name="line.283"></a>
+<span class="sourceLineNo">284</span>    {<a name="line.284"></a>
+<span class="sourceLineNo">285</span>        if (!par2World.isRemote)<a name="line.285"></a>
+<span class="sourceLineNo">286</span>        {<a name="line.286"></a>
+<span class="sourceLineNo">287</span>            MapData mapdata = this.getMapData(par1ItemStack, par2World);<a name="line.287"></a>
+<span class="sourceLineNo">288</span><a name="line.288"></a>
+<span class="sourceLineNo">289</span>            if (par3Entity instanceof EntityPlayer)<a name="line.289"></a>
+<span class="sourceLineNo">290</span>            {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>                EntityPlayer entityplayer = (EntityPlayer)par3Entity;<a name="line.291"></a>
+<span class="sourceLineNo">292</span>                mapdata.updateVisiblePlayers(entityplayer, par1ItemStack);<a name="line.292"></a>
+<span class="sourceLineNo">293</span>            }<a name="line.293"></a>
+<span class="sourceLineNo">294</span><a name="line.294"></a>
+<span class="sourceLineNo">295</span>            if (par5)<a name="line.295"></a>
+<span class="sourceLineNo">296</span>            {<a name="line.296"></a>
+<span class="sourceLineNo">297</span>                this.updateMapData(par2World, par3Entity, mapdata);<a name="line.297"></a>
+<span class="sourceLineNo">298</span>            }<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        }<a name="line.299"></a>
+<span class="sourceLineNo">300</span>    }<a name="line.300"></a>
+<span class="sourceLineNo">301</span><a name="line.301"></a>
+<span class="sourceLineNo">302</span>    /**<a name="line.302"></a>
+<span class="sourceLineNo">303</span>     * returns null if no update is to be sent<a name="line.303"></a>
+<span class="sourceLineNo">304</span>     */<a name="line.304"></a>
+<span class="sourceLineNo">305</span>    public Packet createMapDataPacket(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer)<a name="line.305"></a>
+<span class="sourceLineNo">306</span>    {<a name="line.306"></a>
+<span class="sourceLineNo">307</span>        byte[] abyte = this.getMapData(par1ItemStack, par2World).getUpdatePacketData(par1ItemStack, par2World, par3EntityPlayer);<a name="line.307"></a>
+<span class="sourceLineNo">308</span>        return abyte == null ? null : new Packet131MapData((short)Item.map.itemID, (short)par1ItemStack.getItemDamage(), abyte);<a name="line.308"></a>
+<span class="sourceLineNo">309</span>    }<a name="line.309"></a>
+<span class="sourceLineNo">310</span><a name="line.310"></a>
+<span class="sourceLineNo">311</span>    /**<a name="line.311"></a>
+<span class="sourceLineNo">312</span>     * Called when item is crafted/smelted. Used only by maps so far.<a name="line.312"></a>
+<span class="sourceLineNo">313</span>     */<a name="line.313"></a>
+<span class="sourceLineNo">314</span>    public void onCreated(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer)<a name="line.314"></a>
+<span class="sourceLineNo">315</span>    {<a name="line.315"></a>
+<span class="sourceLineNo">316</span>        if (par1ItemStack.hasTagCompound() &amp;&amp; par1ItemStack.getTagCompound().getBoolean("map_is_scaling"))<a name="line.316"></a>
+<span class="sourceLineNo">317</span>        {<a name="line.317"></a>
+<span class="sourceLineNo">318</span>            MapData mapdata = Item.map.getMapData(par1ItemStack, par2World);<a name="line.318"></a>
+<span class="sourceLineNo">319</span>            par1ItemStack.setItemDamage(par2World.getUniqueDataId("map"));<a name="line.319"></a>
+<span class="sourceLineNo">320</span>            MapData mapdata1 = new MapData("map_" + par1ItemStack.getItemDamage());<a name="line.320"></a>
+<span class="sourceLineNo">321</span>            mapdata1.scale = (byte)(mapdata.scale + 1);<a name="line.321"></a>
+<span class="sourceLineNo">322</span><a name="line.322"></a>
+<span class="sourceLineNo">323</span>            if (mapdata1.scale &gt; 4)<a name="line.323"></a>
+<span class="sourceLineNo">324</span>            {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                mapdata1.scale = 4;<a name="line.325"></a>
+<span class="sourceLineNo">326</span>            }<a name="line.326"></a>
+<span class="sourceLineNo">327</span><a name="line.327"></a>
+<span class="sourceLineNo">328</span>            mapdata1.xCenter = mapdata.xCenter;<a name="line.328"></a>
+<span class="sourceLineNo">329</span>            mapdata1.zCenter = mapdata.zCenter;<a name="line.329"></a>
+<span class="sourceLineNo">330</span>            mapdata1.dimension = mapdata.dimension;<a name="line.330"></a>
+<span class="sourceLineNo">331</span>            mapdata1.markDirty();<a name="line.331"></a>
+<span class="sourceLineNo">332</span>            par2World.setItemData("map_" + par1ItemStack.getItemDamage(), mapdata1);<a name="line.332"></a>
+<span class="sourceLineNo">333</span>        }<a name="line.333"></a>
+<span class="sourceLineNo">334</span>    }<a name="line.334"></a>
+<span class="sourceLineNo">335</span><a name="line.335"></a>
+<span class="sourceLineNo">336</span>    @SideOnly(Side.CLIENT)<a name="line.336"></a>
+<span class="sourceLineNo">337</span><a name="line.337"></a>
+<span class="sourceLineNo">338</span>    /**<a name="line.338"></a>
+<span class="sourceLineNo">339</span>     * allows items to add custom lines of information to the mouseover description<a name="line.339"></a>
+<span class="sourceLineNo">340</span>     */<a name="line.340"></a>
+<span class="sourceLineNo">341</span>    public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4)<a name="line.341"></a>
+<span class="sourceLineNo">342</span>    {<a name="line.342"></a>
+<span class="sourceLineNo">343</span>        MapData mapdata = this.getMapData(par1ItemStack, par2EntityPlayer.worldObj);<a name="line.343"></a>
+<span class="sourceLineNo">344</span><a name="line.344"></a>
+<span class="sourceLineNo">345</span>        if (par4)<a name="line.345"></a>
+<span class="sourceLineNo">346</span>        {<a name="line.346"></a>
+<span class="sourceLineNo">347</span>            if (mapdata == null)<a name="line.347"></a>
+<span class="sourceLineNo">348</span>            {<a name="line.348"></a>
+<span class="sourceLineNo">349</span>                par3List.add("Unknown map");<a name="line.349"></a>
+<span class="sourceLineNo">350</span>            }<a name="line.350"></a>
+<span class="sourceLineNo">351</span>            else<a name="line.351"></a>
+<span class="sourceLineNo">352</span>            {<a name="line.352"></a>
+<span class="sourceLineNo">353</span>                par3List.add("Scaling at 1:" + (1 &lt;&lt; mapdata.scale));<a name="line.353"></a>
+<span class="sourceLineNo">354</span>                par3List.add("(Level " + mapdata.scale + "/" + 4 + ")");<a name="line.354"></a>
+<span class="sourceLineNo">355</span>            }<a name="line.355"></a>
+<span class="sourceLineNo">356</span>        }<a name="line.356"></a>
+<span class="sourceLineNo">357</span>    }<a name="line.357"></a>
+<span class="sourceLineNo">358</span>}<a name="line.358"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

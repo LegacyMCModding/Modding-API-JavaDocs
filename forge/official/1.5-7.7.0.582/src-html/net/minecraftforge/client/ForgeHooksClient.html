@@ -1,0 +1,324 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraftforge.client;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.HashMap;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Random;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.util.TreeSet;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>import org.lwjgl.opengl.GL11;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import org.lwjgl.opengl.GL12;<a name="line.8"></a>
+<span class="sourceLineNo">009</span><a name="line.9"></a>
+<span class="sourceLineNo">010</span>import cpw.mods.fml.client.FMLClientHandler;<a name="line.10"></a>
+<span class="sourceLineNo">011</span><a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.client.Minecraft;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.block.Block;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.entity.item.EntityItem;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.entity.EntityLiving;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.entity.player.EntityPlayer;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import net.minecraft.client.texturepacks.ITexturePack;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import net.minecraft.item.Item;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import net.minecraft.item.ItemBlock;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import net.minecraft.item.ItemStack;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import net.minecraft.util.MathHelper;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import net.minecraft.util.MovingObjectPosition;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import net.minecraft.client.renderer.RenderBlocks;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import net.minecraft.client.renderer.RenderEngine;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import net.minecraft.client.renderer.RenderGlobal;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import net.minecraft.client.renderer.Tessellator;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import net.minecraft.client.renderer.entity.RenderItem;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import net.minecraftforge.client.event.DrawBlockHighlightEvent;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import net.minecraftforge.client.event.RenderWorldLastEvent;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import net.minecraftforge.client.event.TextureLoadEvent;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import net.minecraftforge.common.IArmorTextureProvider;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import net.minecraftforge.common.MinecraftForge;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import static net.minecraftforge.client.IItemRenderer.ItemRenderType.*;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import static net.minecraftforge.client.IItemRenderer.ItemRendererHelper.*;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>public class ForgeHooksClient<a name="line.36"></a>
+<span class="sourceLineNo">037</span>{<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    static RenderEngine engine()<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        return FMLClientHandler.instance().getClient().renderEngine;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    }<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>    public static String getArmorTexture(ItemStack armor, String _default)<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    {<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        if (armor.getItem() instanceof IArmorTextureProvider)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>            return ((IArmorTextureProvider)armor.getItem()).getArmorTextureFile(armor);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        }<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        return _default;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    }<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>    public static boolean renderEntityItem(EntityItem entity, ItemStack item, float bobing, float rotation, Random random, RenderEngine engine, RenderBlocks renderBlocks)<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        IItemRenderer customRenderer = MinecraftForgeClient.getItemRenderer(item, ENTITY);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        if (customRenderer == null)<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            return false;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        }<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>        if (customRenderer.shouldUseRenderHelper(ENTITY, item, ENTITY_ROTATION))<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            GL11.glRotatef(rotation, 0.0F, 1.0F, 0.0F);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        }<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        if (!customRenderer.shouldUseRenderHelper(ENTITY, item, ENTITY_BOBBING))<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            GL11.glTranslatef(0.0F, -bobing, 0.0F);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        }<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        boolean is3D = customRenderer.shouldUseRenderHelper(ENTITY, item, BLOCK_3D);<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>        if (item.getItem() instanceof ItemBlock &amp;&amp; (is3D || RenderBlocks.renderItemIn3d(Block.blocksList[item.itemID].getRenderType())))<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            engine.func_98187_b("/terrain.png");<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            int renderType = Block.blocksList[item.itemID].getRenderType();<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            float scale = (renderType == 1 || renderType == 19 || renderType == 12 || renderType == 2 ? 0.5F : 0.25F);<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>            if (RenderItem.field_82407_g)<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>                GL11.glScalef(1.25F, 1.25F, 1.25F);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                GL11.glTranslatef(0.0F, 0.05F, 0.0F);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            }<a name="line.81"></a>
+<span class="sourceLineNo">082</span><a name="line.82"></a>
+<span class="sourceLineNo">083</span>            GL11.glScalef(scale, scale, scale);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            <a name="line.84"></a>
+<span class="sourceLineNo">085</span>            int size = item.stackSize;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            int count = (size &gt; 20 ? 4 : (size &gt; 5 ? 3 : (size &gt; 1 ? 2 : 1)));<a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>            for(int j = 0; j &lt; count; j++)<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                GL11.glPushMatrix();<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                if (j &gt; 0)<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                {<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                    GL11.glTranslatef(<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                        ((random.nextFloat() * 2.0F - 1.0F) * 0.2F) / 0.5F,<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                        ((random.nextFloat() * 2.0F - 1.0F) * 0.2F) / 0.5F,<a name="line.95"></a>
+<span class="sourceLineNo">096</span>                        ((random.nextFloat() * 2.0F - 1.0F) * 0.2F) / 0.5F);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                }<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                customRenderer.renderItem(ENTITY, item, renderBlocks, entity);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                GL11.glPopMatrix();<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            }<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        }<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        else<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            engine.func_98187_b(item.func_94608_d() == 0 ? "/terrain.png" : "/gui/items.png");<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            GL11.glScalef(0.5F, 0.5F, 0.5F);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            customRenderer.renderItem(ENTITY, item, renderBlocks, entity);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        return true;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    }<a name="line.109"></a>
+<span class="sourceLineNo">110</span><a name="line.110"></a>
+<span class="sourceLineNo">111</span>    public static boolean renderInventoryItem(RenderBlocks renderBlocks, RenderEngine engine, ItemStack item, boolean inColor, float zLevel, float x, float y)<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        IItemRenderer customRenderer = MinecraftForgeClient.getItemRenderer(item, INVENTORY);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        if (customRenderer == null)<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                return false;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        }<a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span>        engine.func_98187_b(item.func_94608_d() == 0 ? "/terrain.png" : "/gui/items.png");<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        if (customRenderer.shouldUseRenderHelper(INVENTORY, item, INVENTORY_BLOCK))<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            GL11.glPushMatrix();<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            GL11.glTranslatef(x - 2, y + 3, -3.0F + zLevel);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            GL11.glScalef(10F, 10F, 10F);<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            GL11.glTranslatef(1.0F, 0.5F, 1.0F);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            GL11.glScalef(1.0F, 1.0F, -1F);<a name="line.126"></a>
+<span class="sourceLineNo">127</span>            GL11.glRotatef(210F, 1.0F, 0.0F, 0.0F);<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            GL11.glRotatef(45F, 0.0F, 1.0F, 0.0F);<a name="line.128"></a>
+<span class="sourceLineNo">129</span><a name="line.129"></a>
+<span class="sourceLineNo">130</span>            if(inColor)<a name="line.130"></a>
+<span class="sourceLineNo">131</span>            {<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                int color = Item.itemsList[item.itemID].getColorFromItemStack(item, 0);<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                float r = (float)(color &gt;&gt; 16 &amp; 0xff) / 255F;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                float g = (float)(color &gt;&gt; 8 &amp; 0xff) / 255F;<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                float b = (float)(color &amp; 0xff) / 255F;<a name="line.135"></a>
+<span class="sourceLineNo">136</span>                GL11.glColor4f(r, g, b, 1.0F);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            }<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>            GL11.glRotatef(-90F, 0.0F, 1.0F, 0.0F);<a name="line.139"></a>
+<span class="sourceLineNo">140</span>            renderBlocks.useInventoryTint = inColor;<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            customRenderer.renderItem(INVENTORY, item, renderBlocks);<a name="line.141"></a>
+<span class="sourceLineNo">142</span>            renderBlocks.useInventoryTint = true;<a name="line.142"></a>
+<span class="sourceLineNo">143</span>            GL11.glPopMatrix();<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        }<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        else<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        {<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            GL11.glDisable(GL11.GL_LIGHTING);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            GL11.glPushMatrix();<a name="line.148"></a>
+<span class="sourceLineNo">149</span>            GL11.glTranslatef(x, y, -3.0F + zLevel);<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>            if (inColor)<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                int color = Item.itemsList[item.itemID].getColorFromItemStack(item, 0);<a name="line.153"></a>
+<span class="sourceLineNo">154</span>                float r = (float)(color &gt;&gt; 16 &amp; 255) / 255.0F;<a name="line.154"></a>
+<span class="sourceLineNo">155</span>                float g = (float)(color &gt;&gt; 8 &amp; 255) / 255.0F;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>                float b = (float)(color &amp; 255) / 255.0F;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>                GL11.glColor4f(r, g, b, 1.0F);<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            }<a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159"></a>
+<span class="sourceLineNo">160</span>            customRenderer.renderItem(INVENTORY, item, renderBlocks);<a name="line.160"></a>
+<span class="sourceLineNo">161</span>            GL11.glPopMatrix();<a name="line.161"></a>
+<span class="sourceLineNo">162</span>            GL11.glEnable(GL11.GL_LIGHTING);<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        }<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        return true;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    }<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>    public static void renderEquippedItem(IItemRenderer customRenderer, RenderBlocks renderBlocks, EntityLiving entity, ItemStack item)<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    {<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        if (customRenderer.shouldUseRenderHelper(EQUIPPED, item, EQUIPPED_BLOCK))<a name="line.169"></a>
+<span class="sourceLineNo">170</span>        {<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            GL11.glPushMatrix();<a name="line.171"></a>
+<span class="sourceLineNo">172</span>            GL11.glTranslatef(-0.5F, -0.5F, -0.5F);<a name="line.172"></a>
+<span class="sourceLineNo">173</span>            customRenderer.renderItem(EQUIPPED, item, renderBlocks, entity);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            GL11.glPopMatrix();<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        }<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        else<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        {<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            GL11.glPushMatrix();<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            GL11.glEnable(GL12.GL_RESCALE_NORMAL);<a name="line.179"></a>
+<span class="sourceLineNo">180</span>            GL11.glTranslatef(0.0F, -0.3F, 0.0F);<a name="line.180"></a>
+<span class="sourceLineNo">181</span>            GL11.glScalef(1.5F, 1.5F, 1.5F);<a name="line.181"></a>
+<span class="sourceLineNo">182</span>            GL11.glRotatef(50.0F, 0.0F, 1.0F, 0.0F);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>            GL11.glRotatef(335.0F, 0.0F, 0.0F, 1.0F);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>            GL11.glTranslatef(-0.9375F, -0.0625F, 0.0F);<a name="line.184"></a>
+<span class="sourceLineNo">185</span>            customRenderer.renderItem(EQUIPPED, item, renderBlocks, entity);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            GL11.glDisable(GL12.GL_RESCALE_NORMAL);<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            GL11.glPopMatrix();<a name="line.187"></a>
+<span class="sourceLineNo">188</span>        }<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    }<a name="line.189"></a>
+<span class="sourceLineNo">190</span><a name="line.190"></a>
+<span class="sourceLineNo">191</span>    //Optifine Helper Functions u.u, these are here specifically for Optifine<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    //Note: When using Optfine, these methods are invoked using reflection, which<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    //incurs a major performance penalty.<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    public static void orientBedCamera(Minecraft mc, EntityLiving entity)<a name="line.194"></a>
+<span class="sourceLineNo">195</span>    {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>        int x = MathHelper.floor_double(entity.posX);<a name="line.196"></a>
+<span class="sourceLineNo">197</span>        int y = MathHelper.floor_double(entity.posY);<a name="line.197"></a>
+<span class="sourceLineNo">198</span>        int z = MathHelper.floor_double(entity.posZ);<a name="line.198"></a>
+<span class="sourceLineNo">199</span>        Block block = Block.blocksList[mc.theWorld.getBlockId(x, y, z)];<a name="line.199"></a>
+<span class="sourceLineNo">200</span><a name="line.200"></a>
+<span class="sourceLineNo">201</span>        if (block != null &amp;&amp; block.isBed(mc.theWorld, x, y, z, entity))<a name="line.201"></a>
+<span class="sourceLineNo">202</span>        {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>            int var12 = block.getBedDirection(mc.theWorld, x, y, z);<a name="line.203"></a>
+<span class="sourceLineNo">204</span>            GL11.glRotatef((float)(var12 * 90), 0.0F, 1.0F, 0.0F);<a name="line.204"></a>
+<span class="sourceLineNo">205</span>        }<a name="line.205"></a>
+<span class="sourceLineNo">206</span>    }<a name="line.206"></a>
+<span class="sourceLineNo">207</span><a name="line.207"></a>
+<span class="sourceLineNo">208</span>    public static boolean onDrawBlockHighlight(RenderGlobal context, EntityPlayer player, MovingObjectPosition target, int subID, ItemStack currentItem, float partialTicks)<a name="line.208"></a>
+<span class="sourceLineNo">209</span>    {<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        return MinecraftForge.EVENT_BUS.post(new DrawBlockHighlightEvent(context, player, target, subID, currentItem, partialTicks));<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    }<a name="line.211"></a>
+<span class="sourceLineNo">212</span><a name="line.212"></a>
+<span class="sourceLineNo">213</span>    public static void dispatchRenderLast(RenderGlobal context, float partialTicks)<a name="line.213"></a>
+<span class="sourceLineNo">214</span>    {<a name="line.214"></a>
+<span class="sourceLineNo">215</span>        MinecraftForge.EVENT_BUS.post(new RenderWorldLastEvent(context, partialTicks));<a name="line.215"></a>
+<span class="sourceLineNo">216</span>    }<a name="line.216"></a>
+<span class="sourceLineNo">217</span><a name="line.217"></a>
+<span class="sourceLineNo">218</span>    public static void onTextureLoad(String texture, ITexturePack pack)<a name="line.218"></a>
+<span class="sourceLineNo">219</span>    {<a name="line.219"></a>
+<span class="sourceLineNo">220</span>        MinecraftForge.EVENT_BUS.post(new TextureLoadEvent(texture, pack));<a name="line.220"></a>
+<span class="sourceLineNo">221</span>    }<a name="line.221"></a>
+<span class="sourceLineNo">222</span><a name="line.222"></a>
+<span class="sourceLineNo">223</span>    /**<a name="line.223"></a>
+<span class="sourceLineNo">224</span>     * This is added for Optifine's convenience. And to explode if a ModMaker is developing.<a name="line.224"></a>
+<span class="sourceLineNo">225</span>     * @param texture<a name="line.225"></a>
+<span class="sourceLineNo">226</span>     */<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    public static void onTextureLoadPre(String texture)<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    {<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        if (Tessellator.renderingWorldRenderer)<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>            String msg = String.format("Warning: Texture %s not preloaded, will cause render glitches!", texture);<a name="line.231"></a>
+<span class="sourceLineNo">232</span>            System.out.println(msg);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>            if (Tessellator.class.getPackage() != null)<a name="line.233"></a>
+<span class="sourceLineNo">234</span>            {<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                if (Tessellator.class.getPackage().getName().startsWith("net.minecraft."))<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                    Minecraft mc = FMLClientHandler.instance().getClient();<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                    if (mc.ingameGUI != null)<a name="line.238"></a>
+<span class="sourceLineNo">239</span>                    {<a name="line.239"></a>
+<span class="sourceLineNo">240</span>                        mc.ingameGUI.getChatGUI().printChatMessage(msg);<a name="line.240"></a>
+<span class="sourceLineNo">241</span>                    }<a name="line.241"></a>
+<span class="sourceLineNo">242</span>                }<a name="line.242"></a>
+<span class="sourceLineNo">243</span>            }<a name="line.243"></a>
+<span class="sourceLineNo">244</span>        }<a name="line.244"></a>
+<span class="sourceLineNo">245</span>    }<a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246"></a>
+<span class="sourceLineNo">247</span>    static int renderPass = -1;<a name="line.247"></a>
+<span class="sourceLineNo">248</span>    public static void setRenderPass(int pass)<a name="line.248"></a>
+<span class="sourceLineNo">249</span>    {<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        renderPass = pass;<a name="line.250"></a>
+<span class="sourceLineNo">251</span>    }<a name="line.251"></a>
+<span class="sourceLineNo">252</span>}<a name="line.252"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

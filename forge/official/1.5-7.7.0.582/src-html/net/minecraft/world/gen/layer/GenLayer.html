@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen.layer;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import net.minecraft.world.WorldType;<a name="line.3"></a>
+<span class="sourceLineNo">004</span><a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraftforge.common.*;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraftforge.event.terraingen.*;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public abstract class GenLayer<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    /** seed from World#getWorldSeed that is used in the LCG prng */<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    private long worldGenSeed;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>    /** parent GenLayer that was provided via the constructor */<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    protected GenLayer parent;<a name="line.14"></a>
+<span class="sourceLineNo">015</span><a name="line.15"></a>
+<span class="sourceLineNo">016</span>    /**<a name="line.16"></a>
+<span class="sourceLineNo">017</span>     * final part of the LCG prng that uses the chunk X, Z coords along with the other two seeds to generate<a name="line.17"></a>
+<span class="sourceLineNo">018</span>     * pseudorandom numbers<a name="line.18"></a>
+<span class="sourceLineNo">019</span>     */<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    private long chunkSeed;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>    /** base seed to the LCG prng provided via the constructor */<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    private long baseSeed;<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /**<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     * the first array item is a linked list of the bioms, the second is the zoom function, the third is the same as the<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     * first.<a name="line.27"></a>
+<span class="sourceLineNo">028</span>     */<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public static GenLayer[] initializeAllBiomeGenerators(long par0, WorldType par2WorldType)<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        GenLayerIsland genlayerisland = new GenLayerIsland(1L);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        GenLayerFuzzyZoom genlayerfuzzyzoom = new GenLayerFuzzyZoom(2000L, genlayerisland);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        GenLayerAddIsland genlayeraddisland = new GenLayerAddIsland(1L, genlayerfuzzyzoom);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        GenLayerZoom genlayerzoom = new GenLayerZoom(2001L, genlayeraddisland);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        genlayeraddisland = new GenLayerAddIsland(2L, genlayerzoom);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        GenLayerAddSnow genlayeraddsnow = new GenLayerAddSnow(2L, genlayeraddisland);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        genlayerzoom = new GenLayerZoom(2002L, genlayeraddsnow);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        genlayeraddisland = new GenLayerAddIsland(3L, genlayerzoom);<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        genlayerzoom = new GenLayerZoom(2003L, genlayeraddisland);<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        genlayeraddisland = new GenLayerAddIsland(4L, genlayerzoom);<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        GenLayerAddMushroomIsland genlayeraddmushroomisland = new GenLayerAddMushroomIsland(5L, genlayeraddisland);<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        byte b0 = 4;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>        if (par2WorldType == WorldType.LARGE_BIOMES)<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            b0 = 6;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        }<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        b0 = getModdedBiomeSize(par2WorldType, b0);<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>        GenLayer genlayer = GenLayerZoom.func_75915_a(1000L, genlayeraddmushroomisland, 0);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        GenLayerRiverInit genlayerriverinit = new GenLayerRiverInit(100L, genlayer);<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        genlayer = GenLayerZoom.func_75915_a(1000L, genlayerriverinit, b0 + 2);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        GenLayerRiver genlayerriver = new GenLayerRiver(1L, genlayer);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        GenLayerSmooth genlayersmooth = new GenLayerSmooth(1000L, genlayerriver);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        GenLayer genlayer1 = GenLayerZoom.func_75915_a(1000L, genlayeraddmushroomisland, 0);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        GenLayerBiome genlayerbiome = new GenLayerBiome(200L, genlayer1, par2WorldType);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        genlayer1 = GenLayerZoom.func_75915_a(1000L, genlayerbiome, 2);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        Object object = new GenLayerHills(1000L, genlayer1);<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>        for (int j = 0; j &lt; b0; ++j)<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            object = new GenLayerZoom((long)(1000 + j), (GenLayer)object);<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>            if (j == 0)<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>                object = new GenLayerAddIsland(3L, (GenLayer)object);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            }<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>            if (j == 1)<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                object = new GenLayerShore(1000L, (GenLayer)object);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            }<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>            if (j == 1)<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            {<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                object = new GenLayerSwampRivers(1000L, (GenLayer)object);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            }<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>        GenLayerSmooth genlayersmooth1 = new GenLayerSmooth(1000L, (GenLayer)object);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        GenLayerRiverMix genlayerrivermix = new GenLayerRiverMix(100L, genlayersmooth1, genlayersmooth);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        GenLayerVoronoiZoom genlayervoronoizoom = new GenLayerVoronoiZoom(10L, genlayerrivermix);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        genlayerrivermix.initWorldGenSeed(par0);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        genlayervoronoizoom.initWorldGenSeed(par0);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        return new GenLayer[] {genlayerrivermix, genlayervoronoizoom, genlayerrivermix};<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    }<a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>    public GenLayer(long par1)<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        this.baseSeed = par1;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        this.baseSeed *= this.baseSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        this.baseSeed += par1;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        this.baseSeed *= this.baseSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        this.baseSeed += par1;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        this.baseSeed *= this.baseSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        this.baseSeed += par1;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    }<a name="line.97"></a>
+<span class="sourceLineNo">098</span><a name="line.98"></a>
+<span class="sourceLineNo">099</span>    /**<a name="line.99"></a>
+<span class="sourceLineNo">100</span>     * Initialize layer's local worldGenSeed based on its own baseSeed and the world's global seed (passed in as an<a name="line.100"></a>
+<span class="sourceLineNo">101</span>     * argument).<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     */<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    public void initWorldGenSeed(long par1)<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        this.worldGenSeed = par1;<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>        if (this.parent != null)<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>            this.parent.initWorldGenSeed(par1);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        }<a name="line.110"></a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+<span class="sourceLineNo">112</span>        this.worldGenSeed *= this.worldGenSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        this.worldGenSeed += this.baseSeed;<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        this.worldGenSeed *= this.worldGenSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        this.worldGenSeed += this.baseSeed;<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        this.worldGenSeed *= this.worldGenSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        this.worldGenSeed += this.baseSeed;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    }<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>    /**<a name="line.120"></a>
+<span class="sourceLineNo">121</span>     * Initialize layer's current chunkSeed based on the local worldGenSeed and the (x,z) chunk coordinates.<a name="line.121"></a>
+<span class="sourceLineNo">122</span>     */<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    public void initChunkSeed(long par1, long par3)<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    {<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        this.chunkSeed = this.worldGenSeed;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        this.chunkSeed *= this.chunkSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        this.chunkSeed += par1;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        this.chunkSeed *= this.chunkSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        this.chunkSeed += par3;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        this.chunkSeed *= this.chunkSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        this.chunkSeed += par1;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        this.chunkSeed *= this.chunkSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        this.chunkSeed += par3;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    }<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>    /**<a name="line.136"></a>
+<span class="sourceLineNo">137</span>     * returns a LCG pseudo random number from [0, x). Args: int x<a name="line.137"></a>
+<span class="sourceLineNo">138</span>     */<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    protected int nextInt(int par1)<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    {<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        int j = (int)((this.chunkSeed &gt;&gt; 24) % (long)par1);<a name="line.141"></a>
+<span class="sourceLineNo">142</span><a name="line.142"></a>
+<span class="sourceLineNo">143</span>        if (j &lt; 0)<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        {<a name="line.144"></a>
+<span class="sourceLineNo">145</span>            j += par1;<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        }<a name="line.146"></a>
+<span class="sourceLineNo">147</span><a name="line.147"></a>
+<span class="sourceLineNo">148</span>        this.chunkSeed *= this.chunkSeed * 6364136223846793005L + 1442695040888963407L;<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        this.chunkSeed += this.worldGenSeed;<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        return j;<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    }<a name="line.151"></a>
+<span class="sourceLineNo">152</span><a name="line.152"></a>
+<span class="sourceLineNo">153</span>    /**<a name="line.153"></a>
+<span class="sourceLineNo">154</span>     * Returns a list of integer values generated by this layer. These may be interpreted as temperatures, rainfall<a name="line.154"></a>
+<span class="sourceLineNo">155</span>     * amounts, or biomeList[] indices based on the particular GenLayer subclass.<a name="line.155"></a>
+<span class="sourceLineNo">156</span>     */<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    public abstract int[] getInts(int i, int j, int k, int l);<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>    public static byte getModdedBiomeSize(WorldType worldType, byte original)<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    {<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        WorldTypeEvent.BiomeSize event = new WorldTypeEvent.BiomeSize(worldType, original);<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        MinecraftForge.TERRAIN_GEN_BUS.post(event);<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        return event.newSize;<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    }<a name="line.164"></a>
+<span class="sourceLineNo">165</span>}<a name="line.165"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

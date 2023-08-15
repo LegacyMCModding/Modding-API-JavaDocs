@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.model;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.entity.Entity;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.util.MathHelper;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>@SideOnly(Side.CLIENT)<a name="line.8"></a>
+<span class="sourceLineNo">009</span>public class ModelWitch extends ModelVillager<a name="line.9"></a>
+<span class="sourceLineNo">010</span>{<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    public boolean field_82900_g = false;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    private ModelRenderer field_82901_h = (new ModelRenderer(this)).setTextureSize(64, 128);<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    private ModelRenderer witchHat;<a name="line.13"></a>
+<span class="sourceLineNo">014</span><a name="line.14"></a>
+<span class="sourceLineNo">015</span>    public ModelWitch(float par1)<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    {<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        super(par1, 0.0F, 64, 128);<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        this.field_82901_h.setRotationPoint(0.0F, -2.0F, 0.0F);<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        this.field_82901_h.setTextureOffset(0, 0).addBox(0.0F, 3.0F, -6.75F, 1, 1, 1, -0.25F);<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        this.field_82898_f.addChild(this.field_82901_h);<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        this.witchHat = (new ModelRenderer(this)).setTextureSize(64, 128);<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        this.witchHat.setRotationPoint(-5.0F, -10.03125F, -5.0F);<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        this.witchHat.setTextureOffset(0, 64).addBox(0.0F, 0.0F, 0.0F, 10, 2, 10);<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        this.villagerHead.addChild(this.witchHat);<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        ModelRenderer modelrenderer = (new ModelRenderer(this)).setTextureSize(64, 128);<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        modelrenderer.setRotationPoint(1.75F, -4.0F, 2.0F);<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        modelrenderer.setTextureOffset(0, 76).addBox(0.0F, 0.0F, 0.0F, 7, 4, 7);<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        modelrenderer.rotateAngleX = -0.05235988F;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        modelrenderer.rotateAngleZ = 0.02617994F;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        this.witchHat.addChild(modelrenderer);<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        ModelRenderer modelrenderer1 = (new ModelRenderer(this)).setTextureSize(64, 128);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        modelrenderer1.setRotationPoint(1.75F, -4.0F, 2.0F);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        modelrenderer1.setTextureOffset(0, 87).addBox(0.0F, 0.0F, 0.0F, 4, 4, 4);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        modelrenderer1.rotateAngleX = -0.10471976F;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        modelrenderer1.rotateAngleZ = 0.05235988F;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        modelrenderer.addChild(modelrenderer1);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        ModelRenderer modelrenderer2 = (new ModelRenderer(this)).setTextureSize(64, 128);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        modelrenderer2.setRotationPoint(1.75F, -2.0F, 2.0F);<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        modelrenderer2.setTextureOffset(0, 95).addBox(0.0F, 0.0F, 0.0F, 1, 2, 1, 0.25F);<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        modelrenderer2.rotateAngleX = -0.20943952F;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        modelrenderer2.rotateAngleZ = 0.10471976F;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        modelrenderer1.addChild(modelrenderer2);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    }<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    /**<a name="line.45"></a>
+<span class="sourceLineNo">046</span>     * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.46"></a>
+<span class="sourceLineNo">047</span>     * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * "far" arms and legs can swing at most.<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     */<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6, Entity par7Entity)<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        super.setRotationAngles(par1, par2, par3, par4, par5, par6, par7Entity);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        this.field_82898_f.field_82906_o = this.field_82898_f.field_82908_p = this.field_82898_f.field_82907_q = 0.0F;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        float f6 = 0.01F * (float)(par7Entity.entityId % 10);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        this.field_82898_f.rotateAngleX = MathHelper.sin((float)par7Entity.ticksExisted * f6) * 4.5F * (float)Math.PI / 180.0F;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        this.field_82898_f.rotateAngleY = 0.0F;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        this.field_82898_f.rotateAngleZ = MathHelper.cos((float)par7Entity.ticksExisted * f6) * 2.5F * (float)Math.PI / 180.0F;<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>        if (this.field_82900_g)<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        {<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            this.field_82898_f.rotateAngleX = -0.9F;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            this.field_82898_f.field_82907_q = -0.09375F;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            this.field_82898_f.field_82908_p = 0.1875F;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        }<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    }<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>    public int func_82899_a()<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        return 0;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    }<a name="line.70"></a>
+<span class="sourceLineNo">071</span>}<a name="line.71"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraftforge.client;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import org.lwjgl.input.Mouse;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import org.lwjgl.opengl.GL11;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.client.Minecraft;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.client.settings.GameSettings;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.client.gui.GuiControls;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.client.gui.GuiSlot;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.client.settings.KeyBinding;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.client.renderer.Tessellator;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.util.EnumChatFormatting;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>public class GuiControlsScrollPanel extends GuiSlot<a name="line.14"></a>
+<span class="sourceLineNo">015</span>{<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    private GuiControls controls;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    private GameSettings options;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    private Minecraft mc;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    private String[] message;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    private int _mouseX;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    private int _mouseY;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    private int selected = -1;<a name="line.22"></a>
+<span class="sourceLineNo">023</span><a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public GuiControlsScrollPanel(GuiControls controls, GameSettings options, Minecraft mc)<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    {<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        super(mc, controls.width, controls.height, 16, (controls.height - 32) + 4, 25);<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        this.controls = controls;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        this.options = options;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        this.mc = mc;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    }<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>    @Override<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    protected int getSize()<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    {<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        return options.keyBindings.length;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    }<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>    @Override<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    protected void elementClicked(int i, boolean flag)<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    {<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        if (!flag)<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>            if (selected == -1)<a name="line.43"></a>
+<span class="sourceLineNo">044</span>            {<a name="line.44"></a>
+<span class="sourceLineNo">045</span>                selected = i;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            }<a name="line.46"></a>
+<span class="sourceLineNo">047</span>            else<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            {<a name="line.48"></a>
+<span class="sourceLineNo">049</span>                options.setKeyBinding(selected, -100);<a name="line.49"></a>
+<span class="sourceLineNo">050</span>                selected = -1;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>                KeyBinding.resetKeyBindingArrayAndHash();<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            }<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        }<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    }<a name="line.54"></a>
+<span class="sourceLineNo">055</span><a name="line.55"></a>
+<span class="sourceLineNo">056</span>    @Override<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    protected boolean isSelected(int i)<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        return false;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    }<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>    @Override<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    protected void drawBackground() {}<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>    @Override<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    public void drawScreen(int mX, int mY, float f)<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        _mouseX = mX;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        _mouseY = mY;<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>        if (selected != -1 &amp;&amp; !Mouse.isButtonDown(0) &amp;&amp; Mouse.getDWheel() == 0)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            if (Mouse.next() &amp;&amp; Mouse.getEventButtonState())<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>                System.out.println(Mouse.getEventButton());<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                options.setKeyBinding(selected, -100 + Mouse.getEventButton());<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                selected = -1;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>                KeyBinding.resetKeyBindingArrayAndHash();<a name="line.78"></a>
+<span class="sourceLineNo">079</span>            }<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        }<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>        super.drawScreen(mX, mY, f);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    }<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>    @Override<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    protected void drawSlot(int index, int xPosition, int yPosition, int l, Tessellator tessellator)<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        int width = 70;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        int height = 20;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        xPosition -= 20;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        boolean flag = _mouseX &gt;= xPosition &amp;&amp; _mouseY &gt;= yPosition &amp;&amp; _mouseX &lt; xPosition + width &amp;&amp; _mouseY &lt; yPosition + height;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        int k = (flag ? 2 : 1);<a name="line.92"></a>
+<span class="sourceLineNo">093</span><a name="line.93"></a>
+<span class="sourceLineNo">094</span>        mc.renderEngine.func_98187_b("/gui/gui.png");<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        controls.drawTexturedModalRect(xPosition, yPosition, 0, 46 + k * 20, width / 2, height);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        controls.drawTexturedModalRect(xPosition + width / 2, yPosition, 200 - width / 2, 46 + k * 20, width / 2, height);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        controls.drawString(mc.fontRenderer, options.getKeyBindingDescription(index), xPosition + width + 4, yPosition + 6, 0xFFFFFFFF);<a name="line.98"></a>
+<span class="sourceLineNo">099</span><a name="line.99"></a>
+<span class="sourceLineNo">100</span>        boolean conflict = false;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        for (int x = 0; x &lt; options.keyBindings.length; x++)<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            if (x != index &amp;&amp; options.keyBindings[x].keyCode == options.keyBindings[index].keyCode)<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                conflict = true;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                break;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>            }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        }<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>        String str = (conflict ? EnumChatFormatting.RED : "") + options.getOptionDisplayString(index);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        str = (index == selected ? EnumChatFormatting.WHITE + "&gt; " + EnumChatFormatting.YELLOW + "??? " + EnumChatFormatting.WHITE + "&lt;" : str);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        controls.drawCenteredString(mc.fontRenderer, str, xPosition + (width / 2), yPosition + (height - 8) / 2, 0xFFFFFFFF);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    }<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>    public boolean keyTyped(char c, int i)<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        if (selected != -1)<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>            options.setKeyBinding(selected, i);<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            selected = -1;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            KeyBinding.resetKeyBindingArrayAndHash();<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            return false;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        }<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        return true;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    }<a name="line.125"></a>
+<span class="sourceLineNo">126</span>}<a name="line.126"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

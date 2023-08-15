@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.settings;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>@SideOnly(Side.CLIENT)<a name="line.6"></a>
+<span class="sourceLineNo">007</span>public enum EnumOptions<a name="line.7"></a>
+<span class="sourceLineNo">008</span>{<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    MUSIC("options.music", true, false),<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    SOUND("options.sound", true, false),<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    INVERT_MOUSE("options.invertMouse", false, true),<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    SENSITIVITY("options.sensitivity", true, false),<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    FOV("options.fov", true, false),<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    GAMMA("options.gamma", true, false),<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    RENDER_DISTANCE("options.renderDistance", false, false),<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    VIEW_BOBBING("options.viewBobbing", false, true),<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    ANAGLYPH("options.anaglyph", false, true),<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    ADVANCED_OPENGL("options.advancedOpengl", false, true),<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    FRAMERATE_LIMIT("options.framerateLimit", false, false),<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    DIFFICULTY("options.difficulty", false, false),<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    GRAPHICS("options.graphics", false, false),<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    AMBIENT_OCCLUSION("options.ao", false, false),<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    GUI_SCALE("options.guiScale", false, false),<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    RENDER_CLOUDS("options.renderClouds", false, true),<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    PARTICLES("options.particles", false, false),<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    CHAT_VISIBILITY("options.chat.visibility", false, false),<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    CHAT_COLOR("options.chat.color", false, true),<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    CHAT_LINKS("options.chat.links", false, true),<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    CHAT_OPACITY("options.chat.opacity", true, false),<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    CHAT_LINKS_PROMPT("options.chat.links.prompt", false, true),<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    USE_SERVER_TEXTURES("options.serverTextures", false, true),<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    SNOOPER_ENABLED("options.snooper", false, true),<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    USE_FULLSCREEN("options.fullscreen", false, true),<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    ENABLE_VSYNC("options.vsync", false, true),<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    SHOW_CAPE("options.showCape", false, true),<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    TOUCHSCREEN("options.touchscreen", false, true),<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    CHAT_SCALE("options.chat.scale", true, false),<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    CHAT_WIDTH("options.chat.width", true, false),<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    CHAT_HEIGHT_FOCUSED("options.chat.height.focused", true, false),<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    CHAT_HEIGHT_UNFOCUSED("options.chat.height.unfocused", true, false);<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    private final boolean enumFloat;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    private final boolean enumBoolean;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    private final String enumString;<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    public static EnumOptions getEnumOptions(int par0)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        EnumOptions[] aenumoptions = values();<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        int j = aenumoptions.length;<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>        for (int k = 0; k &lt; j; ++k)<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            EnumOptions enumoptions = aenumoptions[k];<a name="line.52"></a>
+<span class="sourceLineNo">053</span><a name="line.53"></a>
+<span class="sourceLineNo">054</span>            if (enumoptions.returnEnumOrdinal() == par0)<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>                return enumoptions;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            }<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        }<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>        return null;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    }<a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62"></a>
+<span class="sourceLineNo">063</span>    private EnumOptions(String par3Str, boolean par4, boolean par5)<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        this.enumString = par3Str;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        this.enumFloat = par4;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        this.enumBoolean = par5;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    }<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>    public boolean getEnumFloat()<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        return this.enumFloat;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    public boolean getEnumBoolean()<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        return this.enumBoolean;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>    public int returnEnumOrdinal()<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        return this.ordinal();<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    }<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>    public String getEnumString()<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        return this.enumString;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    }<a name="line.88"></a>
+<span class="sourceLineNo">089</span>}<a name="line.89"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

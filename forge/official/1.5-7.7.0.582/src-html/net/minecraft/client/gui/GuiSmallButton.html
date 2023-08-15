@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.gui;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.client.settings.EnumOptions;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>@SideOnly(Side.CLIENT)<a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class GuiSmallButton extends GuiButton<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    private final EnumOptions enumOptions;<a name="line.10"></a>
+<span class="sourceLineNo">011</span><a name="line.11"></a>
+<span class="sourceLineNo">012</span>    public GuiSmallButton(int par1, int par2, int par3, String par4Str)<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    {<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        this(par1, par2, par3, (EnumOptions)null, par4Str);<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    }<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public GuiSmallButton(int par1, int par2, int par3, int par4, int par5, String par6Str)<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    {<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        super(par1, par2, par3, par4, par5, par6Str);<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        this.enumOptions = null;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    }<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public GuiSmallButton(int par1, int par2, int par3, EnumOptions par4EnumOptions, String par5Str)<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    {<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        super(par1, par2, par3, 150, 20, par5Str);<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        this.enumOptions = par4EnumOptions;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    }<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public EnumOptions returnEnumOptions()<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        return this.enumOptions;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    }<a name="line.32"></a>
+<span class="sourceLineNo">033</span>}<a name="line.33"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

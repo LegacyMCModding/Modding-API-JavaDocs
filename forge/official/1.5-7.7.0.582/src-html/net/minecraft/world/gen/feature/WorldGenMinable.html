@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen.feature;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.Random;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.block.Block;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.util.MathHelper;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.world.World;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class WorldGenMinable extends WorldGenerator<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    /** The block ID of the ore to be placed using this generator. */<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    private int minableBlockId;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    private int minableBlockMeta = 0;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    /** The number of blocks to generate. */<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    private int numberOfBlocks;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    private int field_94523_c;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public WorldGenMinable(int par1, int par2)<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    {<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        this(par1, par2, Block.stone.blockID);<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    }<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public WorldGenMinable(int par1, int par2, int par3)<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    {<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        this.minableBlockId = par1;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        this.numberOfBlocks = par2;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        this.field_94523_c = par3;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    }<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>    public WorldGenMinable(int id, int meta, int number, int target)<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        this(id, number, target);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        minableBlockMeta = meta;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    }<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public boolean generate(World par1World, Random par2Random, int par3, int par4, int par5)<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    {<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        float f = par2Random.nextFloat() * (float)Math.PI;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        double d0 = (double)((float)(par3 + 8) + MathHelper.sin(f) * (float)this.numberOfBlocks / 8.0F);<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        double d1 = (double)((float)(par3 + 8) - MathHelper.sin(f) * (float)this.numberOfBlocks / 8.0F);<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        double d2 = (double)((float)(par5 + 8) + MathHelper.cos(f) * (float)this.numberOfBlocks / 8.0F);<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        double d3 = (double)((float)(par5 + 8) - MathHelper.cos(f) * (float)this.numberOfBlocks / 8.0F);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        double d4 = (double)(par4 + par2Random.nextInt(3) - 2);<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        double d5 = (double)(par4 + par2Random.nextInt(3) - 2);<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>        for (int l = 0; l &lt;= this.numberOfBlocks; ++l)<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        {<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            double d6 = d0 + (d1 - d0) * (double)l / (double)this.numberOfBlocks;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            double d7 = d4 + (d5 - d4) * (double)l / (double)this.numberOfBlocks;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            double d8 = d2 + (d3 - d2) * (double)l / (double)this.numberOfBlocks;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            double d9 = par2Random.nextDouble() * (double)this.numberOfBlocks / 16.0D;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            double d10 = (double)(MathHelper.sin((float)l * (float)Math.PI / (float)this.numberOfBlocks) + 1.0F) * d9 + 1.0D;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            double d11 = (double)(MathHelper.sin((float)l * (float)Math.PI / (float)this.numberOfBlocks) + 1.0F) * d9 + 1.0D;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            int i1 = MathHelper.floor_double(d6 - d10 / 2.0D);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            int j1 = MathHelper.floor_double(d7 - d11 / 2.0D);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            int k1 = MathHelper.floor_double(d8 - d10 / 2.0D);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            int l1 = MathHelper.floor_double(d6 + d10 / 2.0D);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            int i2 = MathHelper.floor_double(d7 + d11 / 2.0D);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            int j2 = MathHelper.floor_double(d8 + d10 / 2.0D);<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>            for (int k2 = i1; k2 &lt;= l1; ++k2)<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>                double d12 = ((double)k2 + 0.5D - d6) / (d10 / 2.0D);<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>                if (d12 * d12 &lt; 1.0D)<a name="line.65"></a>
+<span class="sourceLineNo">066</span>                {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>                    for (int l2 = j1; l2 &lt;= i2; ++l2)<a name="line.67"></a>
+<span class="sourceLineNo">068</span>                    {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                        double d13 = ((double)l2 + 0.5D - d7) / (d11 / 2.0D);<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>                        if (d12 * d12 + d13 * d13 &lt; 1.0D)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                        {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                            for (int i3 = k1; i3 &lt;= j2; ++i3)<a name="line.73"></a>
+<span class="sourceLineNo">074</span>                            {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>                                double d14 = ((double)i3 + 0.5D - d8) / (d10 / 2.0D);<a name="line.75"></a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span>                                Block block = Block.blocksList[par1World.getBlockId(k2, l2, i3)];<a name="line.77"></a>
+<span class="sourceLineNo">078</span>                                if (d12 * d12 + d13 * d13 + d14 * d14 &lt; 1.0D &amp;&amp; (block != null &amp;&amp; block.isGenMineableReplaceable(par1World, k2, l2, i3, field_94523_c)))<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                                {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                                    par1World.setBlockAndMetadataWithNotify(k2, l2, i3, this.minableBlockId, minableBlockMeta, 2);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                                }<a name="line.81"></a>
+<span class="sourceLineNo">082</span>                            }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>                        }<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                    }<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                }<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            }<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        }<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>        return true;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    }<a name="line.90"></a>
+<span class="sourceLineNo">091</span>}<a name="line.91"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

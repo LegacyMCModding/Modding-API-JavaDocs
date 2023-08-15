@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.entity.ai;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import net.minecraft.entity.EntityLiving;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.util.MathHelper;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>public class EntityMoveHelper<a name="line.6"></a>
+<span class="sourceLineNo">007</span>{<a name="line.7"></a>
+<span class="sourceLineNo">008</span>    /** The EntityLiving that is being moved */<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    private EntityLiving entity;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    private double posX;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    private double posY;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    private double posZ;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    /** The speed at which the entity should move */<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    private float speed;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    private boolean update = false;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public EntityMoveHelper(EntityLiving par1EntityLiving)<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    {<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        this.entity = par1EntityLiving;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        this.posX = par1EntityLiving.posX;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        this.posY = par1EntityLiving.posY;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        this.posZ = par1EntityLiving.posZ;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    }<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    public boolean isUpdating()<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    {<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        return this.update;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    }<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>    public float getSpeed()<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    {<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        return this.speed;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    }<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>    /**<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     * Sets the speed and location to move to<a name="line.37"></a>
+<span class="sourceLineNo">038</span>     */<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    public void setMoveTo(double par1, double par3, double par5, float par7)<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    {<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.posX = par1;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.posY = par3;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.posZ = par5;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.speed = par7;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        this.update = true;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    }<a name="line.46"></a>
+<span class="sourceLineNo">047</span><a name="line.47"></a>
+<span class="sourceLineNo">048</span>    public void onUpdateMoveHelper()<a name="line.48"></a>
+<span class="sourceLineNo">049</span>    {<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.entity.setMoveForward(0.0F);<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>        if (this.update)<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            this.update = false;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            int i = MathHelper.floor_double(this.entity.boundingBox.minY + 0.5D);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            double d0 = this.posX - this.entity.posX;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            double d1 = this.posZ - this.entity.posZ;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            double d2 = this.posY - (double)i;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            double d3 = d0 * d0 + d2 * d2 + d1 * d1;<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>            if (d3 &gt;= 2.500000277905201E-7D)<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>                float f = (float)(Math.atan2(d1, d0) * 180.0D / Math.PI) - 90.0F;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                this.entity.rotationYaw = this.limitAngle(this.entity.rotationYaw, f, 30.0F);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>                this.entity.setAIMoveSpeed(this.speed * this.entity.getSpeedModifier());<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>                if (d2 &gt; 0.0D &amp;&amp; d0 * d0 + d1 * d1 &lt; 1.0D)<a name="line.67"></a>
+<span class="sourceLineNo">068</span>                {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                    this.entity.getJumpHelper().setJumping();<a name="line.69"></a>
+<span class="sourceLineNo">070</span>                }<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            }<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        }<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    /**<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * Limits the given angle to a upper and lower limit.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     */<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    private float limitAngle(float par1, float par2, float par3)<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        float f3 = MathHelper.wrapAngleTo180_float(par2 - par1);<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>        if (f3 &gt; par3)<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            f3 = par3;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        }<a name="line.85"></a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span>        if (f3 &lt; -par3)<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            f3 = -par3;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        }<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>        return par1 + f3;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>}<a name="line.94"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

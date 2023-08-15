@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * Forge Mod Loader<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Copyright (c) 2012-2013 cpw.<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * All rights reserved. This program and the accompanying materials<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * are made available under the terms of the GNU Lesser Public License v2.1<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * which accompanies this distribution, and is available at<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * <a name="line.8"></a>
+<span class="sourceLineNo">009</span> * Contributors:<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *     cpw - implementation<a name="line.10"></a>
+<span class="sourceLineNo">011</span> */<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>package cpw.mods.fml.common;<a name="line.13"></a>
+<span class="sourceLineNo">014</span><a name="line.14"></a>
+<span class="sourceLineNo">015</span>import com.google.common.base.Throwables;<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>import cpw.mods.fml.common.event.FMLConstructionEvent;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import cpw.mods.fml.common.event.FMLEvent;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import cpw.mods.fml.common.event.FMLInitializationEvent;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import cpw.mods.fml.common.event.FMLLoadCompleteEvent;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import cpw.mods.fml.common.event.FMLPostInitializationEvent;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import cpw.mods.fml.common.event.FMLPreInitializationEvent;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import cpw.mods.fml.common.event.FMLServerStartedEvent;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import cpw.mods.fml.common.event.FMLServerStartingEvent;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import cpw.mods.fml.common.event.FMLServerStoppedEvent;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import cpw.mods.fml.common.event.FMLServerStoppingEvent;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import cpw.mods.fml.common.event.FMLStateEvent;<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>/**<a name="line.30"></a>
+<span class="sourceLineNo">031</span> * The state enum used to help track state progression for the loader<a name="line.31"></a>
+<span class="sourceLineNo">032</span> * @author cpw<a name="line.32"></a>
+<span class="sourceLineNo">033</span> *<a name="line.33"></a>
+<span class="sourceLineNo">034</span> */<a name="line.34"></a>
+<span class="sourceLineNo">035</span>public enum LoaderState<a name="line.35"></a>
+<span class="sourceLineNo">036</span>{<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    NOINIT("Uninitialized",null),<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    LOADING("Loading",null),<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    CONSTRUCTING("Constructing mods",FMLConstructionEvent.class),<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    PREINITIALIZATION("Pre-initializing mods", FMLPreInitializationEvent.class),<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    INITIALIZATION("Initializing mods", FMLInitializationEvent.class),<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    POSTINITIALIZATION("Post-initializing mods", FMLPostInitializationEvent.class),<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    AVAILABLE("Mod loading complete", FMLLoadCompleteEvent.class),<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    SERVER_ABOUT_TO_START("Server about to start", FMLServerAboutToStartEvent.class),<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    SERVER_STARTING("Server starting", FMLServerStartingEvent.class),<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    SERVER_STARTED("Server started", FMLServerStartedEvent.class),<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    SERVER_STOPPING("Server stopping", FMLServerStoppingEvent.class),<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    SERVER_STOPPED("Server stopped", FMLServerStoppedEvent.class),<a name="line.48"></a>
+<span class="sourceLineNo">049</span>    ERRORED("Mod Loading errored",null);<a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>    private Class&lt;? extends FMLStateEvent&gt; eventClass;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    private String name;<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    private LoaderState(String name, Class&lt;? extends FMLStateEvent&gt; event)<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        this.name = name;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        this.eventClass = event;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    }<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>    public LoaderState transition(boolean errored)<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        if (errored)<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            return ERRORED;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        }<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        // stopping -&gt; available<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        if (this == SERVER_STOPPED)<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            return AVAILABLE;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        }<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        return values()[ordinal() &lt; values().length ? ordinal()+1 : ordinal()];<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    public boolean hasEvent()<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        return eventClass != null;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>    public FMLStateEvent getEvent(Object... eventData)<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        try<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            return eventClass.getConstructor(Object[].class).newInstance((Object)eventData);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        }<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        catch (Exception e)<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            throw Throwables.propagate(e);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        }<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    }<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    public LoaderState requiredState()<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    {<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        if (this == NOINIT) return NOINIT;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        return LoaderState.values()[this.ordinal()-1];<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    }<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    public enum ModState<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        UNLOADED("Unloaded"),<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        LOADED("Loaded"),<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        CONSTRUCTED("Constructed"),<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        PREINITIALIZED("Pre-initialized"),<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        INITIALIZED("Initialized"),<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        POSTINITIALIZED("Post-initialized"),<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        AVAILABLE("Available"),<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        DISABLED("Disabled"),<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        ERRORED("Errored");<a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>        private String label;<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>        private ModState(String label)<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>            this.label = label;<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        }<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>        public String toString()<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            return this.label;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        }<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    }<a name="line.119"></a>
+<span class="sourceLineNo">120</span>}<a name="line.120"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

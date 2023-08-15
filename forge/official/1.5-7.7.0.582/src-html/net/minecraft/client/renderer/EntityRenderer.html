@@ -1,0 +1,2047 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.awt.image.BufferedImage;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import java.nio.FloatBuffer;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import java.util.List;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import java.util.Random;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.block.Block;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.block.material.Material;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.client.Minecraft;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.client.entity.EntityPlayerSP;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.client.gui.ScaledResolution;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.client.multiplayer.WorldClient;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.client.particle.EffectRenderer;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.client.particle.EntityRainFX;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import net.minecraft.client.particle.EntitySmokeFX;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import net.minecraft.client.renderer.culling.ClippingHelperImpl;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import net.minecraft.client.renderer.culling.Frustrum;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import net.minecraft.crash.CrashReport;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import net.minecraft.crash.CrashReportCategory;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import net.minecraft.entity.Entity;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import net.minecraft.entity.EntityLiving;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import net.minecraft.entity.boss.BossStatus;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import net.minecraft.entity.player.EntityPlayer;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import net.minecraft.potion.Potion;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import net.minecraft.util.AxisAlignedBB;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import net.minecraft.util.MathHelper;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import net.minecraft.util.MouseFilter;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import net.minecraft.util.MovingObjectPosition;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import net.minecraft.util.ReportedException;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import net.minecraft.util.Vec3;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import net.minecraft.world.biome.BiomeGenBase;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.lwjgl.input.Mouse;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.lwjgl.opengl.Display;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.lwjgl.opengl.GL11;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.lwjgl.opengl.GLContext;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.lwjgl.util.glu.GLU;<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>import net.minecraftforge.client.ForgeHooksClient;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import net.minecraftforge.client.event.DrawBlockHighlightEvent;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import net.minecraftforge.client.event.RenderWorldLastEvent;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import net.minecraftforge.common.MinecraftForge;<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>@SideOnly(Side.CLIENT)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>public class EntityRenderer<a name="line.46"></a>
+<span class="sourceLineNo">047</span>{<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    public static boolean anaglyphEnable = false;<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /** Anaglyph field (0=R, 1=GB) */<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    public static int anaglyphField;<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>    /** A reference to the Minecraft object. */<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    private Minecraft mc;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    private float farPlaneDistance = 0.0F;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    public ItemRenderer itemRenderer;<a name="line.56"></a>
+<span class="sourceLineNo">057</span><a name="line.57"></a>
+<span class="sourceLineNo">058</span>    /** Entity renderer update count */<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    private int rendererUpdateCount;<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>    /** Pointed entity */<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    private Entity pointedEntity = null;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    private MouseFilter mouseFilterXAxis = new MouseFilter();<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    private MouseFilter mouseFilterYAxis = new MouseFilter();<a name="line.64"></a>
+<span class="sourceLineNo">065</span><a name="line.65"></a>
+<span class="sourceLineNo">066</span>    /** Mouse filter dummy 1 */<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    private MouseFilter mouseFilterDummy1 = new MouseFilter();<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>    /** Mouse filter dummy 2 */<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    private MouseFilter mouseFilterDummy2 = new MouseFilter();<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>    /** Mouse filter dummy 3 */<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    private MouseFilter mouseFilterDummy3 = new MouseFilter();<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    /** Mouse filter dummy 4 */<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    private MouseFilter mouseFilterDummy4 = new MouseFilter();<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    private float thirdPersonDistance = 4.0F;<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>    /** Third person distance temp */<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    private float thirdPersonDistanceTemp = 4.0F;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    private float debugCamYaw = 0.0F;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    private float prevDebugCamYaw = 0.0F;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    private float debugCamPitch = 0.0F;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    private float prevDebugCamPitch = 0.0F;<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>    /** Smooth cam yaw */<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    private float smoothCamYaw;<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>    /** Smooth cam pitch */<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    private float smoothCamPitch;<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>    /** Smooth cam filter X */<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    private float smoothCamFilterX;<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>    /** Smooth cam filter Y */<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    private float smoothCamFilterY;<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>    /** Smooth cam partial ticks */<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    private float smoothCamPartialTicks;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    private float debugCamFOV = 0.0F;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    private float prevDebugCamFOV = 0.0F;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    private float camRoll = 0.0F;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    private float prevCamRoll = 0.0F;<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>    /**<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     * The texture id of the blocklight/skylight texture used for lighting effects<a name="line.106"></a>
+<span class="sourceLineNo">107</span>     */<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    public int lightmapTexture;<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>    /**<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     * Colors computed in updateLightmap() and loaded into the lightmap emptyTexture<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     */<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    private int[] lightmapColors;<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>    /** FOV modifier hand */<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    private float fovModifierHand;<a name="line.116"></a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span>    /** FOV modifier hand prev */<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    private float fovModifierHandPrev;<a name="line.119"></a>
+<span class="sourceLineNo">120</span><a name="line.120"></a>
+<span class="sourceLineNo">121</span>    /** FOV multiplier temp */<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    private float fovMultiplierTemp;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    private float field_82831_U;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    private float field_82832_V;<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>    /** Cloud fog mode */<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    private boolean cloudFog = false;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    private double cameraZoom = 1.0D;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    private double cameraYaw = 0.0D;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    private double cameraPitch = 0.0D;<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>    /** Previous frame time in milliseconds */<a name="line.132"></a>
+<span class="sourceLineNo">133</span>    private long prevFrameTime = Minecraft.getSystemTime();<a name="line.133"></a>
+<span class="sourceLineNo">134</span><a name="line.134"></a>
+<span class="sourceLineNo">135</span>    /** End time of last render (ns) */<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    private long renderEndNanoTime = 0L;<a name="line.136"></a>
+<span class="sourceLineNo">137</span><a name="line.137"></a>
+<span class="sourceLineNo">138</span>    /**<a name="line.138"></a>
+<span class="sourceLineNo">139</span>     * Is set, updateCameraAndRender() calls updateLightmap(); set by updateTorchFlicker()<a name="line.139"></a>
+<span class="sourceLineNo">140</span>     */<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    private boolean lightmapUpdateNeeded = false;<a name="line.141"></a>
+<span class="sourceLineNo">142</span><a name="line.142"></a>
+<span class="sourceLineNo">143</span>    /** Torch flicker X */<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    float torchFlickerX = 0.0F;<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>    /** Torch flicker DX */<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    float torchFlickerDX = 0.0F;<a name="line.147"></a>
+<span class="sourceLineNo">148</span><a name="line.148"></a>
+<span class="sourceLineNo">149</span>    /** Torch flicker Y */<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    float torchFlickerY = 0.0F;<a name="line.150"></a>
+<span class="sourceLineNo">151</span><a name="line.151"></a>
+<span class="sourceLineNo">152</span>    /** Torch flicker DY */<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    float torchFlickerDY = 0.0F;<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    private Random random = new Random();<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>    /** Rain sound counter */<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    private int rainSoundCounter = 0;<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>    /** Rain X coords */<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    float[] rainXCoords;<a name="line.160"></a>
+<span class="sourceLineNo">161</span><a name="line.161"></a>
+<span class="sourceLineNo">162</span>    /** Rain Y coords */<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    float[] rainYCoords;<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    volatile int field_78523_k = 0;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    volatile int field_78520_l = 0;<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>    /** Fog color buffer */<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    FloatBuffer fogColorBuffer = GLAllocation.createDirectFloatBuffer(16);<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>    /** red component of the fog color */<a name="line.170"></a>
+<span class="sourceLineNo">171</span>    float fogColorRed;<a name="line.171"></a>
+<span class="sourceLineNo">172</span><a name="line.172"></a>
+<span class="sourceLineNo">173</span>    /** green component of the fog color */<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    float fogColorGreen;<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span>    /** blue component of the fog color */<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    float fogColorBlue;<a name="line.177"></a>
+<span class="sourceLineNo">178</span><a name="line.178"></a>
+<span class="sourceLineNo">179</span>    /** Fog color 2 */<a name="line.179"></a>
+<span class="sourceLineNo">180</span>    private float fogColor2;<a name="line.180"></a>
+<span class="sourceLineNo">181</span><a name="line.181"></a>
+<span class="sourceLineNo">182</span>    /** Fog color 1 */<a name="line.182"></a>
+<span class="sourceLineNo">183</span>    private float fogColor1;<a name="line.183"></a>
+<span class="sourceLineNo">184</span><a name="line.184"></a>
+<span class="sourceLineNo">185</span>    /**<a name="line.185"></a>
+<span class="sourceLineNo">186</span>     * Debug view direction (0=OFF, 1=Front, 2=Right, 3=Back, 4=Left, 5=TiltLeft, 6=TiltRight)<a name="line.186"></a>
+<span class="sourceLineNo">187</span>     */<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    public int debugViewDirection;<a name="line.188"></a>
+<span class="sourceLineNo">189</span><a name="line.189"></a>
+<span class="sourceLineNo">190</span>    public EntityRenderer(Minecraft par1Minecraft)<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    {<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        this.mc = par1Minecraft;<a name="line.192"></a>
+<span class="sourceLineNo">193</span>        this.itemRenderer = new ItemRenderer(par1Minecraft);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>        this.lightmapTexture = par1Minecraft.renderEngine.allocateAndSetupTexture(new BufferedImage(16, 16, 1));<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        this.lightmapColors = new int[256];<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    }<a name="line.196"></a>
+<span class="sourceLineNo">197</span><a name="line.197"></a>
+<span class="sourceLineNo">198</span>    /**<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     * Updates the entity renderer<a name="line.199"></a>
+<span class="sourceLineNo">200</span>     */<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    public void updateRenderer()<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        this.updateFovModifierHand();<a name="line.203"></a>
+<span class="sourceLineNo">204</span>        this.updateTorchFlicker();<a name="line.204"></a>
+<span class="sourceLineNo">205</span>        this.fogColor2 = this.fogColor1;<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        this.thirdPersonDistanceTemp = this.thirdPersonDistance;<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        this.prevDebugCamYaw = this.debugCamYaw;<a name="line.207"></a>
+<span class="sourceLineNo">208</span>        this.prevDebugCamPitch = this.debugCamPitch;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>        this.prevDebugCamFOV = this.debugCamFOV;<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        this.prevCamRoll = this.camRoll;<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        float f;<a name="line.211"></a>
+<span class="sourceLineNo">212</span>        float f1;<a name="line.212"></a>
+<span class="sourceLineNo">213</span><a name="line.213"></a>
+<span class="sourceLineNo">214</span>        if (this.mc.gameSettings.smoothCamera)<a name="line.214"></a>
+<span class="sourceLineNo">215</span>        {<a name="line.215"></a>
+<span class="sourceLineNo">216</span>            f = this.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>            f1 = f * f * f * 8.0F;<a name="line.217"></a>
+<span class="sourceLineNo">218</span>            this.smoothCamFilterX = this.mouseFilterXAxis.smooth(this.smoothCamYaw, 0.05F * f1);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>            this.smoothCamFilterY = this.mouseFilterYAxis.smooth(this.smoothCamPitch, 0.05F * f1);<a name="line.219"></a>
+<span class="sourceLineNo">220</span>            this.smoothCamPartialTicks = 0.0F;<a name="line.220"></a>
+<span class="sourceLineNo">221</span>            this.smoothCamYaw = 0.0F;<a name="line.221"></a>
+<span class="sourceLineNo">222</span>            this.smoothCamPitch = 0.0F;<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        }<a name="line.223"></a>
+<span class="sourceLineNo">224</span><a name="line.224"></a>
+<span class="sourceLineNo">225</span>        if (this.mc.renderViewEntity == null)<a name="line.225"></a>
+<span class="sourceLineNo">226</span>        {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>            this.mc.renderViewEntity = this.mc.thePlayer;<a name="line.227"></a>
+<span class="sourceLineNo">228</span>        }<a name="line.228"></a>
+<span class="sourceLineNo">229</span><a name="line.229"></a>
+<span class="sourceLineNo">230</span>        f = this.mc.theWorld.getLightBrightness(MathHelper.floor_double(this.mc.renderViewEntity.posX), MathHelper.floor_double(this.mc.renderViewEntity.posY), MathHelper.floor_double(this.mc.renderViewEntity.posZ));<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        f1 = (float)(3 - this.mc.gameSettings.renderDistance) / 3.0F;<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        float f2 = f * (1.0F - f1) + f1;<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        this.fogColor1 += (f2 - this.fogColor1) * 0.1F;<a name="line.233"></a>
+<span class="sourceLineNo">234</span>        ++this.rendererUpdateCount;<a name="line.234"></a>
+<span class="sourceLineNo">235</span>        this.itemRenderer.updateEquippedItem();<a name="line.235"></a>
+<span class="sourceLineNo">236</span>        this.addRainParticles();<a name="line.236"></a>
+<span class="sourceLineNo">237</span>        this.field_82832_V = this.field_82831_U;<a name="line.237"></a>
+<span class="sourceLineNo">238</span><a name="line.238"></a>
+<span class="sourceLineNo">239</span>        if (BossStatus.field_82825_d)<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        {<a name="line.240"></a>
+<span class="sourceLineNo">241</span>            this.field_82831_U += 0.05F;<a name="line.241"></a>
+<span class="sourceLineNo">242</span><a name="line.242"></a>
+<span class="sourceLineNo">243</span>            if (this.field_82831_U &gt; 1.0F)<a name="line.243"></a>
+<span class="sourceLineNo">244</span>            {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>                this.field_82831_U = 1.0F;<a name="line.245"></a>
+<span class="sourceLineNo">246</span>            }<a name="line.246"></a>
+<span class="sourceLineNo">247</span><a name="line.247"></a>
+<span class="sourceLineNo">248</span>            BossStatus.field_82825_d = false;<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        }<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        else if (this.field_82831_U &gt; 0.0F)<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        {<a name="line.251"></a>
+<span class="sourceLineNo">252</span>            this.field_82831_U -= 0.0125F;<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        }<a name="line.253"></a>
+<span class="sourceLineNo">254</span>    }<a name="line.254"></a>
+<span class="sourceLineNo">255</span><a name="line.255"></a>
+<span class="sourceLineNo">256</span>    /**<a name="line.256"></a>
+<span class="sourceLineNo">257</span>     * Finds what block or object the mouse is over at the specified partial tick time. Args: partialTickTime<a name="line.257"></a>
+<span class="sourceLineNo">258</span>     */<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    public void getMouseOver(float par1)<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    {<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        if (this.mc.renderViewEntity != null)<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        {<a name="line.262"></a>
+<span class="sourceLineNo">263</span>            if (this.mc.theWorld != null)<a name="line.263"></a>
+<span class="sourceLineNo">264</span>            {<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                this.mc.field_96291_i = null;<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                double d0 = (double)this.mc.playerController.getBlockReachDistance();<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                this.mc.objectMouseOver = this.mc.renderViewEntity.rayTrace(d0, par1);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>                double d1 = d0;<a name="line.268"></a>
+<span class="sourceLineNo">269</span>                Vec3 vec3 = this.mc.renderViewEntity.getPosition(par1);<a name="line.269"></a>
+<span class="sourceLineNo">270</span><a name="line.270"></a>
+<span class="sourceLineNo">271</span>                if (this.mc.playerController.extendedReach())<a name="line.271"></a>
+<span class="sourceLineNo">272</span>                {<a name="line.272"></a>
+<span class="sourceLineNo">273</span>                    d0 = 6.0D;<a name="line.273"></a>
+<span class="sourceLineNo">274</span>                    d1 = 6.0D;<a name="line.274"></a>
+<span class="sourceLineNo">275</span>                }<a name="line.275"></a>
+<span class="sourceLineNo">276</span>                else<a name="line.276"></a>
+<span class="sourceLineNo">277</span>                {<a name="line.277"></a>
+<span class="sourceLineNo">278</span>                    if (d0 &gt; 3.0D)<a name="line.278"></a>
+<span class="sourceLineNo">279</span>                    {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>                        d1 = 3.0D;<a name="line.280"></a>
+<span class="sourceLineNo">281</span>                    }<a name="line.281"></a>
+<span class="sourceLineNo">282</span><a name="line.282"></a>
+<span class="sourceLineNo">283</span>                    d0 = d1;<a name="line.283"></a>
+<span class="sourceLineNo">284</span>                }<a name="line.284"></a>
+<span class="sourceLineNo">285</span><a name="line.285"></a>
+<span class="sourceLineNo">286</span>                if (this.mc.objectMouseOver != null)<a name="line.286"></a>
+<span class="sourceLineNo">287</span>                {<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                    d1 = this.mc.objectMouseOver.hitVec.distanceTo(vec3);<a name="line.288"></a>
+<span class="sourceLineNo">289</span>                }<a name="line.289"></a>
+<span class="sourceLineNo">290</span><a name="line.290"></a>
+<span class="sourceLineNo">291</span>                Vec3 vec31 = this.mc.renderViewEntity.getLook(par1);<a name="line.291"></a>
+<span class="sourceLineNo">292</span>                Vec3 vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);<a name="line.292"></a>
+<span class="sourceLineNo">293</span>                this.pointedEntity = null;<a name="line.293"></a>
+<span class="sourceLineNo">294</span>                float f1 = 1.0F;<a name="line.294"></a>
+<span class="sourceLineNo">295</span>                List list = this.mc.theWorld.getEntitiesWithinAABBExcludingEntity(this.mc.renderViewEntity, this.mc.renderViewEntity.boundingBox.addCoord(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0).expand((double)f1, (double)f1, (double)f1));<a name="line.295"></a>
+<span class="sourceLineNo">296</span>                double d2 = d1;<a name="line.296"></a>
+<span class="sourceLineNo">297</span><a name="line.297"></a>
+<span class="sourceLineNo">298</span>                for (int i = 0; i &lt; list.size(); ++i)<a name="line.298"></a>
+<span class="sourceLineNo">299</span>                {<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                    Entity entity = (Entity)list.get(i);<a name="line.300"></a>
+<span class="sourceLineNo">301</span><a name="line.301"></a>
+<span class="sourceLineNo">302</span>                    if (entity.canBeCollidedWith())<a name="line.302"></a>
+<span class="sourceLineNo">303</span>                    {<a name="line.303"></a>
+<span class="sourceLineNo">304</span>                        float f2 = entity.getCollisionBorderSize();<a name="line.304"></a>
+<span class="sourceLineNo">305</span>                        AxisAlignedBB axisalignedbb = entity.boundingBox.expand((double)f2, (double)f2, (double)f2);<a name="line.305"></a>
+<span class="sourceLineNo">306</span>                        MovingObjectPosition movingobjectposition = axisalignedbb.calculateIntercept(vec3, vec32);<a name="line.306"></a>
+<span class="sourceLineNo">307</span><a name="line.307"></a>
+<span class="sourceLineNo">308</span>                        if (axisalignedbb.isVecInside(vec3))<a name="line.308"></a>
+<span class="sourceLineNo">309</span>                        {<a name="line.309"></a>
+<span class="sourceLineNo">310</span>                            if (0.0D &lt; d2 || d2 == 0.0D)<a name="line.310"></a>
+<span class="sourceLineNo">311</span>                            {<a name="line.311"></a>
+<span class="sourceLineNo">312</span>                                this.pointedEntity = entity;<a name="line.312"></a>
+<span class="sourceLineNo">313</span>                                d2 = 0.0D;<a name="line.313"></a>
+<span class="sourceLineNo">314</span>                            }<a name="line.314"></a>
+<span class="sourceLineNo">315</span>                        }<a name="line.315"></a>
+<span class="sourceLineNo">316</span>                        else if (movingobjectposition != null)<a name="line.316"></a>
+<span class="sourceLineNo">317</span>                        {<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                            double d3 = vec3.distanceTo(movingobjectposition.hitVec);<a name="line.318"></a>
+<span class="sourceLineNo">319</span><a name="line.319"></a>
+<span class="sourceLineNo">320</span>                            if (d3 &lt; d2 || d2 == 0.0D)<a name="line.320"></a>
+<span class="sourceLineNo">321</span>                            {<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                                this.pointedEntity = entity;<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                                d2 = d3;<a name="line.323"></a>
+<span class="sourceLineNo">324</span>                            }<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                        }<a name="line.325"></a>
+<span class="sourceLineNo">326</span>                    }<a name="line.326"></a>
+<span class="sourceLineNo">327</span>                }<a name="line.327"></a>
+<span class="sourceLineNo">328</span><a name="line.328"></a>
+<span class="sourceLineNo">329</span>                if (this.pointedEntity != null &amp;&amp; (d2 &lt; d1 || this.mc.objectMouseOver == null))<a name="line.329"></a>
+<span class="sourceLineNo">330</span>                {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>                    this.mc.objectMouseOver = new MovingObjectPosition(this.pointedEntity);<a name="line.331"></a>
+<span class="sourceLineNo">332</span><a name="line.332"></a>
+<span class="sourceLineNo">333</span>                    if (this.pointedEntity instanceof EntityLiving)<a name="line.333"></a>
+<span class="sourceLineNo">334</span>                    {<a name="line.334"></a>
+<span class="sourceLineNo">335</span>                        this.mc.field_96291_i = (EntityLiving)this.pointedEntity;<a name="line.335"></a>
+<span class="sourceLineNo">336</span>                    }<a name="line.336"></a>
+<span class="sourceLineNo">337</span>                }<a name="line.337"></a>
+<span class="sourceLineNo">338</span>            }<a name="line.338"></a>
+<span class="sourceLineNo">339</span>        }<a name="line.339"></a>
+<span class="sourceLineNo">340</span>    }<a name="line.340"></a>
+<span class="sourceLineNo">341</span><a name="line.341"></a>
+<span class="sourceLineNo">342</span>    /**<a name="line.342"></a>
+<span class="sourceLineNo">343</span>     * Update FOV modifier hand<a name="line.343"></a>
+<span class="sourceLineNo">344</span>     */<a name="line.344"></a>
+<span class="sourceLineNo">345</span>    private void updateFovModifierHand()<a name="line.345"></a>
+<span class="sourceLineNo">346</span>    {<a name="line.346"></a>
+<span class="sourceLineNo">347</span>        if (mc.renderViewEntity instanceof EntityPlayerSP)<a name="line.347"></a>
+<span class="sourceLineNo">348</span>        {<a name="line.348"></a>
+<span class="sourceLineNo">349</span>            EntityPlayerSP entityplayersp = (EntityPlayerSP)this.mc.renderViewEntity;<a name="line.349"></a>
+<span class="sourceLineNo">350</span>            this.fovMultiplierTemp = entityplayersp.getFOVMultiplier();<a name="line.350"></a>
+<span class="sourceLineNo">351</span>        }<a name="line.351"></a>
+<span class="sourceLineNo">352</span>        else<a name="line.352"></a>
+<span class="sourceLineNo">353</span>        {<a name="line.353"></a>
+<span class="sourceLineNo">354</span>            this.fovMultiplierTemp = mc.thePlayer.getFOVMultiplier();<a name="line.354"></a>
+<span class="sourceLineNo">355</span>        }<a name="line.355"></a>
+<span class="sourceLineNo">356</span>        this.fovModifierHandPrev = this.fovModifierHand;<a name="line.356"></a>
+<span class="sourceLineNo">357</span>        this.fovModifierHand += (this.fovMultiplierTemp - this.fovModifierHand) * 0.5F;<a name="line.357"></a>
+<span class="sourceLineNo">358</span><a name="line.358"></a>
+<span class="sourceLineNo">359</span>        if (this.fovModifierHand &gt; 1.5F)<a name="line.359"></a>
+<span class="sourceLineNo">360</span>        {<a name="line.360"></a>
+<span class="sourceLineNo">361</span>            this.fovModifierHand = 1.5F;<a name="line.361"></a>
+<span class="sourceLineNo">362</span>        }<a name="line.362"></a>
+<span class="sourceLineNo">363</span><a name="line.363"></a>
+<span class="sourceLineNo">364</span>        if (this.fovModifierHand &lt; 0.1F)<a name="line.364"></a>
+<span class="sourceLineNo">365</span>        {<a name="line.365"></a>
+<span class="sourceLineNo">366</span>            this.fovModifierHand = 0.1F;<a name="line.366"></a>
+<span class="sourceLineNo">367</span>        }<a name="line.367"></a>
+<span class="sourceLineNo">368</span>    }<a name="line.368"></a>
+<span class="sourceLineNo">369</span><a name="line.369"></a>
+<span class="sourceLineNo">370</span>    /**<a name="line.370"></a>
+<span class="sourceLineNo">371</span>     * Changes the field of view of the player depending on if they are underwater or not<a name="line.371"></a>
+<span class="sourceLineNo">372</span>     */<a name="line.372"></a>
+<span class="sourceLineNo">373</span>    private float getFOVModifier(float par1, boolean par2)<a name="line.373"></a>
+<span class="sourceLineNo">374</span>    {<a name="line.374"></a>
+<span class="sourceLineNo">375</span>        if (this.debugViewDirection &gt; 0)<a name="line.375"></a>
+<span class="sourceLineNo">376</span>        {<a name="line.376"></a>
+<span class="sourceLineNo">377</span>            return 90.0F;<a name="line.377"></a>
+<span class="sourceLineNo">378</span>        }<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        else<a name="line.379"></a>
+<span class="sourceLineNo">380</span>        {<a name="line.380"></a>
+<span class="sourceLineNo">381</span>            EntityLiving entityplayer = (EntityLiving)this.mc.renderViewEntity;<a name="line.381"></a>
+<span class="sourceLineNo">382</span>            float f1 = 70.0F;<a name="line.382"></a>
+<span class="sourceLineNo">383</span><a name="line.383"></a>
+<span class="sourceLineNo">384</span>            if (par2)<a name="line.384"></a>
+<span class="sourceLineNo">385</span>            {<a name="line.385"></a>
+<span class="sourceLineNo">386</span>                f1 += this.mc.gameSettings.fovSetting * 40.0F;<a name="line.386"></a>
+<span class="sourceLineNo">387</span>                f1 *= this.fovModifierHandPrev + (this.fovModifierHand - this.fovModifierHandPrev) * par1;<a name="line.387"></a>
+<span class="sourceLineNo">388</span>            }<a name="line.388"></a>
+<span class="sourceLineNo">389</span><a name="line.389"></a>
+<span class="sourceLineNo">390</span>            if (entityplayer.getHealth() &lt;= 0)<a name="line.390"></a>
+<span class="sourceLineNo">391</span>            {<a name="line.391"></a>
+<span class="sourceLineNo">392</span>                float f2 = (float)entityplayer.deathTime + par1;<a name="line.392"></a>
+<span class="sourceLineNo">393</span>                f1 /= (1.0F - 500.0F / (f2 + 500.0F)) * 2.0F + 1.0F;<a name="line.393"></a>
+<span class="sourceLineNo">394</span>            }<a name="line.394"></a>
+<span class="sourceLineNo">395</span><a name="line.395"></a>
+<span class="sourceLineNo">396</span>            int i = ActiveRenderInfo.getBlockIdAtEntityViewpoint(this.mc.theWorld, entityplayer, par1);<a name="line.396"></a>
+<span class="sourceLineNo">397</span><a name="line.397"></a>
+<span class="sourceLineNo">398</span>            if (i != 0 &amp;&amp; Block.blocksList[i].blockMaterial == Material.water)<a name="line.398"></a>
+<span class="sourceLineNo">399</span>            {<a name="line.399"></a>
+<span class="sourceLineNo">400</span>                f1 = f1 * 60.0F / 70.0F;<a name="line.400"></a>
+<span class="sourceLineNo">401</span>            }<a name="line.401"></a>
+<span class="sourceLineNo">402</span><a name="line.402"></a>
+<span class="sourceLineNo">403</span>            return f1 + this.prevDebugCamFOV + (this.debugCamFOV - this.prevDebugCamFOV) * par1;<a name="line.403"></a>
+<span class="sourceLineNo">404</span>        }<a name="line.404"></a>
+<span class="sourceLineNo">405</span>    }<a name="line.405"></a>
+<span class="sourceLineNo">406</span><a name="line.406"></a>
+<span class="sourceLineNo">407</span>    private void hurtCameraEffect(float par1)<a name="line.407"></a>
+<span class="sourceLineNo">408</span>    {<a name="line.408"></a>
+<span class="sourceLineNo">409</span>        EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.409"></a>
+<span class="sourceLineNo">410</span>        float f1 = (float)entityliving.hurtTime - par1;<a name="line.410"></a>
+<span class="sourceLineNo">411</span>        float f2;<a name="line.411"></a>
+<span class="sourceLineNo">412</span><a name="line.412"></a>
+<span class="sourceLineNo">413</span>        if (entityliving.getHealth() &lt;= 0)<a name="line.413"></a>
+<span class="sourceLineNo">414</span>        {<a name="line.414"></a>
+<span class="sourceLineNo">415</span>            f2 = (float)entityliving.deathTime + par1;<a name="line.415"></a>
+<span class="sourceLineNo">416</span>            GL11.glRotatef(40.0F - 8000.0F / (f2 + 200.0F), 0.0F, 0.0F, 1.0F);<a name="line.416"></a>
+<span class="sourceLineNo">417</span>        }<a name="line.417"></a>
+<span class="sourceLineNo">418</span><a name="line.418"></a>
+<span class="sourceLineNo">419</span>        if (f1 &gt;= 0.0F)<a name="line.419"></a>
+<span class="sourceLineNo">420</span>        {<a name="line.420"></a>
+<span class="sourceLineNo">421</span>            f1 /= (float)entityliving.maxHurtTime;<a name="line.421"></a>
+<span class="sourceLineNo">422</span>            f1 = MathHelper.sin(f1 * f1 * f1 * f1 * (float)Math.PI);<a name="line.422"></a>
+<span class="sourceLineNo">423</span>            f2 = entityliving.attackedAtYaw;<a name="line.423"></a>
+<span class="sourceLineNo">424</span>            GL11.glRotatef(-f2, 0.0F, 1.0F, 0.0F);<a name="line.424"></a>
+<span class="sourceLineNo">425</span>            GL11.glRotatef(-f1 * 14.0F, 0.0F, 0.0F, 1.0F);<a name="line.425"></a>
+<span class="sourceLineNo">426</span>            GL11.glRotatef(f2, 0.0F, 1.0F, 0.0F);<a name="line.426"></a>
+<span class="sourceLineNo">427</span>        }<a name="line.427"></a>
+<span class="sourceLineNo">428</span>    }<a name="line.428"></a>
+<span class="sourceLineNo">429</span><a name="line.429"></a>
+<span class="sourceLineNo">430</span>    /**<a name="line.430"></a>
+<span class="sourceLineNo">431</span>     * Setups all the GL settings for view bobbing. Args: partialTickTime<a name="line.431"></a>
+<span class="sourceLineNo">432</span>     */<a name="line.432"></a>
+<span class="sourceLineNo">433</span>    private void setupViewBobbing(float par1)<a name="line.433"></a>
+<span class="sourceLineNo">434</span>    {<a name="line.434"></a>
+<span class="sourceLineNo">435</span>        if (this.mc.renderViewEntity instanceof EntityPlayer)<a name="line.435"></a>
+<span class="sourceLineNo">436</span>        {<a name="line.436"></a>
+<span class="sourceLineNo">437</span>            EntityPlayer entityplayer = (EntityPlayer)this.mc.renderViewEntity;<a name="line.437"></a>
+<span class="sourceLineNo">438</span>            float f1 = entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified;<a name="line.438"></a>
+<span class="sourceLineNo">439</span>            float f2 = -(entityplayer.distanceWalkedModified + f1 * par1);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>            float f3 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * par1;<a name="line.440"></a>
+<span class="sourceLineNo">441</span>            float f4 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * par1;<a name="line.441"></a>
+<span class="sourceLineNo">442</span>            GL11.glTranslatef(MathHelper.sin(f2 * (float)Math.PI) * f3 * 0.5F, -Math.abs(MathHelper.cos(f2 * (float)Math.PI) * f3), 0.0F);<a name="line.442"></a>
+<span class="sourceLineNo">443</span>            GL11.glRotatef(MathHelper.sin(f2 * (float)Math.PI) * f3 * 3.0F, 0.0F, 0.0F, 1.0F);<a name="line.443"></a>
+<span class="sourceLineNo">444</span>            GL11.glRotatef(Math.abs(MathHelper.cos(f2 * (float)Math.PI - 0.2F) * f3) * 5.0F, 1.0F, 0.0F, 0.0F);<a name="line.444"></a>
+<span class="sourceLineNo">445</span>            GL11.glRotatef(f4, 1.0F, 0.0F, 0.0F);<a name="line.445"></a>
+<span class="sourceLineNo">446</span>        }<a name="line.446"></a>
+<span class="sourceLineNo">447</span>    }<a name="line.447"></a>
+<span class="sourceLineNo">448</span><a name="line.448"></a>
+<span class="sourceLineNo">449</span>    /**<a name="line.449"></a>
+<span class="sourceLineNo">450</span>     * sets up player's eye (or camera in third person mode)<a name="line.450"></a>
+<span class="sourceLineNo">451</span>     */<a name="line.451"></a>
+<span class="sourceLineNo">452</span>    private void orientCamera(float par1)<a name="line.452"></a>
+<span class="sourceLineNo">453</span>    {<a name="line.453"></a>
+<span class="sourceLineNo">454</span>        EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.454"></a>
+<span class="sourceLineNo">455</span>        float f1 = entityliving.yOffset - 1.62F;<a name="line.455"></a>
+<span class="sourceLineNo">456</span>        double d0 = entityliving.prevPosX + (entityliving.posX - entityliving.prevPosX) * (double)par1;<a name="line.456"></a>
+<span class="sourceLineNo">457</span>        double d1 = entityliving.prevPosY + (entityliving.posY - entityliving.prevPosY) * (double)par1 - (double)f1;<a name="line.457"></a>
+<span class="sourceLineNo">458</span>        double d2 = entityliving.prevPosZ + (entityliving.posZ - entityliving.prevPosZ) * (double)par1;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>        GL11.glRotatef(this.prevCamRoll + (this.camRoll - this.prevCamRoll) * par1, 0.0F, 0.0F, 1.0F);<a name="line.459"></a>
+<span class="sourceLineNo">460</span><a name="line.460"></a>
+<span class="sourceLineNo">461</span>        if (entityliving.isPlayerSleeping())<a name="line.461"></a>
+<span class="sourceLineNo">462</span>        {<a name="line.462"></a>
+<span class="sourceLineNo">463</span>            f1 = (float)((double)f1 + 1.0D);<a name="line.463"></a>
+<span class="sourceLineNo">464</span>            GL11.glTranslatef(0.0F, 0.3F, 0.0F);<a name="line.464"></a>
+<span class="sourceLineNo">465</span><a name="line.465"></a>
+<span class="sourceLineNo">466</span>            if (!this.mc.gameSettings.debugCamEnable)<a name="line.466"></a>
+<span class="sourceLineNo">467</span>            {<a name="line.467"></a>
+<span class="sourceLineNo">468</span>                ForgeHooksClient.orientBedCamera(mc, entityliving);<a name="line.468"></a>
+<span class="sourceLineNo">469</span>                GL11.glRotatef(entityliving.prevRotationYaw + (entityliving.rotationYaw - entityliving.prevRotationYaw) * par1 + 180.0F, 0.0F, -1.0F, 0.0F);<a name="line.469"></a>
+<span class="sourceLineNo">470</span>                GL11.glRotatef(entityliving.prevRotationPitch + (entityliving.rotationPitch - entityliving.prevRotationPitch) * par1, -1.0F, 0.0F, 0.0F);<a name="line.470"></a>
+<span class="sourceLineNo">471</span>            }<a name="line.471"></a>
+<span class="sourceLineNo">472</span>        }<a name="line.472"></a>
+<span class="sourceLineNo">473</span>        else if (this.mc.gameSettings.thirdPersonView &gt; 0)<a name="line.473"></a>
+<span class="sourceLineNo">474</span>        {<a name="line.474"></a>
+<span class="sourceLineNo">475</span>            double d3 = (double)(this.thirdPersonDistanceTemp + (this.thirdPersonDistance - this.thirdPersonDistanceTemp) * par1);<a name="line.475"></a>
+<span class="sourceLineNo">476</span>            float f2;<a name="line.476"></a>
+<span class="sourceLineNo">477</span>            float f3;<a name="line.477"></a>
+<span class="sourceLineNo">478</span><a name="line.478"></a>
+<span class="sourceLineNo">479</span>            if (this.mc.gameSettings.debugCamEnable)<a name="line.479"></a>
+<span class="sourceLineNo">480</span>            {<a name="line.480"></a>
+<span class="sourceLineNo">481</span>                f3 = this.prevDebugCamYaw + (this.debugCamYaw - this.prevDebugCamYaw) * par1;<a name="line.481"></a>
+<span class="sourceLineNo">482</span>                f2 = this.prevDebugCamPitch + (this.debugCamPitch - this.prevDebugCamPitch) * par1;<a name="line.482"></a>
+<span class="sourceLineNo">483</span>                GL11.glTranslatef(0.0F, 0.0F, (float)(-d3));<a name="line.483"></a>
+<span class="sourceLineNo">484</span>                GL11.glRotatef(f2, 1.0F, 0.0F, 0.0F);<a name="line.484"></a>
+<span class="sourceLineNo">485</span>                GL11.glRotatef(f3, 0.0F, 1.0F, 0.0F);<a name="line.485"></a>
+<span class="sourceLineNo">486</span>            }<a name="line.486"></a>
+<span class="sourceLineNo">487</span>            else<a name="line.487"></a>
+<span class="sourceLineNo">488</span>            {<a name="line.488"></a>
+<span class="sourceLineNo">489</span>                f3 = entityliving.rotationYaw;<a name="line.489"></a>
+<span class="sourceLineNo">490</span>                f2 = entityliving.rotationPitch;<a name="line.490"></a>
+<span class="sourceLineNo">491</span><a name="line.491"></a>
+<span class="sourceLineNo">492</span>                if (this.mc.gameSettings.thirdPersonView == 2)<a name="line.492"></a>
+<span class="sourceLineNo">493</span>                {<a name="line.493"></a>
+<span class="sourceLineNo">494</span>                    f2 += 180.0F;<a name="line.494"></a>
+<span class="sourceLineNo">495</span>                }<a name="line.495"></a>
+<span class="sourceLineNo">496</span><a name="line.496"></a>
+<span class="sourceLineNo">497</span>                double d4 = (double)(-MathHelper.sin(f3 / 180.0F * (float)Math.PI) * MathHelper.cos(f2 / 180.0F * (float)Math.PI)) * d3;<a name="line.497"></a>
+<span class="sourceLineNo">498</span>                double d5 = (double)(MathHelper.cos(f3 / 180.0F * (float)Math.PI) * MathHelper.cos(f2 / 180.0F * (float)Math.PI)) * d3;<a name="line.498"></a>
+<span class="sourceLineNo">499</span>                double d6 = (double)(-MathHelper.sin(f2 / 180.0F * (float)Math.PI)) * d3;<a name="line.499"></a>
+<span class="sourceLineNo">500</span><a name="line.500"></a>
+<span class="sourceLineNo">501</span>                for (int l = 0; l &lt; 8; ++l)<a name="line.501"></a>
+<span class="sourceLineNo">502</span>                {<a name="line.502"></a>
+<span class="sourceLineNo">503</span>                    float f4 = (float)((l &amp; 1) * 2 - 1);<a name="line.503"></a>
+<span class="sourceLineNo">504</span>                    float f5 = (float)((l &gt;&gt; 1 &amp; 1) * 2 - 1);<a name="line.504"></a>
+<span class="sourceLineNo">505</span>                    float f6 = (float)((l &gt;&gt; 2 &amp; 1) * 2 - 1);<a name="line.505"></a>
+<span class="sourceLineNo">506</span>                    f4 *= 0.1F;<a name="line.506"></a>
+<span class="sourceLineNo">507</span>                    f5 *= 0.1F;<a name="line.507"></a>
+<span class="sourceLineNo">508</span>                    f6 *= 0.1F;<a name="line.508"></a>
+<span class="sourceLineNo">509</span>                    MovingObjectPosition movingobjectposition = this.mc.theWorld.rayTraceBlocks(this.mc.theWorld.getWorldVec3Pool().getVecFromPool(d0 + (double)f4, d1 + (double)f5, d2 + (double)f6), this.mc.theWorld.getWorldVec3Pool().getVecFromPool(d0 - d4 + (double)f4 + (double)f6, d1 - d6 + (double)f5, d2 - d5 + (double)f6));<a name="line.509"></a>
+<span class="sourceLineNo">510</span><a name="line.510"></a>
+<span class="sourceLineNo">511</span>                    if (movingobjectposition != null)<a name="line.511"></a>
+<span class="sourceLineNo">512</span>                    {<a name="line.512"></a>
+<span class="sourceLineNo">513</span>                        double d7 = movingobjectposition.hitVec.distanceTo(this.mc.theWorld.getWorldVec3Pool().getVecFromPool(d0, d1, d2));<a name="line.513"></a>
+<span class="sourceLineNo">514</span><a name="line.514"></a>
+<span class="sourceLineNo">515</span>                        if (d7 &lt; d3)<a name="line.515"></a>
+<span class="sourceLineNo">516</span>                        {<a name="line.516"></a>
+<span class="sourceLineNo">517</span>                            d3 = d7;<a name="line.517"></a>
+<span class="sourceLineNo">518</span>                        }<a name="line.518"></a>
+<span class="sourceLineNo">519</span>                    }<a name="line.519"></a>
+<span class="sourceLineNo">520</span>                }<a name="line.520"></a>
+<span class="sourceLineNo">521</span><a name="line.521"></a>
+<span class="sourceLineNo">522</span>                if (this.mc.gameSettings.thirdPersonView == 2)<a name="line.522"></a>
+<span class="sourceLineNo">523</span>                {<a name="line.523"></a>
+<span class="sourceLineNo">524</span>                    GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);<a name="line.524"></a>
+<span class="sourceLineNo">525</span>                }<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>                GL11.glRotatef(entityliving.rotationPitch - f2, 1.0F, 0.0F, 0.0F);<a name="line.527"></a>
+<span class="sourceLineNo">528</span>                GL11.glRotatef(entityliving.rotationYaw - f3, 0.0F, 1.0F, 0.0F);<a name="line.528"></a>
+<span class="sourceLineNo">529</span>                GL11.glTranslatef(0.0F, 0.0F, (float)(-d3));<a name="line.529"></a>
+<span class="sourceLineNo">530</span>                GL11.glRotatef(f3 - entityliving.rotationYaw, 0.0F, 1.0F, 0.0F);<a name="line.530"></a>
+<span class="sourceLineNo">531</span>                GL11.glRotatef(f2 - entityliving.rotationPitch, 1.0F, 0.0F, 0.0F);<a name="line.531"></a>
+<span class="sourceLineNo">532</span>            }<a name="line.532"></a>
+<span class="sourceLineNo">533</span>        }<a name="line.533"></a>
+<span class="sourceLineNo">534</span>        else<a name="line.534"></a>
+<span class="sourceLineNo">535</span>        {<a name="line.535"></a>
+<span class="sourceLineNo">536</span>            GL11.glTranslatef(0.0F, 0.0F, -0.1F);<a name="line.536"></a>
+<span class="sourceLineNo">537</span>        }<a name="line.537"></a>
+<span class="sourceLineNo">538</span><a name="line.538"></a>
+<span class="sourceLineNo">539</span>        if (!this.mc.gameSettings.debugCamEnable)<a name="line.539"></a>
+<span class="sourceLineNo">540</span>        {<a name="line.540"></a>
+<span class="sourceLineNo">541</span>            GL11.glRotatef(entityliving.prevRotationPitch + (entityliving.rotationPitch - entityliving.prevRotationPitch) * par1, 1.0F, 0.0F, 0.0F);<a name="line.541"></a>
+<span class="sourceLineNo">542</span>            GL11.glRotatef(entityliving.prevRotationYaw + (entityliving.rotationYaw - entityliving.prevRotationYaw) * par1 + 180.0F, 0.0F, 1.0F, 0.0F);<a name="line.542"></a>
+<span class="sourceLineNo">543</span>        }<a name="line.543"></a>
+<span class="sourceLineNo">544</span><a name="line.544"></a>
+<span class="sourceLineNo">545</span>        GL11.glTranslatef(0.0F, f1, 0.0F);<a name="line.545"></a>
+<span class="sourceLineNo">546</span>        d0 = entityliving.prevPosX + (entityliving.posX - entityliving.prevPosX) * (double)par1;<a name="line.546"></a>
+<span class="sourceLineNo">547</span>        d1 = entityliving.prevPosY + (entityliving.posY - entityliving.prevPosY) * (double)par1 - (double)f1;<a name="line.547"></a>
+<span class="sourceLineNo">548</span>        d2 = entityliving.prevPosZ + (entityliving.posZ - entityliving.prevPosZ) * (double)par1;<a name="line.548"></a>
+<span class="sourceLineNo">549</span>        this.cloudFog = this.mc.renderGlobal.hasCloudFog(d0, d1, d2, par1);<a name="line.549"></a>
+<span class="sourceLineNo">550</span>    }<a name="line.550"></a>
+<span class="sourceLineNo">551</span><a name="line.551"></a>
+<span class="sourceLineNo">552</span>    /**<a name="line.552"></a>
+<span class="sourceLineNo">553</span>     * sets up projection, view effects, camera position/rotation<a name="line.553"></a>
+<span class="sourceLineNo">554</span>     */<a name="line.554"></a>
+<span class="sourceLineNo">555</span>    private void setupCameraTransform(float par1, int par2)<a name="line.555"></a>
+<span class="sourceLineNo">556</span>    {<a name="line.556"></a>
+<span class="sourceLineNo">557</span>        this.farPlaneDistance = (float)(256 &gt;&gt; this.mc.gameSettings.renderDistance);<a name="line.557"></a>
+<span class="sourceLineNo">558</span>        GL11.glMatrixMode(GL11.GL_PROJECTION);<a name="line.558"></a>
+<span class="sourceLineNo">559</span>        GL11.glLoadIdentity();<a name="line.559"></a>
+<span class="sourceLineNo">560</span>        float f1 = 0.07F;<a name="line.560"></a>
+<span class="sourceLineNo">561</span><a name="line.561"></a>
+<span class="sourceLineNo">562</span>        if (this.mc.gameSettings.anaglyph)<a name="line.562"></a>
+<span class="sourceLineNo">563</span>        {<a name="line.563"></a>
+<span class="sourceLineNo">564</span>            GL11.glTranslatef((float)(-(par2 * 2 - 1)) * f1, 0.0F, 0.0F);<a name="line.564"></a>
+<span class="sourceLineNo">565</span>        }<a name="line.565"></a>
+<span class="sourceLineNo">566</span><a name="line.566"></a>
+<span class="sourceLineNo">567</span>        if (this.cameraZoom != 1.0D)<a name="line.567"></a>
+<span class="sourceLineNo">568</span>        {<a name="line.568"></a>
+<span class="sourceLineNo">569</span>            GL11.glTranslatef((float)this.cameraYaw, (float)(-this.cameraPitch), 0.0F);<a name="line.569"></a>
+<span class="sourceLineNo">570</span>            GL11.glScaled(this.cameraZoom, this.cameraZoom, 1.0D);<a name="line.570"></a>
+<span class="sourceLineNo">571</span>        }<a name="line.571"></a>
+<span class="sourceLineNo">572</span><a name="line.572"></a>
+<span class="sourceLineNo">573</span>        GLU.gluPerspective(this.getFOVModifier(par1, true), (float)this.mc.displayWidth / (float)this.mc.displayHeight, 0.05F, this.farPlaneDistance * 2.0F);<a name="line.573"></a>
+<span class="sourceLineNo">574</span>        float f2;<a name="line.574"></a>
+<span class="sourceLineNo">575</span><a name="line.575"></a>
+<span class="sourceLineNo">576</span>        if (this.mc.playerController.enableEverythingIsScrewedUpMode())<a name="line.576"></a>
+<span class="sourceLineNo">577</span>        {<a name="line.577"></a>
+<span class="sourceLineNo">578</span>            f2 = 0.6666667F;<a name="line.578"></a>
+<span class="sourceLineNo">579</span>            GL11.glScalef(1.0F, f2, 1.0F);<a name="line.579"></a>
+<span class="sourceLineNo">580</span>        }<a name="line.580"></a>
+<span class="sourceLineNo">581</span><a name="line.581"></a>
+<span class="sourceLineNo">582</span>        GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.582"></a>
+<span class="sourceLineNo">583</span>        GL11.glLoadIdentity();<a name="line.583"></a>
+<span class="sourceLineNo">584</span><a name="line.584"></a>
+<span class="sourceLineNo">585</span>        if (this.mc.gameSettings.anaglyph)<a name="line.585"></a>
+<span class="sourceLineNo">586</span>        {<a name="line.586"></a>
+<span class="sourceLineNo">587</span>            GL11.glTranslatef((float)(par2 * 2 - 1) * 0.1F, 0.0F, 0.0F);<a name="line.587"></a>
+<span class="sourceLineNo">588</span>        }<a name="line.588"></a>
+<span class="sourceLineNo">589</span><a name="line.589"></a>
+<span class="sourceLineNo">590</span>        this.hurtCameraEffect(par1);<a name="line.590"></a>
+<span class="sourceLineNo">591</span><a name="line.591"></a>
+<span class="sourceLineNo">592</span>        if (this.mc.gameSettings.viewBobbing)<a name="line.592"></a>
+<span class="sourceLineNo">593</span>        {<a name="line.593"></a>
+<span class="sourceLineNo">594</span>            this.setupViewBobbing(par1);<a name="line.594"></a>
+<span class="sourceLineNo">595</span>        }<a name="line.595"></a>
+<span class="sourceLineNo">596</span><a name="line.596"></a>
+<span class="sourceLineNo">597</span>        f2 = this.mc.thePlayer.prevTimeInPortal + (this.mc.thePlayer.timeInPortal - this.mc.thePlayer.prevTimeInPortal) * par1;<a name="line.597"></a>
+<span class="sourceLineNo">598</span><a name="line.598"></a>
+<span class="sourceLineNo">599</span>        if (f2 &gt; 0.0F)<a name="line.599"></a>
+<span class="sourceLineNo">600</span>        {<a name="line.600"></a>
+<span class="sourceLineNo">601</span>            byte b0 = 20;<a name="line.601"></a>
+<span class="sourceLineNo">602</span><a name="line.602"></a>
+<span class="sourceLineNo">603</span>            if (this.mc.thePlayer.isPotionActive(Potion.confusion))<a name="line.603"></a>
+<span class="sourceLineNo">604</span>            {<a name="line.604"></a>
+<span class="sourceLineNo">605</span>                b0 = 7;<a name="line.605"></a>
+<span class="sourceLineNo">606</span>            }<a name="line.606"></a>
+<span class="sourceLineNo">607</span><a name="line.607"></a>
+<span class="sourceLineNo">608</span>            float f3 = 5.0F / (f2 * f2 + 5.0F) - f2 * 0.04F;<a name="line.608"></a>
+<span class="sourceLineNo">609</span>            f3 *= f3;<a name="line.609"></a>
+<span class="sourceLineNo">610</span>            GL11.glRotatef(((float)this.rendererUpdateCount + par1) * (float)b0, 0.0F, 1.0F, 1.0F);<a name="line.610"></a>
+<span class="sourceLineNo">611</span>            GL11.glScalef(1.0F / f3, 1.0F, 1.0F);<a name="line.611"></a>
+<span class="sourceLineNo">612</span>            GL11.glRotatef(-((float)this.rendererUpdateCount + par1) * (float)b0, 0.0F, 1.0F, 1.0F);<a name="line.612"></a>
+<span class="sourceLineNo">613</span>        }<a name="line.613"></a>
+<span class="sourceLineNo">614</span><a name="line.614"></a>
+<span class="sourceLineNo">615</span>        this.orientCamera(par1);<a name="line.615"></a>
+<span class="sourceLineNo">616</span><a name="line.616"></a>
+<span class="sourceLineNo">617</span>        if (this.debugViewDirection &gt; 0)<a name="line.617"></a>
+<span class="sourceLineNo">618</span>        {<a name="line.618"></a>
+<span class="sourceLineNo">619</span>            int j = this.debugViewDirection - 1;<a name="line.619"></a>
+<span class="sourceLineNo">620</span><a name="line.620"></a>
+<span class="sourceLineNo">621</span>            if (j == 1)<a name="line.621"></a>
+<span class="sourceLineNo">622</span>            {<a name="line.622"></a>
+<span class="sourceLineNo">623</span>                GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);<a name="line.623"></a>
+<span class="sourceLineNo">624</span>            }<a name="line.624"></a>
+<span class="sourceLineNo">625</span><a name="line.625"></a>
+<span class="sourceLineNo">626</span>            if (j == 2)<a name="line.626"></a>
+<span class="sourceLineNo">627</span>            {<a name="line.627"></a>
+<span class="sourceLineNo">628</span>                GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);<a name="line.628"></a>
+<span class="sourceLineNo">629</span>            }<a name="line.629"></a>
+<span class="sourceLineNo">630</span><a name="line.630"></a>
+<span class="sourceLineNo">631</span>            if (j == 3)<a name="line.631"></a>
+<span class="sourceLineNo">632</span>            {<a name="line.632"></a>
+<span class="sourceLineNo">633</span>                GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);<a name="line.633"></a>
+<span class="sourceLineNo">634</span>            }<a name="line.634"></a>
+<span class="sourceLineNo">635</span><a name="line.635"></a>
+<span class="sourceLineNo">636</span>            if (j == 4)<a name="line.636"></a>
+<span class="sourceLineNo">637</span>            {<a name="line.637"></a>
+<span class="sourceLineNo">638</span>                GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);<a name="line.638"></a>
+<span class="sourceLineNo">639</span>            }<a name="line.639"></a>
+<span class="sourceLineNo">640</span><a name="line.640"></a>
+<span class="sourceLineNo">641</span>            if (j == 5)<a name="line.641"></a>
+<span class="sourceLineNo">642</span>            {<a name="line.642"></a>
+<span class="sourceLineNo">643</span>                GL11.glRotatef(-90.0F, 1.0F, 0.0F, 0.0F);<a name="line.643"></a>
+<span class="sourceLineNo">644</span>            }<a name="line.644"></a>
+<span class="sourceLineNo">645</span>        }<a name="line.645"></a>
+<span class="sourceLineNo">646</span>    }<a name="line.646"></a>
+<span class="sourceLineNo">647</span><a name="line.647"></a>
+<span class="sourceLineNo">648</span>    /**<a name="line.648"></a>
+<span class="sourceLineNo">649</span>     * Render player hand<a name="line.649"></a>
+<span class="sourceLineNo">650</span>     */<a name="line.650"></a>
+<span class="sourceLineNo">651</span>    private void renderHand(float par1, int par2)<a name="line.651"></a>
+<span class="sourceLineNo">652</span>    {<a name="line.652"></a>
+<span class="sourceLineNo">653</span>        if (this.debugViewDirection &lt;= 0)<a name="line.653"></a>
+<span class="sourceLineNo">654</span>        {<a name="line.654"></a>
+<span class="sourceLineNo">655</span>            GL11.glMatrixMode(GL11.GL_PROJECTION);<a name="line.655"></a>
+<span class="sourceLineNo">656</span>            GL11.glLoadIdentity();<a name="line.656"></a>
+<span class="sourceLineNo">657</span>            float f1 = 0.07F;<a name="line.657"></a>
+<span class="sourceLineNo">658</span><a name="line.658"></a>
+<span class="sourceLineNo">659</span>            if (this.mc.gameSettings.anaglyph)<a name="line.659"></a>
+<span class="sourceLineNo">660</span>            {<a name="line.660"></a>
+<span class="sourceLineNo">661</span>                GL11.glTranslatef((float)(-(par2 * 2 - 1)) * f1, 0.0F, 0.0F);<a name="line.661"></a>
+<span class="sourceLineNo">662</span>            }<a name="line.662"></a>
+<span class="sourceLineNo">663</span><a name="line.663"></a>
+<span class="sourceLineNo">664</span>            if (this.cameraZoom != 1.0D)<a name="line.664"></a>
+<span class="sourceLineNo">665</span>            {<a name="line.665"></a>
+<span class="sourceLineNo">666</span>                GL11.glTranslatef((float)this.cameraYaw, (float)(-this.cameraPitch), 0.0F);<a name="line.666"></a>
+<span class="sourceLineNo">667</span>                GL11.glScaled(this.cameraZoom, this.cameraZoom, 1.0D);<a name="line.667"></a>
+<span class="sourceLineNo">668</span>            }<a name="line.668"></a>
+<span class="sourceLineNo">669</span><a name="line.669"></a>
+<span class="sourceLineNo">670</span>            GLU.gluPerspective(this.getFOVModifier(par1, false), (float)this.mc.displayWidth / (float)this.mc.displayHeight, 0.05F, this.farPlaneDistance * 2.0F);<a name="line.670"></a>
+<span class="sourceLineNo">671</span><a name="line.671"></a>
+<span class="sourceLineNo">672</span>            if (this.mc.playerController.enableEverythingIsScrewedUpMode())<a name="line.672"></a>
+<span class="sourceLineNo">673</span>            {<a name="line.673"></a>
+<span class="sourceLineNo">674</span>                float f2 = 0.6666667F;<a name="line.674"></a>
+<span class="sourceLineNo">675</span>                GL11.glScalef(1.0F, f2, 1.0F);<a name="line.675"></a>
+<span class="sourceLineNo">676</span>            }<a name="line.676"></a>
+<span class="sourceLineNo">677</span><a name="line.677"></a>
+<span class="sourceLineNo">678</span>            GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.678"></a>
+<span class="sourceLineNo">679</span>            GL11.glLoadIdentity();<a name="line.679"></a>
+<span class="sourceLineNo">680</span><a name="line.680"></a>
+<span class="sourceLineNo">681</span>            if (this.mc.gameSettings.anaglyph)<a name="line.681"></a>
+<span class="sourceLineNo">682</span>            {<a name="line.682"></a>
+<span class="sourceLineNo">683</span>                GL11.glTranslatef((float)(par2 * 2 - 1) * 0.1F, 0.0F, 0.0F);<a name="line.683"></a>
+<span class="sourceLineNo">684</span>            }<a name="line.684"></a>
+<span class="sourceLineNo">685</span><a name="line.685"></a>
+<span class="sourceLineNo">686</span>            GL11.glPushMatrix();<a name="line.686"></a>
+<span class="sourceLineNo">687</span>            this.hurtCameraEffect(par1);<a name="line.687"></a>
+<span class="sourceLineNo">688</span><a name="line.688"></a>
+<span class="sourceLineNo">689</span>            if (this.mc.gameSettings.viewBobbing)<a name="line.689"></a>
+<span class="sourceLineNo">690</span>            {<a name="line.690"></a>
+<span class="sourceLineNo">691</span>                this.setupViewBobbing(par1);<a name="line.691"></a>
+<span class="sourceLineNo">692</span>            }<a name="line.692"></a>
+<span class="sourceLineNo">693</span><a name="line.693"></a>
+<span class="sourceLineNo">694</span>            if (this.mc.gameSettings.thirdPersonView == 0 &amp;&amp; !this.mc.renderViewEntity.isPlayerSleeping() &amp;&amp; !this.mc.gameSettings.hideGUI &amp;&amp; !this.mc.playerController.enableEverythingIsScrewedUpMode())<a name="line.694"></a>
+<span class="sourceLineNo">695</span>            {<a name="line.695"></a>
+<span class="sourceLineNo">696</span>                this.enableLightmap((double)par1);<a name="line.696"></a>
+<span class="sourceLineNo">697</span>                this.itemRenderer.renderItemInFirstPerson(par1);<a name="line.697"></a>
+<span class="sourceLineNo">698</span>                this.disableLightmap((double)par1);<a name="line.698"></a>
+<span class="sourceLineNo">699</span>            }<a name="line.699"></a>
+<span class="sourceLineNo">700</span><a name="line.700"></a>
+<span class="sourceLineNo">701</span>            GL11.glPopMatrix();<a name="line.701"></a>
+<span class="sourceLineNo">702</span><a name="line.702"></a>
+<span class="sourceLineNo">703</span>            if (this.mc.gameSettings.thirdPersonView == 0 &amp;&amp; !this.mc.renderViewEntity.isPlayerSleeping())<a name="line.703"></a>
+<span class="sourceLineNo">704</span>            {<a name="line.704"></a>
+<span class="sourceLineNo">705</span>                this.itemRenderer.renderOverlays(par1);<a name="line.705"></a>
+<span class="sourceLineNo">706</span>                this.hurtCameraEffect(par1);<a name="line.706"></a>
+<span class="sourceLineNo">707</span>            }<a name="line.707"></a>
+<span class="sourceLineNo">708</span><a name="line.708"></a>
+<span class="sourceLineNo">709</span>            if (this.mc.gameSettings.viewBobbing)<a name="line.709"></a>
+<span class="sourceLineNo">710</span>            {<a name="line.710"></a>
+<span class="sourceLineNo">711</span>                this.setupViewBobbing(par1);<a name="line.711"></a>
+<span class="sourceLineNo">712</span>            }<a name="line.712"></a>
+<span class="sourceLineNo">713</span>        }<a name="line.713"></a>
+<span class="sourceLineNo">714</span>    }<a name="line.714"></a>
+<span class="sourceLineNo">715</span><a name="line.715"></a>
+<span class="sourceLineNo">716</span>    /**<a name="line.716"></a>
+<span class="sourceLineNo">717</span>     * Disable secondary texture unit used by lightmap<a name="line.717"></a>
+<span class="sourceLineNo">718</span>     */<a name="line.718"></a>
+<span class="sourceLineNo">719</span>    public void disableLightmap(double par1)<a name="line.719"></a>
+<span class="sourceLineNo">720</span>    {<a name="line.720"></a>
+<span class="sourceLineNo">721</span>        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);<a name="line.721"></a>
+<span class="sourceLineNo">722</span>        GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.722"></a>
+<span class="sourceLineNo">723</span>        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);<a name="line.723"></a>
+<span class="sourceLineNo">724</span>    }<a name="line.724"></a>
+<span class="sourceLineNo">725</span><a name="line.725"></a>
+<span class="sourceLineNo">726</span>    /**<a name="line.726"></a>
+<span class="sourceLineNo">727</span>     * Enable lightmap in secondary texture unit<a name="line.727"></a>
+<span class="sourceLineNo">728</span>     */<a name="line.728"></a>
+<span class="sourceLineNo">729</span>    public void enableLightmap(double par1)<a name="line.729"></a>
+<span class="sourceLineNo">730</span>    {<a name="line.730"></a>
+<span class="sourceLineNo">731</span>        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);<a name="line.731"></a>
+<span class="sourceLineNo">732</span>        GL11.glMatrixMode(GL11.GL_TEXTURE);<a name="line.732"></a>
+<span class="sourceLineNo">733</span>        GL11.glLoadIdentity();<a name="line.733"></a>
+<span class="sourceLineNo">734</span>        float f = 0.00390625F;<a name="line.734"></a>
+<span class="sourceLineNo">735</span>        GL11.glScalef(f, f, f);<a name="line.735"></a>
+<span class="sourceLineNo">736</span>        GL11.glTranslatef(8.0F, 8.0F, 8.0F);<a name="line.736"></a>
+<span class="sourceLineNo">737</span>        GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.737"></a>
+<span class="sourceLineNo">738</span>        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.lightmapTexture);<a name="line.738"></a>
+<span class="sourceLineNo">739</span>        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);<a name="line.739"></a>
+<span class="sourceLineNo">740</span>        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);<a name="line.740"></a>
+<span class="sourceLineNo">741</span>        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);<a name="line.741"></a>
+<span class="sourceLineNo">742</span>        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);<a name="line.742"></a>
+<span class="sourceLineNo">743</span>        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);<a name="line.743"></a>
+<span class="sourceLineNo">744</span>        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);<a name="line.744"></a>
+<span class="sourceLineNo">745</span>        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.745"></a>
+<span class="sourceLineNo">746</span>        GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.746"></a>
+<span class="sourceLineNo">747</span>        this.mc.renderEngine.func_98185_a();<a name="line.747"></a>
+<span class="sourceLineNo">748</span>        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);<a name="line.748"></a>
+<span class="sourceLineNo">749</span>    }<a name="line.749"></a>
+<span class="sourceLineNo">750</span><a name="line.750"></a>
+<span class="sourceLineNo">751</span>    /**<a name="line.751"></a>
+<span class="sourceLineNo">752</span>     * Recompute a random value that is applied to block color in updateLightmap()<a name="line.752"></a>
+<span class="sourceLineNo">753</span>     */<a name="line.753"></a>
+<span class="sourceLineNo">754</span>    private void updateTorchFlicker()<a name="line.754"></a>
+<span class="sourceLineNo">755</span>    {<a name="line.755"></a>
+<span class="sourceLineNo">756</span>        this.torchFlickerDX = (float)((double)this.torchFlickerDX + (Math.random() - Math.random()) * Math.random() * Math.random());<a name="line.756"></a>
+<span class="sourceLineNo">757</span>        this.torchFlickerDY = (float)((double)this.torchFlickerDY + (Math.random() - Math.random()) * Math.random() * Math.random());<a name="line.757"></a>
+<span class="sourceLineNo">758</span>        this.torchFlickerDX = (float)((double)this.torchFlickerDX * 0.9D);<a name="line.758"></a>
+<span class="sourceLineNo">759</span>        this.torchFlickerDY = (float)((double)this.torchFlickerDY * 0.9D);<a name="line.759"></a>
+<span class="sourceLineNo">760</span>        this.torchFlickerX += (this.torchFlickerDX - this.torchFlickerX) * 1.0F;<a name="line.760"></a>
+<span class="sourceLineNo">761</span>        this.torchFlickerY += (this.torchFlickerDY - this.torchFlickerY) * 1.0F;<a name="line.761"></a>
+<span class="sourceLineNo">762</span>        this.lightmapUpdateNeeded = true;<a name="line.762"></a>
+<span class="sourceLineNo">763</span>    }<a name="line.763"></a>
+<span class="sourceLineNo">764</span><a name="line.764"></a>
+<span class="sourceLineNo">765</span>    private void updateLightmap(float par1)<a name="line.765"></a>
+<span class="sourceLineNo">766</span>    {<a name="line.766"></a>
+<span class="sourceLineNo">767</span>        WorldClient worldclient = this.mc.theWorld;<a name="line.767"></a>
+<span class="sourceLineNo">768</span><a name="line.768"></a>
+<span class="sourceLineNo">769</span>        if (worldclient != null)<a name="line.769"></a>
+<span class="sourceLineNo">770</span>        {<a name="line.770"></a>
+<span class="sourceLineNo">771</span>            for (int i = 0; i &lt; 256; ++i)<a name="line.771"></a>
+<span class="sourceLineNo">772</span>            {<a name="line.772"></a>
+<span class="sourceLineNo">773</span>                float f1 = worldclient.getSunBrightness(1.0F) * 0.95F + 0.05F;<a name="line.773"></a>
+<span class="sourceLineNo">774</span>                float f2 = worldclient.provider.lightBrightnessTable[i / 16] * f1;<a name="line.774"></a>
+<span class="sourceLineNo">775</span>                float f3 = worldclient.provider.lightBrightnessTable[i % 16] * (this.torchFlickerX * 0.1F + 1.5F);<a name="line.775"></a>
+<span class="sourceLineNo">776</span><a name="line.776"></a>
+<span class="sourceLineNo">777</span>                if (worldclient.lastLightningBolt &gt; 0)<a name="line.777"></a>
+<span class="sourceLineNo">778</span>                {<a name="line.778"></a>
+<span class="sourceLineNo">779</span>                    f2 = worldclient.provider.lightBrightnessTable[i / 16];<a name="line.779"></a>
+<span class="sourceLineNo">780</span>                }<a name="line.780"></a>
+<span class="sourceLineNo">781</span><a name="line.781"></a>
+<span class="sourceLineNo">782</span>                float f4 = f2 * (worldclient.getSunBrightness(1.0F) * 0.65F + 0.35F);<a name="line.782"></a>
+<span class="sourceLineNo">783</span>                float f5 = f2 * (worldclient.getSunBrightness(1.0F) * 0.65F + 0.35F);<a name="line.783"></a>
+<span class="sourceLineNo">784</span>                float f6 = f3 * ((f3 * 0.6F + 0.4F) * 0.6F + 0.4F);<a name="line.784"></a>
+<span class="sourceLineNo">785</span>                float f7 = f3 * (f3 * f3 * 0.6F + 0.4F);<a name="line.785"></a>
+<span class="sourceLineNo">786</span>                float f8 = f4 + f3;<a name="line.786"></a>
+<span class="sourceLineNo">787</span>                float f9 = f5 + f6;<a name="line.787"></a>
+<span class="sourceLineNo">788</span>                float f10 = f2 + f7;<a name="line.788"></a>
+<span class="sourceLineNo">789</span>                f8 = f8 * 0.96F + 0.03F;<a name="line.789"></a>
+<span class="sourceLineNo">790</span>                f9 = f9 * 0.96F + 0.03F;<a name="line.790"></a>
+<span class="sourceLineNo">791</span>                f10 = f10 * 0.96F + 0.03F;<a name="line.791"></a>
+<span class="sourceLineNo">792</span>                float f11;<a name="line.792"></a>
+<span class="sourceLineNo">793</span><a name="line.793"></a>
+<span class="sourceLineNo">794</span>                if (this.field_82831_U &gt; 0.0F)<a name="line.794"></a>
+<span class="sourceLineNo">795</span>                {<a name="line.795"></a>
+<span class="sourceLineNo">796</span>                    f11 = this.field_82832_V + (this.field_82831_U - this.field_82832_V) * par1;<a name="line.796"></a>
+<span class="sourceLineNo">797</span>                    f8 = f8 * (1.0F - f11) + f8 * 0.7F * f11;<a name="line.797"></a>
+<span class="sourceLineNo">798</span>                    f9 = f9 * (1.0F - f11) + f9 * 0.6F * f11;<a name="line.798"></a>
+<span class="sourceLineNo">799</span>                    f10 = f10 * (1.0F - f11) + f10 * 0.6F * f11;<a name="line.799"></a>
+<span class="sourceLineNo">800</span>                }<a name="line.800"></a>
+<span class="sourceLineNo">801</span><a name="line.801"></a>
+<span class="sourceLineNo">802</span>                if (worldclient.provider.dimensionId == 1)<a name="line.802"></a>
+<span class="sourceLineNo">803</span>                {<a name="line.803"></a>
+<span class="sourceLineNo">804</span>                    f8 = 0.22F + f3 * 0.75F;<a name="line.804"></a>
+<span class="sourceLineNo">805</span>                    f9 = 0.28F + f6 * 0.75F;<a name="line.805"></a>
+<span class="sourceLineNo">806</span>                    f10 = 0.25F + f7 * 0.75F;<a name="line.806"></a>
+<span class="sourceLineNo">807</span>                }<a name="line.807"></a>
+<span class="sourceLineNo">808</span><a name="line.808"></a>
+<span class="sourceLineNo">809</span>                float f12;<a name="line.809"></a>
+<span class="sourceLineNo">810</span><a name="line.810"></a>
+<span class="sourceLineNo">811</span>                if (this.mc.thePlayer.isPotionActive(Potion.nightVision))<a name="line.811"></a>
+<span class="sourceLineNo">812</span>                {<a name="line.812"></a>
+<span class="sourceLineNo">813</span>                    f11 = this.getNightVisionBrightness(this.mc.thePlayer, par1);<a name="line.813"></a>
+<span class="sourceLineNo">814</span>                    f12 = 1.0F / f8;<a name="line.814"></a>
+<span class="sourceLineNo">815</span><a name="line.815"></a>
+<span class="sourceLineNo">816</span>                    if (f12 &gt; 1.0F / f9)<a name="line.816"></a>
+<span class="sourceLineNo">817</span>                    {<a name="line.817"></a>
+<span class="sourceLineNo">818</span>                        f12 = 1.0F / f9;<a name="line.818"></a>
+<span class="sourceLineNo">819</span>                    }<a name="line.819"></a>
+<span class="sourceLineNo">820</span><a name="line.820"></a>
+<span class="sourceLineNo">821</span>                    if (f12 &gt; 1.0F / f10)<a name="line.821"></a>
+<span class="sourceLineNo">822</span>                    {<a name="line.822"></a>
+<span class="sourceLineNo">823</span>                        f12 = 1.0F / f10;<a name="line.823"></a>
+<span class="sourceLineNo">824</span>                    }<a name="line.824"></a>
+<span class="sourceLineNo">825</span><a name="line.825"></a>
+<span class="sourceLineNo">826</span>                    f8 = f8 * (1.0F - f11) + f8 * f12 * f11;<a name="line.826"></a>
+<span class="sourceLineNo">827</span>                    f9 = f9 * (1.0F - f11) + f9 * f12 * f11;<a name="line.827"></a>
+<span class="sourceLineNo">828</span>                    f10 = f10 * (1.0F - f11) + f10 * f12 * f11;<a name="line.828"></a>
+<span class="sourceLineNo">829</span>                }<a name="line.829"></a>
+<span class="sourceLineNo">830</span><a name="line.830"></a>
+<span class="sourceLineNo">831</span>                if (f8 &gt; 1.0F)<a name="line.831"></a>
+<span class="sourceLineNo">832</span>                {<a name="line.832"></a>
+<span class="sourceLineNo">833</span>                    f8 = 1.0F;<a name="line.833"></a>
+<span class="sourceLineNo">834</span>                }<a name="line.834"></a>
+<span class="sourceLineNo">835</span><a name="line.835"></a>
+<span class="sourceLineNo">836</span>                if (f9 &gt; 1.0F)<a name="line.836"></a>
+<span class="sourceLineNo">837</span>                {<a name="line.837"></a>
+<span class="sourceLineNo">838</span>                    f9 = 1.0F;<a name="line.838"></a>
+<span class="sourceLineNo">839</span>                }<a name="line.839"></a>
+<span class="sourceLineNo">840</span><a name="line.840"></a>
+<span class="sourceLineNo">841</span>                if (f10 &gt; 1.0F)<a name="line.841"></a>
+<span class="sourceLineNo">842</span>                {<a name="line.842"></a>
+<span class="sourceLineNo">843</span>                    f10 = 1.0F;<a name="line.843"></a>
+<span class="sourceLineNo">844</span>                }<a name="line.844"></a>
+<span class="sourceLineNo">845</span><a name="line.845"></a>
+<span class="sourceLineNo">846</span>                f11 = this.mc.gameSettings.gammaSetting;<a name="line.846"></a>
+<span class="sourceLineNo">847</span>                f12 = 1.0F - f8;<a name="line.847"></a>
+<span class="sourceLineNo">848</span>                float f13 = 1.0F - f9;<a name="line.848"></a>
+<span class="sourceLineNo">849</span>                float f14 = 1.0F - f10;<a name="line.849"></a>
+<span class="sourceLineNo">850</span>                f12 = 1.0F - f12 * f12 * f12 * f12;<a name="line.850"></a>
+<span class="sourceLineNo">851</span>                f13 = 1.0F - f13 * f13 * f13 * f13;<a name="line.851"></a>
+<span class="sourceLineNo">852</span>                f14 = 1.0F - f14 * f14 * f14 * f14;<a name="line.852"></a>
+<span class="sourceLineNo">853</span>                f8 = f8 * (1.0F - f11) + f12 * f11;<a name="line.853"></a>
+<span class="sourceLineNo">854</span>                f9 = f9 * (1.0F - f11) + f13 * f11;<a name="line.854"></a>
+<span class="sourceLineNo">855</span>                f10 = f10 * (1.0F - f11) + f14 * f11;<a name="line.855"></a>
+<span class="sourceLineNo">856</span>                f8 = f8 * 0.96F + 0.03F;<a name="line.856"></a>
+<span class="sourceLineNo">857</span>                f9 = f9 * 0.96F + 0.03F;<a name="line.857"></a>
+<span class="sourceLineNo">858</span>                f10 = f10 * 0.96F + 0.03F;<a name="line.858"></a>
+<span class="sourceLineNo">859</span><a name="line.859"></a>
+<span class="sourceLineNo">860</span>                if (f8 &gt; 1.0F)<a name="line.860"></a>
+<span class="sourceLineNo">861</span>                {<a name="line.861"></a>
+<span class="sourceLineNo">862</span>                    f8 = 1.0F;<a name="line.862"></a>
+<span class="sourceLineNo">863</span>                }<a name="line.863"></a>
+<span class="sourceLineNo">864</span><a name="line.864"></a>
+<span class="sourceLineNo">865</span>                if (f9 &gt; 1.0F)<a name="line.865"></a>
+<span class="sourceLineNo">866</span>                {<a name="line.866"></a>
+<span class="sourceLineNo">867</span>                    f9 = 1.0F;<a name="line.867"></a>
+<span class="sourceLineNo">868</span>                }<a name="line.868"></a>
+<span class="sourceLineNo">869</span><a name="line.869"></a>
+<span class="sourceLineNo">870</span>                if (f10 &gt; 1.0F)<a name="line.870"></a>
+<span class="sourceLineNo">871</span>                {<a name="line.871"></a>
+<span class="sourceLineNo">872</span>                    f10 = 1.0F;<a name="line.872"></a>
+<span class="sourceLineNo">873</span>                }<a name="line.873"></a>
+<span class="sourceLineNo">874</span><a name="line.874"></a>
+<span class="sourceLineNo">875</span>                if (f8 &lt; 0.0F)<a name="line.875"></a>
+<span class="sourceLineNo">876</span>                {<a name="line.876"></a>
+<span class="sourceLineNo">877</span>                    f8 = 0.0F;<a name="line.877"></a>
+<span class="sourceLineNo">878</span>                }<a name="line.878"></a>
+<span class="sourceLineNo">879</span><a name="line.879"></a>
+<span class="sourceLineNo">880</span>                if (f9 &lt; 0.0F)<a name="line.880"></a>
+<span class="sourceLineNo">881</span>                {<a name="line.881"></a>
+<span class="sourceLineNo">882</span>                    f9 = 0.0F;<a name="line.882"></a>
+<span class="sourceLineNo">883</span>                }<a name="line.883"></a>
+<span class="sourceLineNo">884</span><a name="line.884"></a>
+<span class="sourceLineNo">885</span>                if (f10 &lt; 0.0F)<a name="line.885"></a>
+<span class="sourceLineNo">886</span>                {<a name="line.886"></a>
+<span class="sourceLineNo">887</span>                    f10 = 0.0F;<a name="line.887"></a>
+<span class="sourceLineNo">888</span>                }<a name="line.888"></a>
+<span class="sourceLineNo">889</span><a name="line.889"></a>
+<span class="sourceLineNo">890</span>                short short1 = 255;<a name="line.890"></a>
+<span class="sourceLineNo">891</span>                int j = (int)(f8 * 255.0F);<a name="line.891"></a>
+<span class="sourceLineNo">892</span>                int k = (int)(f9 * 255.0F);<a name="line.892"></a>
+<span class="sourceLineNo">893</span>                int l = (int)(f10 * 255.0F);<a name="line.893"></a>
+<span class="sourceLineNo">894</span>                this.lightmapColors[i] = short1 &lt;&lt; 24 | j &lt;&lt; 16 | k &lt;&lt; 8 | l;<a name="line.894"></a>
+<span class="sourceLineNo">895</span>            }<a name="line.895"></a>
+<span class="sourceLineNo">896</span><a name="line.896"></a>
+<span class="sourceLineNo">897</span>            this.mc.renderEngine.createTextureFromBytes(this.lightmapColors, 16, 16, this.lightmapTexture);<a name="line.897"></a>
+<span class="sourceLineNo">898</span>        }<a name="line.898"></a>
+<span class="sourceLineNo">899</span>    }<a name="line.899"></a>
+<span class="sourceLineNo">900</span><a name="line.900"></a>
+<span class="sourceLineNo">901</span>    /**<a name="line.901"></a>
+<span class="sourceLineNo">902</span>     * Gets the night vision brightness<a name="line.902"></a>
+<span class="sourceLineNo">903</span>     */<a name="line.903"></a>
+<span class="sourceLineNo">904</span>    private float getNightVisionBrightness(EntityPlayer par1EntityPlayer, float par2)<a name="line.904"></a>
+<span class="sourceLineNo">905</span>    {<a name="line.905"></a>
+<span class="sourceLineNo">906</span>        int i = par1EntityPlayer.getActivePotionEffect(Potion.nightVision).getDuration();<a name="line.906"></a>
+<span class="sourceLineNo">907</span>        return i &gt; 200 ? 1.0F : 0.7F + MathHelper.sin(((float)i - par2) * (float)Math.PI * 0.2F) * 0.3F;<a name="line.907"></a>
+<span class="sourceLineNo">908</span>    }<a name="line.908"></a>
+<span class="sourceLineNo">909</span><a name="line.909"></a>
+<span class="sourceLineNo">910</span>    /**<a name="line.910"></a>
+<span class="sourceLineNo">911</span>     * Will update any inputs that effect the camera angle (mouse) and then render the world and GUI<a name="line.911"></a>
+<span class="sourceLineNo">912</span>     */<a name="line.912"></a>
+<span class="sourceLineNo">913</span>    public void updateCameraAndRender(float par1)<a name="line.913"></a>
+<span class="sourceLineNo">914</span>    {<a name="line.914"></a>
+<span class="sourceLineNo">915</span>        this.mc.mcProfiler.startSection("lightTex");<a name="line.915"></a>
+<span class="sourceLineNo">916</span><a name="line.916"></a>
+<span class="sourceLineNo">917</span>        if (this.lightmapUpdateNeeded)<a name="line.917"></a>
+<span class="sourceLineNo">918</span>        {<a name="line.918"></a>
+<span class="sourceLineNo">919</span>            this.updateLightmap(par1);<a name="line.919"></a>
+<span class="sourceLineNo">920</span>        }<a name="line.920"></a>
+<span class="sourceLineNo">921</span><a name="line.921"></a>
+<span class="sourceLineNo">922</span>        this.mc.mcProfiler.endSection();<a name="line.922"></a>
+<span class="sourceLineNo">923</span>        boolean flag = Display.isActive();<a name="line.923"></a>
+<span class="sourceLineNo">924</span><a name="line.924"></a>
+<span class="sourceLineNo">925</span>        if (!flag &amp;&amp; this.mc.gameSettings.pauseOnLostFocus &amp;&amp; (!this.mc.gameSettings.touchscreen || !Mouse.isButtonDown(1)))<a name="line.925"></a>
+<span class="sourceLineNo">926</span>        {<a name="line.926"></a>
+<span class="sourceLineNo">927</span>            if (Minecraft.getSystemTime() - this.prevFrameTime &gt; 500L)<a name="line.927"></a>
+<span class="sourceLineNo">928</span>            {<a name="line.928"></a>
+<span class="sourceLineNo">929</span>                this.mc.displayInGameMenu();<a name="line.929"></a>
+<span class="sourceLineNo">930</span>            }<a name="line.930"></a>
+<span class="sourceLineNo">931</span>        }<a name="line.931"></a>
+<span class="sourceLineNo">932</span>        else<a name="line.932"></a>
+<span class="sourceLineNo">933</span>        {<a name="line.933"></a>
+<span class="sourceLineNo">934</span>            this.prevFrameTime = Minecraft.getSystemTime();<a name="line.934"></a>
+<span class="sourceLineNo">935</span>        }<a name="line.935"></a>
+<span class="sourceLineNo">936</span><a name="line.936"></a>
+<span class="sourceLineNo">937</span>        this.mc.mcProfiler.startSection("mouse");<a name="line.937"></a>
+<span class="sourceLineNo">938</span><a name="line.938"></a>
+<span class="sourceLineNo">939</span>        if (this.mc.inGameHasFocus &amp;&amp; flag)<a name="line.939"></a>
+<span class="sourceLineNo">940</span>        {<a name="line.940"></a>
+<span class="sourceLineNo">941</span>            this.mc.mouseHelper.mouseXYChange();<a name="line.941"></a>
+<span class="sourceLineNo">942</span>            float f1 = this.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;<a name="line.942"></a>
+<span class="sourceLineNo">943</span>            float f2 = f1 * f1 * f1 * 8.0F;<a name="line.943"></a>
+<span class="sourceLineNo">944</span>            float f3 = (float)this.mc.mouseHelper.deltaX * f2;<a name="line.944"></a>
+<span class="sourceLineNo">945</span>            float f4 = (float)this.mc.mouseHelper.deltaY * f2;<a name="line.945"></a>
+<span class="sourceLineNo">946</span>            byte b0 = 1;<a name="line.946"></a>
+<span class="sourceLineNo">947</span><a name="line.947"></a>
+<span class="sourceLineNo">948</span>            if (this.mc.gameSettings.invertMouse)<a name="line.948"></a>
+<span class="sourceLineNo">949</span>            {<a name="line.949"></a>
+<span class="sourceLineNo">950</span>                b0 = -1;<a name="line.950"></a>
+<span class="sourceLineNo">951</span>            }<a name="line.951"></a>
+<span class="sourceLineNo">952</span><a name="line.952"></a>
+<span class="sourceLineNo">953</span>            if (this.mc.gameSettings.smoothCamera)<a name="line.953"></a>
+<span class="sourceLineNo">954</span>            {<a name="line.954"></a>
+<span class="sourceLineNo">955</span>                this.smoothCamYaw += f3;<a name="line.955"></a>
+<span class="sourceLineNo">956</span>                this.smoothCamPitch += f4;<a name="line.956"></a>
+<span class="sourceLineNo">957</span>                float f5 = par1 - this.smoothCamPartialTicks;<a name="line.957"></a>
+<span class="sourceLineNo">958</span>                this.smoothCamPartialTicks = par1;<a name="line.958"></a>
+<span class="sourceLineNo">959</span>                f3 = this.smoothCamFilterX * f5;<a name="line.959"></a>
+<span class="sourceLineNo">960</span>                f4 = this.smoothCamFilterY * f5;<a name="line.960"></a>
+<span class="sourceLineNo">961</span>                this.mc.thePlayer.setAngles(f3, f4 * (float)b0);<a name="line.961"></a>
+<span class="sourceLineNo">962</span>            }<a name="line.962"></a>
+<span class="sourceLineNo">963</span>            else<a name="line.963"></a>
+<span class="sourceLineNo">964</span>            {<a name="line.964"></a>
+<span class="sourceLineNo">965</span>                this.mc.thePlayer.setAngles(f3, f4 * (float)b0);<a name="line.965"></a>
+<span class="sourceLineNo">966</span>            }<a name="line.966"></a>
+<span class="sourceLineNo">967</span>        }<a name="line.967"></a>
+<span class="sourceLineNo">968</span><a name="line.968"></a>
+<span class="sourceLineNo">969</span>        this.mc.mcProfiler.endSection();<a name="line.969"></a>
+<span class="sourceLineNo">970</span><a name="line.970"></a>
+<span class="sourceLineNo">971</span>        if (!this.mc.skipRenderWorld)<a name="line.971"></a>
+<span class="sourceLineNo">972</span>        {<a name="line.972"></a>
+<span class="sourceLineNo">973</span>            anaglyphEnable = this.mc.gameSettings.anaglyph;<a name="line.973"></a>
+<span class="sourceLineNo">974</span>            ScaledResolution scaledresolution = new ScaledResolution(this.mc.gameSettings, this.mc.displayWidth, this.mc.displayHeight);<a name="line.974"></a>
+<span class="sourceLineNo">975</span>            int i = scaledresolution.getScaledWidth();<a name="line.975"></a>
+<span class="sourceLineNo">976</span>            int j = scaledresolution.getScaledHeight();<a name="line.976"></a>
+<span class="sourceLineNo">977</span>            int k = Mouse.getX() * i / this.mc.displayWidth;<a name="line.977"></a>
+<span class="sourceLineNo">978</span>            int l = j - Mouse.getY() * j / this.mc.displayHeight - 1;<a name="line.978"></a>
+<span class="sourceLineNo">979</span>            int i1 = performanceToFps(this.mc.gameSettings.limitFramerate);<a name="line.979"></a>
+<span class="sourceLineNo">980</span><a name="line.980"></a>
+<span class="sourceLineNo">981</span>            if (this.mc.theWorld != null)<a name="line.981"></a>
+<span class="sourceLineNo">982</span>            {<a name="line.982"></a>
+<span class="sourceLineNo">983</span>                this.mc.mcProfiler.startSection("level");<a name="line.983"></a>
+<span class="sourceLineNo">984</span><a name="line.984"></a>
+<span class="sourceLineNo">985</span>                if (this.mc.gameSettings.limitFramerate == 0)<a name="line.985"></a>
+<span class="sourceLineNo">986</span>                {<a name="line.986"></a>
+<span class="sourceLineNo">987</span>                    this.renderWorld(par1, 0L);<a name="line.987"></a>
+<span class="sourceLineNo">988</span>                }<a name="line.988"></a>
+<span class="sourceLineNo">989</span>                else<a name="line.989"></a>
+<span class="sourceLineNo">990</span>                {<a name="line.990"></a>
+<span class="sourceLineNo">991</span>                    this.renderWorld(par1, this.renderEndNanoTime + (long)(1000000000 / i1));<a name="line.991"></a>
+<span class="sourceLineNo">992</span>                }<a name="line.992"></a>
+<span class="sourceLineNo">993</span><a name="line.993"></a>
+<span class="sourceLineNo">994</span>                this.renderEndNanoTime = System.nanoTime();<a name="line.994"></a>
+<span class="sourceLineNo">995</span>                this.mc.mcProfiler.endStartSection("gui");<a name="line.995"></a>
+<span class="sourceLineNo">996</span><a name="line.996"></a>
+<span class="sourceLineNo">997</span>                if (!this.mc.gameSettings.hideGUI || this.mc.currentScreen != null)<a name="line.997"></a>
+<span class="sourceLineNo">998</span>                {<a name="line.998"></a>
+<span class="sourceLineNo">999</span>                    this.mc.ingameGUI.renderGameOverlay(par1, this.mc.currentScreen != null, k, l);<a name="line.999"></a>
+<span class="sourceLineNo">1000</span>                }<a name="line.1000"></a>
+<span class="sourceLineNo">1001</span><a name="line.1001"></a>
+<span class="sourceLineNo">1002</span>                this.mc.mcProfiler.endSection();<a name="line.1002"></a>
+<span class="sourceLineNo">1003</span>            }<a name="line.1003"></a>
+<span class="sourceLineNo">1004</span>            else<a name="line.1004"></a>
+<span class="sourceLineNo">1005</span>            {<a name="line.1005"></a>
+<span class="sourceLineNo">1006</span>                GL11.glViewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);<a name="line.1006"></a>
+<span class="sourceLineNo">1007</span>                GL11.glMatrixMode(GL11.GL_PROJECTION);<a name="line.1007"></a>
+<span class="sourceLineNo">1008</span>                GL11.glLoadIdentity();<a name="line.1008"></a>
+<span class="sourceLineNo">1009</span>                GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.1009"></a>
+<span class="sourceLineNo">1010</span>                GL11.glLoadIdentity();<a name="line.1010"></a>
+<span class="sourceLineNo">1011</span>                this.setupOverlayRendering();<a name="line.1011"></a>
+<span class="sourceLineNo">1012</span>                this.renderEndNanoTime = System.nanoTime();<a name="line.1012"></a>
+<span class="sourceLineNo">1013</span>            }<a name="line.1013"></a>
+<span class="sourceLineNo">1014</span><a name="line.1014"></a>
+<span class="sourceLineNo">1015</span>            if (this.mc.currentScreen != null)<a name="line.1015"></a>
+<span class="sourceLineNo">1016</span>            {<a name="line.1016"></a>
+<span class="sourceLineNo">1017</span>                GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);<a name="line.1017"></a>
+<span class="sourceLineNo">1018</span><a name="line.1018"></a>
+<span class="sourceLineNo">1019</span>                try<a name="line.1019"></a>
+<span class="sourceLineNo">1020</span>                {<a name="line.1020"></a>
+<span class="sourceLineNo">1021</span>                    this.mc.currentScreen.drawScreen(k, l, par1);<a name="line.1021"></a>
+<span class="sourceLineNo">1022</span>                }<a name="line.1022"></a>
+<span class="sourceLineNo">1023</span>                catch (Throwable throwable)<a name="line.1023"></a>
+<span class="sourceLineNo">1024</span>                {<a name="line.1024"></a>
+<span class="sourceLineNo">1025</span>                    CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering screen");<a name="line.1025"></a>
+<span class="sourceLineNo">1026</span>                    CrashReportCategory crashreportcategory = crashreport.makeCategory("Screen render details");<a name="line.1026"></a>
+<span class="sourceLineNo">1027</span>                    crashreportcategory.addCrashSectionCallable("Screen name", new CallableScreenName(this));<a name="line.1027"></a>
+<span class="sourceLineNo">1028</span>                    crashreportcategory.addCrashSectionCallable("Mouse location", new CallableMouseLocation(this, k, l));<a name="line.1028"></a>
+<span class="sourceLineNo">1029</span>                    crashreportcategory.addCrashSectionCallable("Screen size", new CallableScreenSize(this, scaledresolution));<a name="line.1029"></a>
+<span class="sourceLineNo">1030</span>                    throw new ReportedException(crashreport);<a name="line.1030"></a>
+<span class="sourceLineNo">1031</span>                }<a name="line.1031"></a>
+<span class="sourceLineNo">1032</span><a name="line.1032"></a>
+<span class="sourceLineNo">1033</span>                if (this.mc.currentScreen != null &amp;&amp; this.mc.currentScreen.guiParticles != null)<a name="line.1033"></a>
+<span class="sourceLineNo">1034</span>                {<a name="line.1034"></a>
+<span class="sourceLineNo">1035</span>                    this.mc.currentScreen.guiParticles.draw(par1);<a name="line.1035"></a>
+<span class="sourceLineNo">1036</span>                }<a name="line.1036"></a>
+<span class="sourceLineNo">1037</span>            }<a name="line.1037"></a>
+<span class="sourceLineNo">1038</span>        }<a name="line.1038"></a>
+<span class="sourceLineNo">1039</span>    }<a name="line.1039"></a>
+<span class="sourceLineNo">1040</span><a name="line.1040"></a>
+<span class="sourceLineNo">1041</span>    public void renderWorld(float par1, long par2)<a name="line.1041"></a>
+<span class="sourceLineNo">1042</span>    {<a name="line.1042"></a>
+<span class="sourceLineNo">1043</span>        this.mc.mcProfiler.startSection("lightTex");<a name="line.1043"></a>
+<span class="sourceLineNo">1044</span><a name="line.1044"></a>
+<span class="sourceLineNo">1045</span>        if (this.lightmapUpdateNeeded)<a name="line.1045"></a>
+<span class="sourceLineNo">1046</span>        {<a name="line.1046"></a>
+<span class="sourceLineNo">1047</span>            this.updateLightmap(par1);<a name="line.1047"></a>
+<span class="sourceLineNo">1048</span>        }<a name="line.1048"></a>
+<span class="sourceLineNo">1049</span><a name="line.1049"></a>
+<span class="sourceLineNo">1050</span>        GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.1050"></a>
+<span class="sourceLineNo">1051</span>        GL11.glEnable(GL11.GL_DEPTH_TEST);<a name="line.1051"></a>
+<span class="sourceLineNo">1052</span><a name="line.1052"></a>
+<span class="sourceLineNo">1053</span>        if (this.mc.renderViewEntity == null)<a name="line.1053"></a>
+<span class="sourceLineNo">1054</span>        {<a name="line.1054"></a>
+<span class="sourceLineNo">1055</span>            this.mc.renderViewEntity = this.mc.thePlayer;<a name="line.1055"></a>
+<span class="sourceLineNo">1056</span>        }<a name="line.1056"></a>
+<span class="sourceLineNo">1057</span><a name="line.1057"></a>
+<span class="sourceLineNo">1058</span>        this.mc.mcProfiler.endStartSection("pick");<a name="line.1058"></a>
+<span class="sourceLineNo">1059</span>        this.getMouseOver(par1);<a name="line.1059"></a>
+<span class="sourceLineNo">1060</span>        EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.1060"></a>
+<span class="sourceLineNo">1061</span>        RenderGlobal renderglobal = this.mc.renderGlobal;<a name="line.1061"></a>
+<span class="sourceLineNo">1062</span>        EffectRenderer effectrenderer = this.mc.effectRenderer;<a name="line.1062"></a>
+<span class="sourceLineNo">1063</span>        double d0 = entityliving.lastTickPosX + (entityliving.posX - entityliving.lastTickPosX) * (double)par1;<a name="line.1063"></a>
+<span class="sourceLineNo">1064</span>        double d1 = entityliving.lastTickPosY + (entityliving.posY - entityliving.lastTickPosY) * (double)par1;<a name="line.1064"></a>
+<span class="sourceLineNo">1065</span>        double d2 = entityliving.lastTickPosZ + (entityliving.posZ - entityliving.lastTickPosZ) * (double)par1;<a name="line.1065"></a>
+<span class="sourceLineNo">1066</span>        this.mc.mcProfiler.endStartSection("center");<a name="line.1066"></a>
+<span class="sourceLineNo">1067</span><a name="line.1067"></a>
+<span class="sourceLineNo">1068</span>        for (int j = 0; j &lt; 2; ++j)<a name="line.1068"></a>
+<span class="sourceLineNo">1069</span>        {<a name="line.1069"></a>
+<span class="sourceLineNo">1070</span>            if (this.mc.gameSettings.anaglyph)<a name="line.1070"></a>
+<span class="sourceLineNo">1071</span>            {<a name="line.1071"></a>
+<span class="sourceLineNo">1072</span>                anaglyphField = j;<a name="line.1072"></a>
+<span class="sourceLineNo">1073</span><a name="line.1073"></a>
+<span class="sourceLineNo">1074</span>                if (anaglyphField == 0)<a name="line.1074"></a>
+<span class="sourceLineNo">1075</span>                {<a name="line.1075"></a>
+<span class="sourceLineNo">1076</span>                    GL11.glColorMask(false, true, true, false);<a name="line.1076"></a>
+<span class="sourceLineNo">1077</span>                }<a name="line.1077"></a>
+<span class="sourceLineNo">1078</span>                else<a name="line.1078"></a>
+<span class="sourceLineNo">1079</span>                {<a name="line.1079"></a>
+<span class="sourceLineNo">1080</span>                    GL11.glColorMask(true, false, false, false);<a name="line.1080"></a>
+<span class="sourceLineNo">1081</span>                }<a name="line.1081"></a>
+<span class="sourceLineNo">1082</span>            }<a name="line.1082"></a>
+<span class="sourceLineNo">1083</span><a name="line.1083"></a>
+<span class="sourceLineNo">1084</span>            this.mc.mcProfiler.endStartSection("clear");<a name="line.1084"></a>
+<span class="sourceLineNo">1085</span>            GL11.glViewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);<a name="line.1085"></a>
+<span class="sourceLineNo">1086</span>            this.updateFogColor(par1);<a name="line.1086"></a>
+<span class="sourceLineNo">1087</span>            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);<a name="line.1087"></a>
+<span class="sourceLineNo">1088</span>            GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.1088"></a>
+<span class="sourceLineNo">1089</span>            this.mc.mcProfiler.endStartSection("camera");<a name="line.1089"></a>
+<span class="sourceLineNo">1090</span>            this.setupCameraTransform(par1, j);<a name="line.1090"></a>
+<span class="sourceLineNo">1091</span>            ActiveRenderInfo.updateRenderInfo(this.mc.thePlayer, this.mc.gameSettings.thirdPersonView == 2);<a name="line.1091"></a>
+<span class="sourceLineNo">1092</span>            this.mc.mcProfiler.endStartSection("frustrum");<a name="line.1092"></a>
+<span class="sourceLineNo">1093</span>            ClippingHelperImpl.getInstance();<a name="line.1093"></a>
+<span class="sourceLineNo">1094</span><a name="line.1094"></a>
+<span class="sourceLineNo">1095</span>            if (this.mc.gameSettings.renderDistance &lt; 2)<a name="line.1095"></a>
+<span class="sourceLineNo">1096</span>            {<a name="line.1096"></a>
+<span class="sourceLineNo">1097</span>                this.setupFog(-1, par1);<a name="line.1097"></a>
+<span class="sourceLineNo">1098</span>                this.mc.mcProfiler.endStartSection("sky");<a name="line.1098"></a>
+<span class="sourceLineNo">1099</span>                renderglobal.renderSky(par1);<a name="line.1099"></a>
+<span class="sourceLineNo">1100</span>            }<a name="line.1100"></a>
+<span class="sourceLineNo">1101</span><a name="line.1101"></a>
+<span class="sourceLineNo">1102</span>            GL11.glEnable(GL11.GL_FOG);<a name="line.1102"></a>
+<span class="sourceLineNo">1103</span>            this.setupFog(1, par1);<a name="line.1103"></a>
+<span class="sourceLineNo">1104</span><a name="line.1104"></a>
+<span class="sourceLineNo">1105</span>            if (this.mc.gameSettings.ambientOcclusion != 0)<a name="line.1105"></a>
+<span class="sourceLineNo">1106</span>            {<a name="line.1106"></a>
+<span class="sourceLineNo">1107</span>                GL11.glShadeModel(GL11.GL_SMOOTH);<a name="line.1107"></a>
+<span class="sourceLineNo">1108</span>            }<a name="line.1108"></a>
+<span class="sourceLineNo">1109</span><a name="line.1109"></a>
+<span class="sourceLineNo">1110</span>            this.mc.mcProfiler.endStartSection("culling");<a name="line.1110"></a>
+<span class="sourceLineNo">1111</span>            Frustrum frustrum = new Frustrum();<a name="line.1111"></a>
+<span class="sourceLineNo">1112</span>            frustrum.setPosition(d0, d1, d2);<a name="line.1112"></a>
+<span class="sourceLineNo">1113</span>            this.mc.renderGlobal.clipRenderersByFrustum(frustrum, par1);<a name="line.1113"></a>
+<span class="sourceLineNo">1114</span><a name="line.1114"></a>
+<span class="sourceLineNo">1115</span>            if (j == 0)<a name="line.1115"></a>
+<span class="sourceLineNo">1116</span>            {<a name="line.1116"></a>
+<span class="sourceLineNo">1117</span>                this.mc.mcProfiler.endStartSection("updatechunks");<a name="line.1117"></a>
+<span class="sourceLineNo">1118</span><a name="line.1118"></a>
+<span class="sourceLineNo">1119</span>                while (!this.mc.renderGlobal.updateRenderers(entityliving, false) &amp;&amp; par2 != 0L)<a name="line.1119"></a>
+<span class="sourceLineNo">1120</span>                {<a name="line.1120"></a>
+<span class="sourceLineNo">1121</span>                    long k = par2 - System.nanoTime();<a name="line.1121"></a>
+<span class="sourceLineNo">1122</span><a name="line.1122"></a>
+<span class="sourceLineNo">1123</span>                    if (k &lt; 0L || k &gt; 1000000000L)<a name="line.1123"></a>
+<span class="sourceLineNo">1124</span>                    {<a name="line.1124"></a>
+<span class="sourceLineNo">1125</span>                        break;<a name="line.1125"></a>
+<span class="sourceLineNo">1126</span>                    }<a name="line.1126"></a>
+<span class="sourceLineNo">1127</span>                }<a name="line.1127"></a>
+<span class="sourceLineNo">1128</span>            }<a name="line.1128"></a>
+<span class="sourceLineNo">1129</span><a name="line.1129"></a>
+<span class="sourceLineNo">1130</span>            if (entityliving.posY &lt; 128.0D)<a name="line.1130"></a>
+<span class="sourceLineNo">1131</span>            {<a name="line.1131"></a>
+<span class="sourceLineNo">1132</span>                this.renderCloudsCheck(renderglobal, par1);<a name="line.1132"></a>
+<span class="sourceLineNo">1133</span>            }<a name="line.1133"></a>
+<span class="sourceLineNo">1134</span><a name="line.1134"></a>
+<span class="sourceLineNo">1135</span>            this.mc.mcProfiler.endStartSection("prepareterrain");<a name="line.1135"></a>
+<span class="sourceLineNo">1136</span>            this.setupFog(0, par1);<a name="line.1136"></a>
+<span class="sourceLineNo">1137</span>            GL11.glEnable(GL11.GL_FOG);<a name="line.1137"></a>
+<span class="sourceLineNo">1138</span>            this.mc.renderEngine.func_98187_b("/terrain.png");<a name="line.1138"></a>
+<span class="sourceLineNo">1139</span>            RenderHelper.disableStandardItemLighting();<a name="line.1139"></a>
+<span class="sourceLineNo">1140</span>            this.mc.mcProfiler.endStartSection("terrain");<a name="line.1140"></a>
+<span class="sourceLineNo">1141</span>            renderglobal.sortAndRender(entityliving, 0, (double)par1);<a name="line.1141"></a>
+<span class="sourceLineNo">1142</span>            GL11.glShadeModel(GL11.GL_FLAT);<a name="line.1142"></a>
+<span class="sourceLineNo">1143</span>            EntityPlayer entityplayer;<a name="line.1143"></a>
+<span class="sourceLineNo">1144</span><a name="line.1144"></a>
+<span class="sourceLineNo">1145</span>            if (this.debugViewDirection == 0)<a name="line.1145"></a>
+<span class="sourceLineNo">1146</span>            {<a name="line.1146"></a>
+<span class="sourceLineNo">1147</span>                RenderHelper.enableStandardItemLighting();<a name="line.1147"></a>
+<span class="sourceLineNo">1148</span>                this.mc.mcProfiler.endStartSection("entities");<a name="line.1148"></a>
+<span class="sourceLineNo">1149</span>                ForgeHooksClient.setRenderPass(0);<a name="line.1149"></a>
+<span class="sourceLineNo">1150</span>                renderglobal.renderEntities(entityliving.getPosition(par1), frustrum, par1);<a name="line.1150"></a>
+<span class="sourceLineNo">1151</span>                ForgeHooksClient.setRenderPass(-1);<a name="line.1151"></a>
+<span class="sourceLineNo">1152</span>                this.enableLightmap((double)par1);<a name="line.1152"></a>
+<span class="sourceLineNo">1153</span>                this.mc.mcProfiler.endStartSection("litParticles");<a name="line.1153"></a>
+<span class="sourceLineNo">1154</span>                effectrenderer.renderLitParticles(entityliving, par1);<a name="line.1154"></a>
+<span class="sourceLineNo">1155</span>                RenderHelper.disableStandardItemLighting();<a name="line.1155"></a>
+<span class="sourceLineNo">1156</span>                this.setupFog(0, par1);<a name="line.1156"></a>
+<span class="sourceLineNo">1157</span>                this.mc.mcProfiler.endStartSection("particles");<a name="line.1157"></a>
+<span class="sourceLineNo">1158</span>                effectrenderer.renderParticles(entityliving, par1);<a name="line.1158"></a>
+<span class="sourceLineNo">1159</span>                this.disableLightmap((double)par1);<a name="line.1159"></a>
+<span class="sourceLineNo">1160</span><a name="line.1160"></a>
+<span class="sourceLineNo">1161</span>                if (this.mc.objectMouseOver != null &amp;&amp; entityliving.isInsideOfMaterial(Material.water) &amp;&amp; entityliving instanceof EntityPlayer &amp;&amp; !this.mc.gameSettings.hideGUI)<a name="line.1161"></a>
+<span class="sourceLineNo">1162</span>                {<a name="line.1162"></a>
+<span class="sourceLineNo">1163</span>                    entityplayer = (EntityPlayer)entityliving;<a name="line.1163"></a>
+<span class="sourceLineNo">1164</span>                    GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.1164"></a>
+<span class="sourceLineNo">1165</span>                    this.mc.mcProfiler.endStartSection("outline");<a name="line.1165"></a>
+<span class="sourceLineNo">1166</span>                    if (!ForgeHooksClient.onDrawBlockHighlight(renderglobal, entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), par1))<a name="line.1166"></a>
+<span class="sourceLineNo">1167</span>                    {<a name="line.1167"></a>
+<span class="sourceLineNo">1168</span>                        renderglobal.drawBlockBreaking(entityplayer, this.mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), par1);<a name="line.1168"></a>
+<span class="sourceLineNo">1169</span>                        renderglobal.drawSelectionBox(entityplayer, this.mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), par1);<a name="line.1169"></a>
+<span class="sourceLineNo">1170</span>                    }<a name="line.1170"></a>
+<span class="sourceLineNo">1171</span>                    GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.1171"></a>
+<span class="sourceLineNo">1172</span>                }<a name="line.1172"></a>
+<span class="sourceLineNo">1173</span>            }<a name="line.1173"></a>
+<span class="sourceLineNo">1174</span><a name="line.1174"></a>
+<span class="sourceLineNo">1175</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.1175"></a>
+<span class="sourceLineNo">1176</span>            GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.1176"></a>
+<span class="sourceLineNo">1177</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.1177"></a>
+<span class="sourceLineNo">1178</span>            GL11.glDepthMask(true);<a name="line.1178"></a>
+<span class="sourceLineNo">1179</span>            this.setupFog(0, par1);<a name="line.1179"></a>
+<span class="sourceLineNo">1180</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.1180"></a>
+<span class="sourceLineNo">1181</span>            GL11.glDisable(GL11.GL_CULL_FACE);<a name="line.1181"></a>
+<span class="sourceLineNo">1182</span>            this.mc.renderEngine.func_98187_b("/terrain.png");<a name="line.1182"></a>
+<span class="sourceLineNo">1183</span><a name="line.1183"></a>
+<span class="sourceLineNo">1184</span>            if (this.mc.gameSettings.fancyGraphics)<a name="line.1184"></a>
+<span class="sourceLineNo">1185</span>            {<a name="line.1185"></a>
+<span class="sourceLineNo">1186</span>                this.mc.mcProfiler.endStartSection("water");<a name="line.1186"></a>
+<span class="sourceLineNo">1187</span><a name="line.1187"></a>
+<span class="sourceLineNo">1188</span>                if (this.mc.gameSettings.ambientOcclusion != 0)<a name="line.1188"></a>
+<span class="sourceLineNo">1189</span>                {<a name="line.1189"></a>
+<span class="sourceLineNo">1190</span>                    GL11.glShadeModel(GL11.GL_SMOOTH);<a name="line.1190"></a>
+<span class="sourceLineNo">1191</span>                }<a name="line.1191"></a>
+<span class="sourceLineNo">1192</span><a name="line.1192"></a>
+<span class="sourceLineNo">1193</span>                GL11.glColorMask(false, false, false, false);<a name="line.1193"></a>
+<span class="sourceLineNo">1194</span>                int l = renderglobal.sortAndRender(entityliving, 1, (double)par1);<a name="line.1194"></a>
+<span class="sourceLineNo">1195</span><a name="line.1195"></a>
+<span class="sourceLineNo">1196</span>                if (this.mc.gameSettings.anaglyph)<a name="line.1196"></a>
+<span class="sourceLineNo">1197</span>                {<a name="line.1197"></a>
+<span class="sourceLineNo">1198</span>                    if (anaglyphField == 0)<a name="line.1198"></a>
+<span class="sourceLineNo">1199</span>                    {<a name="line.1199"></a>
+<span class="sourceLineNo">1200</span>                        GL11.glColorMask(false, true, true, true);<a name="line.1200"></a>
+<span class="sourceLineNo">1201</span>                    }<a name="line.1201"></a>
+<span class="sourceLineNo">1202</span>                    else<a name="line.1202"></a>
+<span class="sourceLineNo">1203</span>                    {<a name="line.1203"></a>
+<span class="sourceLineNo">1204</span>                        GL11.glColorMask(true, false, false, true);<a name="line.1204"></a>
+<span class="sourceLineNo">1205</span>                    }<a name="line.1205"></a>
+<span class="sourceLineNo">1206</span>                }<a name="line.1206"></a>
+<span class="sourceLineNo">1207</span>                else<a name="line.1207"></a>
+<span class="sourceLineNo">1208</span>                {<a name="line.1208"></a>
+<span class="sourceLineNo">1209</span>                    GL11.glColorMask(true, true, true, true);<a name="line.1209"></a>
+<span class="sourceLineNo">1210</span>                }<a name="line.1210"></a>
+<span class="sourceLineNo">1211</span><a name="line.1211"></a>
+<span class="sourceLineNo">1212</span>                if (l &gt; 0)<a name="line.1212"></a>
+<span class="sourceLineNo">1213</span>                {<a name="line.1213"></a>
+<span class="sourceLineNo">1214</span>                    renderglobal.renderAllRenderLists(1, (double)par1);<a name="line.1214"></a>
+<span class="sourceLineNo">1215</span>                }<a name="line.1215"></a>
+<span class="sourceLineNo">1216</span><a name="line.1216"></a>
+<span class="sourceLineNo">1217</span>                GL11.glShadeModel(GL11.GL_FLAT);<a name="line.1217"></a>
+<span class="sourceLineNo">1218</span>            }<a name="line.1218"></a>
+<span class="sourceLineNo">1219</span>            else<a name="line.1219"></a>
+<span class="sourceLineNo">1220</span>            {<a name="line.1220"></a>
+<span class="sourceLineNo">1221</span>                this.mc.mcProfiler.endStartSection("water");<a name="line.1221"></a>
+<span class="sourceLineNo">1222</span>                renderglobal.sortAndRender(entityliving, 1, (double)par1);<a name="line.1222"></a>
+<span class="sourceLineNo">1223</span>            }<a name="line.1223"></a>
+<span class="sourceLineNo">1224</span><a name="line.1224"></a>
+<span class="sourceLineNo">1225</span>            RenderHelper.enableStandardItemLighting();<a name="line.1225"></a>
+<span class="sourceLineNo">1226</span>            this.mc.mcProfiler.endStartSection("entities");<a name="line.1226"></a>
+<span class="sourceLineNo">1227</span>            ForgeHooksClient.setRenderPass(1);<a name="line.1227"></a>
+<span class="sourceLineNo">1228</span>            renderglobal.renderEntities(entityliving.getPosition(par1), frustrum, par1);<a name="line.1228"></a>
+<span class="sourceLineNo">1229</span>            ForgeHooksClient.setRenderPass(-1);<a name="line.1229"></a>
+<span class="sourceLineNo">1230</span>            RenderHelper.disableStandardItemLighting();<a name="line.1230"></a>
+<span class="sourceLineNo">1231</span><a name="line.1231"></a>
+<span class="sourceLineNo">1232</span>            GL11.glDepthMask(true);<a name="line.1232"></a>
+<span class="sourceLineNo">1233</span>            GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.1233"></a>
+<span class="sourceLineNo">1234</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.1234"></a>
+<span class="sourceLineNo">1235</span><a name="line.1235"></a>
+<span class="sourceLineNo">1236</span>            if (this.cameraZoom == 1.0D &amp;&amp; entityliving instanceof EntityPlayer &amp;&amp; !this.mc.gameSettings.hideGUI &amp;&amp; this.mc.objectMouseOver != null &amp;&amp; !entityliving.isInsideOfMaterial(Material.water))<a name="line.1236"></a>
+<span class="sourceLineNo">1237</span>            {<a name="line.1237"></a>
+<span class="sourceLineNo">1238</span>                entityplayer = (EntityPlayer)entityliving;<a name="line.1238"></a>
+<span class="sourceLineNo">1239</span>                GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.1239"></a>
+<span class="sourceLineNo">1240</span>                this.mc.mcProfiler.endStartSection("outline");<a name="line.1240"></a>
+<span class="sourceLineNo">1241</span>                if (!ForgeHooksClient.onDrawBlockHighlight(renderglobal, entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), par1))<a name="line.1241"></a>
+<span class="sourceLineNo">1242</span>                {<a name="line.1242"></a>
+<span class="sourceLineNo">1243</span>                    renderglobal.drawBlockBreaking(entityplayer, this.mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), par1);<a name="line.1243"></a>
+<span class="sourceLineNo">1244</span>                    renderglobal.drawSelectionBox(entityplayer, this.mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), par1);<a name="line.1244"></a>
+<span class="sourceLineNo">1245</span>                }<a name="line.1245"></a>
+<span class="sourceLineNo">1246</span>                GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.1246"></a>
+<span class="sourceLineNo">1247</span>            }<a name="line.1247"></a>
+<span class="sourceLineNo">1248</span><a name="line.1248"></a>
+<span class="sourceLineNo">1249</span>            this.mc.mcProfiler.endStartSection("destroyProgress");<a name="line.1249"></a>
+<span class="sourceLineNo">1250</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.1250"></a>
+<span class="sourceLineNo">1251</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);<a name="line.1251"></a>
+<span class="sourceLineNo">1252</span>            renderglobal.drawBlockDamageTexture(Tessellator.instance, entityliving, par1);<a name="line.1252"></a>
+<span class="sourceLineNo">1253</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.1253"></a>
+<span class="sourceLineNo">1254</span>            this.mc.mcProfiler.endStartSection("weather");<a name="line.1254"></a>
+<span class="sourceLineNo">1255</span>            this.renderRainSnow(par1);<a name="line.1255"></a>
+<span class="sourceLineNo">1256</span>            GL11.glDisable(GL11.GL_FOG);<a name="line.1256"></a>
+<span class="sourceLineNo">1257</span><a name="line.1257"></a>
+<span class="sourceLineNo">1258</span>            if (entityliving.posY &gt;= 128.0D)<a name="line.1258"></a>
+<span class="sourceLineNo">1259</span>            {<a name="line.1259"></a>
+<span class="sourceLineNo">1260</span>                this.renderCloudsCheck(renderglobal, par1);<a name="line.1260"></a>
+<span class="sourceLineNo">1261</span>            }<a name="line.1261"></a>
+<span class="sourceLineNo">1262</span><a name="line.1262"></a>
+<span class="sourceLineNo">1263</span>            this.mc.mcProfiler.endStartSection("FRenderLast");<a name="line.1263"></a>
+<span class="sourceLineNo">1264</span>            ForgeHooksClient.dispatchRenderLast(renderglobal, par1);<a name="line.1264"></a>
+<span class="sourceLineNo">1265</span><a name="line.1265"></a>
+<span class="sourceLineNo">1266</span>            this.mc.mcProfiler.endStartSection("hand");<a name="line.1266"></a>
+<span class="sourceLineNo">1267</span><a name="line.1267"></a>
+<span class="sourceLineNo">1268</span>            if (this.cameraZoom == 1.0D)<a name="line.1268"></a>
+<span class="sourceLineNo">1269</span>            {<a name="line.1269"></a>
+<span class="sourceLineNo">1270</span>                GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);<a name="line.1270"></a>
+<span class="sourceLineNo">1271</span>                this.renderHand(par1, j);<a name="line.1271"></a>
+<span class="sourceLineNo">1272</span>            }<a name="line.1272"></a>
+<span class="sourceLineNo">1273</span><a name="line.1273"></a>
+<span class="sourceLineNo">1274</span>            if (!this.mc.gameSettings.anaglyph)<a name="line.1274"></a>
+<span class="sourceLineNo">1275</span>            {<a name="line.1275"></a>
+<span class="sourceLineNo">1276</span>                this.mc.mcProfiler.endSection();<a name="line.1276"></a>
+<span class="sourceLineNo">1277</span>                return;<a name="line.1277"></a>
+<span class="sourceLineNo">1278</span>            }<a name="line.1278"></a>
+<span class="sourceLineNo">1279</span>        }<a name="line.1279"></a>
+<span class="sourceLineNo">1280</span><a name="line.1280"></a>
+<span class="sourceLineNo">1281</span>        GL11.glColorMask(true, true, true, false);<a name="line.1281"></a>
+<span class="sourceLineNo">1282</span>        this.mc.mcProfiler.endSection();<a name="line.1282"></a>
+<span class="sourceLineNo">1283</span>    }<a name="line.1283"></a>
+<span class="sourceLineNo">1284</span><a name="line.1284"></a>
+<span class="sourceLineNo">1285</span>    /**<a name="line.1285"></a>
+<span class="sourceLineNo">1286</span>     * Render clouds if enabled<a name="line.1286"></a>
+<span class="sourceLineNo">1287</span>     */<a name="line.1287"></a>
+<span class="sourceLineNo">1288</span>    private void renderCloudsCheck(RenderGlobal par1RenderGlobal, float par2)<a name="line.1288"></a>
+<span class="sourceLineNo">1289</span>    {<a name="line.1289"></a>
+<span class="sourceLineNo">1290</span>        if (this.mc.gameSettings.shouldRenderClouds())<a name="line.1290"></a>
+<span class="sourceLineNo">1291</span>        {<a name="line.1291"></a>
+<span class="sourceLineNo">1292</span>            this.mc.mcProfiler.endStartSection("clouds");<a name="line.1292"></a>
+<span class="sourceLineNo">1293</span>            GL11.glPushMatrix();<a name="line.1293"></a>
+<span class="sourceLineNo">1294</span>            this.setupFog(0, par2);<a name="line.1294"></a>
+<span class="sourceLineNo">1295</span>            GL11.glEnable(GL11.GL_FOG);<a name="line.1295"></a>
+<span class="sourceLineNo">1296</span>            par1RenderGlobal.renderClouds(par2);<a name="line.1296"></a>
+<span class="sourceLineNo">1297</span>            GL11.glDisable(GL11.GL_FOG);<a name="line.1297"></a>
+<span class="sourceLineNo">1298</span>            this.setupFog(1, par2);<a name="line.1298"></a>
+<span class="sourceLineNo">1299</span>            GL11.glPopMatrix();<a name="line.1299"></a>
+<span class="sourceLineNo">1300</span>        }<a name="line.1300"></a>
+<span class="sourceLineNo">1301</span>    }<a name="line.1301"></a>
+<span class="sourceLineNo">1302</span><a name="line.1302"></a>
+<span class="sourceLineNo">1303</span>    private void addRainParticles()<a name="line.1303"></a>
+<span class="sourceLineNo">1304</span>    {<a name="line.1304"></a>
+<span class="sourceLineNo">1305</span>        float f = this.mc.theWorld.getRainStrength(1.0F);<a name="line.1305"></a>
+<span class="sourceLineNo">1306</span><a name="line.1306"></a>
+<span class="sourceLineNo">1307</span>        if (!this.mc.gameSettings.fancyGraphics)<a name="line.1307"></a>
+<span class="sourceLineNo">1308</span>        {<a name="line.1308"></a>
+<span class="sourceLineNo">1309</span>            f /= 2.0F;<a name="line.1309"></a>
+<span class="sourceLineNo">1310</span>        }<a name="line.1310"></a>
+<span class="sourceLineNo">1311</span><a name="line.1311"></a>
+<span class="sourceLineNo">1312</span>        if (f != 0.0F)<a name="line.1312"></a>
+<span class="sourceLineNo">1313</span>        {<a name="line.1313"></a>
+<span class="sourceLineNo">1314</span>            this.random.setSeed((long)this.rendererUpdateCount * 312987231L);<a name="line.1314"></a>
+<span class="sourceLineNo">1315</span>            EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.1315"></a>
+<span class="sourceLineNo">1316</span>            WorldClient worldclient = this.mc.theWorld;<a name="line.1316"></a>
+<span class="sourceLineNo">1317</span>            int i = MathHelper.floor_double(entityliving.posX);<a name="line.1317"></a>
+<span class="sourceLineNo">1318</span>            int j = MathHelper.floor_double(entityliving.posY);<a name="line.1318"></a>
+<span class="sourceLineNo">1319</span>            int k = MathHelper.floor_double(entityliving.posZ);<a name="line.1319"></a>
+<span class="sourceLineNo">1320</span>            byte b0 = 10;<a name="line.1320"></a>
+<span class="sourceLineNo">1321</span>            double d0 = 0.0D;<a name="line.1321"></a>
+<span class="sourceLineNo">1322</span>            double d1 = 0.0D;<a name="line.1322"></a>
+<span class="sourceLineNo">1323</span>            double d2 = 0.0D;<a name="line.1323"></a>
+<span class="sourceLineNo">1324</span>            int l = 0;<a name="line.1324"></a>
+<span class="sourceLineNo">1325</span>            int i1 = (int)(100.0F * f * f);<a name="line.1325"></a>
+<span class="sourceLineNo">1326</span><a name="line.1326"></a>
+<span class="sourceLineNo">1327</span>            if (this.mc.gameSettings.particleSetting == 1)<a name="line.1327"></a>
+<span class="sourceLineNo">1328</span>            {<a name="line.1328"></a>
+<span class="sourceLineNo">1329</span>                i1 &gt;&gt;= 1;<a name="line.1329"></a>
+<span class="sourceLineNo">1330</span>            }<a name="line.1330"></a>
+<span class="sourceLineNo">1331</span>            else if (this.mc.gameSettings.particleSetting == 2)<a name="line.1331"></a>
+<span class="sourceLineNo">1332</span>            {<a name="line.1332"></a>
+<span class="sourceLineNo">1333</span>                i1 = 0;<a name="line.1333"></a>
+<span class="sourceLineNo">1334</span>            }<a name="line.1334"></a>
+<span class="sourceLineNo">1335</span><a name="line.1335"></a>
+<span class="sourceLineNo">1336</span>            for (int j1 = 0; j1 &lt; i1; ++j1)<a name="line.1336"></a>
+<span class="sourceLineNo">1337</span>            {<a name="line.1337"></a>
+<span class="sourceLineNo">1338</span>                int k1 = i + this.random.nextInt(b0) - this.random.nextInt(b0);<a name="line.1338"></a>
+<span class="sourceLineNo">1339</span>                int l1 = k + this.random.nextInt(b0) - this.random.nextInt(b0);<a name="line.1339"></a>
+<span class="sourceLineNo">1340</span>                int i2 = worldclient.getPrecipitationHeight(k1, l1);<a name="line.1340"></a>
+<span class="sourceLineNo">1341</span>                int j2 = worldclient.getBlockId(k1, i2 - 1, l1);<a name="line.1341"></a>
+<span class="sourceLineNo">1342</span>                BiomeGenBase biomegenbase = worldclient.getBiomeGenForCoords(k1, l1);<a name="line.1342"></a>
+<span class="sourceLineNo">1343</span><a name="line.1343"></a>
+<span class="sourceLineNo">1344</span>                if (i2 &lt;= j + b0 &amp;&amp; i2 &gt;= j - b0 &amp;&amp; biomegenbase.canSpawnLightningBolt() &amp;&amp; biomegenbase.getFloatTemperature() &gt;= 0.2F)<a name="line.1344"></a>
+<span class="sourceLineNo">1345</span>                {<a name="line.1345"></a>
+<span class="sourceLineNo">1346</span>                    float f1 = this.random.nextFloat();<a name="line.1346"></a>
+<span class="sourceLineNo">1347</span>                    float f2 = this.random.nextFloat();<a name="line.1347"></a>
+<span class="sourceLineNo">1348</span><a name="line.1348"></a>
+<span class="sourceLineNo">1349</span>                    if (j2 &gt; 0)<a name="line.1349"></a>
+<span class="sourceLineNo">1350</span>                    {<a name="line.1350"></a>
+<span class="sourceLineNo">1351</span>                        if (Block.blocksList[j2].blockMaterial == Material.lava)<a name="line.1351"></a>
+<span class="sourceLineNo">1352</span>                        {<a name="line.1352"></a>
+<span class="sourceLineNo">1353</span>                            this.mc.effectRenderer.addEffect(new EntitySmokeFX(worldclient, (double)((float)k1 + f1), (double)((float)i2 + 0.1F) - Block.blocksList[j2].getBlockBoundsMinY(), (double)((float)l1 + f2), 0.0D, 0.0D, 0.0D));<a name="line.1353"></a>
+<span class="sourceLineNo">1354</span>                        }<a name="line.1354"></a>
+<span class="sourceLineNo">1355</span>                        else<a name="line.1355"></a>
+<span class="sourceLineNo">1356</span>                        {<a name="line.1356"></a>
+<span class="sourceLineNo">1357</span>                            ++l;<a name="line.1357"></a>
+<span class="sourceLineNo">1358</span><a name="line.1358"></a>
+<span class="sourceLineNo">1359</span>                            if (this.random.nextInt(l) == 0)<a name="line.1359"></a>
+<span class="sourceLineNo">1360</span>                            {<a name="line.1360"></a>
+<span class="sourceLineNo">1361</span>                                d0 = (double)((float)k1 + f1);<a name="line.1361"></a>
+<span class="sourceLineNo">1362</span>                                d1 = (double)((float)i2 + 0.1F) - Block.blocksList[j2].getBlockBoundsMinY();<a name="line.1362"></a>
+<span class="sourceLineNo">1363</span>                                d2 = (double)((float)l1 + f2);<a name="line.1363"></a>
+<span class="sourceLineNo">1364</span>                            }<a name="line.1364"></a>
+<span class="sourceLineNo">1365</span><a name="line.1365"></a>
+<span class="sourceLineNo">1366</span>                            this.mc.effectRenderer.addEffect(new EntityRainFX(worldclient, (double)((float)k1 + f1), (double)((float)i2 + 0.1F) - Block.blocksList[j2].getBlockBoundsMinY(), (double)((float)l1 + f2)));<a name="line.1366"></a>
+<span class="sourceLineNo">1367</span>                        }<a name="line.1367"></a>
+<span class="sourceLineNo">1368</span>                    }<a name="line.1368"></a>
+<span class="sourceLineNo">1369</span>                }<a name="line.1369"></a>
+<span class="sourceLineNo">1370</span>            }<a name="line.1370"></a>
+<span class="sourceLineNo">1371</span><a name="line.1371"></a>
+<span class="sourceLineNo">1372</span>            if (l &gt; 0 &amp;&amp; this.random.nextInt(3) &lt; this.rainSoundCounter++)<a name="line.1372"></a>
+<span class="sourceLineNo">1373</span>            {<a name="line.1373"></a>
+<span class="sourceLineNo">1374</span>                this.rainSoundCounter = 0;<a name="line.1374"></a>
+<span class="sourceLineNo">1375</span><a name="line.1375"></a>
+<span class="sourceLineNo">1376</span>                if (d1 &gt; entityliving.posY + 1.0D &amp;&amp; worldclient.getPrecipitationHeight(MathHelper.floor_double(entityliving.posX), MathHelper.floor_double(entityliving.posZ)) &gt; MathHelper.floor_double(entityliving.posY))<a name="line.1376"></a>
+<span class="sourceLineNo">1377</span>                {<a name="line.1377"></a>
+<span class="sourceLineNo">1378</span>                    this.mc.theWorld.playSound(d0, d1, d2, "ambient.weather.rain", 0.1F, 0.5F, false);<a name="line.1378"></a>
+<span class="sourceLineNo">1379</span>                }<a name="line.1379"></a>
+<span class="sourceLineNo">1380</span>                else<a name="line.1380"></a>
+<span class="sourceLineNo">1381</span>                {<a name="line.1381"></a>
+<span class="sourceLineNo">1382</span>                    this.mc.theWorld.playSound(d0, d1, d2, "ambient.weather.rain", 0.2F, 1.0F, false);<a name="line.1382"></a>
+<span class="sourceLineNo">1383</span>                }<a name="line.1383"></a>
+<span class="sourceLineNo">1384</span>            }<a name="line.1384"></a>
+<span class="sourceLineNo">1385</span>        }<a name="line.1385"></a>
+<span class="sourceLineNo">1386</span>    }<a name="line.1386"></a>
+<span class="sourceLineNo">1387</span><a name="line.1387"></a>
+<span class="sourceLineNo">1388</span>    /**<a name="line.1388"></a>
+<span class="sourceLineNo">1389</span>     * Render rain and snow<a name="line.1389"></a>
+<span class="sourceLineNo">1390</span>     */<a name="line.1390"></a>
+<span class="sourceLineNo">1391</span>    protected void renderRainSnow(float par1)<a name="line.1391"></a>
+<span class="sourceLineNo">1392</span>    {<a name="line.1392"></a>
+<span class="sourceLineNo">1393</span>        float f1 = this.mc.theWorld.getRainStrength(par1);<a name="line.1393"></a>
+<span class="sourceLineNo">1394</span><a name="line.1394"></a>
+<span class="sourceLineNo">1395</span>        if (f1 &gt; 0.0F)<a name="line.1395"></a>
+<span class="sourceLineNo">1396</span>        {<a name="line.1396"></a>
+<span class="sourceLineNo">1397</span>            this.enableLightmap((double)par1);<a name="line.1397"></a>
+<span class="sourceLineNo">1398</span><a name="line.1398"></a>
+<span class="sourceLineNo">1399</span>            if (this.rainXCoords == null)<a name="line.1399"></a>
+<span class="sourceLineNo">1400</span>            {<a name="line.1400"></a>
+<span class="sourceLineNo">1401</span>                this.rainXCoords = new float[1024];<a name="line.1401"></a>
+<span class="sourceLineNo">1402</span>                this.rainYCoords = new float[1024];<a name="line.1402"></a>
+<span class="sourceLineNo">1403</span><a name="line.1403"></a>
+<span class="sourceLineNo">1404</span>                for (int i = 0; i &lt; 32; ++i)<a name="line.1404"></a>
+<span class="sourceLineNo">1405</span>                {<a name="line.1405"></a>
+<span class="sourceLineNo">1406</span>                    for (int j = 0; j &lt; 32; ++j)<a name="line.1406"></a>
+<span class="sourceLineNo">1407</span>                    {<a name="line.1407"></a>
+<span class="sourceLineNo">1408</span>                        float f2 = (float)(j - 16);<a name="line.1408"></a>
+<span class="sourceLineNo">1409</span>                        float f3 = (float)(i - 16);<a name="line.1409"></a>
+<span class="sourceLineNo">1410</span>                        float f4 = MathHelper.sqrt_float(f2 * f2 + f3 * f3);<a name="line.1410"></a>
+<span class="sourceLineNo">1411</span>                        this.rainXCoords[i &lt;&lt; 5 | j] = -f3 / f4;<a name="line.1411"></a>
+<span class="sourceLineNo">1412</span>                        this.rainYCoords[i &lt;&lt; 5 | j] = f2 / f4;<a name="line.1412"></a>
+<span class="sourceLineNo">1413</span>                    }<a name="line.1413"></a>
+<span class="sourceLineNo">1414</span>                }<a name="line.1414"></a>
+<span class="sourceLineNo">1415</span>            }<a name="line.1415"></a>
+<span class="sourceLineNo">1416</span><a name="line.1416"></a>
+<span class="sourceLineNo">1417</span>            EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.1417"></a>
+<span class="sourceLineNo">1418</span>            WorldClient worldclient = this.mc.theWorld;<a name="line.1418"></a>
+<span class="sourceLineNo">1419</span>            int k = MathHelper.floor_double(entityliving.posX);<a name="line.1419"></a>
+<span class="sourceLineNo">1420</span>            int l = MathHelper.floor_double(entityliving.posY);<a name="line.1420"></a>
+<span class="sourceLineNo">1421</span>            int i1 = MathHelper.floor_double(entityliving.posZ);<a name="line.1421"></a>
+<span class="sourceLineNo">1422</span>            Tessellator tessellator = Tessellator.instance;<a name="line.1422"></a>
+<span class="sourceLineNo">1423</span>            GL11.glDisable(GL11.GL_CULL_FACE);<a name="line.1423"></a>
+<span class="sourceLineNo">1424</span>            GL11.glNormal3f(0.0F, 1.0F, 0.0F);<a name="line.1424"></a>
+<span class="sourceLineNo">1425</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.1425"></a>
+<span class="sourceLineNo">1426</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.1426"></a>
+<span class="sourceLineNo">1427</span>            GL11.glAlphaFunc(GL11.GL_GREATER, 0.01F);<a name="line.1427"></a>
+<span class="sourceLineNo">1428</span>            this.mc.renderEngine.func_98187_b("/environment/snow.png");<a name="line.1428"></a>
+<span class="sourceLineNo">1429</span>            double d0 = entityliving.lastTickPosX + (entityliving.posX - entityliving.lastTickPosX) * (double)par1;<a name="line.1429"></a>
+<span class="sourceLineNo">1430</span>            double d1 = entityliving.lastTickPosY + (entityliving.posY - entityliving.lastTickPosY) * (double)par1;<a name="line.1430"></a>
+<span class="sourceLineNo">1431</span>            double d2 = entityliving.lastTickPosZ + (entityliving.posZ - entityliving.lastTickPosZ) * (double)par1;<a name="line.1431"></a>
+<span class="sourceLineNo">1432</span>            int j1 = MathHelper.floor_double(d1);<a name="line.1432"></a>
+<span class="sourceLineNo">1433</span>            byte b0 = 5;<a name="line.1433"></a>
+<span class="sourceLineNo">1434</span><a name="line.1434"></a>
+<span class="sourceLineNo">1435</span>            if (this.mc.gameSettings.fancyGraphics)<a name="line.1435"></a>
+<span class="sourceLineNo">1436</span>            {<a name="line.1436"></a>
+<span class="sourceLineNo">1437</span>                b0 = 10;<a name="line.1437"></a>
+<span class="sourceLineNo">1438</span>            }<a name="line.1438"></a>
+<span class="sourceLineNo">1439</span><a name="line.1439"></a>
+<span class="sourceLineNo">1440</span>            boolean flag = false;<a name="line.1440"></a>
+<span class="sourceLineNo">1441</span>            byte b1 = -1;<a name="line.1441"></a>
+<span class="sourceLineNo">1442</span>            float f5 = (float)this.rendererUpdateCount + par1;<a name="line.1442"></a>
+<span class="sourceLineNo">1443</span><a name="line.1443"></a>
+<span class="sourceLineNo">1444</span>            if (this.mc.gameSettings.fancyGraphics)<a name="line.1444"></a>
+<span class="sourceLineNo">1445</span>            {<a name="line.1445"></a>
+<span class="sourceLineNo">1446</span>                b0 = 10;<a name="line.1446"></a>
+<span class="sourceLineNo">1447</span>            }<a name="line.1447"></a>
+<span class="sourceLineNo">1448</span><a name="line.1448"></a>
+<span class="sourceLineNo">1449</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.1449"></a>
+<span class="sourceLineNo">1450</span>            flag = false;<a name="line.1450"></a>
+<span class="sourceLineNo">1451</span><a name="line.1451"></a>
+<span class="sourceLineNo">1452</span>            for (int k1 = i1 - b0; k1 &lt;= i1 + b0; ++k1)<a name="line.1452"></a>
+<span class="sourceLineNo">1453</span>            {<a name="line.1453"></a>
+<span class="sourceLineNo">1454</span>                for (int l1 = k - b0; l1 &lt;= k + b0; ++l1)<a name="line.1454"></a>
+<span class="sourceLineNo">1455</span>                {<a name="line.1455"></a>
+<span class="sourceLineNo">1456</span>                    int i2 = (k1 - i1 + 16) * 32 + l1 - k + 16;<a name="line.1456"></a>
+<span class="sourceLineNo">1457</span>                    float f6 = this.rainXCoords[i2] * 0.5F;<a name="line.1457"></a>
+<span class="sourceLineNo">1458</span>                    float f7 = this.rainYCoords[i2] * 0.5F;<a name="line.1458"></a>
+<span class="sourceLineNo">1459</span>                    BiomeGenBase biomegenbase = worldclient.getBiomeGenForCoords(l1, k1);<a name="line.1459"></a>
+<span class="sourceLineNo">1460</span><a name="line.1460"></a>
+<span class="sourceLineNo">1461</span>                    if (biomegenbase.canSpawnLightningBolt() || biomegenbase.getEnableSnow())<a name="line.1461"></a>
+<span class="sourceLineNo">1462</span>                    {<a name="line.1462"></a>
+<span class="sourceLineNo">1463</span>                        int j2 = worldclient.getPrecipitationHeight(l1, k1);<a name="line.1463"></a>
+<span class="sourceLineNo">1464</span>                        int k2 = l - b0;<a name="line.1464"></a>
+<span class="sourceLineNo">1465</span>                        int l2 = l + b0;<a name="line.1465"></a>
+<span class="sourceLineNo">1466</span><a name="line.1466"></a>
+<span class="sourceLineNo">1467</span>                        if (k2 &lt; j2)<a name="line.1467"></a>
+<span class="sourceLineNo">1468</span>                        {<a name="line.1468"></a>
+<span class="sourceLineNo">1469</span>                            k2 = j2;<a name="line.1469"></a>
+<span class="sourceLineNo">1470</span>                        }<a name="line.1470"></a>
+<span class="sourceLineNo">1471</span><a name="line.1471"></a>
+<span class="sourceLineNo">1472</span>                        if (l2 &lt; j2)<a name="line.1472"></a>
+<span class="sourceLineNo">1473</span>                        {<a name="line.1473"></a>
+<span class="sourceLineNo">1474</span>                            l2 = j2;<a name="line.1474"></a>
+<span class="sourceLineNo">1475</span>                        }<a name="line.1475"></a>
+<span class="sourceLineNo">1476</span><a name="line.1476"></a>
+<span class="sourceLineNo">1477</span>                        float f8 = 1.0F;<a name="line.1477"></a>
+<span class="sourceLineNo">1478</span>                        int i3 = j2;<a name="line.1478"></a>
+<span class="sourceLineNo">1479</span><a name="line.1479"></a>
+<span class="sourceLineNo">1480</span>                        if (j2 &lt; j1)<a name="line.1480"></a>
+<span class="sourceLineNo">1481</span>                        {<a name="line.1481"></a>
+<span class="sourceLineNo">1482</span>                            i3 = j1;<a name="line.1482"></a>
+<span class="sourceLineNo">1483</span>                        }<a name="line.1483"></a>
+<span class="sourceLineNo">1484</span><a name="line.1484"></a>
+<span class="sourceLineNo">1485</span>                        if (k2 != l2)<a name="line.1485"></a>
+<span class="sourceLineNo">1486</span>                        {<a name="line.1486"></a>
+<span class="sourceLineNo">1487</span>                            this.random.setSeed((long)(l1 * l1 * 3121 + l1 * 45238971 ^ k1 * k1 * 418711 + k1 * 13761));<a name="line.1487"></a>
+<span class="sourceLineNo">1488</span>                            float f9 = biomegenbase.getFloatTemperature();<a name="line.1488"></a>
+<span class="sourceLineNo">1489</span>                            double d3;<a name="line.1489"></a>
+<span class="sourceLineNo">1490</span>                            float f10;<a name="line.1490"></a>
+<span class="sourceLineNo">1491</span><a name="line.1491"></a>
+<span class="sourceLineNo">1492</span>                            if (worldclient.getWorldChunkManager().getTemperatureAtHeight(f9, j2) &gt;= 0.15F)<a name="line.1492"></a>
+<span class="sourceLineNo">1493</span>                            {<a name="line.1493"></a>
+<span class="sourceLineNo">1494</span>                                if (b1 != 0)<a name="line.1494"></a>
+<span class="sourceLineNo">1495</span>                                {<a name="line.1495"></a>
+<span class="sourceLineNo">1496</span>                                    if (b1 &gt;= 0)<a name="line.1496"></a>
+<span class="sourceLineNo">1497</span>                                    {<a name="line.1497"></a>
+<span class="sourceLineNo">1498</span>                                        tessellator.draw();<a name="line.1498"></a>
+<span class="sourceLineNo">1499</span>                                    }<a name="line.1499"></a>
+<span class="sourceLineNo">1500</span><a name="line.1500"></a>
+<span class="sourceLineNo">1501</span>                                    b1 = 0;<a name="line.1501"></a>
+<span class="sourceLineNo">1502</span>                                    this.mc.renderEngine.func_98187_b("/environment/rain.png");<a name="line.1502"></a>
+<span class="sourceLineNo">1503</span>                                    tessellator.startDrawingQuads();<a name="line.1503"></a>
+<span class="sourceLineNo">1504</span>                                }<a name="line.1504"></a>
+<span class="sourceLineNo">1505</span><a name="line.1505"></a>
+<span class="sourceLineNo">1506</span>                                f10 = ((float)(this.rendererUpdateCount + l1 * l1 * 3121 + l1 * 45238971 + k1 * k1 * 418711 + k1 * 13761 &amp; 31) + par1) / 32.0F * (3.0F + this.random.nextFloat());<a name="line.1506"></a>
+<span class="sourceLineNo">1507</span>                                double d4 = (double)((float)l1 + 0.5F) - entityliving.posX;<a name="line.1507"></a>
+<span class="sourceLineNo">1508</span>                                d3 = (double)((float)k1 + 0.5F) - entityliving.posZ;<a name="line.1508"></a>
+<span class="sourceLineNo">1509</span>                                float f11 = MathHelper.sqrt_double(d4 * d4 + d3 * d3) / (float)b0;<a name="line.1509"></a>
+<span class="sourceLineNo">1510</span>                                float f12 = 1.0F;<a name="line.1510"></a>
+<span class="sourceLineNo">1511</span>                                tessellator.setBrightness(worldclient.getLightBrightnessForSkyBlocks(l1, i3, k1, 0));<a name="line.1511"></a>
+<span class="sourceLineNo">1512</span>                                tessellator.setColorRGBA_F(f12, f12, f12, ((1.0F - f11 * f11) * 0.5F + 0.5F) * f1);<a name="line.1512"></a>
+<span class="sourceLineNo">1513</span>                                tessellator.setTranslation(-d0 * 1.0D, -d1 * 1.0D, -d2 * 1.0D);<a name="line.1513"></a>
+<span class="sourceLineNo">1514</span>                                tessellator.addVertexWithUV((double)((float)l1 - f6) + 0.5D, (double)k2, (double)((float)k1 - f7) + 0.5D, (double)(0.0F * f8), (double)((float)k2 * f8 / 4.0F + f10 * f8));<a name="line.1514"></a>
+<span class="sourceLineNo">1515</span>                                tessellator.addVertexWithUV((double)((float)l1 + f6) + 0.5D, (double)k2, (double)((float)k1 + f7) + 0.5D, (double)(1.0F * f8), (double)((float)k2 * f8 / 4.0F + f10 * f8));<a name="line.1515"></a>
+<span class="sourceLineNo">1516</span>                                tessellator.addVertexWithUV((double)((float)l1 + f6) + 0.5D, (double)l2, (double)((float)k1 + f7) + 0.5D, (double)(1.0F * f8), (double)((float)l2 * f8 / 4.0F + f10 * f8));<a name="line.1516"></a>
+<span class="sourceLineNo">1517</span>                                tessellator.addVertexWithUV((double)((float)l1 - f6) + 0.5D, (double)l2, (double)((float)k1 - f7) + 0.5D, (double)(0.0F * f8), (double)((float)l2 * f8 / 4.0F + f10 * f8));<a name="line.1517"></a>
+<span class="sourceLineNo">1518</span>                                tessellator.setTranslation(0.0D, 0.0D, 0.0D);<a name="line.1518"></a>
+<span class="sourceLineNo">1519</span>                            }<a name="line.1519"></a>
+<span class="sourceLineNo">1520</span>                            else<a name="line.1520"></a>
+<span class="sourceLineNo">1521</span>                            {<a name="line.1521"></a>
+<span class="sourceLineNo">1522</span>                                if (b1 != 1)<a name="line.1522"></a>
+<span class="sourceLineNo">1523</span>                                {<a name="line.1523"></a>
+<span class="sourceLineNo">1524</span>                                    if (b1 &gt;= 0)<a name="line.1524"></a>
+<span class="sourceLineNo">1525</span>                                    {<a name="line.1525"></a>
+<span class="sourceLineNo">1526</span>                                        tessellator.draw();<a name="line.1526"></a>
+<span class="sourceLineNo">1527</span>                                    }<a name="line.1527"></a>
+<span class="sourceLineNo">1528</span><a name="line.1528"></a>
+<span class="sourceLineNo">1529</span>                                    b1 = 1;<a name="line.1529"></a>
+<span class="sourceLineNo">1530</span>                                    this.mc.renderEngine.func_98187_b("/environment/snow.png");<a name="line.1530"></a>
+<span class="sourceLineNo">1531</span>                                    tessellator.startDrawingQuads();<a name="line.1531"></a>
+<span class="sourceLineNo">1532</span>                                }<a name="line.1532"></a>
+<span class="sourceLineNo">1533</span><a name="line.1533"></a>
+<span class="sourceLineNo">1534</span>                                f10 = ((float)(this.rendererUpdateCount &amp; 511) + par1) / 512.0F;<a name="line.1534"></a>
+<span class="sourceLineNo">1535</span>                                float f13 = this.random.nextFloat() + f5 * 0.01F * (float)this.random.nextGaussian();<a name="line.1535"></a>
+<span class="sourceLineNo">1536</span>                                float f14 = this.random.nextFloat() + f5 * (float)this.random.nextGaussian() * 0.001F;<a name="line.1536"></a>
+<span class="sourceLineNo">1537</span>                                d3 = (double)((float)l1 + 0.5F) - entityliving.posX;<a name="line.1537"></a>
+<span class="sourceLineNo">1538</span>                                double d5 = (double)((float)k1 + 0.5F) - entityliving.posZ;<a name="line.1538"></a>
+<span class="sourceLineNo">1539</span>                                float f15 = MathHelper.sqrt_double(d3 * d3 + d5 * d5) / (float)b0;<a name="line.1539"></a>
+<span class="sourceLineNo">1540</span>                                float f16 = 1.0F;<a name="line.1540"></a>
+<span class="sourceLineNo">1541</span>                                tessellator.setBrightness((worldclient.getLightBrightnessForSkyBlocks(l1, i3, k1, 0) * 3 + 15728880) / 4);<a name="line.1541"></a>
+<span class="sourceLineNo">1542</span>                                tessellator.setColorRGBA_F(f16, f16, f16, ((1.0F - f15 * f15) * 0.3F + 0.5F) * f1);<a name="line.1542"></a>
+<span class="sourceLineNo">1543</span>                                tessellator.setTranslation(-d0 * 1.0D, -d1 * 1.0D, -d2 * 1.0D);<a name="line.1543"></a>
+<span class="sourceLineNo">1544</span>                                tessellator.addVertexWithUV((double)((float)l1 - f6) + 0.5D, (double)k2, (double)((float)k1 - f7) + 0.5D, (double)(0.0F * f8 + f13), (double)((float)k2 * f8 / 4.0F + f10 * f8 + f14));<a name="line.1544"></a>
+<span class="sourceLineNo">1545</span>                                tessellator.addVertexWithUV((double)((float)l1 + f6) + 0.5D, (double)k2, (double)((float)k1 + f7) + 0.5D, (double)(1.0F * f8 + f13), (double)((float)k2 * f8 / 4.0F + f10 * f8 + f14));<a name="line.1545"></a>
+<span class="sourceLineNo">1546</span>                                tessellator.addVertexWithUV((double)((float)l1 + f6) + 0.5D, (double)l2, (double)((float)k1 + f7) + 0.5D, (double)(1.0F * f8 + f13), (double)((float)l2 * f8 / 4.0F + f10 * f8 + f14));<a name="line.1546"></a>
+<span class="sourceLineNo">1547</span>                                tessellator.addVertexWithUV((double)((float)l1 - f6) + 0.5D, (double)l2, (double)((float)k1 - f7) + 0.5D, (double)(0.0F * f8 + f13), (double)((float)l2 * f8 / 4.0F + f10 * f8 + f14));<a name="line.1547"></a>
+<span class="sourceLineNo">1548</span>                                tessellator.setTranslation(0.0D, 0.0D, 0.0D);<a name="line.1548"></a>
+<span class="sourceLineNo">1549</span>                            }<a name="line.1549"></a>
+<span class="sourceLineNo">1550</span>                        }<a name="line.1550"></a>
+<span class="sourceLineNo">1551</span>                    }<a name="line.1551"></a>
+<span class="sourceLineNo">1552</span>                }<a name="line.1552"></a>
+<span class="sourceLineNo">1553</span>            }<a name="line.1553"></a>
+<span class="sourceLineNo">1554</span><a name="line.1554"></a>
+<span class="sourceLineNo">1555</span>            if (b1 &gt;= 0)<a name="line.1555"></a>
+<span class="sourceLineNo">1556</span>            {<a name="line.1556"></a>
+<span class="sourceLineNo">1557</span>                tessellator.draw();<a name="line.1557"></a>
+<span class="sourceLineNo">1558</span>            }<a name="line.1558"></a>
+<span class="sourceLineNo">1559</span><a name="line.1559"></a>
+<span class="sourceLineNo">1560</span>            GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.1560"></a>
+<span class="sourceLineNo">1561</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.1561"></a>
+<span class="sourceLineNo">1562</span>            GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);<a name="line.1562"></a>
+<span class="sourceLineNo">1563</span>            this.disableLightmap((double)par1);<a name="line.1563"></a>
+<span class="sourceLineNo">1564</span>        }<a name="line.1564"></a>
+<span class="sourceLineNo">1565</span>    }<a name="line.1565"></a>
+<span class="sourceLineNo">1566</span><a name="line.1566"></a>
+<span class="sourceLineNo">1567</span>    /**<a name="line.1567"></a>
+<span class="sourceLineNo">1568</span>     * Setup orthogonal projection for rendering GUI screen overlays<a name="line.1568"></a>
+<span class="sourceLineNo">1569</span>     */<a name="line.1569"></a>
+<span class="sourceLineNo">1570</span>    public void setupOverlayRendering()<a name="line.1570"></a>
+<span class="sourceLineNo">1571</span>    {<a name="line.1571"></a>
+<span class="sourceLineNo">1572</span>        ScaledResolution scaledresolution = new ScaledResolution(this.mc.gameSettings, this.mc.displayWidth, this.mc.displayHeight);<a name="line.1572"></a>
+<span class="sourceLineNo">1573</span>        GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);<a name="line.1573"></a>
+<span class="sourceLineNo">1574</span>        GL11.glMatrixMode(GL11.GL_PROJECTION);<a name="line.1574"></a>
+<span class="sourceLineNo">1575</span>        GL11.glLoadIdentity();<a name="line.1575"></a>
+<span class="sourceLineNo">1576</span>        GL11.glOrtho(0.0D, scaledresolution.getScaledWidth_double(), scaledresolution.getScaledHeight_double(), 0.0D, 1000.0D, 3000.0D);<a name="line.1576"></a>
+<span class="sourceLineNo">1577</span>        GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.1577"></a>
+<span class="sourceLineNo">1578</span>        GL11.glLoadIdentity();<a name="line.1578"></a>
+<span class="sourceLineNo">1579</span>        GL11.glTranslatef(0.0F, 0.0F, -2000.0F);<a name="line.1579"></a>
+<span class="sourceLineNo">1580</span>    }<a name="line.1580"></a>
+<span class="sourceLineNo">1581</span><a name="line.1581"></a>
+<span class="sourceLineNo">1582</span>    /**<a name="line.1582"></a>
+<span class="sourceLineNo">1583</span>     * calculates fog and calls glClearColor<a name="line.1583"></a>
+<span class="sourceLineNo">1584</span>     */<a name="line.1584"></a>
+<span class="sourceLineNo">1585</span>    private void updateFogColor(float par1)<a name="line.1585"></a>
+<span class="sourceLineNo">1586</span>    {<a name="line.1586"></a>
+<span class="sourceLineNo">1587</span>        WorldClient worldclient = this.mc.theWorld;<a name="line.1587"></a>
+<span class="sourceLineNo">1588</span>        EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.1588"></a>
+<span class="sourceLineNo">1589</span>        float f1 = 1.0F / (float)(4 - this.mc.gameSettings.renderDistance);<a name="line.1589"></a>
+<span class="sourceLineNo">1590</span>        f1 = 1.0F - (float)Math.pow((double)f1, 0.25D);<a name="line.1590"></a>
+<span class="sourceLineNo">1591</span>        Vec3 vec3 = worldclient.getSkyColor(this.mc.renderViewEntity, par1);<a name="line.1591"></a>
+<span class="sourceLineNo">1592</span>        float f2 = (float)vec3.xCoord;<a name="line.1592"></a>
+<span class="sourceLineNo">1593</span>        float f3 = (float)vec3.yCoord;<a name="line.1593"></a>
+<span class="sourceLineNo">1594</span>        float f4 = (float)vec3.zCoord;<a name="line.1594"></a>
+<span class="sourceLineNo">1595</span>        Vec3 vec31 = worldclient.getFogColor(par1);<a name="line.1595"></a>
+<span class="sourceLineNo">1596</span>        this.fogColorRed = (float)vec31.xCoord;<a name="line.1596"></a>
+<span class="sourceLineNo">1597</span>        this.fogColorGreen = (float)vec31.yCoord;<a name="line.1597"></a>
+<span class="sourceLineNo">1598</span>        this.fogColorBlue = (float)vec31.zCoord;<a name="line.1598"></a>
+<span class="sourceLineNo">1599</span>        float f5;<a name="line.1599"></a>
+<span class="sourceLineNo">1600</span><a name="line.1600"></a>
+<span class="sourceLineNo">1601</span>        if (this.mc.gameSettings.renderDistance &lt; 2)<a name="line.1601"></a>
+<span class="sourceLineNo">1602</span>        {<a name="line.1602"></a>
+<span class="sourceLineNo">1603</span>            Vec3 vec32 = MathHelper.sin(worldclient.getCelestialAngleRadians(par1)) &gt; 0.0F ? worldclient.getWorldVec3Pool().getVecFromPool(-1.0D, 0.0D, 0.0D) : worldclient.getWorldVec3Pool().getVecFromPool(1.0D, 0.0D, 0.0D);<a name="line.1603"></a>
+<span class="sourceLineNo">1604</span>            f5 = (float)entityliving.getLook(par1).dotProduct(vec32);<a name="line.1604"></a>
+<span class="sourceLineNo">1605</span><a name="line.1605"></a>
+<span class="sourceLineNo">1606</span>            if (f5 &lt; 0.0F)<a name="line.1606"></a>
+<span class="sourceLineNo">1607</span>            {<a name="line.1607"></a>
+<span class="sourceLineNo">1608</span>                f5 = 0.0F;<a name="line.1608"></a>
+<span class="sourceLineNo">1609</span>            }<a name="line.1609"></a>
+<span class="sourceLineNo">1610</span><a name="line.1610"></a>
+<span class="sourceLineNo">1611</span>            if (f5 &gt; 0.0F)<a name="line.1611"></a>
+<span class="sourceLineNo">1612</span>            {<a name="line.1612"></a>
+<span class="sourceLineNo">1613</span>                float[] afloat = worldclient.provider.calcSunriseSunsetColors(worldclient.getCelestialAngle(par1), par1);<a name="line.1613"></a>
+<span class="sourceLineNo">1614</span><a name="line.1614"></a>
+<span class="sourceLineNo">1615</span>                if (afloat != null)<a name="line.1615"></a>
+<span class="sourceLineNo">1616</span>                {<a name="line.1616"></a>
+<span class="sourceLineNo">1617</span>                    f5 *= afloat[3];<a name="line.1617"></a>
+<span class="sourceLineNo">1618</span>                    this.fogColorRed = this.fogColorRed * (1.0F - f5) + afloat[0] * f5;<a name="line.1618"></a>
+<span class="sourceLineNo">1619</span>                    this.fogColorGreen = this.fogColorGreen * (1.0F - f5) + afloat[1] * f5;<a name="line.1619"></a>
+<span class="sourceLineNo">1620</span>                    this.fogColorBlue = this.fogColorBlue * (1.0F - f5) + afloat[2] * f5;<a name="line.1620"></a>
+<span class="sourceLineNo">1621</span>                }<a name="line.1621"></a>
+<span class="sourceLineNo">1622</span>            }<a name="line.1622"></a>
+<span class="sourceLineNo">1623</span>        }<a name="line.1623"></a>
+<span class="sourceLineNo">1624</span><a name="line.1624"></a>
+<span class="sourceLineNo">1625</span>        this.fogColorRed += (f2 - this.fogColorRed) * f1;<a name="line.1625"></a>
+<span class="sourceLineNo">1626</span>        this.fogColorGreen += (f3 - this.fogColorGreen) * f1;<a name="line.1626"></a>
+<span class="sourceLineNo">1627</span>        this.fogColorBlue += (f4 - this.fogColorBlue) * f1;<a name="line.1627"></a>
+<span class="sourceLineNo">1628</span>        float f6 = worldclient.getRainStrength(par1);<a name="line.1628"></a>
+<span class="sourceLineNo">1629</span>        float f7;<a name="line.1629"></a>
+<span class="sourceLineNo">1630</span><a name="line.1630"></a>
+<span class="sourceLineNo">1631</span>        if (f6 &gt; 0.0F)<a name="line.1631"></a>
+<span class="sourceLineNo">1632</span>        {<a name="line.1632"></a>
+<span class="sourceLineNo">1633</span>            f5 = 1.0F - f6 * 0.5F;<a name="line.1633"></a>
+<span class="sourceLineNo">1634</span>            f7 = 1.0F - f6 * 0.4F;<a name="line.1634"></a>
+<span class="sourceLineNo">1635</span>            this.fogColorRed *= f5;<a name="line.1635"></a>
+<span class="sourceLineNo">1636</span>            this.fogColorGreen *= f5;<a name="line.1636"></a>
+<span class="sourceLineNo">1637</span>            this.fogColorBlue *= f7;<a name="line.1637"></a>
+<span class="sourceLineNo">1638</span>        }<a name="line.1638"></a>
+<span class="sourceLineNo">1639</span><a name="line.1639"></a>
+<span class="sourceLineNo">1640</span>        f5 = worldclient.getWeightedThunderStrength(par1);<a name="line.1640"></a>
+<span class="sourceLineNo">1641</span><a name="line.1641"></a>
+<span class="sourceLineNo">1642</span>        if (f5 &gt; 0.0F)<a name="line.1642"></a>
+<span class="sourceLineNo">1643</span>        {<a name="line.1643"></a>
+<span class="sourceLineNo">1644</span>            f7 = 1.0F - f5 * 0.5F;<a name="line.1644"></a>
+<span class="sourceLineNo">1645</span>            this.fogColorRed *= f7;<a name="line.1645"></a>
+<span class="sourceLineNo">1646</span>            this.fogColorGreen *= f7;<a name="line.1646"></a>
+<span class="sourceLineNo">1647</span>            this.fogColorBlue *= f7;<a name="line.1647"></a>
+<span class="sourceLineNo">1648</span>        }<a name="line.1648"></a>
+<span class="sourceLineNo">1649</span><a name="line.1649"></a>
+<span class="sourceLineNo">1650</span>        int i = ActiveRenderInfo.getBlockIdAtEntityViewpoint(this.mc.theWorld, entityliving, par1);<a name="line.1650"></a>
+<span class="sourceLineNo">1651</span><a name="line.1651"></a>
+<span class="sourceLineNo">1652</span>        if (this.cloudFog)<a name="line.1652"></a>
+<span class="sourceLineNo">1653</span>        {<a name="line.1653"></a>
+<span class="sourceLineNo">1654</span>            Vec3 vec33 = worldclient.getCloudColour(par1);<a name="line.1654"></a>
+<span class="sourceLineNo">1655</span>            this.fogColorRed = (float)vec33.xCoord;<a name="line.1655"></a>
+<span class="sourceLineNo">1656</span>            this.fogColorGreen = (float)vec33.yCoord;<a name="line.1656"></a>
+<span class="sourceLineNo">1657</span>            this.fogColorBlue = (float)vec33.zCoord;<a name="line.1657"></a>
+<span class="sourceLineNo">1658</span>        }<a name="line.1658"></a>
+<span class="sourceLineNo">1659</span>        else if (i != 0 &amp;&amp; Block.blocksList[i].blockMaterial == Material.water)<a name="line.1659"></a>
+<span class="sourceLineNo">1660</span>        {<a name="line.1660"></a>
+<span class="sourceLineNo">1661</span>            this.fogColorRed = 0.02F;<a name="line.1661"></a>
+<span class="sourceLineNo">1662</span>            this.fogColorGreen = 0.02F;<a name="line.1662"></a>
+<span class="sourceLineNo">1663</span>            this.fogColorBlue = 0.2F;<a name="line.1663"></a>
+<span class="sourceLineNo">1664</span>        }<a name="line.1664"></a>
+<span class="sourceLineNo">1665</span>        else if (i != 0 &amp;&amp; Block.blocksList[i].blockMaterial == Material.lava)<a name="line.1665"></a>
+<span class="sourceLineNo">1666</span>        {<a name="line.1666"></a>
+<span class="sourceLineNo">1667</span>            this.fogColorRed = 0.6F;<a name="line.1667"></a>
+<span class="sourceLineNo">1668</span>            this.fogColorGreen = 0.1F;<a name="line.1668"></a>
+<span class="sourceLineNo">1669</span>            this.fogColorBlue = 0.0F;<a name="line.1669"></a>
+<span class="sourceLineNo">1670</span>        }<a name="line.1670"></a>
+<span class="sourceLineNo">1671</span><a name="line.1671"></a>
+<span class="sourceLineNo">1672</span>        float f8 = this.fogColor2 + (this.fogColor1 - this.fogColor2) * par1;<a name="line.1672"></a>
+<span class="sourceLineNo">1673</span>        this.fogColorRed *= f8;<a name="line.1673"></a>
+<span class="sourceLineNo">1674</span>        this.fogColorGreen *= f8;<a name="line.1674"></a>
+<span class="sourceLineNo">1675</span>        this.fogColorBlue *= f8;<a name="line.1675"></a>
+<span class="sourceLineNo">1676</span>        double d0 = (entityliving.lastTickPosY + (entityliving.posY - entityliving.lastTickPosY) * (double)par1) * worldclient.provider.getVoidFogYFactor();<a name="line.1676"></a>
+<span class="sourceLineNo">1677</span><a name="line.1677"></a>
+<span class="sourceLineNo">1678</span>        if (entityliving.isPotionActive(Potion.blindness))<a name="line.1678"></a>
+<span class="sourceLineNo">1679</span>        {<a name="line.1679"></a>
+<span class="sourceLineNo">1680</span>            int j = entityliving.getActivePotionEffect(Potion.blindness).getDuration();<a name="line.1680"></a>
+<span class="sourceLineNo">1681</span><a name="line.1681"></a>
+<span class="sourceLineNo">1682</span>            if (j &lt; 20)<a name="line.1682"></a>
+<span class="sourceLineNo">1683</span>            {<a name="line.1683"></a>
+<span class="sourceLineNo">1684</span>                d0 *= (double)(1.0F - (float)j / 20.0F);<a name="line.1684"></a>
+<span class="sourceLineNo">1685</span>            }<a name="line.1685"></a>
+<span class="sourceLineNo">1686</span>            else<a name="line.1686"></a>
+<span class="sourceLineNo">1687</span>            {<a name="line.1687"></a>
+<span class="sourceLineNo">1688</span>                d0 = 0.0D;<a name="line.1688"></a>
+<span class="sourceLineNo">1689</span>            }<a name="line.1689"></a>
+<span class="sourceLineNo">1690</span>        }<a name="line.1690"></a>
+<span class="sourceLineNo">1691</span><a name="line.1691"></a>
+<span class="sourceLineNo">1692</span>        if (d0 &lt; 1.0D)<a name="line.1692"></a>
+<span class="sourceLineNo">1693</span>        {<a name="line.1693"></a>
+<span class="sourceLineNo">1694</span>            if (d0 &lt; 0.0D)<a name="line.1694"></a>
+<span class="sourceLineNo">1695</span>            {<a name="line.1695"></a>
+<span class="sourceLineNo">1696</span>                d0 = 0.0D;<a name="line.1696"></a>
+<span class="sourceLineNo">1697</span>            }<a name="line.1697"></a>
+<span class="sourceLineNo">1698</span><a name="line.1698"></a>
+<span class="sourceLineNo">1699</span>            d0 *= d0;<a name="line.1699"></a>
+<span class="sourceLineNo">1700</span>            this.fogColorRed = (float)((double)this.fogColorRed * d0);<a name="line.1700"></a>
+<span class="sourceLineNo">1701</span>            this.fogColorGreen = (float)((double)this.fogColorGreen * d0);<a name="line.1701"></a>
+<span class="sourceLineNo">1702</span>            this.fogColorBlue = (float)((double)this.fogColorBlue * d0);<a name="line.1702"></a>
+<span class="sourceLineNo">1703</span>        }<a name="line.1703"></a>
+<span class="sourceLineNo">1704</span><a name="line.1704"></a>
+<span class="sourceLineNo">1705</span>        float f9;<a name="line.1705"></a>
+<span class="sourceLineNo">1706</span><a name="line.1706"></a>
+<span class="sourceLineNo">1707</span>        if (this.field_82831_U &gt; 0.0F)<a name="line.1707"></a>
+<span class="sourceLineNo">1708</span>        {<a name="line.1708"></a>
+<span class="sourceLineNo">1709</span>            f9 = this.field_82832_V + (this.field_82831_U - this.field_82832_V) * par1;<a name="line.1709"></a>
+<span class="sourceLineNo">1710</span>            this.fogColorRed = this.fogColorRed * (1.0F - f9) + this.fogColorRed * 0.7F * f9;<a name="line.1710"></a>
+<span class="sourceLineNo">1711</span>            this.fogColorGreen = this.fogColorGreen * (1.0F - f9) + this.fogColorGreen * 0.6F * f9;<a name="line.1711"></a>
+<span class="sourceLineNo">1712</span>            this.fogColorBlue = this.fogColorBlue * (1.0F - f9) + this.fogColorBlue * 0.6F * f9;<a name="line.1712"></a>
+<span class="sourceLineNo">1713</span>        }<a name="line.1713"></a>
+<span class="sourceLineNo">1714</span><a name="line.1714"></a>
+<span class="sourceLineNo">1715</span>        float f10;<a name="line.1715"></a>
+<span class="sourceLineNo">1716</span><a name="line.1716"></a>
+<span class="sourceLineNo">1717</span>        if (entityliving.isPotionActive(Potion.nightVision))<a name="line.1717"></a>
+<span class="sourceLineNo">1718</span>        {<a name="line.1718"></a>
+<span class="sourceLineNo">1719</span>            f9 = this.getNightVisionBrightness(this.mc.thePlayer, par1);<a name="line.1719"></a>
+<span class="sourceLineNo">1720</span>            f10 = 1.0F / this.fogColorRed;<a name="line.1720"></a>
+<span class="sourceLineNo">1721</span><a name="line.1721"></a>
+<span class="sourceLineNo">1722</span>            if (f10 &gt; 1.0F / this.fogColorGreen)<a name="line.1722"></a>
+<span class="sourceLineNo">1723</span>            {<a name="line.1723"></a>
+<span class="sourceLineNo">1724</span>                f10 = 1.0F / this.fogColorGreen;<a name="line.1724"></a>
+<span class="sourceLineNo">1725</span>            }<a name="line.1725"></a>
+<span class="sourceLineNo">1726</span><a name="line.1726"></a>
+<span class="sourceLineNo">1727</span>            if (f10 &gt; 1.0F / this.fogColorBlue)<a name="line.1727"></a>
+<span class="sourceLineNo">1728</span>            {<a name="line.1728"></a>
+<span class="sourceLineNo">1729</span>                f10 = 1.0F / this.fogColorBlue;<a name="line.1729"></a>
+<span class="sourceLineNo">1730</span>            }<a name="line.1730"></a>
+<span class="sourceLineNo">1731</span><a name="line.1731"></a>
+<span class="sourceLineNo">1732</span>            this.fogColorRed = this.fogColorRed * (1.0F - f9) + this.fogColorRed * f10 * f9;<a name="line.1732"></a>
+<span class="sourceLineNo">1733</span>            this.fogColorGreen = this.fogColorGreen * (1.0F - f9) + this.fogColorGreen * f10 * f9;<a name="line.1733"></a>
+<span class="sourceLineNo">1734</span>            this.fogColorBlue = this.fogColorBlue * (1.0F - f9) + this.fogColorBlue * f10 * f9;<a name="line.1734"></a>
+<span class="sourceLineNo">1735</span>        }<a name="line.1735"></a>
+<span class="sourceLineNo">1736</span><a name="line.1736"></a>
+<span class="sourceLineNo">1737</span>        if (this.mc.gameSettings.anaglyph)<a name="line.1737"></a>
+<span class="sourceLineNo">1738</span>        {<a name="line.1738"></a>
+<span class="sourceLineNo">1739</span>            f9 = (this.fogColorRed * 30.0F + this.fogColorGreen * 59.0F + this.fogColorBlue * 11.0F) / 100.0F;<a name="line.1739"></a>
+<span class="sourceLineNo">1740</span>            f10 = (this.fogColorRed * 30.0F + this.fogColorGreen * 70.0F) / 100.0F;<a name="line.1740"></a>
+<span class="sourceLineNo">1741</span>            float f11 = (this.fogColorRed * 30.0F + this.fogColorBlue * 70.0F) / 100.0F;<a name="line.1741"></a>
+<span class="sourceLineNo">1742</span>            this.fogColorRed = f9;<a name="line.1742"></a>
+<span class="sourceLineNo">1743</span>            this.fogColorGreen = f10;<a name="line.1743"></a>
+<span class="sourceLineNo">1744</span>            this.fogColorBlue = f11;<a name="line.1744"></a>
+<span class="sourceLineNo">1745</span>        }<a name="line.1745"></a>
+<span class="sourceLineNo">1746</span><a name="line.1746"></a>
+<span class="sourceLineNo">1747</span>        GL11.glClearColor(this.fogColorRed, this.fogColorGreen, this.fogColorBlue, 0.0F);<a name="line.1747"></a>
+<span class="sourceLineNo">1748</span>    }<a name="line.1748"></a>
+<span class="sourceLineNo">1749</span><a name="line.1749"></a>
+<span class="sourceLineNo">1750</span>    /**<a name="line.1750"></a>
+<span class="sourceLineNo">1751</span>     * Sets up the fog to be rendered. If the arg passed in is -1 the fog starts at 0 and goes to 80% of far plane<a name="line.1751"></a>
+<span class="sourceLineNo">1752</span>     * distance and is used for sky rendering.<a name="line.1752"></a>
+<span class="sourceLineNo">1753</span>     */<a name="line.1753"></a>
+<span class="sourceLineNo">1754</span>    private void setupFog(int par1, float par2)<a name="line.1754"></a>
+<span class="sourceLineNo">1755</span>    {<a name="line.1755"></a>
+<span class="sourceLineNo">1756</span>        EntityLiving entityliving = this.mc.renderViewEntity;<a name="line.1756"></a>
+<span class="sourceLineNo">1757</span>        boolean flag = false;<a name="line.1757"></a>
+<span class="sourceLineNo">1758</span><a name="line.1758"></a>
+<span class="sourceLineNo">1759</span>        if (entityliving instanceof EntityPlayer)<a name="line.1759"></a>
+<span class="sourceLineNo">1760</span>        {<a name="line.1760"></a>
+<span class="sourceLineNo">1761</span>            flag = ((EntityPlayer)entityliving).capabilities.isCreativeMode;<a name="line.1761"></a>
+<span class="sourceLineNo">1762</span>        }<a name="line.1762"></a>
+<span class="sourceLineNo">1763</span><a name="line.1763"></a>
+<span class="sourceLineNo">1764</span>        if (par1 == 999)<a name="line.1764"></a>
+<span class="sourceLineNo">1765</span>        {<a name="line.1765"></a>
+<span class="sourceLineNo">1766</span>            GL11.glFog(GL11.GL_FOG_COLOR, this.setFogColorBuffer(0.0F, 0.0F, 0.0F, 1.0F));<a name="line.1766"></a>
+<span class="sourceLineNo">1767</span>            GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_LINEAR);<a name="line.1767"></a>
+<span class="sourceLineNo">1768</span>            GL11.glFogf(GL11.GL_FOG_START, 0.0F);<a name="line.1768"></a>
+<span class="sourceLineNo">1769</span>            GL11.glFogf(GL11.GL_FOG_END, 8.0F);<a name="line.1769"></a>
+<span class="sourceLineNo">1770</span><a name="line.1770"></a>
+<span class="sourceLineNo">1771</span>            if (GLContext.getCapabilities().GL_NV_fog_distance)<a name="line.1771"></a>
+<span class="sourceLineNo">1772</span>            {<a name="line.1772"></a>
+<span class="sourceLineNo">1773</span>                GL11.glFogi(34138, 34139);<a name="line.1773"></a>
+<span class="sourceLineNo">1774</span>            }<a name="line.1774"></a>
+<span class="sourceLineNo">1775</span><a name="line.1775"></a>
+<span class="sourceLineNo">1776</span>            GL11.glFogf(GL11.GL_FOG_START, 0.0F);<a name="line.1776"></a>
+<span class="sourceLineNo">1777</span>        }<a name="line.1777"></a>
+<span class="sourceLineNo">1778</span>        else<a name="line.1778"></a>
+<span class="sourceLineNo">1779</span>        {<a name="line.1779"></a>
+<span class="sourceLineNo">1780</span>            GL11.glFog(GL11.GL_FOG_COLOR, this.setFogColorBuffer(this.fogColorRed, this.fogColorGreen, this.fogColorBlue, 1.0F));<a name="line.1780"></a>
+<span class="sourceLineNo">1781</span>            GL11.glNormal3f(0.0F, -1.0F, 0.0F);<a name="line.1781"></a>
+<span class="sourceLineNo">1782</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.1782"></a>
+<span class="sourceLineNo">1783</span>            int j = ActiveRenderInfo.getBlockIdAtEntityViewpoint(this.mc.theWorld, entityliving, par2);<a name="line.1783"></a>
+<span class="sourceLineNo">1784</span>            float f1;<a name="line.1784"></a>
+<span class="sourceLineNo">1785</span><a name="line.1785"></a>
+<span class="sourceLineNo">1786</span>            if (entityliving.isPotionActive(Potion.blindness))<a name="line.1786"></a>
+<span class="sourceLineNo">1787</span>            {<a name="line.1787"></a>
+<span class="sourceLineNo">1788</span>                f1 = 5.0F;<a name="line.1788"></a>
+<span class="sourceLineNo">1789</span>                int k = entityliving.getActivePotionEffect(Potion.blindness).getDuration();<a name="line.1789"></a>
+<span class="sourceLineNo">1790</span><a name="line.1790"></a>
+<span class="sourceLineNo">1791</span>                if (k &lt; 20)<a name="line.1791"></a>
+<span class="sourceLineNo">1792</span>                {<a name="line.1792"></a>
+<span class="sourceLineNo">1793</span>                    f1 = 5.0F + (this.farPlaneDistance - 5.0F) * (1.0F - (float)k / 20.0F);<a name="line.1793"></a>
+<span class="sourceLineNo">1794</span>                }<a name="line.1794"></a>
+<span class="sourceLineNo">1795</span><a name="line.1795"></a>
+<span class="sourceLineNo">1796</span>                GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_LINEAR);<a name="line.1796"></a>
+<span class="sourceLineNo">1797</span><a name="line.1797"></a>
+<span class="sourceLineNo">1798</span>                if (par1 &lt; 0)<a name="line.1798"></a>
+<span class="sourceLineNo">1799</span>                {<a name="line.1799"></a>
+<span class="sourceLineNo">1800</span>                    GL11.glFogf(GL11.GL_FOG_START, 0.0F);<a name="line.1800"></a>
+<span class="sourceLineNo">1801</span>                    GL11.glFogf(GL11.GL_FOG_END, f1 * 0.8F);<a name="line.1801"></a>
+<span class="sourceLineNo">1802</span>                }<a name="line.1802"></a>
+<span class="sourceLineNo">1803</span>                else<a name="line.1803"></a>
+<span class="sourceLineNo">1804</span>                {<a name="line.1804"></a>
+<span class="sourceLineNo">1805</span>                    GL11.glFogf(GL11.GL_FOG_START, f1 * 0.25F);<a name="line.1805"></a>
+<span class="sourceLineNo">1806</span>                    GL11.glFogf(GL11.GL_FOG_END, f1);<a name="line.1806"></a>
+<span class="sourceLineNo">1807</span>                }<a name="line.1807"></a>
+<span class="sourceLineNo">1808</span><a name="line.1808"></a>
+<span class="sourceLineNo">1809</span>                if (GLContext.getCapabilities().GL_NV_fog_distance)<a name="line.1809"></a>
+<span class="sourceLineNo">1810</span>                {<a name="line.1810"></a>
+<span class="sourceLineNo">1811</span>                    GL11.glFogi(34138, 34139);<a name="line.1811"></a>
+<span class="sourceLineNo">1812</span>                }<a name="line.1812"></a>
+<span class="sourceLineNo">1813</span>            }<a name="line.1813"></a>
+<span class="sourceLineNo">1814</span>            else<a name="line.1814"></a>
+<span class="sourceLineNo">1815</span>            {<a name="line.1815"></a>
+<span class="sourceLineNo">1816</span>                float f2;<a name="line.1816"></a>
+<span class="sourceLineNo">1817</span>                float f3;<a name="line.1817"></a>
+<span class="sourceLineNo">1818</span>                float f4;<a name="line.1818"></a>
+<span class="sourceLineNo">1819</span>                float f5;<a name="line.1819"></a>
+<span class="sourceLineNo">1820</span>                float f6;<a name="line.1820"></a>
+<span class="sourceLineNo">1821</span><a name="line.1821"></a>
+<span class="sourceLineNo">1822</span>                if (this.cloudFog)<a name="line.1822"></a>
+<span class="sourceLineNo">1823</span>                {<a name="line.1823"></a>
+<span class="sourceLineNo">1824</span>                    GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_EXP);<a name="line.1824"></a>
+<span class="sourceLineNo">1825</span>                    GL11.glFogf(GL11.GL_FOG_DENSITY, 0.1F);<a name="line.1825"></a>
+<span class="sourceLineNo">1826</span>                    f1 = 1.0F;<a name="line.1826"></a>
+<span class="sourceLineNo">1827</span>                    f6 = 1.0F;<a name="line.1827"></a>
+<span class="sourceLineNo">1828</span>                    f2 = 1.0F;<a name="line.1828"></a>
+<span class="sourceLineNo">1829</span><a name="line.1829"></a>
+<span class="sourceLineNo">1830</span>                    if (this.mc.gameSettings.anaglyph)<a name="line.1830"></a>
+<span class="sourceLineNo">1831</span>                    {<a name="line.1831"></a>
+<span class="sourceLineNo">1832</span>                        f3 = (f1 * 30.0F + f6 * 59.0F + f2 * 11.0F) / 100.0F;<a name="line.1832"></a>
+<span class="sourceLineNo">1833</span>                        f4 = (f1 * 30.0F + f6 * 70.0F) / 100.0F;<a name="line.1833"></a>
+<span class="sourceLineNo">1834</span>                        f5 = (f1 * 30.0F + f2 * 70.0F) / 100.0F;<a name="line.1834"></a>
+<span class="sourceLineNo">1835</span>                    }<a name="line.1835"></a>
+<span class="sourceLineNo">1836</span>                }<a name="line.1836"></a>
+<span class="sourceLineNo">1837</span>                else if (j &gt; 0 &amp;&amp; Block.blocksList[j].blockMaterial == Material.water)<a name="line.1837"></a>
+<span class="sourceLineNo">1838</span>                {<a name="line.1838"></a>
+<span class="sourceLineNo">1839</span>                    GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_EXP);<a name="line.1839"></a>
+<span class="sourceLineNo">1840</span><a name="line.1840"></a>
+<span class="sourceLineNo">1841</span>                    if (entityliving.isPotionActive(Potion.waterBreathing))<a name="line.1841"></a>
+<span class="sourceLineNo">1842</span>                    {<a name="line.1842"></a>
+<span class="sourceLineNo">1843</span>                        GL11.glFogf(GL11.GL_FOG_DENSITY, 0.05F);<a name="line.1843"></a>
+<span class="sourceLineNo">1844</span>                    }<a name="line.1844"></a>
+<span class="sourceLineNo">1845</span>                    else<a name="line.1845"></a>
+<span class="sourceLineNo">1846</span>                    {<a name="line.1846"></a>
+<span class="sourceLineNo">1847</span>                        GL11.glFogf(GL11.GL_FOG_DENSITY, 0.1F);<a name="line.1847"></a>
+<span class="sourceLineNo">1848</span>                    }<a name="line.1848"></a>
+<span class="sourceLineNo">1849</span><a name="line.1849"></a>
+<span class="sourceLineNo">1850</span>                    f1 = 0.4F;<a name="line.1850"></a>
+<span class="sourceLineNo">1851</span>                    f6 = 0.4F;<a name="line.1851"></a>
+<span class="sourceLineNo">1852</span>                    f2 = 0.9F;<a name="line.1852"></a>
+<span class="sourceLineNo">1853</span><a name="line.1853"></a>
+<span class="sourceLineNo">1854</span>                    if (this.mc.gameSettings.anaglyph)<a name="line.1854"></a>
+<span class="sourceLineNo">1855</span>                    {<a name="line.1855"></a>
+<span class="sourceLineNo">1856</span>                        f3 = (f1 * 30.0F + f6 * 59.0F + f2 * 11.0F) / 100.0F;<a name="line.1856"></a>
+<span class="sourceLineNo">1857</span>                        f4 = (f1 * 30.0F + f6 * 70.0F) / 100.0F;<a name="line.1857"></a>
+<span class="sourceLineNo">1858</span>                        f5 = (f1 * 30.0F + f2 * 70.0F) / 100.0F;<a name="line.1858"></a>
+<span class="sourceLineNo">1859</span>                    }<a name="line.1859"></a>
+<span class="sourceLineNo">1860</span>                }<a name="line.1860"></a>
+<span class="sourceLineNo">1861</span>                else if (j &gt; 0 &amp;&amp; Block.blocksList[j].blockMaterial == Material.lava)<a name="line.1861"></a>
+<span class="sourceLineNo">1862</span>                {<a name="line.1862"></a>
+<span class="sourceLineNo">1863</span>                    GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_EXP);<a name="line.1863"></a>
+<span class="sourceLineNo">1864</span>                    GL11.glFogf(GL11.GL_FOG_DENSITY, 2.0F);<a name="line.1864"></a>
+<span class="sourceLineNo">1865</span>                    f1 = 0.4F;<a name="line.1865"></a>
+<span class="sourceLineNo">1866</span>                    f6 = 0.3F;<a name="line.1866"></a>
+<span class="sourceLineNo">1867</span>                    f2 = 0.3F;<a name="line.1867"></a>
+<span class="sourceLineNo">1868</span><a name="line.1868"></a>
+<span class="sourceLineNo">1869</span>                    if (this.mc.gameSettings.anaglyph)<a name="line.1869"></a>
+<span class="sourceLineNo">1870</span>                    {<a name="line.1870"></a>
+<span class="sourceLineNo">1871</span>                        f3 = (f1 * 30.0F + f6 * 59.0F + f2 * 11.0F) / 100.0F;<a name="line.1871"></a>
+<span class="sourceLineNo">1872</span>                        f4 = (f1 * 30.0F + f6 * 70.0F) / 100.0F;<a name="line.1872"></a>
+<span class="sourceLineNo">1873</span>                        f5 = (f1 * 30.0F + f2 * 70.0F) / 100.0F;<a name="line.1873"></a>
+<span class="sourceLineNo">1874</span>                    }<a name="line.1874"></a>
+<span class="sourceLineNo">1875</span>                }<a name="line.1875"></a>
+<span class="sourceLineNo">1876</span>                else<a name="line.1876"></a>
+<span class="sourceLineNo">1877</span>                {<a name="line.1877"></a>
+<span class="sourceLineNo">1878</span>                    f1 = this.farPlaneDistance;<a name="line.1878"></a>
+<span class="sourceLineNo">1879</span><a name="line.1879"></a>
+<span class="sourceLineNo">1880</span>                    if (this.mc.theWorld.provider.getWorldHasVoidParticles() &amp;&amp; !flag)<a name="line.1880"></a>
+<span class="sourceLineNo">1881</span>                    {<a name="line.1881"></a>
+<span class="sourceLineNo">1882</span>                        double d0 = (double)((entityliving.getBrightnessForRender(par2) &amp; 15728640) &gt;&gt; 20) / 16.0D + (entityliving.lastTickPosY + (entityliving.posY - entityliving.lastTickPosY) * (double)par2 + 4.0D) / 32.0D;<a name="line.1882"></a>
+<span class="sourceLineNo">1883</span><a name="line.1883"></a>
+<span class="sourceLineNo">1884</span>                        if (d0 &lt; 1.0D)<a name="line.1884"></a>
+<span class="sourceLineNo">1885</span>                        {<a name="line.1885"></a>
+<span class="sourceLineNo">1886</span>                            if (d0 &lt; 0.0D)<a name="line.1886"></a>
+<span class="sourceLineNo">1887</span>                            {<a name="line.1887"></a>
+<span class="sourceLineNo">1888</span>                                d0 = 0.0D;<a name="line.1888"></a>
+<span class="sourceLineNo">1889</span>                            }<a name="line.1889"></a>
+<span class="sourceLineNo">1890</span><a name="line.1890"></a>
+<span class="sourceLineNo">1891</span>                            d0 *= d0;<a name="line.1891"></a>
+<span class="sourceLineNo">1892</span>                            f3 = 100.0F * (float)d0;<a name="line.1892"></a>
+<span class="sourceLineNo">1893</span><a name="line.1893"></a>
+<span class="sourceLineNo">1894</span>                            if (f3 &lt; 5.0F)<a name="line.1894"></a>
+<span class="sourceLineNo">1895</span>                            {<a name="line.1895"></a>
+<span class="sourceLineNo">1896</span>                                f3 = 5.0F;<a name="line.1896"></a>
+<span class="sourceLineNo">1897</span>                            }<a name="line.1897"></a>
+<span class="sourceLineNo">1898</span><a name="line.1898"></a>
+<span class="sourceLineNo">1899</span>                            if (f1 &gt; f3)<a name="line.1899"></a>
+<span class="sourceLineNo">1900</span>                            {<a name="line.1900"></a>
+<span class="sourceLineNo">1901</span>                                f1 = f3;<a name="line.1901"></a>
+<span class="sourceLineNo">1902</span>                            }<a name="line.1902"></a>
+<span class="sourceLineNo">1903</span>                        }<a name="line.1903"></a>
+<span class="sourceLineNo">1904</span>                    }<a name="line.1904"></a>
+<span class="sourceLineNo">1905</span><a name="line.1905"></a>
+<span class="sourceLineNo">1906</span>                    GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_LINEAR);<a name="line.1906"></a>
+<span class="sourceLineNo">1907</span><a name="line.1907"></a>
+<span class="sourceLineNo">1908</span>                    if (par1 &lt; 0)<a name="line.1908"></a>
+<span class="sourceLineNo">1909</span>                    {<a name="line.1909"></a>
+<span class="sourceLineNo">1910</span>                        GL11.glFogf(GL11.GL_FOG_START, 0.0F);<a name="line.1910"></a>
+<span class="sourceLineNo">1911</span>                        GL11.glFogf(GL11.GL_FOG_END, f1 * 0.8F);<a name="line.1911"></a>
+<span class="sourceLineNo">1912</span>                    }<a name="line.1912"></a>
+<span class="sourceLineNo">1913</span>                    else<a name="line.1913"></a>
+<span class="sourceLineNo">1914</span>                    {<a name="line.1914"></a>
+<span class="sourceLineNo">1915</span>                        GL11.glFogf(GL11.GL_FOG_START, f1 * 0.25F);<a name="line.1915"></a>
+<span class="sourceLineNo">1916</span>                        GL11.glFogf(GL11.GL_FOG_END, f1);<a name="line.1916"></a>
+<span class="sourceLineNo">1917</span>                    }<a name="line.1917"></a>
+<span class="sourceLineNo">1918</span><a name="line.1918"></a>
+<span class="sourceLineNo">1919</span>                    if (GLContext.getCapabilities().GL_NV_fog_distance)<a name="line.1919"></a>
+<span class="sourceLineNo">1920</span>                    {<a name="line.1920"></a>
+<span class="sourceLineNo">1921</span>                        GL11.glFogi(34138, 34139);<a name="line.1921"></a>
+<span class="sourceLineNo">1922</span>                    }<a name="line.1922"></a>
+<span class="sourceLineNo">1923</span><a name="line.1923"></a>
+<span class="sourceLineNo">1924</span>                    if (this.mc.theWorld.provider.doesXZShowFog((int)entityliving.posX, (int)entityliving.posZ))<a name="line.1924"></a>
+<span class="sourceLineNo">1925</span>                    {<a name="line.1925"></a>
+<span class="sourceLineNo">1926</span>                        GL11.glFogf(GL11.GL_FOG_START, f1 * 0.05F);<a name="line.1926"></a>
+<span class="sourceLineNo">1927</span>                        GL11.glFogf(GL11.GL_FOG_END, Math.min(f1, 192.0F) * 0.5F);<a name="line.1927"></a>
+<span class="sourceLineNo">1928</span>                    }<a name="line.1928"></a>
+<span class="sourceLineNo">1929</span>                }<a name="line.1929"></a>
+<span class="sourceLineNo">1930</span>            }<a name="line.1930"></a>
+<span class="sourceLineNo">1931</span><a name="line.1931"></a>
+<span class="sourceLineNo">1932</span>            GL11.glEnable(GL11.GL_COLOR_MATERIAL);<a name="line.1932"></a>
+<span class="sourceLineNo">1933</span>            GL11.glColorMaterial(GL11.GL_FRONT, GL11.GL_AMBIENT);<a name="line.1933"></a>
+<span class="sourceLineNo">1934</span>        }<a name="line.1934"></a>
+<span class="sourceLineNo">1935</span>    }<a name="line.1935"></a>
+<span class="sourceLineNo">1936</span><a name="line.1936"></a>
+<span class="sourceLineNo">1937</span>    /**<a name="line.1937"></a>
+<span class="sourceLineNo">1938</span>     * Update and return fogColorBuffer with the RGBA values passed as arguments<a name="line.1938"></a>
+<span class="sourceLineNo">1939</span>     */<a name="line.1939"></a>
+<span class="sourceLineNo">1940</span>    private FloatBuffer setFogColorBuffer(float par1, float par2, float par3, float par4)<a name="line.1940"></a>
+<span class="sourceLineNo">1941</span>    {<a name="line.1941"></a>
+<span class="sourceLineNo">1942</span>        this.fogColorBuffer.clear();<a name="line.1942"></a>
+<span class="sourceLineNo">1943</span>        this.fogColorBuffer.put(par1).put(par2).put(par3).put(par4);<a name="line.1943"></a>
+<span class="sourceLineNo">1944</span>        this.fogColorBuffer.flip();<a name="line.1944"></a>
+<span class="sourceLineNo">1945</span>        return this.fogColorBuffer;<a name="line.1945"></a>
+<span class="sourceLineNo">1946</span>    }<a name="line.1946"></a>
+<span class="sourceLineNo">1947</span><a name="line.1947"></a>
+<span class="sourceLineNo">1948</span>    /**<a name="line.1948"></a>
+<span class="sourceLineNo">1949</span>     * Converts performance value (0-2) to FPS (35-200)<a name="line.1949"></a>
+<span class="sourceLineNo">1950</span>     */<a name="line.1950"></a>
+<span class="sourceLineNo">1951</span>    public static int performanceToFps(int par0)<a name="line.1951"></a>
+<span class="sourceLineNo">1952</span>    {<a name="line.1952"></a>
+<span class="sourceLineNo">1953</span>        short short1 = 200;<a name="line.1953"></a>
+<span class="sourceLineNo">1954</span><a name="line.1954"></a>
+<span class="sourceLineNo">1955</span>        if (par0 == 1)<a name="line.1955"></a>
+<span class="sourceLineNo">1956</span>        {<a name="line.1956"></a>
+<span class="sourceLineNo">1957</span>            short1 = 120;<a name="line.1957"></a>
+<span class="sourceLineNo">1958</span>        }<a name="line.1958"></a>
+<span class="sourceLineNo">1959</span><a name="line.1959"></a>
+<span class="sourceLineNo">1960</span>        if (par0 == 2)<a name="line.1960"></a>
+<span class="sourceLineNo">1961</span>        {<a name="line.1961"></a>
+<span class="sourceLineNo">1962</span>            short1 = 35;<a name="line.1962"></a>
+<span class="sourceLineNo">1963</span>        }<a name="line.1963"></a>
+<span class="sourceLineNo">1964</span><a name="line.1964"></a>
+<span class="sourceLineNo">1965</span>        return short1;<a name="line.1965"></a>
+<span class="sourceLineNo">1966</span>    }<a name="line.1966"></a>
+<span class="sourceLineNo">1967</span><a name="line.1967"></a>
+<span class="sourceLineNo">1968</span>    /**<a name="line.1968"></a>
+<span class="sourceLineNo">1969</span>     * Get minecraft reference from the EntityRenderer<a name="line.1969"></a>
+<span class="sourceLineNo">1970</span>     */<a name="line.1970"></a>
+<span class="sourceLineNo">1971</span>    static Minecraft getRendererMinecraft(EntityRenderer par0EntityRenderer)<a name="line.1971"></a>
+<span class="sourceLineNo">1972</span>    {<a name="line.1972"></a>
+<span class="sourceLineNo">1973</span>        return par0EntityRenderer.mc;<a name="line.1973"></a>
+<span class="sourceLineNo">1974</span>    }<a name="line.1974"></a>
+<span class="sourceLineNo">1975</span>}<a name="line.1975"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

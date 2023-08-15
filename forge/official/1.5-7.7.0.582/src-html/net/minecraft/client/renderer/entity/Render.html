@@ -1,0 +1,433 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer.entity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.Block;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.client.gui.FontRenderer;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.client.model.ModelBase;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.client.model.ModelBiped;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.client.renderer.RenderBlocks;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.client.renderer.RenderEngine;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.client.renderer.Tessellator;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.client.renderer.texture.IconRegister;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.entity.Entity;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.entity.EntityLiving;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.util.AxisAlignedBB;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.util.Icon;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import net.minecraft.util.MathHelper;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import net.minecraft.world.World;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import org.lwjgl.opengl.GL11;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>@SideOnly(Side.CLIENT)<a name="line.21"></a>
+<span class="sourceLineNo">022</span>public abstract class Render<a name="line.22"></a>
+<span class="sourceLineNo">023</span>{<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    protected RenderManager renderManager;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    private ModelBase modelBase = new ModelBiped();<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    protected RenderBlocks renderBlocks = new RenderBlocks();<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    protected float shadowSize = 0.0F;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    /**<a name="line.29"></a>
+<span class="sourceLineNo">030</span>     * Determines the darkness of the object's shadow. Higher value makes a darker shadow.<a name="line.30"></a>
+<span class="sourceLineNo">031</span>     */<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    protected float shadowOpaque = 1.0F;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>    /**<a name="line.34"></a>
+<span class="sourceLineNo">035</span>     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.35"></a>
+<span class="sourceLineNo">036</span>     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.37"></a>
+<span class="sourceLineNo">038</span>     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.38"></a>
+<span class="sourceLineNo">039</span>     */<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    public abstract void doRender(Entity entity, double d0, double d1, double d2, float f, float f1);<a name="line.40"></a>
+<span class="sourceLineNo">041</span><a name="line.41"></a>
+<span class="sourceLineNo">042</span>    /**<a name="line.42"></a>
+<span class="sourceLineNo">043</span>     * loads the specified texture<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     */<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    protected void loadTexture(String par1Str)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        this.renderManager.renderEngine.func_98187_b(par1Str);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    }<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * loads the specified downloadable texture or alternative built in texture<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     */<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    protected boolean loadDownloadableImageTexture(String par1Str, String par2Str)<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        RenderEngine renderengine = this.renderManager.renderEngine;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        int i = renderengine.getTextureForDownloadableImage(par1Str, par2Str);<a name="line.56"></a>
+<span class="sourceLineNo">057</span><a name="line.57"></a>
+<span class="sourceLineNo">058</span>        if (i &gt;= 0)<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        {<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            GL11.glBindTexture(GL11.GL_TEXTURE_2D, i);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            renderengine.func_98185_a();<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            return true;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        }<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        else<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            return false;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        }<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    }<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>    /**<a name="line.70"></a>
+<span class="sourceLineNo">071</span>     * Renders fire on top of the entity. Args: entity, x, y, z, partialTickTime<a name="line.71"></a>
+<span class="sourceLineNo">072</span>     */<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    private void renderEntityOnFire(Entity par1Entity, double par2, double par4, double par6, float par8)<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        GL11.glDisable(GL11.GL_LIGHTING);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        Icon icon = Block.fire.func_94438_c(0);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        Icon icon1 = Block.fire.func_94438_c(1);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        GL11.glPushMatrix();<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        GL11.glTranslatef((float)par2, (float)par4, (float)par6);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        float f1 = par1Entity.width * 1.4F;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        GL11.glScalef(f1, f1, f1);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        this.loadTexture("/terrain.png");<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        Tessellator tessellator = Tessellator.instance;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        float f2 = 0.5F;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        float f3 = 0.0F;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        float f4 = par1Entity.height / f1;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        float f5 = (float)(par1Entity.posY - par1Entity.boundingBox.minY);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        GL11.glTranslatef(0.0F, 0.0F, -0.3F + (float)((int)f4) * 0.02F);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        float f6 = 0.0F;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        int i = 0;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        tessellator.startDrawingQuads();<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>        while (f4 &gt; 0.0F)<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            Icon icon2;<a name="line.97"></a>
+<span class="sourceLineNo">098</span><a name="line.98"></a>
+<span class="sourceLineNo">099</span>            if (i % 2 == 0)<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>                icon2 = icon;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>            }<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            else<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                icon2 = icon1;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            }<a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>            float f7 = icon2.func_94209_e();<a name="line.108"></a>
+<span class="sourceLineNo">109</span>            float f8 = icon2.func_94206_g();<a name="line.109"></a>
+<span class="sourceLineNo">110</span>            float f9 = icon2.func_94212_f();<a name="line.110"></a>
+<span class="sourceLineNo">111</span>            float f10 = icon2.func_94210_h();<a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112"></a>
+<span class="sourceLineNo">113</span>            if (i / 2 % 2 == 0)<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            {<a name="line.114"></a>
+<span class="sourceLineNo">115</span>                float f11 = f9;<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                f9 = f7;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                f7 = f11;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>            }<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>            tessellator.addVertexWithUV((double)(f2 - f3), (double)(0.0F - f5), (double)f6, (double)f9, (double)f10);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            tessellator.addVertexWithUV((double)(-f2 - f3), (double)(0.0F - f5), (double)f6, (double)f7, (double)f10);<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            tessellator.addVertexWithUV((double)(-f2 - f3), (double)(1.4F - f5), (double)f6, (double)f7, (double)f8);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            tessellator.addVertexWithUV((double)(f2 - f3), (double)(1.4F - f5), (double)f6, (double)f9, (double)f8);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            f4 -= 0.45F;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            f5 -= 0.45F;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            f2 *= 0.9F;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>            f6 += 0.03F;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            ++i;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        }<a name="line.129"></a>
+<span class="sourceLineNo">130</span><a name="line.130"></a>
+<span class="sourceLineNo">131</span>        tessellator.draw();<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        GL11.glPopMatrix();<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        GL11.glEnable(GL11.GL_LIGHTING);<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    }<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>    /**<a name="line.136"></a>
+<span class="sourceLineNo">137</span>     * Renders the entity shadows at the position, shadow alpha and partialTickTime. Args: entity, x, y, z, shadowAlpha,<a name="line.137"></a>
+<span class="sourceLineNo">138</span>     * partialTickTime<a name="line.138"></a>
+<span class="sourceLineNo">139</span>     */<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    private void renderShadow(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    {<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        GL11.glEnable(GL11.GL_BLEND);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        this.renderManager.renderEngine.func_98187_b("%clamp%/misc/shadow.png");<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        World world = this.getWorldFromRenderManager();<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        GL11.glDepthMask(false);<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        float f2 = this.shadowSize;<a name="line.147"></a>
+<span class="sourceLineNo">148</span><a name="line.148"></a>
+<span class="sourceLineNo">149</span>        if (par1Entity instanceof EntityLiving)<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>            EntityLiving entityliving = (EntityLiving)par1Entity;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            f2 *= entityliving.getRenderSizeModifier();<a name="line.152"></a>
+<span class="sourceLineNo">153</span><a name="line.153"></a>
+<span class="sourceLineNo">154</span>            if (entityliving.isChild())<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            {<a name="line.155"></a>
+<span class="sourceLineNo">156</span>                f2 *= 0.5F;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>            }<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        }<a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159"></a>
+<span class="sourceLineNo">160</span>        double d3 = par1Entity.lastTickPosX + (par1Entity.posX - par1Entity.lastTickPosX) * (double)par9;<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        double d4 = par1Entity.lastTickPosY + (par1Entity.posY - par1Entity.lastTickPosY) * (double)par9 + (double)par1Entity.getShadowSize();<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        double d5 = par1Entity.lastTickPosZ + (par1Entity.posZ - par1Entity.lastTickPosZ) * (double)par9;<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        int i = MathHelper.floor_double(d3 - (double)f2);<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        int j = MathHelper.floor_double(d3 + (double)f2);<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        int k = MathHelper.floor_double(d4 - (double)f2);<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        int l = MathHelper.floor_double(d4);<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        int i1 = MathHelper.floor_double(d5 - (double)f2);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        int j1 = MathHelper.floor_double(d5 + (double)f2);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        double d6 = par2 - d3;<a name="line.169"></a>
+<span class="sourceLineNo">170</span>        double d7 = par4 - d4;<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        double d8 = par6 - d5;<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        Tessellator tessellator = Tessellator.instance;<a name="line.172"></a>
+<span class="sourceLineNo">173</span>        tessellator.startDrawingQuads();<a name="line.173"></a>
+<span class="sourceLineNo">174</span><a name="line.174"></a>
+<span class="sourceLineNo">175</span>        for (int k1 = i; k1 &lt;= j; ++k1)<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        {<a name="line.176"></a>
+<span class="sourceLineNo">177</span>            for (int l1 = k; l1 &lt;= l; ++l1)<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>                for (int i2 = i1; i2 &lt;= j1; ++i2)<a name="line.179"></a>
+<span class="sourceLineNo">180</span>                {<a name="line.180"></a>
+<span class="sourceLineNo">181</span>                    int j2 = world.getBlockId(k1, l1 - 1, i2);<a name="line.181"></a>
+<span class="sourceLineNo">182</span><a name="line.182"></a>
+<span class="sourceLineNo">183</span>                    if (j2 &gt; 0 &amp;&amp; world.getBlockLightValue(k1, l1, i2) &gt; 3)<a name="line.183"></a>
+<span class="sourceLineNo">184</span>                    {<a name="line.184"></a>
+<span class="sourceLineNo">185</span>                        this.renderShadowOnBlock(Block.blocksList[j2], par2, par4 + (double)par1Entity.getShadowSize(), par6, k1, l1, i2, par8, f2, d6, d7 + (double)par1Entity.getShadowSize(), d8);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>                    }<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                }<a name="line.187"></a>
+<span class="sourceLineNo">188</span>            }<a name="line.188"></a>
+<span class="sourceLineNo">189</span>        }<a name="line.189"></a>
+<span class="sourceLineNo">190</span><a name="line.190"></a>
+<span class="sourceLineNo">191</span>        tessellator.draw();<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.192"></a>
+<span class="sourceLineNo">193</span>        GL11.glDisable(GL11.GL_BLEND);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>        GL11.glDepthMask(true);<a name="line.194"></a>
+<span class="sourceLineNo">195</span>    }<a name="line.195"></a>
+<span class="sourceLineNo">196</span><a name="line.196"></a>
+<span class="sourceLineNo">197</span>    /**<a name="line.197"></a>
+<span class="sourceLineNo">198</span>     * Returns the render manager's world object<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     */<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    private World getWorldFromRenderManager()<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>        return this.renderManager.worldObj;<a name="line.202"></a>
+<span class="sourceLineNo">203</span>    }<a name="line.203"></a>
+<span class="sourceLineNo">204</span><a name="line.204"></a>
+<span class="sourceLineNo">205</span>    /**<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     * Renders a shadow projected down onto the specified block. Brightness of the block plus how far away on the Y axis<a name="line.206"></a>
+<span class="sourceLineNo">207</span>     * determines the alpha of the shadow.  Args: block, centerX, centerY, centerZ, blockX, blockY, blockZ, baseAlpha,<a name="line.207"></a>
+<span class="sourceLineNo">208</span>     * shadowSize, xOffset, yOffset, zOffset<a name="line.208"></a>
+<span class="sourceLineNo">209</span>     */<a name="line.209"></a>
+<span class="sourceLineNo">210</span>    private void renderShadowOnBlock(Block par1Block, double par2, double par4, double par6, int par8, int par9, int par10, float par11, float par12, double par13, double par15, double par17)<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    {<a name="line.211"></a>
+<span class="sourceLineNo">212</span>        Tessellator tessellator = Tessellator.instance;<a name="line.212"></a>
+<span class="sourceLineNo">213</span><a name="line.213"></a>
+<span class="sourceLineNo">214</span>        if (par1Block.renderAsNormalBlock())<a name="line.214"></a>
+<span class="sourceLineNo">215</span>        {<a name="line.215"></a>
+<span class="sourceLineNo">216</span>            double d6 = ((double)par11 - (par4 - ((double)par9 + par15)) / 2.0D) * 0.5D * (double)this.getWorldFromRenderManager().getLightBrightness(par8, par9, par10);<a name="line.216"></a>
+<span class="sourceLineNo">217</span><a name="line.217"></a>
+<span class="sourceLineNo">218</span>            if (d6 &gt;= 0.0D)<a name="line.218"></a>
+<span class="sourceLineNo">219</span>            {<a name="line.219"></a>
+<span class="sourceLineNo">220</span>                if (d6 &gt; 1.0D)<a name="line.220"></a>
+<span class="sourceLineNo">221</span>                {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                    d6 = 1.0D;<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                }<a name="line.223"></a>
+<span class="sourceLineNo">224</span><a name="line.224"></a>
+<span class="sourceLineNo">225</span>                tessellator.setColorRGBA_F(1.0F, 1.0F, 1.0F, (float)d6);<a name="line.225"></a>
+<span class="sourceLineNo">226</span>                double d7 = (double)par8 + par1Block.getBlockBoundsMinX() + par13;<a name="line.226"></a>
+<span class="sourceLineNo">227</span>                double d8 = (double)par8 + par1Block.getBlockBoundsMaxX() + par13;<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                double d9 = (double)par9 + par1Block.getBlockBoundsMinY() + par15 + 0.015625D;<a name="line.228"></a>
+<span class="sourceLineNo">229</span>                double d10 = (double)par10 + par1Block.getBlockBoundsMinZ() + par17;<a name="line.229"></a>
+<span class="sourceLineNo">230</span>                double d11 = (double)par10 + par1Block.getBlockBoundsMaxZ() + par17;<a name="line.230"></a>
+<span class="sourceLineNo">231</span>                float f2 = (float)((par2 - d7) / 2.0D / (double)par12 + 0.5D);<a name="line.231"></a>
+<span class="sourceLineNo">232</span>                float f3 = (float)((par2 - d8) / 2.0D / (double)par12 + 0.5D);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                float f4 = (float)((par6 - d10) / 2.0D / (double)par12 + 0.5D);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                float f5 = (float)((par6 - d11) / 2.0D / (double)par12 + 0.5D);<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                tessellator.addVertexWithUV(d7, d9, d10, (double)f2, (double)f4);<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                tessellator.addVertexWithUV(d7, d9, d11, (double)f2, (double)f5);<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                tessellator.addVertexWithUV(d8, d9, d11, (double)f3, (double)f5);<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                tessellator.addVertexWithUV(d8, d9, d10, (double)f3, (double)f4);<a name="line.238"></a>
+<span class="sourceLineNo">239</span>            }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        }<a name="line.240"></a>
+<span class="sourceLineNo">241</span>    }<a name="line.241"></a>
+<span class="sourceLineNo">242</span><a name="line.242"></a>
+<span class="sourceLineNo">243</span>    /**<a name="line.243"></a>
+<span class="sourceLineNo">244</span>     * Renders a white box with the bounds of the AABB translated by the offset. Args: aabb, x, y, z<a name="line.244"></a>
+<span class="sourceLineNo">245</span>     */<a name="line.245"></a>
+<span class="sourceLineNo">246</span>    public static void renderOffsetAABB(AxisAlignedBB par0AxisAlignedBB, double par1, double par3, double par5)<a name="line.246"></a>
+<span class="sourceLineNo">247</span>    {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        Tessellator tessellator = Tessellator.instance;<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        tessellator.startDrawingQuads();<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        tessellator.setTranslation(par1, par3, par5);<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        tessellator.setNormal(0.0F, 0.0F, -1.0F);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.254"></a>
+<span class="sourceLineNo">255</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.255"></a>
+<span class="sourceLineNo">256</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.256"></a>
+<span class="sourceLineNo">257</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>        tessellator.setNormal(0.0F, 0.0F, 1.0F);<a name="line.258"></a>
+<span class="sourceLineNo">259</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.262"></a>
+<span class="sourceLineNo">263</span>        tessellator.setNormal(0.0F, -1.0F, 0.0F);<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.265"></a>
+<span class="sourceLineNo">266</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>        tessellator.setNormal(0.0F, 1.0F, 0.0F);<a name="line.268"></a>
+<span class="sourceLineNo">269</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.269"></a>
+<span class="sourceLineNo">270</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.270"></a>
+<span class="sourceLineNo">271</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.271"></a>
+<span class="sourceLineNo">272</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>        tessellator.setNormal(-1.0F, 0.0F, 0.0F);<a name="line.273"></a>
+<span class="sourceLineNo">274</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.274"></a>
+<span class="sourceLineNo">275</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        tessellator.setNormal(1.0F, 0.0F, 0.0F);<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.280"></a>
+<span class="sourceLineNo">281</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.281"></a>
+<span class="sourceLineNo">282</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.282"></a>
+<span class="sourceLineNo">283</span>        tessellator.setTranslation(0.0D, 0.0D, 0.0D);<a name="line.283"></a>
+<span class="sourceLineNo">284</span>        tessellator.draw();<a name="line.284"></a>
+<span class="sourceLineNo">285</span>        GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.285"></a>
+<span class="sourceLineNo">286</span>    }<a name="line.286"></a>
+<span class="sourceLineNo">287</span><a name="line.287"></a>
+<span class="sourceLineNo">288</span>    /**<a name="line.288"></a>
+<span class="sourceLineNo">289</span>     * Adds to the tesselator a box using the aabb for the bounds. Args: aabb<a name="line.289"></a>
+<span class="sourceLineNo">290</span>     */<a name="line.290"></a>
+<span class="sourceLineNo">291</span>    public static void renderAABB(AxisAlignedBB par0AxisAlignedBB)<a name="line.291"></a>
+<span class="sourceLineNo">292</span>    {<a name="line.292"></a>
+<span class="sourceLineNo">293</span>        Tessellator tessellator = Tessellator.instance;<a name="line.293"></a>
+<span class="sourceLineNo">294</span>        tessellator.startDrawingQuads();<a name="line.294"></a>
+<span class="sourceLineNo">295</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.295"></a>
+<span class="sourceLineNo">296</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.296"></a>
+<span class="sourceLineNo">297</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.297"></a>
+<span class="sourceLineNo">298</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.299"></a>
+<span class="sourceLineNo">300</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.300"></a>
+<span class="sourceLineNo">301</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.301"></a>
+<span class="sourceLineNo">302</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.302"></a>
+<span class="sourceLineNo">303</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.303"></a>
+<span class="sourceLineNo">304</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.304"></a>
+<span class="sourceLineNo">305</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.305"></a>
+<span class="sourceLineNo">306</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.306"></a>
+<span class="sourceLineNo">307</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.307"></a>
+<span class="sourceLineNo">308</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.310"></a>
+<span class="sourceLineNo">311</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.311"></a>
+<span class="sourceLineNo">312</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.312"></a>
+<span class="sourceLineNo">313</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.313"></a>
+<span class="sourceLineNo">314</span>        tessellator.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.314"></a>
+<span class="sourceLineNo">315</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.315"></a>
+<span class="sourceLineNo">316</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.316"></a>
+<span class="sourceLineNo">317</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.317"></a>
+<span class="sourceLineNo">318</span>        tessellator.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.318"></a>
+<span class="sourceLineNo">319</span>        tessellator.draw();<a name="line.319"></a>
+<span class="sourceLineNo">320</span>    }<a name="line.320"></a>
+<span class="sourceLineNo">321</span><a name="line.321"></a>
+<span class="sourceLineNo">322</span>    /**<a name="line.322"></a>
+<span class="sourceLineNo">323</span>     * Sets the RenderManager.<a name="line.323"></a>
+<span class="sourceLineNo">324</span>     */<a name="line.324"></a>
+<span class="sourceLineNo">325</span>    public void setRenderManager(RenderManager par1RenderManager)<a name="line.325"></a>
+<span class="sourceLineNo">326</span>    {<a name="line.326"></a>
+<span class="sourceLineNo">327</span>        this.renderManager = par1RenderManager;<a name="line.327"></a>
+<span class="sourceLineNo">328</span>    }<a name="line.328"></a>
+<span class="sourceLineNo">329</span><a name="line.329"></a>
+<span class="sourceLineNo">330</span>    /**<a name="line.330"></a>
+<span class="sourceLineNo">331</span>     * Renders the entity's shadow and fire (if its on fire). Args: entity, x, y, z, yaw, partialTickTime<a name="line.331"></a>
+<span class="sourceLineNo">332</span>     */<a name="line.332"></a>
+<span class="sourceLineNo">333</span>    public void doRenderShadowAndFire(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.333"></a>
+<span class="sourceLineNo">334</span>    {<a name="line.334"></a>
+<span class="sourceLineNo">335</span>        if (this.renderManager.options.fancyGraphics &amp;&amp; this.shadowSize &gt; 0.0F &amp;&amp; !par1Entity.getHasActivePotion())<a name="line.335"></a>
+<span class="sourceLineNo">336</span>        {<a name="line.336"></a>
+<span class="sourceLineNo">337</span>            double d3 = this.renderManager.getDistanceToCamera(par1Entity.posX, par1Entity.posY, par1Entity.posZ);<a name="line.337"></a>
+<span class="sourceLineNo">338</span>            float f2 = (float)((1.0D - d3 / 256.0D) * (double)this.shadowOpaque);<a name="line.338"></a>
+<span class="sourceLineNo">339</span><a name="line.339"></a>
+<span class="sourceLineNo">340</span>            if (f2 &gt; 0.0F)<a name="line.340"></a>
+<span class="sourceLineNo">341</span>            {<a name="line.341"></a>
+<span class="sourceLineNo">342</span>                this.renderShadow(par1Entity, par2, par4, par6, f2, par9);<a name="line.342"></a>
+<span class="sourceLineNo">343</span>            }<a name="line.343"></a>
+<span class="sourceLineNo">344</span>        }<a name="line.344"></a>
+<span class="sourceLineNo">345</span><a name="line.345"></a>
+<span class="sourceLineNo">346</span>        if (par1Entity.canRenderOnFire())<a name="line.346"></a>
+<span class="sourceLineNo">347</span>        {<a name="line.347"></a>
+<span class="sourceLineNo">348</span>            this.renderEntityOnFire(par1Entity, par2, par4, par6, par9);<a name="line.348"></a>
+<span class="sourceLineNo">349</span>        }<a name="line.349"></a>
+<span class="sourceLineNo">350</span>    }<a name="line.350"></a>
+<span class="sourceLineNo">351</span><a name="line.351"></a>
+<span class="sourceLineNo">352</span>    /**<a name="line.352"></a>
+<span class="sourceLineNo">353</span>     * Returns the font renderer from the set render manager<a name="line.353"></a>
+<span class="sourceLineNo">354</span>     */<a name="line.354"></a>
+<span class="sourceLineNo">355</span>    public FontRenderer getFontRendererFromRenderManager()<a name="line.355"></a>
+<span class="sourceLineNo">356</span>    {<a name="line.356"></a>
+<span class="sourceLineNo">357</span>        return this.renderManager.getFontRenderer();<a name="line.357"></a>
+<span class="sourceLineNo">358</span>    }<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>    public void func_94143_a(IconRegister par1IconRegister) {}<a name="line.360"></a>
+<span class="sourceLineNo">361</span>}<a name="line.361"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

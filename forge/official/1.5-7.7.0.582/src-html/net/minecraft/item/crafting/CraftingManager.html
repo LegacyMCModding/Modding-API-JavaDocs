@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.item.crafting;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.ArrayList;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Collections;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.util.HashMap;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import java.util.List;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.block.Block;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.inventory.InventoryCrafting;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.item.Item;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.item.ItemStack;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.world.World;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>public class CraftingManager<a name="line.13"></a>
+<span class="sourceLineNo">014</span>{<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    /** The static instance of this class */<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    private static final CraftingManager instance = new CraftingManager();<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>    /** A list of all the recipes added */<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    private List recipes = new ArrayList();<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>    /**<a name="line.21"></a>
+<span class="sourceLineNo">022</span>     * Returns the static instance of this class<a name="line.22"></a>
+<span class="sourceLineNo">023</span>     */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public static final CraftingManager getInstance()<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    {<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        return instance;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    }<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    private CraftingManager()<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        (new RecipesTools()).addRecipes(this);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        (new RecipesWeapons()).addRecipes(this);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        (new RecipesIngots()).addRecipes(this);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        (new RecipesFood()).addRecipes(this);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        (new RecipesCrafting()).addRecipes(this);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        (new RecipesArmor()).addRecipes(this);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        (new RecipesDyes()).addRecipes(this);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        this.recipes.add(new RecipesArmorDyes());<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        this.recipes.add(new RecipesMapCloning());<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        this.recipes.add(new RecipesMapExtending());<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.recipes.add(new RecipeFireworks());<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.addRecipe(new ItemStack(Item.paper, 3), new Object[] {"###", '#', Item.reed});<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.addShapelessRecipe(new ItemStack(Item.book, 1), new Object[] {Item.paper, Item.paper, Item.paper, Item.leather});<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.addShapelessRecipe(new ItemStack(Item.writableBook, 1), new Object[] {Item.book, new ItemStack(Item.dyePowder, 1, 0), Item.feather});<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        this.addRecipe(new ItemStack(Block.fence, 2), new Object[] {"###", "###", '#', Item.stick});<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        this.addRecipe(new ItemStack(Block.cobblestoneWall, 6, 0), new Object[] {"###", "###", '#', Block.cobblestone});<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        this.addRecipe(new ItemStack(Block.cobblestoneWall, 6, 1), new Object[] {"###", "###", '#', Block.cobblestoneMossy});<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.addRecipe(new ItemStack(Block.netherFence, 6), new Object[] {"###", "###", '#', Block.netherBrick});<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        this.addRecipe(new ItemStack(Block.fenceGate, 1), new Object[] {"#W#", "#W#", '#', Item.stick, 'W', Block.planks});<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.addRecipe(new ItemStack(Block.jukebox, 1), new Object[] {"###", "#X#", "###", '#', Block.planks, 'X', Item.diamond});<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        this.addRecipe(new ItemStack(Block.music, 1), new Object[] {"###", "#X#", "###", '#', Block.planks, 'X', Item.redstone});<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        this.addRecipe(new ItemStack(Block.bookShelf, 1), new Object[] {"###", "XXX", "###", '#', Block.planks, 'X', Item.book});<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        this.addRecipe(new ItemStack(Block.blockSnow, 1), new Object[] {"##", "##", '#', Item.snowball});<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        this.addRecipe(new ItemStack(Block.snow, 6), new Object[] {"###", '#', Block.blockSnow});<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        this.addRecipe(new ItemStack(Block.blockClay, 1), new Object[] {"##", "##", '#', Item.clay});<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        this.addRecipe(new ItemStack(Block.brick, 1), new Object[] {"##", "##", '#', Item.brick});<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        this.addRecipe(new ItemStack(Block.glowStone, 1), new Object[] {"##", "##", '#', Item.lightStoneDust});<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        this.addRecipe(new ItemStack(Block.field_94339_ct, 1), new Object[] {"##", "##", '#', Item.field_94583_ca});<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        this.addRecipe(new ItemStack(Block.cloth, 1), new Object[] {"##", "##", '#', Item.silk});<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        this.addRecipe(new ItemStack(Block.tnt, 1), new Object[] {"X#X", "#X#", "X#X", 'X', Item.gunpowder, '#', Block.sand});<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 3), new Object[] {"###", '#', Block.cobblestone});<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 0), new Object[] {"###", '#', Block.stone});<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 1), new Object[] {"###", '#', Block.sandStone});<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 4), new Object[] {"###", '#', Block.brick});<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 5), new Object[] {"###", '#', Block.stoneBrick});<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 6), new Object[] {"###", '#', Block.netherBrick});<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        this.addRecipe(new ItemStack(Block.stoneSingleSlab, 6, 7), new Object[] {"###", '#', Block.field_94339_ct});<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        this.addRecipe(new ItemStack(Block.woodSingleSlab, 6, 0), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 0)});<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        this.addRecipe(new ItemStack(Block.woodSingleSlab, 6, 2), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 2)});<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.addRecipe(new ItemStack(Block.woodSingleSlab, 6, 1), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 1)});<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        this.addRecipe(new ItemStack(Block.woodSingleSlab, 6, 3), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 3)});<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        this.addRecipe(new ItemStack(Block.ladder, 3), new Object[] {"# #", "###", "# #", '#', Item.stick});<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        this.addRecipe(new ItemStack(Item.doorWood, 1), new Object[] {"##", "##", "##", '#', Block.planks});<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        this.addRecipe(new ItemStack(Block.trapdoor, 2), new Object[] {"###", "###", '#', Block.planks});<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        this.addRecipe(new ItemStack(Item.doorSteel, 1), new Object[] {"##", "##", "##", '#', Item.ingotIron});<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        this.addRecipe(new ItemStack(Item.sign, 3), new Object[] {"###", "###", " X ", '#', Block.planks, 'X', Item.stick});<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        this.addRecipe(new ItemStack(Item.cake, 1), new Object[] {"AAA", "BEB", "CCC", 'A', Item.bucketMilk, 'B', Item.sugar, 'C', Item.wheat, 'E', Item.egg});<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        this.addRecipe(new ItemStack(Item.sugar, 1), new Object[] {"#", '#', Item.reed});<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        this.addRecipe(new ItemStack(Block.planks, 4, 0), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 0)});<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        this.addRecipe(new ItemStack(Block.planks, 4, 1), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 1)});<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        this.addRecipe(new ItemStack(Block.planks, 4, 2), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 2)});<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        this.addRecipe(new ItemStack(Block.planks, 4, 3), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 3)});<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        this.addRecipe(new ItemStack(Item.stick, 4), new Object[] {"#", "#", '#', Block.planks});<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        this.addRecipe(new ItemStack(Block.torchWood, 4), new Object[] {"X", "#", 'X', Item.coal, '#', Item.stick});<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        this.addRecipe(new ItemStack(Block.torchWood, 4), new Object[] {"X", "#", 'X', new ItemStack(Item.coal, 1, 1), '#', Item.stick});<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        this.addRecipe(new ItemStack(Item.bowlEmpty, 4), new Object[] {"# #", " # ", '#', Block.planks});<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        this.addRecipe(new ItemStack(Item.glassBottle, 3), new Object[] {"# #", " # ", '#', Block.glass});<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        this.addRecipe(new ItemStack(Block.rail, 16), new Object[] {"X X", "X#X", "X X", 'X', Item.ingotIron, '#', Item.stick});<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        this.addRecipe(new ItemStack(Block.railPowered, 6), new Object[] {"X X", "X#X", "XRX", 'X', Item.ingotGold, 'R', Item.redstone, '#', Item.stick});<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        this.addRecipe(new ItemStack(Block.field_94337_cv, 6), new Object[] {"XSX", "X#X", "XSX", 'X', Item.ingotIron, '#', Block.torchRedstoneActive, 'S', Item.stick});<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        this.addRecipe(new ItemStack(Block.railDetector, 6), new Object[] {"X X", "X#X", "XRX", 'X', Item.ingotIron, 'R', Item.redstone, '#', Block.pressurePlateStone});<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        this.addRecipe(new ItemStack(Item.minecartEmpty, 1), new Object[] {"# #", "###", '#', Item.ingotIron});<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        this.addRecipe(new ItemStack(Item.cauldron, 1), new Object[] {"# #", "# #", "###", '#', Item.ingotIron});<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        this.addRecipe(new ItemStack(Item.brewingStand, 1), new Object[] {" B ", "###", '#', Block.cobblestone, 'B', Item.blazeRod});<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        this.addRecipe(new ItemStack(Block.pumpkinLantern, 1), new Object[] {"A", "B", 'A', Block.pumpkin, 'B', Block.torchWood});<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        this.addRecipe(new ItemStack(Item.minecartCrate, 1), new Object[] {"A", "B", 'A', Block.chest, 'B', Item.minecartEmpty});<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        this.addRecipe(new ItemStack(Item.minecartPowered, 1), new Object[] {"A", "B", 'A', Block.furnaceIdle, 'B', Item.minecartEmpty});<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        this.addRecipe(new ItemStack(Item.field_94582_cb, 1), new Object[] {"A", "B", 'A', Block.tnt, 'B', Item.minecartEmpty});<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        this.addRecipe(new ItemStack(Item.field_96600_cc, 1), new Object[] {"A", "B", 'A', Block.field_94340_cs, 'B', Item.minecartEmpty});<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        this.addRecipe(new ItemStack(Item.boat, 1), new Object[] {"# #", "###", '#', Block.planks});<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        this.addRecipe(new ItemStack(Item.bucketEmpty, 1), new Object[] {"# #", " # ", '#', Item.ingotIron});<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        this.addRecipe(new ItemStack(Item.flowerPot, 1), new Object[] {"# #", " # ", '#', Item.brick});<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        this.addRecipe(new ItemStack(Item.flintAndSteel, 1), new Object[] {"A ", " B", 'A', Item.ingotIron, 'B', Item.flint});<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        this.addRecipe(new ItemStack(Item.bread, 1), new Object[] {"###", '#', Item.wheat});<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        this.addRecipe(new ItemStack(Block.stairCompactPlanks, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 0)});<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        this.addRecipe(new ItemStack(Block.stairsWoodBirch, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 2)});<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        this.addRecipe(new ItemStack(Block.stairsWoodSpruce, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 1)});<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        this.addRecipe(new ItemStack(Block.stairsWoodJungle, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 3)});<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        this.addRecipe(new ItemStack(Item.fishingRod, 1), new Object[] {"  #", " #X", "# X", '#', Item.stick, 'X', Item.silk});<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        this.addRecipe(new ItemStack(Item.carrotOnAStick, 1), new Object[] {"# ", " X", '#', Item.fishingRod, 'X', Item.carrot}).func_92100_c();<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        this.addRecipe(new ItemStack(Block.stairCompactCobblestone, 4), new Object[] {"#  ", "## ", "###", '#', Block.cobblestone});<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        this.addRecipe(new ItemStack(Block.stairsBrick, 4), new Object[] {"#  ", "## ", "###", '#', Block.brick});<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        this.addRecipe(new ItemStack(Block.stairsStoneBrickSmooth, 4), new Object[] {"#  ", "## ", "###", '#', Block.stoneBrick});<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        this.addRecipe(new ItemStack(Block.stairsNetherBrick, 4), new Object[] {"#  ", "## ", "###", '#', Block.netherBrick});<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        this.addRecipe(new ItemStack(Block.stairsSandStone, 4), new Object[] {"#  ", "## ", "###", '#', Block.sandStone});<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        this.addRecipe(new ItemStack(Block.field_94338_cu, 4), new Object[] {"#  ", "## ", "###", '#', Block.field_94339_ct});<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        this.addRecipe(new ItemStack(Item.painting, 1), new Object[] {"###", "#X#", "###", '#', Item.stick, 'X', Block.cloth});<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        this.addRecipe(new ItemStack(Item.itemFrame, 1), new Object[] {"###", "#X#", "###", '#', Item.stick, 'X', Item.leather});<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        this.addRecipe(new ItemStack(Item.appleGold, 1, 0), new Object[] {"###", "#X#", "###", '#', Item.goldNugget, 'X', Item.appleRed});<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        this.addRecipe(new ItemStack(Item.appleGold, 1, 1), new Object[] {"###", "#X#", "###", '#', Block.blockGold, 'X', Item.appleRed});<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        this.addRecipe(new ItemStack(Item.goldenCarrot, 1, 0), new Object[] {"###", "#X#", "###", '#', Item.goldNugget, 'X', Item.carrot});<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        this.addRecipe(new ItemStack(Block.lever, 1), new Object[] {"X", "#", '#', Block.cobblestone, 'X', Item.stick});<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        this.addRecipe(new ItemStack(Block.tripWireSource, 2), new Object[] {"I", "S", "#", '#', Block.planks, 'S', Item.stick, 'I', Item.ingotIron});<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        this.addRecipe(new ItemStack(Block.torchRedstoneActive, 1), new Object[] {"X", "#", '#', Item.stick, 'X', Item.redstone});<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        this.addRecipe(new ItemStack(Item.redstoneRepeater, 1), new Object[] {"#X#", "III", '#', Block.torchRedstoneActive, 'X', Item.redstone, 'I', Block.stone});<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        this.addRecipe(new ItemStack(Item.field_94585_bY, 1), new Object[] {" # ", "#X#", "III", '#', Block.torchRedstoneActive, 'X', Item.field_94583_ca, 'I', Block.stone});<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        this.addRecipe(new ItemStack(Item.pocketSundial, 1), new Object[] {" # ", "#X#", " # ", '#', Item.ingotGold, 'X', Item.redstone});<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        this.addRecipe(new ItemStack(Item.compass, 1), new Object[] {" # ", "#X#", " # ", '#', Item.ingotIron, 'X', Item.redstone});<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        this.addRecipe(new ItemStack(Item.emptyMap, 1), new Object[] {"###", "#X#", "###", '#', Item.paper, 'X', Item.compass});<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        this.addRecipe(new ItemStack(Block.stoneButton, 1), new Object[] {"#", '#', Block.stone});<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        this.addRecipe(new ItemStack(Block.woodenButton, 1), new Object[] {"#", '#', Block.planks});<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        this.addRecipe(new ItemStack(Block.pressurePlateStone, 1), new Object[] {"##", '#', Block.stone});<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        this.addRecipe(new ItemStack(Block.pressurePlatePlanks, 1), new Object[] {"##", '#', Block.planks});<a name="line.133"></a>
+<span class="sourceLineNo">134</span>        this.addRecipe(new ItemStack(Block.field_94345_cm, 1), new Object[] {"##", '#', Item.ingotIron});<a name="line.134"></a>
+<span class="sourceLineNo">135</span>        this.addRecipe(new ItemStack(Block.field_94348_cl, 1), new Object[] {"##", '#', Item.ingotGold});<a name="line.135"></a>
+<span class="sourceLineNo">136</span>        this.addRecipe(new ItemStack(Block.dispenser, 1), new Object[] {"###", "#X#", "#R#", '#', Block.cobblestone, 'X', Item.bow, 'R', Item.redstone});<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        this.addRecipe(new ItemStack(Block.field_96469_cy, 1), new Object[] {"###", "# #", "#R#", '#', Block.cobblestone, 'R', Item.redstone});<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        this.addRecipe(new ItemStack(Block.pistonBase, 1), new Object[] {"TTT", "#X#", "#R#", '#', Block.cobblestone, 'X', Item.ingotIron, 'R', Item.redstone, 'T', Block.planks});<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        this.addRecipe(new ItemStack(Block.pistonStickyBase, 1), new Object[] {"S", "P", 'S', Item.slimeBall, 'P', Block.pistonBase});<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        this.addRecipe(new ItemStack(Item.bed, 1), new Object[] {"###", "XXX", '#', Block.cloth, 'X', Block.planks});<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        this.addRecipe(new ItemStack(Block.enchantmentTable, 1), new Object[] {" B ", "D#D", "###", '#', Block.obsidian, 'B', Item.book, 'D', Item.diamond});<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        this.addRecipe(new ItemStack(Block.anvil, 1), new Object[] {"III", " i ", "iii", 'I', Block.blockSteel, 'i', Item.ingotIron});<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        this.addShapelessRecipe(new ItemStack(Item.eyeOfEnder, 1), new Object[] {Item.enderPearl, Item.blazePowder});<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        this.addShapelessRecipe(new ItemStack(Item.fireballCharge, 3), new Object[] {Item.gunpowder, Item.blazePowder, Item.coal});<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        this.addShapelessRecipe(new ItemStack(Item.fireballCharge, 3), new Object[] {Item.gunpowder, Item.blazePowder, new ItemStack(Item.coal, 1, 1)});<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        this.addRecipe(new ItemStack(Block.field_94344_cp), new Object[] {"GGG", "QQQ", "WWW", 'G', Block.glass, 'Q', Item.field_94583_ca, 'W', Block.woodSingleSlab});<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        this.addRecipe(new ItemStack(Block.field_94340_cs), new Object[] {"I I", "ICI", " I ", 'I', Item.ingotIron, 'C', Block.chest});<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        Collections.sort(this.recipes, new RecipeSorter(this));<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        System.out.println(this.recipes.size() + " recipes");<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    }<a name="line.150"></a>
+<span class="sourceLineNo">151</span><a name="line.151"></a>
+<span class="sourceLineNo">152</span>    public ShapedRecipes addRecipe(ItemStack par1ItemStack, Object ... par2ArrayOfObj)<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    {<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        String s = "";<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        int i = 0;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        int j = 0;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        int k = 0;<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>        if (par2ArrayOfObj[i] instanceof String[])<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        {<a name="line.160"></a>
+<span class="sourceLineNo">161</span>            String[] astring = (String[])((String[])par2ArrayOfObj[i++]);<a name="line.161"></a>
+<span class="sourceLineNo">162</span><a name="line.162"></a>
+<span class="sourceLineNo">163</span>            for (int l = 0; l &lt; astring.length; ++l)<a name="line.163"></a>
+<span class="sourceLineNo">164</span>            {<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                String s1 = astring[l];<a name="line.165"></a>
+<span class="sourceLineNo">166</span>                ++k;<a name="line.166"></a>
+<span class="sourceLineNo">167</span>                j = s1.length();<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                s = s + s1;<a name="line.168"></a>
+<span class="sourceLineNo">169</span>            }<a name="line.169"></a>
+<span class="sourceLineNo">170</span>        }<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        else<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        {<a name="line.172"></a>
+<span class="sourceLineNo">173</span>            while (par2ArrayOfObj[i] instanceof String)<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            {<a name="line.174"></a>
+<span class="sourceLineNo">175</span>                String s2 = (String)par2ArrayOfObj[i++];<a name="line.175"></a>
+<span class="sourceLineNo">176</span>                ++k;<a name="line.176"></a>
+<span class="sourceLineNo">177</span>                j = s2.length();<a name="line.177"></a>
+<span class="sourceLineNo">178</span>                s = s + s2;<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            }<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        }<a name="line.180"></a>
+<span class="sourceLineNo">181</span><a name="line.181"></a>
+<span class="sourceLineNo">182</span>        HashMap hashmap;<a name="line.182"></a>
+<span class="sourceLineNo">183</span><a name="line.183"></a>
+<span class="sourceLineNo">184</span>        for (hashmap = new HashMap(); i &lt; par2ArrayOfObj.length; i += 2)<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        {<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            Character character = (Character)par2ArrayOfObj[i];<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            ItemStack itemstack1 = null;<a name="line.187"></a>
+<span class="sourceLineNo">188</span><a name="line.188"></a>
+<span class="sourceLineNo">189</span>            if (par2ArrayOfObj[i + 1] instanceof Item)<a name="line.189"></a>
+<span class="sourceLineNo">190</span>            {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>                itemstack1 = new ItemStack((Item)par2ArrayOfObj[i + 1]);<a name="line.191"></a>
+<span class="sourceLineNo">192</span>            }<a name="line.192"></a>
+<span class="sourceLineNo">193</span>            else if (par2ArrayOfObj[i + 1] instanceof Block)<a name="line.193"></a>
+<span class="sourceLineNo">194</span>            {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>                itemstack1 = new ItemStack((Block)par2ArrayOfObj[i + 1], 1, 32767);<a name="line.195"></a>
+<span class="sourceLineNo">196</span>            }<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            else if (par2ArrayOfObj[i + 1] instanceof ItemStack)<a name="line.197"></a>
+<span class="sourceLineNo">198</span>            {<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                itemstack1 = (ItemStack)par2ArrayOfObj[i + 1];<a name="line.199"></a>
+<span class="sourceLineNo">200</span>            }<a name="line.200"></a>
+<span class="sourceLineNo">201</span><a name="line.201"></a>
+<span class="sourceLineNo">202</span>            hashmap.put(character, itemstack1);<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        }<a name="line.203"></a>
+<span class="sourceLineNo">204</span><a name="line.204"></a>
+<span class="sourceLineNo">205</span>        ItemStack[] aitemstack = new ItemStack[j * k];<a name="line.205"></a>
+<span class="sourceLineNo">206</span><a name="line.206"></a>
+<span class="sourceLineNo">207</span>        for (int i1 = 0; i1 &lt; j * k; ++i1)<a name="line.207"></a>
+<span class="sourceLineNo">208</span>        {<a name="line.208"></a>
+<span class="sourceLineNo">209</span>            char c0 = s.charAt(i1);<a name="line.209"></a>
+<span class="sourceLineNo">210</span><a name="line.210"></a>
+<span class="sourceLineNo">211</span>            if (hashmap.containsKey(Character.valueOf(c0)))<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            {<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                aitemstack[i1] = ((ItemStack)hashmap.get(Character.valueOf(c0))).copy();<a name="line.213"></a>
+<span class="sourceLineNo">214</span>            }<a name="line.214"></a>
+<span class="sourceLineNo">215</span>            else<a name="line.215"></a>
+<span class="sourceLineNo">216</span>            {<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                aitemstack[i1] = null;<a name="line.217"></a>
+<span class="sourceLineNo">218</span>            }<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>        ShapedRecipes shapedrecipes = new ShapedRecipes(j, k, aitemstack, par1ItemStack);<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        this.recipes.add(shapedrecipes);<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        return shapedrecipes;<a name="line.223"></a>
+<span class="sourceLineNo">224</span>    }<a name="line.224"></a>
+<span class="sourceLineNo">225</span><a name="line.225"></a>
+<span class="sourceLineNo">226</span>    public void addShapelessRecipe(ItemStack par1ItemStack, Object ... par2ArrayOfObj)<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    {<a name="line.227"></a>
+<span class="sourceLineNo">228</span>        ArrayList arraylist = new ArrayList();<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        Object[] aobject = par2ArrayOfObj;<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        int i = par2ArrayOfObj.length;<a name="line.230"></a>
+<span class="sourceLineNo">231</span><a name="line.231"></a>
+<span class="sourceLineNo">232</span>        for (int j = 0; j &lt; i; ++j)<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        {<a name="line.233"></a>
+<span class="sourceLineNo">234</span>            Object object1 = aobject[j];<a name="line.234"></a>
+<span class="sourceLineNo">235</span><a name="line.235"></a>
+<span class="sourceLineNo">236</span>            if (object1 instanceof ItemStack)<a name="line.236"></a>
+<span class="sourceLineNo">237</span>            {<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                arraylist.add(((ItemStack)object1).copy());<a name="line.238"></a>
+<span class="sourceLineNo">239</span>            }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>            else if (object1 instanceof Item)<a name="line.240"></a>
+<span class="sourceLineNo">241</span>            {<a name="line.241"></a>
+<span class="sourceLineNo">242</span>                arraylist.add(new ItemStack((Item)object1));<a name="line.242"></a>
+<span class="sourceLineNo">243</span>            }<a name="line.243"></a>
+<span class="sourceLineNo">244</span>            else<a name="line.244"></a>
+<span class="sourceLineNo">245</span>            {<a name="line.245"></a>
+<span class="sourceLineNo">246</span>                if (!(object1 instanceof Block))<a name="line.246"></a>
+<span class="sourceLineNo">247</span>                {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>                    throw new RuntimeException("Invalid shapeless recipy!");<a name="line.248"></a>
+<span class="sourceLineNo">249</span>                }<a name="line.249"></a>
+<span class="sourceLineNo">250</span><a name="line.250"></a>
+<span class="sourceLineNo">251</span>                arraylist.add(new ItemStack((Block)object1));<a name="line.251"></a>
+<span class="sourceLineNo">252</span>            }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        }<a name="line.253"></a>
+<span class="sourceLineNo">254</span><a name="line.254"></a>
+<span class="sourceLineNo">255</span>        this.recipes.add(new ShapelessRecipes(par1ItemStack, arraylist));<a name="line.255"></a>
+<span class="sourceLineNo">256</span>    }<a name="line.256"></a>
+<span class="sourceLineNo">257</span><a name="line.257"></a>
+<span class="sourceLineNo">258</span>    public ItemStack findMatchingRecipe(InventoryCrafting par1InventoryCrafting, World par2World)<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    {<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        int i = 0;<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        ItemStack itemstack = null;<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        ItemStack itemstack1 = null;<a name="line.262"></a>
+<span class="sourceLineNo">263</span>        int j;<a name="line.263"></a>
+<span class="sourceLineNo">264</span><a name="line.264"></a>
+<span class="sourceLineNo">265</span>        for (j = 0; j &lt; par1InventoryCrafting.getSizeInventory(); ++j)<a name="line.265"></a>
+<span class="sourceLineNo">266</span>        {<a name="line.266"></a>
+<span class="sourceLineNo">267</span>            ItemStack itemstack2 = par1InventoryCrafting.getStackInSlot(j);<a name="line.267"></a>
+<span class="sourceLineNo">268</span><a name="line.268"></a>
+<span class="sourceLineNo">269</span>            if (itemstack2 != null)<a name="line.269"></a>
+<span class="sourceLineNo">270</span>            {<a name="line.270"></a>
+<span class="sourceLineNo">271</span>                if (i == 0)<a name="line.271"></a>
+<span class="sourceLineNo">272</span>                {<a name="line.272"></a>
+<span class="sourceLineNo">273</span>                    itemstack = itemstack2;<a name="line.273"></a>
+<span class="sourceLineNo">274</span>                }<a name="line.274"></a>
+<span class="sourceLineNo">275</span><a name="line.275"></a>
+<span class="sourceLineNo">276</span>                if (i == 1)<a name="line.276"></a>
+<span class="sourceLineNo">277</span>                {<a name="line.277"></a>
+<span class="sourceLineNo">278</span>                    itemstack1 = itemstack2;<a name="line.278"></a>
+<span class="sourceLineNo">279</span>                }<a name="line.279"></a>
+<span class="sourceLineNo">280</span><a name="line.280"></a>
+<span class="sourceLineNo">281</span>                ++i;<a name="line.281"></a>
+<span class="sourceLineNo">282</span>            }<a name="line.282"></a>
+<span class="sourceLineNo">283</span>        }<a name="line.283"></a>
+<span class="sourceLineNo">284</span><a name="line.284"></a>
+<span class="sourceLineNo">285</span>        if (i == 2 &amp;&amp; itemstack.itemID == itemstack1.itemID &amp;&amp; itemstack.stackSize == 1 &amp;&amp; itemstack1.stackSize == 1 &amp;&amp; Item.itemsList[itemstack.itemID].isRepairable())<a name="line.285"></a>
+<span class="sourceLineNo">286</span>        {<a name="line.286"></a>
+<span class="sourceLineNo">287</span>            Item item = Item.itemsList[itemstack.itemID];<a name="line.287"></a>
+<span class="sourceLineNo">288</span>            int k = item.getMaxDamage() - itemstack.getItemDamageForDisplay();<a name="line.288"></a>
+<span class="sourceLineNo">289</span>            int l = item.getMaxDamage() - itemstack1.getItemDamageForDisplay();<a name="line.289"></a>
+<span class="sourceLineNo">290</span>            int i1 = k + l + item.getMaxDamage() * 5 / 100;<a name="line.290"></a>
+<span class="sourceLineNo">291</span>            int j1 = item.getMaxDamage() - i1;<a name="line.291"></a>
+<span class="sourceLineNo">292</span><a name="line.292"></a>
+<span class="sourceLineNo">293</span>            if (j1 &lt; 0)<a name="line.293"></a>
+<span class="sourceLineNo">294</span>            {<a name="line.294"></a>
+<span class="sourceLineNo">295</span>                j1 = 0;<a name="line.295"></a>
+<span class="sourceLineNo">296</span>            }<a name="line.296"></a>
+<span class="sourceLineNo">297</span><a name="line.297"></a>
+<span class="sourceLineNo">298</span>            return new ItemStack(itemstack.itemID, 1, j1);<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        }<a name="line.299"></a>
+<span class="sourceLineNo">300</span>        else<a name="line.300"></a>
+<span class="sourceLineNo">301</span>        {<a name="line.301"></a>
+<span class="sourceLineNo">302</span>            for (j = 0; j &lt; this.recipes.size(); ++j)<a name="line.302"></a>
+<span class="sourceLineNo">303</span>            {<a name="line.303"></a>
+<span class="sourceLineNo">304</span>                IRecipe irecipe = (IRecipe)this.recipes.get(j);<a name="line.304"></a>
+<span class="sourceLineNo">305</span><a name="line.305"></a>
+<span class="sourceLineNo">306</span>                if (irecipe.matches(par1InventoryCrafting, par2World))<a name="line.306"></a>
+<span class="sourceLineNo">307</span>                {<a name="line.307"></a>
+<span class="sourceLineNo">308</span>                    return irecipe.getCraftingResult(par1InventoryCrafting);<a name="line.308"></a>
+<span class="sourceLineNo">309</span>                }<a name="line.309"></a>
+<span class="sourceLineNo">310</span>            }<a name="line.310"></a>
+<span class="sourceLineNo">311</span><a name="line.311"></a>
+<span class="sourceLineNo">312</span>            return null;<a name="line.312"></a>
+<span class="sourceLineNo">313</span>        }<a name="line.313"></a>
+<span class="sourceLineNo">314</span>    }<a name="line.314"></a>
+<span class="sourceLineNo">315</span><a name="line.315"></a>
+<span class="sourceLineNo">316</span>    /**<a name="line.316"></a>
+<span class="sourceLineNo">317</span>     * returns the List&lt;&gt; of all recipes<a name="line.317"></a>
+<span class="sourceLineNo">318</span>     */<a name="line.318"></a>
+<span class="sourceLineNo">319</span>    public List getRecipeList()<a name="line.319"></a>
+<span class="sourceLineNo">320</span>    {<a name="line.320"></a>
+<span class="sourceLineNo">321</span>        return this.recipes;<a name="line.321"></a>
+<span class="sourceLineNo">322</span>    }<a name="line.322"></a>
+<span class="sourceLineNo">323</span>}<a name="line.323"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

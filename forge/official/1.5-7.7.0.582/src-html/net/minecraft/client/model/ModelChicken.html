@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.model;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.entity.Entity;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.util.MathHelper;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import org.lwjgl.opengl.GL11;<a name="line.7"></a>
+<span class="sourceLineNo">008</span><a name="line.8"></a>
+<span class="sourceLineNo">009</span>@SideOnly(Side.CLIENT)<a name="line.9"></a>
+<span class="sourceLineNo">010</span>public class ModelChicken extends ModelBase<a name="line.10"></a>
+<span class="sourceLineNo">011</span>{<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    public ModelRenderer head;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public ModelRenderer body;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public ModelRenderer rightLeg;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    public ModelRenderer leftLeg;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    public ModelRenderer rightWing;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public ModelRenderer leftWing;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public ModelRenderer bill;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public ModelRenderer chin;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>    public ModelChicken()<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    {<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        byte b0 = 16;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        this.head = new ModelRenderer(this, 0, 0);<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        this.head.addBox(-2.0F, -6.0F, -2.0F, 4, 6, 3, 0.0F);<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        this.head.setRotationPoint(0.0F, (float)(-1 + b0), -4.0F);<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        this.bill = new ModelRenderer(this, 14, 0);<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        this.bill.addBox(-2.0F, -4.0F, -4.0F, 4, 2, 2, 0.0F);<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        this.bill.setRotationPoint(0.0F, (float)(-1 + b0), -4.0F);<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        this.chin = new ModelRenderer(this, 14, 4);<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        this.chin.addBox(-1.0F, -2.0F, -3.0F, 2, 2, 2, 0.0F);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        this.chin.setRotationPoint(0.0F, (float)(-1 + b0), -4.0F);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        this.body = new ModelRenderer(this, 0, 9);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        this.body.addBox(-3.0F, -4.0F, -3.0F, 6, 8, 6, 0.0F);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        this.body.setRotationPoint(0.0F, (float)b0, 0.0F);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        this.rightLeg = new ModelRenderer(this, 26, 0);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        this.rightLeg.addBox(-1.0F, 0.0F, -3.0F, 3, 5, 3);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        this.rightLeg.setRotationPoint(-2.0F, (float)(3 + b0), 1.0F);<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        this.leftLeg = new ModelRenderer(this, 26, 0);<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        this.leftLeg.addBox(-1.0F, 0.0F, -3.0F, 3, 5, 3);<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.leftLeg.setRotationPoint(1.0F, (float)(3 + b0), 1.0F);<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.rightWing = new ModelRenderer(this, 24, 13);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.rightWing.addBox(0.0F, 0.0F, -3.0F, 1, 4, 6);<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.rightWing.setRotationPoint(-4.0F, (float)(-3 + b0), 0.0F);<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        this.leftWing = new ModelRenderer(this, 24, 13);<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        this.leftWing.addBox(-1.0F, 0.0F, -3.0F, 1, 4, 6);<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        this.leftWing.setRotationPoint(4.0F, (float)(-3 + b0), 0.0F);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    }<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * Sets the models various rotation angles then renders the model.<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     */<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        this.setRotationAngles(par2, par3, par4, par5, par6, par7, par1Entity);<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>        if (this.isChild)<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            float f6 = 2.0F;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            GL11.glPushMatrix();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            GL11.glTranslatef(0.0F, 5.0F * par7, 2.0F * par7);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            this.head.render(par7);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            this.bill.render(par7);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            this.chin.render(par7);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            GL11.glPopMatrix();<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            GL11.glPushMatrix();<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            GL11.glScalef(1.0F / f6, 1.0F / f6, 1.0F / f6);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            GL11.glTranslatef(0.0F, 24.0F * par7, 0.0F);<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            this.body.render(par7);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            this.rightLeg.render(par7);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            this.leftLeg.render(par7);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            this.rightWing.render(par7);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            this.leftWing.render(par7);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            GL11.glPopMatrix();<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        }<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        else<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            this.head.render(par7);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>            this.bill.render(par7);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            this.chin.render(par7);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            this.body.render(par7);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            this.rightLeg.render(par7);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            this.leftLeg.render(par7);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            this.rightWing.render(par7);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            this.leftWing.render(par7);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        }<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    }<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>    /**<a name="line.89"></a>
+<span class="sourceLineNo">090</span>     * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.91"></a>
+<span class="sourceLineNo">092</span>     * "far" arms and legs can swing at most.<a name="line.92"></a>
+<span class="sourceLineNo">093</span>     */<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6, Entity par7Entity)<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        this.head.rotateAngleX = par5 / (180F / (float)Math.PI);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        this.head.rotateAngleY = par4 / (180F / (float)Math.PI);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        this.bill.rotateAngleX = this.head.rotateAngleX;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        this.bill.rotateAngleY = this.head.rotateAngleY;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        this.chin.rotateAngleX = this.head.rotateAngleX;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        this.chin.rotateAngleY = this.head.rotateAngleY;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        this.body.rotateAngleX = ((float)Math.PI / 2F);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        this.rightLeg.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.4F * par2;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        this.leftLeg.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.4F * par2;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        this.rightWing.rotateAngleZ = par3;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        this.leftWing.rotateAngleZ = -par3;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>}<a name="line.108"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

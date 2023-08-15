@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.entity.passive;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import net.minecraft.entity.EntityAgeable;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.entity.ai.EntityAIFollowParent;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.entity.ai.EntityAILookIdle;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.entity.ai.EntityAIMate;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.entity.ai.EntityAIPanic;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.entity.ai.EntityAISwimming;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.entity.ai.EntityAITempt;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.entity.ai.EntityAIWander;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.entity.ai.EntityAIWatchClosest;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.entity.player.EntityPlayer;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.item.Item;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.item.ItemSeeds;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.item.ItemStack;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.world.World;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>public class EntityChicken extends EntityAnimal<a name="line.18"></a>
+<span class="sourceLineNo">019</span>{<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    public boolean field_70885_d = false;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    public float field_70886_e = 0.0F;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    public float destPos = 0.0F;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public float field_70884_g;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public float field_70888_h;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    public float field_70889_i = 1.0F;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>    /** The time until the next egg is spawned. */<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    public int timeUntilNextEgg;<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>    public EntityChicken(World par1World)<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        super(par1World);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        this.texture = "/mob/chicken.png";<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        this.setSize(0.3F, 0.7F);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        float f = 0.25F;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        this.tasks.addTask(0, new EntityAISwimming(this));<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        this.tasks.addTask(1, new EntityAIPanic(this, 0.38F));<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        this.tasks.addTask(2, new EntityAIMate(this, f));<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        this.tasks.addTask(3, new EntityAITempt(this, 0.25F, Item.seeds.itemID, false));<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.tasks.addTask(4, new EntityAIFollowParent(this, 0.28F));<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.tasks.addTask(5, new EntityAIWander(this, f));<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.tasks.addTask(7, new EntityAILookIdle(this));<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    }<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>    /**<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * Returns true if the newer Entity AI code should be run<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     */<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    public boolean isAIEnabled()<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        return true;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    }<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    public int getMaxHealth()<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        return 4;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    }<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>    /**<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons<a name="line.61"></a>
+<span class="sourceLineNo">062</span>     * use this to react to sunlight and start to burn.<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     */<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    public void onLivingUpdate()<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        super.onLivingUpdate();<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        this.field_70888_h = this.field_70886_e;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        this.field_70884_g = this.destPos;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        this.destPos = (float)((double)this.destPos + (double)(this.onGround ? -1 : 4) * 0.3D);<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>        if (this.destPos &lt; 0.0F)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            this.destPos = 0.0F;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        }<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>        if (this.destPos &gt; 1.0F)<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            this.destPos = 1.0F;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        }<a name="line.79"></a>
+<span class="sourceLineNo">080</span><a name="line.80"></a>
+<span class="sourceLineNo">081</span>        if (!this.onGround &amp;&amp; this.field_70889_i &lt; 1.0F)<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            this.field_70889_i = 1.0F;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        }<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>        this.field_70889_i = (float)((double)this.field_70889_i * 0.9D);<a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>        if (!this.onGround &amp;&amp; this.motionY &lt; 0.0D)<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            this.motionY *= 0.6D;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        }<a name="line.91"></a>
+<span class="sourceLineNo">092</span><a name="line.92"></a>
+<span class="sourceLineNo">093</span>        this.field_70886_e += this.field_70889_i * 2.0F;<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>        if (!this.isChild() &amp;&amp; !this.worldObj.isRemote &amp;&amp; --this.timeUntilNextEgg &lt;= 0)<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            this.playSound("mob.chicken.plop", 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            this.dropItem(Item.egg.itemID, 1);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        }<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    }<a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>    /**<a name="line.103"></a>
+<span class="sourceLineNo">104</span>     * Called when the mob is falling. Calculates and applies fall damage.<a name="line.104"></a>
+<span class="sourceLineNo">105</span>     */<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    protected void fall(float par1) {}<a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>    /**<a name="line.108"></a>
+<span class="sourceLineNo">109</span>     * Returns the sound this mob makes while it's alive.<a name="line.109"></a>
+<span class="sourceLineNo">110</span>     */<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    protected String getLivingSound()<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        return "mob.chicken.say";<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    }<a name="line.114"></a>
+<span class="sourceLineNo">115</span><a name="line.115"></a>
+<span class="sourceLineNo">116</span>    /**<a name="line.116"></a>
+<span class="sourceLineNo">117</span>     * Returns the sound this mob makes when it is hurt.<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     */<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    protected String getHurtSound()<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        return "mob.chicken.hurt";<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    }<a name="line.122"></a>
+<span class="sourceLineNo">123</span><a name="line.123"></a>
+<span class="sourceLineNo">124</span>    /**<a name="line.124"></a>
+<span class="sourceLineNo">125</span>     * Returns the sound this mob makes on death.<a name="line.125"></a>
+<span class="sourceLineNo">126</span>     */<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    protected String getDeathSound()<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        return "mob.chicken.hurt";<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    }<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>    /**<a name="line.132"></a>
+<span class="sourceLineNo">133</span>     * Plays step sound at given x, y, z for the entity<a name="line.133"></a>
+<span class="sourceLineNo">134</span>     */<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    protected void playStepSound(int par1, int par2, int par3, int par4)<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        this.playSound("mob.chicken.step", 0.15F, 1.0F);<a name="line.137"></a>
+<span class="sourceLineNo">138</span>    }<a name="line.138"></a>
+<span class="sourceLineNo">139</span><a name="line.139"></a>
+<span class="sourceLineNo">140</span>    /**<a name="line.140"></a>
+<span class="sourceLineNo">141</span>     * Returns the item ID for the item the mob drops on death.<a name="line.141"></a>
+<span class="sourceLineNo">142</span>     */<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    protected int getDropItemId()<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    {<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        return Item.feather.itemID;<a name="line.145"></a>
+<span class="sourceLineNo">146</span>    }<a name="line.146"></a>
+<span class="sourceLineNo">147</span><a name="line.147"></a>
+<span class="sourceLineNo">148</span>    /**<a name="line.148"></a>
+<span class="sourceLineNo">149</span>     * Drop 0-2 items of this living's type. @param par1 - Whether this entity has recently been hit by a player. @param<a name="line.149"></a>
+<span class="sourceLineNo">150</span>     * par2 - Level of Looting used to kill this mob.<a name="line.150"></a>
+<span class="sourceLineNo">151</span>     */<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    protected void dropFewItems(boolean par1, int par2)<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    {<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        int j = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>        for (int k = 0; k &lt; j; ++k)<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        {<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            this.dropItem(Item.feather.itemID, 1);<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        }<a name="line.159"></a>
+<span class="sourceLineNo">160</span><a name="line.160"></a>
+<span class="sourceLineNo">161</span>        if (this.isBurning())<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        {<a name="line.162"></a>
+<span class="sourceLineNo">163</span>            this.dropItem(Item.chickenCooked.itemID, 1);<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        }<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        else<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        {<a name="line.166"></a>
+<span class="sourceLineNo">167</span>            this.dropItem(Item.chickenRaw.itemID, 1);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        }<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    }<a name="line.169"></a>
+<span class="sourceLineNo">170</span><a name="line.170"></a>
+<span class="sourceLineNo">171</span>    /**<a name="line.171"></a>
+<span class="sourceLineNo">172</span>     * This function is used when two same-species animals in 'love mode' breed to generate the new baby animal.<a name="line.172"></a>
+<span class="sourceLineNo">173</span>     */<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    public EntityChicken spawnBabyAnimal(EntityAgeable par1EntityAgeable)<a name="line.174"></a>
+<span class="sourceLineNo">175</span>    {<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        return new EntityChicken(this.worldObj);<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    }<a name="line.177"></a>
+<span class="sourceLineNo">178</span><a name="line.178"></a>
+<span class="sourceLineNo">179</span>    /**<a name="line.179"></a>
+<span class="sourceLineNo">180</span>     * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on<a name="line.180"></a>
+<span class="sourceLineNo">181</span>     * the animal type)<a name="line.181"></a>
+<span class="sourceLineNo">182</span>     */<a name="line.182"></a>
+<span class="sourceLineNo">183</span>    public boolean isBreedingItem(ItemStack par1ItemStack)<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    {<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        return par1ItemStack != null &amp;&amp; par1ItemStack.getItem() instanceof ItemSeeds;<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    }<a name="line.186"></a>
+<span class="sourceLineNo">187</span><a name="line.187"></a>
+<span class="sourceLineNo">188</span>    public EntityAgeable createChild(EntityAgeable par1EntityAgeable)<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    {<a name="line.189"></a>
+<span class="sourceLineNo">190</span>        return this.spawnBabyAnimal(par1EntityAgeable);<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    }<a name="line.191"></a>
+<span class="sourceLineNo">192</span>}<a name="line.192"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

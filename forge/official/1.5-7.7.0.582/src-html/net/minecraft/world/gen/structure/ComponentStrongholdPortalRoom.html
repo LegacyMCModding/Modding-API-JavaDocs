@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.List;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Random;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.Block;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.tileentity.TileEntityMobSpawner;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.world.World;<a name="line.7"></a>
+<span class="sourceLineNo">008</span><a name="line.8"></a>
+<span class="sourceLineNo">009</span>public class ComponentStrongholdPortalRoom extends ComponentStronghold<a name="line.9"></a>
+<span class="sourceLineNo">010</span>{<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    private boolean hasSpawner;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public ComponentStrongholdPortalRoom(int par1, Random par2Random, StructureBoundingBox par3StructureBoundingBox, int par4)<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    {<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        super(par1);<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.coordBaseMode = par4;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        this.boundingBox = par3StructureBoundingBox;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    }<a name="line.18"></a>
+<span class="sourceLineNo">019</span><a name="line.19"></a>
+<span class="sourceLineNo">020</span>    /**<a name="line.20"></a>
+<span class="sourceLineNo">021</span>     * Initiates construction of the Structure Component picked, at the current Location of StructGen<a name="line.21"></a>
+<span class="sourceLineNo">022</span>     */<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public void buildComponent(StructureComponent par1StructureComponent, List par2List, Random par3Random)<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    {<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        if (par1StructureComponent != null)<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        {<a name="line.26"></a>
+<span class="sourceLineNo">027</span>            ((ComponentStrongholdStairs2)par1StructureComponent).strongholdPortalRoom = this;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        }<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    }<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>    public static ComponentStrongholdPortalRoom findValidPlacement(List par0List, Random par1Random, int par2, int par3, int par4, int par5, int par6)<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    {<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(par2, par3, par4, -4, -1, 0, 11, 8, 16, par5);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        return canStrongholdGoDeeper(structureboundingbox) &amp;&amp; StructureComponent.findIntersecting(par0List, structureboundingbox) == null ? new ComponentStrongholdPortalRoom(par6, par1Random, structureboundingbox, par5) : null;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    }<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>    /**<a name="line.37"></a>
+<span class="sourceLineNo">038</span>     * second Part of Structure generating, this for example places Spiderwebs, Mob Spawners, it closes Mineshafts at<a name="line.38"></a>
+<span class="sourceLineNo">039</span>     * the end, it adds Fences...<a name="line.39"></a>
+<span class="sourceLineNo">040</span>     */<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public boolean addComponentParts(World par1World, Random par2Random, StructureBoundingBox par3StructureBoundingBox)<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 0, 0, 0, 10, 7, 15, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.placeDoor(par1World, par2Random, par3StructureBoundingBox, EnumDoor.GRATES, 4, 1, 0);<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        byte b0 = 6;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 1, b0, 1, 1, b0, 14, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 9, b0, 1, 9, b0, 14, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 2, b0, 1, 8, b0, 2, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 2, b0, 14, 8, b0, 14, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 1, 1, 1, 2, 1, 4, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 8, 1, 1, 9, 1, 4, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 1, 1, 1, 1, 3, Block.lavaMoving.blockID, Block.lavaMoving.blockID, false);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 9, 1, 1, 9, 1, 3, Block.lavaMoving.blockID, Block.lavaMoving.blockID, false);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 3, 1, 8, 7, 1, 12, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 4, 1, 9, 6, 1, 11, Block.lavaMoving.blockID, Block.lavaMoving.blockID, false);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        int i;<a name="line.56"></a>
+<span class="sourceLineNo">057</span><a name="line.57"></a>
+<span class="sourceLineNo">058</span>        for (i = 3; i &lt; 14; i += 2)<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        {<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, 3, i, 0, 4, i, Block.fenceIron.blockID, Block.fenceIron.blockID, false);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 10, 3, i, 10, 4, i, Block.fenceIron.blockID, Block.fenceIron.blockID, false);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        }<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>        for (i = 2; i &lt; 9; i += 2)<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, i, 3, 15, i, 4, 15, Block.fenceIron.blockID, Block.fenceIron.blockID, false);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        }<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>        i = this.getMetadataWithOffset(Block.stairsStoneBrickSmooth.blockID, 3);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 1, 5, 6, 1, 7, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 2, 6, 6, 2, 7, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 3, 7, 6, 3, 7, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>        for (int j = 4; j &lt;= 6; ++j)<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        {<a name="line.75"></a>
+<span class="sourceLineNo">076</span>            this.placeBlockAtCurrentPosition(par1World, Block.stairsStoneBrickSmooth.blockID, i, j, 1, 4, par3StructureBoundingBox);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            this.placeBlockAtCurrentPosition(par1World, Block.stairsStoneBrickSmooth.blockID, i, j, 2, 5, par3StructureBoundingBox);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            this.placeBlockAtCurrentPosition(par1World, Block.stairsStoneBrickSmooth.blockID, i, j, 3, 6, par3StructureBoundingBox);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        }<a name="line.79"></a>
+<span class="sourceLineNo">080</span><a name="line.80"></a>
+<span class="sourceLineNo">081</span>        byte b1 = 2;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        byte b2 = 0;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        byte b3 = 3;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        byte b4 = 1;<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>        switch (this.coordBaseMode)<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            case 0:<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                b1 = 0;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                b2 = 2;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                break;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            case 1:<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                b1 = 1;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                b2 = 3;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                b3 = 0;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>                b4 = 2;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            case 2:<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            default:<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                break;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            case 3:<a name="line.100"></a>
+<span class="sourceLineNo">101</span>                b1 = 3;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                b2 = 1;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                b3 = 0;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                b4 = 2;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        }<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b1 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 4, 3, 8, par3StructureBoundingBox);<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b1 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 5, 3, 8, par3StructureBoundingBox);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b1 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 6, 3, 8, par3StructureBoundingBox);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b2 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 4, 3, 12, par3StructureBoundingBox);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b2 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 5, 3, 12, par3StructureBoundingBox);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b2 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 6, 3, 12, par3StructureBoundingBox);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b3 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 3, 3, 9, par3StructureBoundingBox);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b3 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 3, 3, 10, par3StructureBoundingBox);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b3 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 3, 3, 11, par3StructureBoundingBox);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b4 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 7, 3, 9, par3StructureBoundingBox);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b4 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 7, 3, 10, par3StructureBoundingBox);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        this.placeBlockAtCurrentPosition(par1World, Block.endPortalFrame.blockID, b4 + (par2Random.nextFloat() &gt; 0.9F ? 4 : 0), 7, 3, 11, par3StructureBoundingBox);<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>        if (!this.hasSpawner)<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            int k = this.getYWithOffset(3);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            int l = this.getXWithOffset(5, 6);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            int i1 = this.getZWithOffset(5, 6);<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>            if (par3StructureBoundingBox.isVecInside(l, k, i1))<a name="line.126"></a>
+<span class="sourceLineNo">127</span>            {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>                this.hasSpawner = true;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>                par1World.setBlockAndMetadataWithNotify(l, k, i1, Block.mobSpawner.blockID, 0, 2);<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                TileEntityMobSpawner tileentitymobspawner = (TileEntityMobSpawner)par1World.getBlockTileEntity(l, k, i1);<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>                if (tileentitymobspawner != null)<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                {<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                    tileentitymobspawner.func_98049_a().func_98272_a("Silverfish");<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        }<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>        return true;<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    }<a name="line.140"></a>
+<span class="sourceLineNo">141</span>}<a name="line.141"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

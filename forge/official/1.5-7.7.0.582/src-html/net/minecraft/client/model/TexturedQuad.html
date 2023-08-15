@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.model;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.client.renderer.Tessellator;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.util.Vec3;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class TexturedQuad<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    public PositionTextureVertex[] vertexPositions;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    public int nVertices;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    private boolean invertNormal;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public TexturedQuad(PositionTextureVertex[] par1ArrayOfPositionTextureVertex)<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    {<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.nVertices = 0;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        this.invertNormal = false;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        this.vertexPositions = par1ArrayOfPositionTextureVertex;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        this.nVertices = par1ArrayOfPositionTextureVertex.length;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    }<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>    public TexturedQuad(PositionTextureVertex[] par1ArrayOfPositionTextureVertex, int par2, int par3, int par4, int par5, float par6, float par7)<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    {<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        this(par1ArrayOfPositionTextureVertex);<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        float f2 = 0.0F / par6;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        float f3 = 0.0F / par7;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        par1ArrayOfPositionTextureVertex[0] = par1ArrayOfPositionTextureVertex[0].setTexturePosition((float)par4 / par6 - f2, (float)par3 / par7 + f3);<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        par1ArrayOfPositionTextureVertex[1] = par1ArrayOfPositionTextureVertex[1].setTexturePosition((float)par2 / par6 + f2, (float)par3 / par7 + f3);<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        par1ArrayOfPositionTextureVertex[2] = par1ArrayOfPositionTextureVertex[2].setTexturePosition((float)par2 / par6 + f2, (float)par5 / par7 - f3);<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        par1ArrayOfPositionTextureVertex[3] = par1ArrayOfPositionTextureVertex[3].setTexturePosition((float)par4 / par6 - f2, (float)par5 / par7 - f3);<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    }<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>    public void flipFace()<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    {<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        PositionTextureVertex[] apositiontexturevertex = new PositionTextureVertex[this.vertexPositions.length];<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>        for (int i = 0; i &lt; this.vertexPositions.length; ++i)<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>            apositiontexturevertex[i] = this.vertexPositions[this.vertexPositions.length - i - 1];<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        }<a name="line.40"></a>
+<span class="sourceLineNo">041</span><a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.vertexPositions = apositiontexturevertex;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    }<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    public void draw(Tessellator par1Tessellator, float par2)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        Vec3 vec3 = this.vertexPositions[1].vector3D.subtract(this.vertexPositions[0].vector3D);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        Vec3 vec31 = this.vertexPositions[1].vector3D.subtract(this.vertexPositions[2].vector3D);<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        Vec3 vec32 = vec31.crossProduct(vec3).normalize();<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        par1Tessellator.startDrawingQuads();<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>        if (this.invertNormal)<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            par1Tessellator.setNormal(-((float)vec32.xCoord), -((float)vec32.yCoord), -((float)vec32.zCoord));<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        }<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        else<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        {<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            par1Tessellator.setNormal((float)vec32.xCoord, (float)vec32.yCoord, (float)vec32.zCoord);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        }<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>        for (int i = 0; i &lt; 4; ++i)<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            PositionTextureVertex positiontexturevertex = this.vertexPositions[i];<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            par1Tessellator.addVertexWithUV((double)((float)positiontexturevertex.vector3D.xCoord * par2), (double)((float)positiontexturevertex.vector3D.yCoord * par2), (double)((float)positiontexturevertex.vector3D.zCoord * par2), (double)positiontexturevertex.texturePositionX, (double)positiontexturevertex.texturePositionY);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        }<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>        par1Tessellator.draw();<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    }<a name="line.68"></a>
+<span class="sourceLineNo">069</span>}<a name="line.69"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

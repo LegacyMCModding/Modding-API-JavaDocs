@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * Forge Mod Loader<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Copyright (c) 2012-2013 cpw.<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * All rights reserved. This program and the accompanying materials<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * are made available under the terms of the GNU Lesser Public License v2.1<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * which accompanies this distribution, and is available at<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * <a name="line.8"></a>
+<span class="sourceLineNo">009</span> * Contributors:<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *     cpw - implementation<a name="line.10"></a>
+<span class="sourceLineNo">011</span> */<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>package cpw.mods.fml.client;<a name="line.13"></a>
+<span class="sourceLineNo">014</span><a name="line.14"></a>
+<span class="sourceLineNo">015</span>import java.util.List;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import java.util.Map.Entry;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>import net.minecraft.client.gui.GuiButton;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import net.minecraft.client.gui.GuiYesNo;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import net.minecraft.util.StringTranslate;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>import com.google.common.collect.Lists;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import com.google.common.collect.MapDifference;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import com.google.common.collect.MapDifference.ValueDifference;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import cpw.mods.fml.common.registry.ItemData;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import cpw.mods.fml.common.versioning.ArtifactVersion;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>public class GuiIdMismatchScreen extends GuiYesNo {<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    private List&lt;String&gt; missingIds = Lists.newArrayList();<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    private List&lt;String&gt; mismatchedIds = Lists.newArrayList();<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    private boolean allowContinue;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>    public GuiIdMismatchScreen(MapDifference&lt;Integer, ItemData&gt; idDifferences, boolean allowContinue)<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    {<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        super(null,"ID mismatch", "Should I continue?", 1);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        parentScreen = this;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        for (Entry&lt;Integer, ItemData&gt; entry : idDifferences.entriesOnlyOnLeft().entrySet())<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>            missingIds.add(String.format("ID %d (ModID: %s, type %s) is missing", entry.getValue().getItemId(), entry.getValue().getModId(), entry.getValue().getItemType()));<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        }<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        for (Entry&lt;Integer, ValueDifference&lt;ItemData&gt;&gt; entry : idDifferences.entriesDiffering().entrySet())<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        {<a name="line.43"></a>
+<span class="sourceLineNo">044</span>            ItemData world = entry.getValue().leftValue();<a name="line.44"></a>
+<span class="sourceLineNo">045</span>            ItemData game = entry.getValue().rightValue();<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            mismatchedIds.add(String.format("ID %d is mismatched. World: (ModID: %s, type %s, ordinal %d) Game (ModID: %s, type %s, ordinal %d)", world.getItemId(), world.getModId(), world.getItemType(), world.getOrdinal(), game.getModId(), game.getItemType(), game.getOrdinal()));<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        }<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.allowContinue = allowContinue;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>    }<a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span>    @Override<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    public void confirmClicked(boolean choice, int par2)<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        FMLClientHandler.instance().callbackIdDifferenceResponse(choice);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    }<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    @Override<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>    /**<a name="line.59"></a>
+<span class="sourceLineNo">060</span>     * Draws the screen and all the components in it.<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     */<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    public void drawScreen(int par1, int par2, float par3)<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        this.drawDefaultBackground();<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        if (!allowContinue &amp;&amp; buttonList.size() == 2)<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            buttonList.remove(0);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        }<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        int offset = Math.max(85 - missingIds.size() * 10 + mismatchedIds.size() * 30, 10);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.drawCenteredString(this.fontRenderer, "Forge Mod Loader has found world ID mismatches", this.width / 2, offset, 0xFFFFFF);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        offset += 10;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        for (String s: missingIds) {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            this.drawCenteredString(this.fontRenderer, s, this.width / 2, offset, 0xEEEEEE);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            offset += 10;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        }<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        for (String s: mismatchedIds) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            this.drawCenteredString(this.fontRenderer, s, this.width / 2, offset, 0xEEEEEE);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            offset += 10;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        }<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        offset += 10;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        if (allowContinue)<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            this.drawCenteredString(this.fontRenderer, "Do you wish to continue loading?", this.width / 2, offset, 0xFFFFFF);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            offset += 10;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        }<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        else<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            this.drawCenteredString(this.fontRenderer, "You cannot connect to this server", this.width / 2, offset, 0xFFFFFF);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            offset += 10;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        }<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        // super.super. Grrr<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        for (int var4 = 0; var4 &lt; this.buttonList.size(); ++var4)<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>            GuiButton var5 = (GuiButton)this.buttonList.get(var4);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            var5.yPosition = Math.min(offset + 10, this.height - 20);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            if (!allowContinue)<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                var5.xPosition = this.width / 2 - 75;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                var5.displayString = StringTranslate.getInstance().translateKey("gui.done");<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            }<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            var5.drawButton(this.mc, par1, par2);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        }<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    }<a name="line.103"></a>
+<span class="sourceLineNo">104</span>}<a name="line.104"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

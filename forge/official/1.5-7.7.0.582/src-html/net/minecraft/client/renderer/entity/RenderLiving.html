@@ -1,0 +1,613 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer.entity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.util.Random;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.client.Minecraft;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.client.gui.FontRenderer;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.client.model.ModelBase;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.client.model.ModelBox;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.client.model.ModelRenderer;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.client.renderer.OpenGlHelper;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.client.renderer.RenderHelper;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.client.renderer.Tessellator;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.entity.Entity;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.entity.EntityLiving;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.entity.projectile.EntityArrow;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import net.minecraft.util.MathHelper;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import org.lwjgl.opengl.GL11;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import org.lwjgl.opengl.GL12;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>@SideOnly(Side.CLIENT)<a name="line.21"></a>
+<span class="sourceLineNo">022</span>public class RenderLiving extends Render<a name="line.22"></a>
+<span class="sourceLineNo">023</span>{<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    protected ModelBase mainModel;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    /** The model to be used during the render passes. */<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    protected ModelBase renderPassModel;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public RenderLiving(ModelBase par1ModelBase, float par2)<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        this.mainModel = par1ModelBase;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        this.shadowSize = par2;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    }<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>    /**<a name="line.35"></a>
+<span class="sourceLineNo">036</span>     * Sets the model to be used in the current render pass (the first render pass is done after the primary model is<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     * rendered) Args: model<a name="line.37"></a>
+<span class="sourceLineNo">038</span>     */<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    public void setRenderPassModel(ModelBase par1ModelBase)<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    {<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.renderPassModel = par1ModelBase;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    }<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>    /**<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     * Returns a rotation angle that is inbetween two other rotation angles. par1 and par2 are the angles between which<a name="line.45"></a>
+<span class="sourceLineNo">046</span>     * to interpolate, par3 is probably a float between 0.0 and 1.0 that tells us where "between" the two angles we are.<a name="line.46"></a>
+<span class="sourceLineNo">047</span>     * Example: par1 = 30, par2 = 50, par3 = 0.5, then return = 40<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     */<a name="line.48"></a>
+<span class="sourceLineNo">049</span>    private float interpolateRotation(float par1, float par2, float par3)<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    {<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        float f3;<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>        for (f3 = par2 - par1; f3 &lt; -180.0F; f3 += 360.0F)<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            ;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        }<a name="line.56"></a>
+<span class="sourceLineNo">057</span><a name="line.57"></a>
+<span class="sourceLineNo">058</span>        while (f3 &gt;= 180.0F)<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        {<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            f3 -= 360.0F;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        }<a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62"></a>
+<span class="sourceLineNo">063</span>        return par1 + par3 * f3;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    }<a name="line.64"></a>
+<span class="sourceLineNo">065</span><a name="line.65"></a>
+<span class="sourceLineNo">066</span>    public void doRenderLiving(EntityLiving par1EntityLiving, double par2, double par4, double par6, float par8, float par9)<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        GL11.glPushMatrix();<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        GL11.glDisable(GL11.GL_CULL_FACE);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.mainModel.onGround = this.renderSwingProgress(par1EntityLiving, par9);<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>        if (this.renderPassModel != null)<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        {<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            this.renderPassModel.onGround = this.mainModel.onGround;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        }<a name="line.75"></a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span>        this.mainModel.isRiding = par1EntityLiving.isRiding();<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>        if (this.renderPassModel != null)<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            this.renderPassModel.isRiding = this.mainModel.isRiding;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        }<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>        this.mainModel.isChild = par1EntityLiving.isChild();<a name="line.84"></a>
+<span class="sourceLineNo">085</span><a name="line.85"></a>
+<span class="sourceLineNo">086</span>        if (this.renderPassModel != null)<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            this.renderPassModel.isChild = this.mainModel.isChild;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        }<a name="line.89"></a>
+<span class="sourceLineNo">090</span><a name="line.90"></a>
+<span class="sourceLineNo">091</span>        try<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        {<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            float f2 = this.interpolateRotation(par1EntityLiving.prevRenderYawOffset, par1EntityLiving.renderYawOffset, par9);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>            float f3 = this.interpolateRotation(par1EntityLiving.prevRotationYawHead, par1EntityLiving.rotationYawHead, par9);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            float f4 = par1EntityLiving.prevRotationPitch + (par1EntityLiving.rotationPitch - par1EntityLiving.prevRotationPitch) * par9;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            this.renderLivingAt(par1EntityLiving, par2, par4, par6);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            float f5 = this.handleRotationFloat(par1EntityLiving, par9);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            this.rotateCorpse(par1EntityLiving, f5, f2, par9);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            float f6 = 0.0625F;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            GL11.glEnable(GL12.GL_RESCALE_NORMAL);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            GL11.glScalef(-1.0F, -1.0F, 1.0F);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>            this.preRenderCallback(par1EntityLiving, par9);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            GL11.glTranslatef(0.0F, -24.0F * f6 - 0.0078125F, 0.0F);<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            float f7 = par1EntityLiving.prevLimbYaw + (par1EntityLiving.limbYaw - par1EntityLiving.prevLimbYaw) * par9;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            float f8 = par1EntityLiving.limbSwing - par1EntityLiving.limbYaw * (1.0F - par9);<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>            if (par1EntityLiving.isChild())<a name="line.107"></a>
+<span class="sourceLineNo">108</span>            {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                f8 *= 3.0F;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>            }<a name="line.110"></a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+<span class="sourceLineNo">112</span>            if (f7 &gt; 1.0F)<a name="line.112"></a>
+<span class="sourceLineNo">113</span>            {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                f7 = 1.0F;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>            }<a name="line.115"></a>
+<span class="sourceLineNo">116</span><a name="line.116"></a>
+<span class="sourceLineNo">117</span>            GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>            this.mainModel.setLivingAnimations(par1EntityLiving, f8, f7, par9);<a name="line.118"></a>
+<span class="sourceLineNo">119</span>            this.renderModel(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            float f9;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            int i;<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            float f10;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            float f11;<a name="line.123"></a>
+<span class="sourceLineNo">124</span><a name="line.124"></a>
+<span class="sourceLineNo">125</span>            for (int j = 0; j &lt; 4; ++j)<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                i = this.shouldRenderPass(par1EntityLiving, j, par9);<a name="line.127"></a>
+<span class="sourceLineNo">128</span><a name="line.128"></a>
+<span class="sourceLineNo">129</span>                if (i &gt; 0)<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                    this.renderPassModel.setLivingAnimations(par1EntityLiving, f8, f7, par9);<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                    this.renderPassModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.132"></a>
+<span class="sourceLineNo">133</span><a name="line.133"></a>
+<span class="sourceLineNo">134</span>                    if ((i &amp; 240) == 16)<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                    {<a name="line.135"></a>
+<span class="sourceLineNo">136</span>                        this.func_82408_c(par1EntityLiving, j, par9);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>                        this.renderPassModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.137"></a>
+<span class="sourceLineNo">138</span>                    }<a name="line.138"></a>
+<span class="sourceLineNo">139</span><a name="line.139"></a>
+<span class="sourceLineNo">140</span>                    if ((i &amp; 15) == 15)<a name="line.140"></a>
+<span class="sourceLineNo">141</span>                    {<a name="line.141"></a>
+<span class="sourceLineNo">142</span>                        f9 = (float)par1EntityLiving.ticksExisted + par9;<a name="line.142"></a>
+<span class="sourceLineNo">143</span>                        this.loadTexture("%blur%/misc/glint.png");<a name="line.143"></a>
+<span class="sourceLineNo">144</span>                        GL11.glEnable(GL11.GL_BLEND);<a name="line.144"></a>
+<span class="sourceLineNo">145</span>                        f10 = 0.5F;<a name="line.145"></a>
+<span class="sourceLineNo">146</span>                        GL11.glColor4f(f10, f10, f10, 1.0F);<a name="line.146"></a>
+<span class="sourceLineNo">147</span>                        GL11.glDepthFunc(GL11.GL_EQUAL);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>                        GL11.glDepthMask(false);<a name="line.148"></a>
+<span class="sourceLineNo">149</span><a name="line.149"></a>
+<span class="sourceLineNo">150</span>                        for (int k = 0; k &lt; 2; ++k)<a name="line.150"></a>
+<span class="sourceLineNo">151</span>                        {<a name="line.151"></a>
+<span class="sourceLineNo">152</span>                            GL11.glDisable(GL11.GL_LIGHTING);<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                            f11 = 0.76F;<a name="line.153"></a>
+<span class="sourceLineNo">154</span>                            GL11.glColor4f(0.5F * f11, 0.25F * f11, 0.8F * f11, 1.0F);<a name="line.154"></a>
+<span class="sourceLineNo">155</span>                            GL11.glBlendFunc(GL11.GL_SRC_COLOR, GL11.GL_ONE);<a name="line.155"></a>
+<span class="sourceLineNo">156</span>                            GL11.glMatrixMode(GL11.GL_TEXTURE);<a name="line.156"></a>
+<span class="sourceLineNo">157</span>                            GL11.glLoadIdentity();<a name="line.157"></a>
+<span class="sourceLineNo">158</span>                            float f12 = f9 * (0.001F + (float)k * 0.003F) * 20.0F;<a name="line.158"></a>
+<span class="sourceLineNo">159</span>                            float f13 = 0.33333334F;<a name="line.159"></a>
+<span class="sourceLineNo">160</span>                            GL11.glScalef(f13, f13, f13);<a name="line.160"></a>
+<span class="sourceLineNo">161</span>                            GL11.glRotatef(30.0F - (float)k * 60.0F, 0.0F, 0.0F, 1.0F);<a name="line.161"></a>
+<span class="sourceLineNo">162</span>                            GL11.glTranslatef(0.0F, f12, 0.0F);<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                            GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.163"></a>
+<span class="sourceLineNo">164</span>                            this.renderPassModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                        }<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>                        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                        GL11.glMatrixMode(GL11.GL_TEXTURE);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>                        GL11.glDepthMask(true);<a name="line.169"></a>
+<span class="sourceLineNo">170</span>                        GL11.glLoadIdentity();<a name="line.170"></a>
+<span class="sourceLineNo">171</span>                        GL11.glMatrixMode(GL11.GL_MODELVIEW);<a name="line.171"></a>
+<span class="sourceLineNo">172</span>                        GL11.glEnable(GL11.GL_LIGHTING);<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                        GL11.glDisable(GL11.GL_BLEND);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                        GL11.glDepthFunc(GL11.GL_LEQUAL);<a name="line.174"></a>
+<span class="sourceLineNo">175</span>                    }<a name="line.175"></a>
+<span class="sourceLineNo">176</span><a name="line.176"></a>
+<span class="sourceLineNo">177</span>                    GL11.glDisable(GL11.GL_BLEND);<a name="line.177"></a>
+<span class="sourceLineNo">178</span>                    GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.178"></a>
+<span class="sourceLineNo">179</span>                }<a name="line.179"></a>
+<span class="sourceLineNo">180</span>            }<a name="line.180"></a>
+<span class="sourceLineNo">181</span><a name="line.181"></a>
+<span class="sourceLineNo">182</span>            GL11.glDepthMask(true);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>            this.renderEquippedItems(par1EntityLiving, par9);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>            float f14 = par1EntityLiving.getBrightness(par9);<a name="line.184"></a>
+<span class="sourceLineNo">185</span>            i = this.getColorMultiplier(par1EntityLiving, f14, par9);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.187"></a>
+<span class="sourceLineNo">188</span>            OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);<a name="line.188"></a>
+<span class="sourceLineNo">189</span><a name="line.189"></a>
+<span class="sourceLineNo">190</span>            if ((i &gt;&gt; 24 &amp; 255) &gt; 0 || par1EntityLiving.hurtTime &gt; 0 || par1EntityLiving.deathTime &gt; 0)<a name="line.190"></a>
+<span class="sourceLineNo">191</span>            {<a name="line.191"></a>
+<span class="sourceLineNo">192</span>                GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.192"></a>
+<span class="sourceLineNo">193</span>                GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>                GL11.glEnable(GL11.GL_BLEND);<a name="line.194"></a>
+<span class="sourceLineNo">195</span>                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.195"></a>
+<span class="sourceLineNo">196</span>                GL11.glDepthFunc(GL11.GL_EQUAL);<a name="line.196"></a>
+<span class="sourceLineNo">197</span><a name="line.197"></a>
+<span class="sourceLineNo">198</span>                if (par1EntityLiving.hurtTime &gt; 0 || par1EntityLiving.deathTime &gt; 0)<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                {<a name="line.199"></a>
+<span class="sourceLineNo">200</span>                    GL11.glColor4f(f14, 0.0F, 0.0F, 0.4F);<a name="line.200"></a>
+<span class="sourceLineNo">201</span>                    this.mainModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.201"></a>
+<span class="sourceLineNo">202</span><a name="line.202"></a>
+<span class="sourceLineNo">203</span>                    for (int l = 0; l &lt; 4; ++l)<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                    {<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                        if (this.inheritRenderPass(par1EntityLiving, l, par9) &gt;= 0)<a name="line.205"></a>
+<span class="sourceLineNo">206</span>                        {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                            GL11.glColor4f(f14, 0.0F, 0.0F, 0.4F);<a name="line.207"></a>
+<span class="sourceLineNo">208</span>                            this.renderPassModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                        }<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                    }<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                }<a name="line.211"></a>
+<span class="sourceLineNo">212</span><a name="line.212"></a>
+<span class="sourceLineNo">213</span>                if ((i &gt;&gt; 24 &amp; 255) &gt; 0)<a name="line.213"></a>
+<span class="sourceLineNo">214</span>                {<a name="line.214"></a>
+<span class="sourceLineNo">215</span>                    f9 = (float)(i &gt;&gt; 16 &amp; 255) / 255.0F;<a name="line.215"></a>
+<span class="sourceLineNo">216</span>                    f10 = (float)(i &gt;&gt; 8 &amp; 255) / 255.0F;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                    float f15 = (float)(i &amp; 255) / 255.0F;<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                    f11 = (float)(i &gt;&gt; 24 &amp; 255) / 255.0F;<a name="line.218"></a>
+<span class="sourceLineNo">219</span>                    GL11.glColor4f(f9, f10, f15, f11);<a name="line.219"></a>
+<span class="sourceLineNo">220</span>                    this.mainModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.220"></a>
+<span class="sourceLineNo">221</span><a name="line.221"></a>
+<span class="sourceLineNo">222</span>                    for (int i1 = 0; i1 &lt; 4; ++i1)<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                    {<a name="line.223"></a>
+<span class="sourceLineNo">224</span>                        if (this.inheritRenderPass(par1EntityLiving, i1, par9) &gt;= 0)<a name="line.224"></a>
+<span class="sourceLineNo">225</span>                        {<a name="line.225"></a>
+<span class="sourceLineNo">226</span>                            GL11.glColor4f(f9, f10, f15, f11);<a name="line.226"></a>
+<span class="sourceLineNo">227</span>                            this.renderPassModel.render(par1EntityLiving, f8, f7, f5, f3 - f2, f4, f6);<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                        }<a name="line.228"></a>
+<span class="sourceLineNo">229</span>                    }<a name="line.229"></a>
+<span class="sourceLineNo">230</span>                }<a name="line.230"></a>
+<span class="sourceLineNo">231</span><a name="line.231"></a>
+<span class="sourceLineNo">232</span>                GL11.glDepthFunc(GL11.GL_LEQUAL);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                GL11.glDisable(GL11.GL_BLEND);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.235"></a>
+<span class="sourceLineNo">236</span>            }<a name="line.236"></a>
+<span class="sourceLineNo">237</span><a name="line.237"></a>
+<span class="sourceLineNo">238</span>            GL11.glDisable(GL12.GL_RESCALE_NORMAL);<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        catch (Exception exception)<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        {<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            exception.printStackTrace();<a name="line.242"></a>
+<span class="sourceLineNo">243</span>        }<a name="line.243"></a>
+<span class="sourceLineNo">244</span><a name="line.244"></a>
+<span class="sourceLineNo">245</span>        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>        GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        GL11.glPopMatrix();<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        this.passSpecialRender(par1EntityLiving, par2, par4, par6);<a name="line.250"></a>
+<span class="sourceLineNo">251</span>    }<a name="line.251"></a>
+<span class="sourceLineNo">252</span><a name="line.252"></a>
+<span class="sourceLineNo">253</span>    /**<a name="line.253"></a>
+<span class="sourceLineNo">254</span>     * Renders the model in RenderLiving<a name="line.254"></a>
+<span class="sourceLineNo">255</span>     */<a name="line.255"></a>
+<span class="sourceLineNo">256</span>    protected void renderModel(EntityLiving par1EntityLiving, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.256"></a>
+<span class="sourceLineNo">257</span>    {<a name="line.257"></a>
+<span class="sourceLineNo">258</span>        this.func_98190_a(par1EntityLiving);<a name="line.258"></a>
+<span class="sourceLineNo">259</span><a name="line.259"></a>
+<span class="sourceLineNo">260</span>        if (!par1EntityLiving.getHasActivePotion())<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        {<a name="line.261"></a>
+<span class="sourceLineNo">262</span>            this.mainModel.render(par1EntityLiving, par2, par3, par4, par5, par6, par7);<a name="line.262"></a>
+<span class="sourceLineNo">263</span>        }<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        else if (!par1EntityLiving.func_98034_c(Minecraft.getMinecraft().thePlayer))<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        {<a name="line.265"></a>
+<span class="sourceLineNo">266</span>            GL11.glPushMatrix();<a name="line.266"></a>
+<span class="sourceLineNo">267</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.15F);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>            GL11.glDepthMask(false);<a name="line.268"></a>
+<span class="sourceLineNo">269</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.269"></a>
+<span class="sourceLineNo">270</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.270"></a>
+<span class="sourceLineNo">271</span>            GL11.glAlphaFunc(GL11.GL_GREATER, 0.003921569F);<a name="line.271"></a>
+<span class="sourceLineNo">272</span>            this.mainModel.render(par1EntityLiving, par2, par3, par4, par5, par6, par7);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.273"></a>
+<span class="sourceLineNo">274</span>            GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);<a name="line.274"></a>
+<span class="sourceLineNo">275</span>            GL11.glPopMatrix();<a name="line.275"></a>
+<span class="sourceLineNo">276</span>            GL11.glDepthMask(true);<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        }<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        else<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>            this.mainModel.setRotationAngles(par2, par3, par4, par5, par6, par7, par1EntityLiving);<a name="line.280"></a>
+<span class="sourceLineNo">281</span>        }<a name="line.281"></a>
+<span class="sourceLineNo">282</span>    }<a name="line.282"></a>
+<span class="sourceLineNo">283</span><a name="line.283"></a>
+<span class="sourceLineNo">284</span>    protected void func_98190_a(EntityLiving par1EntityLiving)<a name="line.284"></a>
+<span class="sourceLineNo">285</span>    {<a name="line.285"></a>
+<span class="sourceLineNo">286</span>        this.loadTexture(par1EntityLiving.getTexture());<a name="line.286"></a>
+<span class="sourceLineNo">287</span>    }<a name="line.287"></a>
+<span class="sourceLineNo">288</span><a name="line.288"></a>
+<span class="sourceLineNo">289</span>    /**<a name="line.289"></a>
+<span class="sourceLineNo">290</span>     * Sets a simple glTranslate on a LivingEntity.<a name="line.290"></a>
+<span class="sourceLineNo">291</span>     */<a name="line.291"></a>
+<span class="sourceLineNo">292</span>    protected void renderLivingAt(EntityLiving par1EntityLiving, double par2, double par4, double par6)<a name="line.292"></a>
+<span class="sourceLineNo">293</span>    {<a name="line.293"></a>
+<span class="sourceLineNo">294</span>        GL11.glTranslatef((float)par2, (float)par4, (float)par6);<a name="line.294"></a>
+<span class="sourceLineNo">295</span>    }<a name="line.295"></a>
+<span class="sourceLineNo">296</span><a name="line.296"></a>
+<span class="sourceLineNo">297</span>    protected void rotateCorpse(EntityLiving par1EntityLiving, float par2, float par3, float par4)<a name="line.297"></a>
+<span class="sourceLineNo">298</span>    {<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        GL11.glRotatef(180.0F - par3, 0.0F, 1.0F, 0.0F);<a name="line.299"></a>
+<span class="sourceLineNo">300</span><a name="line.300"></a>
+<span class="sourceLineNo">301</span>        if (par1EntityLiving.deathTime &gt; 0)<a name="line.301"></a>
+<span class="sourceLineNo">302</span>        {<a name="line.302"></a>
+<span class="sourceLineNo">303</span>            float f3 = ((float)par1EntityLiving.deathTime + par4 - 1.0F) / 20.0F * 1.6F;<a name="line.303"></a>
+<span class="sourceLineNo">304</span>            f3 = MathHelper.sqrt_float(f3);<a name="line.304"></a>
+<span class="sourceLineNo">305</span><a name="line.305"></a>
+<span class="sourceLineNo">306</span>            if (f3 &gt; 1.0F)<a name="line.306"></a>
+<span class="sourceLineNo">307</span>            {<a name="line.307"></a>
+<span class="sourceLineNo">308</span>                f3 = 1.0F;<a name="line.308"></a>
+<span class="sourceLineNo">309</span>            }<a name="line.309"></a>
+<span class="sourceLineNo">310</span><a name="line.310"></a>
+<span class="sourceLineNo">311</span>            GL11.glRotatef(f3 * this.getDeathMaxRotation(par1EntityLiving), 0.0F, 0.0F, 1.0F);<a name="line.311"></a>
+<span class="sourceLineNo">312</span>        }<a name="line.312"></a>
+<span class="sourceLineNo">313</span>    }<a name="line.313"></a>
+<span class="sourceLineNo">314</span><a name="line.314"></a>
+<span class="sourceLineNo">315</span>    protected float renderSwingProgress(EntityLiving par1EntityLiving, float par2)<a name="line.315"></a>
+<span class="sourceLineNo">316</span>    {<a name="line.316"></a>
+<span class="sourceLineNo">317</span>        return par1EntityLiving.getSwingProgress(par2);<a name="line.317"></a>
+<span class="sourceLineNo">318</span>    }<a name="line.318"></a>
+<span class="sourceLineNo">319</span><a name="line.319"></a>
+<span class="sourceLineNo">320</span>    /**<a name="line.320"></a>
+<span class="sourceLineNo">321</span>     * Defines what float the third param in setRotationAngles of ModelBase is<a name="line.321"></a>
+<span class="sourceLineNo">322</span>     */<a name="line.322"></a>
+<span class="sourceLineNo">323</span>    protected float handleRotationFloat(EntityLiving par1EntityLiving, float par2)<a name="line.323"></a>
+<span class="sourceLineNo">324</span>    {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>        return (float)par1EntityLiving.ticksExisted + par2;<a name="line.325"></a>
+<span class="sourceLineNo">326</span>    }<a name="line.326"></a>
+<span class="sourceLineNo">327</span><a name="line.327"></a>
+<span class="sourceLineNo">328</span>    protected void renderEquippedItems(EntityLiving par1EntityLiving, float par2) {}<a name="line.328"></a>
+<span class="sourceLineNo">329</span><a name="line.329"></a>
+<span class="sourceLineNo">330</span>    /**<a name="line.330"></a>
+<span class="sourceLineNo">331</span>     * renders arrows the Entity has been attacked with, attached to it<a name="line.331"></a>
+<span class="sourceLineNo">332</span>     */<a name="line.332"></a>
+<span class="sourceLineNo">333</span>    protected void renderArrowsStuckInEntity(EntityLiving par1EntityLiving, float par2)<a name="line.333"></a>
+<span class="sourceLineNo">334</span>    {<a name="line.334"></a>
+<span class="sourceLineNo">335</span>        int i = par1EntityLiving.getArrowCountInEntity();<a name="line.335"></a>
+<span class="sourceLineNo">336</span><a name="line.336"></a>
+<span class="sourceLineNo">337</span>        if (i &gt; 0)<a name="line.337"></a>
+<span class="sourceLineNo">338</span>        {<a name="line.338"></a>
+<span class="sourceLineNo">339</span>            EntityArrow entityarrow = new EntityArrow(par1EntityLiving.worldObj, par1EntityLiving.posX, par1EntityLiving.posY, par1EntityLiving.posZ);<a name="line.339"></a>
+<span class="sourceLineNo">340</span>            Random random = new Random((long)par1EntityLiving.entityId);<a name="line.340"></a>
+<span class="sourceLineNo">341</span>            RenderHelper.disableStandardItemLighting();<a name="line.341"></a>
+<span class="sourceLineNo">342</span><a name="line.342"></a>
+<span class="sourceLineNo">343</span>            for (int j = 0; j &lt; i; ++j)<a name="line.343"></a>
+<span class="sourceLineNo">344</span>            {<a name="line.344"></a>
+<span class="sourceLineNo">345</span>                GL11.glPushMatrix();<a name="line.345"></a>
+<span class="sourceLineNo">346</span>                ModelRenderer modelrenderer = this.mainModel.getRandomModelBox(random);<a name="line.346"></a>
+<span class="sourceLineNo">347</span>                ModelBox modelbox = (ModelBox)modelrenderer.cubeList.get(random.nextInt(modelrenderer.cubeList.size()));<a name="line.347"></a>
+<span class="sourceLineNo">348</span>                modelrenderer.postRender(0.0625F);<a name="line.348"></a>
+<span class="sourceLineNo">349</span>                float f1 = random.nextFloat();<a name="line.349"></a>
+<span class="sourceLineNo">350</span>                float f2 = random.nextFloat();<a name="line.350"></a>
+<span class="sourceLineNo">351</span>                float f3 = random.nextFloat();<a name="line.351"></a>
+<span class="sourceLineNo">352</span>                float f4 = (modelbox.posX1 + (modelbox.posX2 - modelbox.posX1) * f1) / 16.0F;<a name="line.352"></a>
+<span class="sourceLineNo">353</span>                float f5 = (modelbox.posY1 + (modelbox.posY2 - modelbox.posY1) * f2) / 16.0F;<a name="line.353"></a>
+<span class="sourceLineNo">354</span>                float f6 = (modelbox.posZ1 + (modelbox.posZ2 - modelbox.posZ1) * f3) / 16.0F;<a name="line.354"></a>
+<span class="sourceLineNo">355</span>                GL11.glTranslatef(f4, f5, f6);<a name="line.355"></a>
+<span class="sourceLineNo">356</span>                f1 = f1 * 2.0F - 1.0F;<a name="line.356"></a>
+<span class="sourceLineNo">357</span>                f2 = f2 * 2.0F - 1.0F;<a name="line.357"></a>
+<span class="sourceLineNo">358</span>                f3 = f3 * 2.0F - 1.0F;<a name="line.358"></a>
+<span class="sourceLineNo">359</span>                f1 *= -1.0F;<a name="line.359"></a>
+<span class="sourceLineNo">360</span>                f2 *= -1.0F;<a name="line.360"></a>
+<span class="sourceLineNo">361</span>                f3 *= -1.0F;<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                float f7 = MathHelper.sqrt_float(f1 * f1 + f3 * f3);<a name="line.362"></a>
+<span class="sourceLineNo">363</span>                entityarrow.prevRotationYaw = entityarrow.rotationYaw = (float)(Math.atan2((double)f1, (double)f3) * 180.0D / Math.PI);<a name="line.363"></a>
+<span class="sourceLineNo">364</span>                entityarrow.prevRotationPitch = entityarrow.rotationPitch = (float)(Math.atan2((double)f2, (double)f7) * 180.0D / Math.PI);<a name="line.364"></a>
+<span class="sourceLineNo">365</span>                double d0 = 0.0D;<a name="line.365"></a>
+<span class="sourceLineNo">366</span>                double d1 = 0.0D;<a name="line.366"></a>
+<span class="sourceLineNo">367</span>                double d2 = 0.0D;<a name="line.367"></a>
+<span class="sourceLineNo">368</span>                float f8 = 0.0F;<a name="line.368"></a>
+<span class="sourceLineNo">369</span>                this.renderManager.renderEntityWithPosYaw(entityarrow, d0, d1, d2, f8, par2);<a name="line.369"></a>
+<span class="sourceLineNo">370</span>                GL11.glPopMatrix();<a name="line.370"></a>
+<span class="sourceLineNo">371</span>            }<a name="line.371"></a>
+<span class="sourceLineNo">372</span><a name="line.372"></a>
+<span class="sourceLineNo">373</span>            RenderHelper.enableStandardItemLighting();<a name="line.373"></a>
+<span class="sourceLineNo">374</span>        }<a name="line.374"></a>
+<span class="sourceLineNo">375</span>    }<a name="line.375"></a>
+<span class="sourceLineNo">376</span><a name="line.376"></a>
+<span class="sourceLineNo">377</span>    protected int inheritRenderPass(EntityLiving par1EntityLiving, int par2, float par3)<a name="line.377"></a>
+<span class="sourceLineNo">378</span>    {<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        return this.shouldRenderPass(par1EntityLiving, par2, par3);<a name="line.379"></a>
+<span class="sourceLineNo">380</span>    }<a name="line.380"></a>
+<span class="sourceLineNo">381</span><a name="line.381"></a>
+<span class="sourceLineNo">382</span>    /**<a name="line.382"></a>
+<span class="sourceLineNo">383</span>     * Queries whether should render the specified pass or not.<a name="line.383"></a>
+<span class="sourceLineNo">384</span>     */<a name="line.384"></a>
+<span class="sourceLineNo">385</span>    protected int shouldRenderPass(EntityLiving par1EntityLiving, int par2, float par3)<a name="line.385"></a>
+<span class="sourceLineNo">386</span>    {<a name="line.386"></a>
+<span class="sourceLineNo">387</span>        return -1;<a name="line.387"></a>
+<span class="sourceLineNo">388</span>    }<a name="line.388"></a>
+<span class="sourceLineNo">389</span><a name="line.389"></a>
+<span class="sourceLineNo">390</span>    protected void func_82408_c(EntityLiving par1EntityLiving, int par2, float par3) {}<a name="line.390"></a>
+<span class="sourceLineNo">391</span><a name="line.391"></a>
+<span class="sourceLineNo">392</span>    protected float getDeathMaxRotation(EntityLiving par1EntityLiving)<a name="line.392"></a>
+<span class="sourceLineNo">393</span>    {<a name="line.393"></a>
+<span class="sourceLineNo">394</span>        return 90.0F;<a name="line.394"></a>
+<span class="sourceLineNo">395</span>    }<a name="line.395"></a>
+<span class="sourceLineNo">396</span><a name="line.396"></a>
+<span class="sourceLineNo">397</span>    /**<a name="line.397"></a>
+<span class="sourceLineNo">398</span>     * Returns an ARGB int color back. Args: entityLiving, lightBrightness, partialTickTime<a name="line.398"></a>
+<span class="sourceLineNo">399</span>     */<a name="line.399"></a>
+<span class="sourceLineNo">400</span>    protected int getColorMultiplier(EntityLiving par1EntityLiving, float par2, float par3)<a name="line.400"></a>
+<span class="sourceLineNo">401</span>    {<a name="line.401"></a>
+<span class="sourceLineNo">402</span>        return 0;<a name="line.402"></a>
+<span class="sourceLineNo">403</span>    }<a name="line.403"></a>
+<span class="sourceLineNo">404</span><a name="line.404"></a>
+<span class="sourceLineNo">405</span>    /**<a name="line.405"></a>
+<span class="sourceLineNo">406</span>     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:<a name="line.406"></a>
+<span class="sourceLineNo">407</span>     * entityLiving, partialTickTime<a name="line.407"></a>
+<span class="sourceLineNo">408</span>     */<a name="line.408"></a>
+<span class="sourceLineNo">409</span>    protected void preRenderCallback(EntityLiving par1EntityLiving, float par2) {}<a name="line.409"></a>
+<span class="sourceLineNo">410</span><a name="line.410"></a>
+<span class="sourceLineNo">411</span>    /**<a name="line.411"></a>
+<span class="sourceLineNo">412</span>     * Passes the specialRender and renders it<a name="line.412"></a>
+<span class="sourceLineNo">413</span>     */<a name="line.413"></a>
+<span class="sourceLineNo">414</span>    protected void passSpecialRender(EntityLiving par1EntityLiving, double par2, double par4, double par6)<a name="line.414"></a>
+<span class="sourceLineNo">415</span>    {<a name="line.415"></a>
+<span class="sourceLineNo">416</span>        if (Minecraft.isGuiEnabled() &amp;&amp; par1EntityLiving != this.renderManager.livingPlayer &amp;&amp; !par1EntityLiving.func_98034_c(Minecraft.getMinecraft().thePlayer) &amp;&amp; (par1EntityLiving.func_94059_bO() || par1EntityLiving.func_94056_bM() &amp;&amp; par1EntityLiving == this.renderManager.field_96451_i))<a name="line.416"></a>
+<span class="sourceLineNo">417</span>        {<a name="line.417"></a>
+<span class="sourceLineNo">418</span>            float f = 1.6F;<a name="line.418"></a>
+<span class="sourceLineNo">419</span>            float f1 = 0.016666668F * f;<a name="line.419"></a>
+<span class="sourceLineNo">420</span>            double d3 = par1EntityLiving.getDistanceSqToEntity(this.renderManager.livingPlayer);<a name="line.420"></a>
+<span class="sourceLineNo">421</span>            float f2 = par1EntityLiving.isSneaking() ? 32.0F : 64.0F;<a name="line.421"></a>
+<span class="sourceLineNo">422</span><a name="line.422"></a>
+<span class="sourceLineNo">423</span>            if (d3 &lt; (double)(f2 * f2))<a name="line.423"></a>
+<span class="sourceLineNo">424</span>            {<a name="line.424"></a>
+<span class="sourceLineNo">425</span>                String s = par1EntityLiving.func_96090_ax();<a name="line.425"></a>
+<span class="sourceLineNo">426</span><a name="line.426"></a>
+<span class="sourceLineNo">427</span>                if (par1EntityLiving.isSneaking())<a name="line.427"></a>
+<span class="sourceLineNo">428</span>                {<a name="line.428"></a>
+<span class="sourceLineNo">429</span>                    FontRenderer fontrenderer = this.getFontRendererFromRenderManager();<a name="line.429"></a>
+<span class="sourceLineNo">430</span>                    GL11.glPushMatrix();<a name="line.430"></a>
+<span class="sourceLineNo">431</span>                    GL11.glTranslatef((float)par2 + 0.0F, (float)par4 + par1EntityLiving.height + 0.5F, (float)par6);<a name="line.431"></a>
+<span class="sourceLineNo">432</span>                    GL11.glNormal3f(0.0F, 1.0F, 0.0F);<a name="line.432"></a>
+<span class="sourceLineNo">433</span>                    GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);<a name="line.433"></a>
+<span class="sourceLineNo">434</span>                    GL11.glRotatef(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);<a name="line.434"></a>
+<span class="sourceLineNo">435</span>                    GL11.glScalef(-f1, -f1, f1);<a name="line.435"></a>
+<span class="sourceLineNo">436</span>                    GL11.glDisable(GL11.GL_LIGHTING);<a name="line.436"></a>
+<span class="sourceLineNo">437</span>                    GL11.glTranslatef(0.0F, 0.25F / f1, 0.0F);<a name="line.437"></a>
+<span class="sourceLineNo">438</span>                    GL11.glDepthMask(false);<a name="line.438"></a>
+<span class="sourceLineNo">439</span>                    GL11.glEnable(GL11.GL_BLEND);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.440"></a>
+<span class="sourceLineNo">441</span>                    Tessellator tessellator = Tessellator.instance;<a name="line.441"></a>
+<span class="sourceLineNo">442</span>                    GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.442"></a>
+<span class="sourceLineNo">443</span>                    tessellator.startDrawingQuads();<a name="line.443"></a>
+<span class="sourceLineNo">444</span>                    int i = fontrenderer.getStringWidth(s) / 2;<a name="line.444"></a>
+<span class="sourceLineNo">445</span>                    tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);<a name="line.445"></a>
+<span class="sourceLineNo">446</span>                    tessellator.addVertex((double)(-i - 1), -1.0D, 0.0D);<a name="line.446"></a>
+<span class="sourceLineNo">447</span>                    tessellator.addVertex((double)(-i - 1), 8.0D, 0.0D);<a name="line.447"></a>
+<span class="sourceLineNo">448</span>                    tessellator.addVertex((double)(i + 1), 8.0D, 0.0D);<a name="line.448"></a>
+<span class="sourceLineNo">449</span>                    tessellator.addVertex((double)(i + 1), -1.0D, 0.0D);<a name="line.449"></a>
+<span class="sourceLineNo">450</span>                    tessellator.draw();<a name="line.450"></a>
+<span class="sourceLineNo">451</span>                    GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.451"></a>
+<span class="sourceLineNo">452</span>                    GL11.glDepthMask(true);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>                    fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, 553648127);<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                    GL11.glEnable(GL11.GL_LIGHTING);<a name="line.454"></a>
+<span class="sourceLineNo">455</span>                    GL11.glDisable(GL11.GL_BLEND);<a name="line.455"></a>
+<span class="sourceLineNo">456</span>                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.456"></a>
+<span class="sourceLineNo">457</span>                    GL11.glPopMatrix();<a name="line.457"></a>
+<span class="sourceLineNo">458</span>                }<a name="line.458"></a>
+<span class="sourceLineNo">459</span>                else<a name="line.459"></a>
+<span class="sourceLineNo">460</span>                {<a name="line.460"></a>
+<span class="sourceLineNo">461</span>                    this.func_96449_a(par1EntityLiving, par2, par4, par6, s, f1, d3);<a name="line.461"></a>
+<span class="sourceLineNo">462</span>                }<a name="line.462"></a>
+<span class="sourceLineNo">463</span>            }<a name="line.463"></a>
+<span class="sourceLineNo">464</span>        }<a name="line.464"></a>
+<span class="sourceLineNo">465</span>    }<a name="line.465"></a>
+<span class="sourceLineNo">466</span><a name="line.466"></a>
+<span class="sourceLineNo">467</span>    protected void func_96449_a(EntityLiving par1EntityLiving, double par2, double par4, double par6, String par8Str, float par9, double par10)<a name="line.467"></a>
+<span class="sourceLineNo">468</span>    {<a name="line.468"></a>
+<span class="sourceLineNo">469</span>        if (par1EntityLiving.isPlayerSleeping())<a name="line.469"></a>
+<span class="sourceLineNo">470</span>        {<a name="line.470"></a>
+<span class="sourceLineNo">471</span>            this.renderLivingLabel(par1EntityLiving, par8Str, par2, par4 - 1.5D, par6, 64);<a name="line.471"></a>
+<span class="sourceLineNo">472</span>        }<a name="line.472"></a>
+<span class="sourceLineNo">473</span>        else<a name="line.473"></a>
+<span class="sourceLineNo">474</span>        {<a name="line.474"></a>
+<span class="sourceLineNo">475</span>            this.renderLivingLabel(par1EntityLiving, par8Str, par2, par4, par6, 64);<a name="line.475"></a>
+<span class="sourceLineNo">476</span>        }<a name="line.476"></a>
+<span class="sourceLineNo">477</span>    }<a name="line.477"></a>
+<span class="sourceLineNo">478</span><a name="line.478"></a>
+<span class="sourceLineNo">479</span>    /**<a name="line.479"></a>
+<span class="sourceLineNo">480</span>     * Draws the debug or playername text above a living<a name="line.480"></a>
+<span class="sourceLineNo">481</span>     */<a name="line.481"></a>
+<span class="sourceLineNo">482</span>    protected void renderLivingLabel(EntityLiving par1EntityLiving, String par2Str, double par3, double par5, double par7, int par9)<a name="line.482"></a>
+<span class="sourceLineNo">483</span>    {<a name="line.483"></a>
+<span class="sourceLineNo">484</span>        double d3 = par1EntityLiving.getDistanceSqToEntity(this.renderManager.livingPlayer);<a name="line.484"></a>
+<span class="sourceLineNo">485</span><a name="line.485"></a>
+<span class="sourceLineNo">486</span>        if (d3 &lt;= (double)(par9 * par9))<a name="line.486"></a>
+<span class="sourceLineNo">487</span>        {<a name="line.487"></a>
+<span class="sourceLineNo">488</span>            FontRenderer fontrenderer = this.getFontRendererFromRenderManager();<a name="line.488"></a>
+<span class="sourceLineNo">489</span>            float f = 1.6F;<a name="line.489"></a>
+<span class="sourceLineNo">490</span>            float f1 = 0.016666668F * f;<a name="line.490"></a>
+<span class="sourceLineNo">491</span>            GL11.glPushMatrix();<a name="line.491"></a>
+<span class="sourceLineNo">492</span>            GL11.glTranslatef((float)par3 + 0.0F, (float)par5 + par1EntityLiving.height + 0.5F, (float)par7);<a name="line.492"></a>
+<span class="sourceLineNo">493</span>            GL11.glNormal3f(0.0F, 1.0F, 0.0F);<a name="line.493"></a>
+<span class="sourceLineNo">494</span>            GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);<a name="line.494"></a>
+<span class="sourceLineNo">495</span>            GL11.glRotatef(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);<a name="line.495"></a>
+<span class="sourceLineNo">496</span>            GL11.glScalef(-f1, -f1, f1);<a name="line.496"></a>
+<span class="sourceLineNo">497</span>            GL11.glDisable(GL11.GL_LIGHTING);<a name="line.497"></a>
+<span class="sourceLineNo">498</span>            GL11.glDepthMask(false);<a name="line.498"></a>
+<span class="sourceLineNo">499</span>            GL11.glDisable(GL11.GL_DEPTH_TEST);<a name="line.499"></a>
+<span class="sourceLineNo">500</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.500"></a>
+<span class="sourceLineNo">501</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.501"></a>
+<span class="sourceLineNo">502</span>            Tessellator tessellator = Tessellator.instance;<a name="line.502"></a>
+<span class="sourceLineNo">503</span>            byte b0 = 0;<a name="line.503"></a>
+<span class="sourceLineNo">504</span><a name="line.504"></a>
+<span class="sourceLineNo">505</span>            if (par2Str.equals("deadmau5"))<a name="line.505"></a>
+<span class="sourceLineNo">506</span>            {<a name="line.506"></a>
+<span class="sourceLineNo">507</span>                b0 = -10;<a name="line.507"></a>
+<span class="sourceLineNo">508</span>            }<a name="line.508"></a>
+<span class="sourceLineNo">509</span><a name="line.509"></a>
+<span class="sourceLineNo">510</span>            GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.510"></a>
+<span class="sourceLineNo">511</span>            tessellator.startDrawingQuads();<a name="line.511"></a>
+<span class="sourceLineNo">512</span>            int j = fontrenderer.getStringWidth(par2Str) / 2;<a name="line.512"></a>
+<span class="sourceLineNo">513</span>            tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);<a name="line.513"></a>
+<span class="sourceLineNo">514</span>            tessellator.addVertex((double)(-j - 1), (double)(-1 + b0), 0.0D);<a name="line.514"></a>
+<span class="sourceLineNo">515</span>            tessellator.addVertex((double)(-j - 1), (double)(8 + b0), 0.0D);<a name="line.515"></a>
+<span class="sourceLineNo">516</span>            tessellator.addVertex((double)(j + 1), (double)(8 + b0), 0.0D);<a name="line.516"></a>
+<span class="sourceLineNo">517</span>            tessellator.addVertex((double)(j + 1), (double)(-1 + b0), 0.0D);<a name="line.517"></a>
+<span class="sourceLineNo">518</span>            tessellator.draw();<a name="line.518"></a>
+<span class="sourceLineNo">519</span>            GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.519"></a>
+<span class="sourceLineNo">520</span>            fontrenderer.drawString(par2Str, -fontrenderer.getStringWidth(par2Str) / 2, b0, 553648127);<a name="line.520"></a>
+<span class="sourceLineNo">521</span>            GL11.glEnable(GL11.GL_DEPTH_TEST);<a name="line.521"></a>
+<span class="sourceLineNo">522</span>            GL11.glDepthMask(true);<a name="line.522"></a>
+<span class="sourceLineNo">523</span>            fontrenderer.drawString(par2Str, -fontrenderer.getStringWidth(par2Str) / 2, b0, -1);<a name="line.523"></a>
+<span class="sourceLineNo">524</span>            GL11.glEnable(GL11.GL_LIGHTING);<a name="line.524"></a>
+<span class="sourceLineNo">525</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.525"></a>
+<span class="sourceLineNo">526</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.526"></a>
+<span class="sourceLineNo">527</span>            GL11.glPopMatrix();<a name="line.527"></a>
+<span class="sourceLineNo">528</span>        }<a name="line.528"></a>
+<span class="sourceLineNo">529</span>    }<a name="line.529"></a>
+<span class="sourceLineNo">530</span><a name="line.530"></a>
+<span class="sourceLineNo">531</span>    /**<a name="line.531"></a>
+<span class="sourceLineNo">532</span>     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.532"></a>
+<span class="sourceLineNo">533</span>     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.533"></a>
+<span class="sourceLineNo">534</span>     * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.534"></a>
+<span class="sourceLineNo">535</span>     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.535"></a>
+<span class="sourceLineNo">536</span>     */<a name="line.536"></a>
+<span class="sourceLineNo">537</span>    public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.537"></a>
+<span class="sourceLineNo">538</span>    {<a name="line.538"></a>
+<span class="sourceLineNo">539</span>        this.doRenderLiving((EntityLiving)par1Entity, par2, par4, par6, par8, par9);<a name="line.539"></a>
+<span class="sourceLineNo">540</span>    }<a name="line.540"></a>
+<span class="sourceLineNo">541</span>}<a name="line.541"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

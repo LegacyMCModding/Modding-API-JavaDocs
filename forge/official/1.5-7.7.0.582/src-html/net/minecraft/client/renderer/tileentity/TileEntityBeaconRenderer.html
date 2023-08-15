@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer.tileentity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.client.renderer.Tessellator;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.tileentity.TileEntity;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.tileentity.TileEntityBeacon;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.util.MathHelper;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import org.lwjgl.opengl.GL11;<a name="line.9"></a>
+<span class="sourceLineNo">010</span><a name="line.10"></a>
+<span class="sourceLineNo">011</span>@SideOnly(Side.CLIENT)<a name="line.11"></a>
+<span class="sourceLineNo">012</span>public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer<a name="line.12"></a>
+<span class="sourceLineNo">013</span>{<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    /**<a name="line.14"></a>
+<span class="sourceLineNo">015</span>     * Render a beacon tile entity.<a name="line.15"></a>
+<span class="sourceLineNo">016</span>     */<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public void renderTileEntityBeaconAt(TileEntityBeacon par1TileEntityBeacon, double par2, double par4, double par6, float par8)<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    {<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        float f1 = par1TileEntityBeacon.func_82125_v_();<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>        if (f1 &gt; 0.0F)<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        {<a name="line.22"></a>
+<span class="sourceLineNo">023</span>            Tessellator tessellator = Tessellator.instance;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>            this.bindTextureByName("/misc/beam.png");<a name="line.24"></a>
+<span class="sourceLineNo">025</span>            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, 10497.0F);<a name="line.25"></a>
+<span class="sourceLineNo">026</span>            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, 10497.0F);<a name="line.26"></a>
+<span class="sourceLineNo">027</span>            GL11.glDisable(GL11.GL_LIGHTING);<a name="line.27"></a>
+<span class="sourceLineNo">028</span>            GL11.glDisable(GL11.GL_CULL_FACE);<a name="line.28"></a>
+<span class="sourceLineNo">029</span>            GL11.glDisable(GL11.GL_BLEND);<a name="line.29"></a>
+<span class="sourceLineNo">030</span>            GL11.glDepthMask(true);<a name="line.30"></a>
+<span class="sourceLineNo">031</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>            float f2 = (float)par1TileEntityBeacon.getWorldObj().getTotalWorldTime() + par8;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>            float f3 = -f2 * 0.2F - (float)MathHelper.floor_float(-f2 * 0.1F);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>            byte b0 = 1;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>            double d3 = (double)f2 * 0.025D * (1.0D - (double)(b0 &amp; 1) * 2.5D);<a name="line.35"></a>
+<span class="sourceLineNo">036</span>            tessellator.startDrawingQuads();<a name="line.36"></a>
+<span class="sourceLineNo">037</span>            tessellator.setColorRGBA(255, 255, 255, 32);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>            double d4 = (double)b0 * 0.2D;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>            double d5 = 0.5D + Math.cos(d3 + 2.356194490192345D) * d4;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>            double d6 = 0.5D + Math.sin(d3 + 2.356194490192345D) * d4;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>            double d7 = 0.5D + Math.cos(d3 + (Math.PI / 4D)) * d4;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>            double d8 = 0.5D + Math.sin(d3 + (Math.PI / 4D)) * d4;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>            double d9 = 0.5D + Math.cos(d3 + 3.9269908169872414D) * d4;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>            double d10 = 0.5D + Math.sin(d3 + 3.9269908169872414D) * d4;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>            double d11 = 0.5D + Math.cos(d3 + 5.497787143782138D) * d4;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            double d12 = 0.5D + Math.sin(d3 + 5.497787143782138D) * d4;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>            double d13 = (double)(256.0F * f1);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            double d14 = 0.0D;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            double d15 = 1.0D;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            double d16 = (double)(-1.0F + f3);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            double d17 = (double)(256.0F * f1) * (0.5D / d4) + d16;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            tessellator.addVertexWithUV(par2 + d5, par4 + d13, par6 + d6, d15, d17);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            tessellator.addVertexWithUV(par2 + d5, par4, par6 + d6, d15, d16);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            tessellator.addVertexWithUV(par2 + d7, par4, par6 + d8, d14, d16);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            tessellator.addVertexWithUV(par2 + d7, par4 + d13, par6 + d8, d14, d17);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            tessellator.addVertexWithUV(par2 + d11, par4 + d13, par6 + d12, d15, d17);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            tessellator.addVertexWithUV(par2 + d11, par4, par6 + d12, d15, d16);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            tessellator.addVertexWithUV(par2 + d9, par4, par6 + d10, d14, d16);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            tessellator.addVertexWithUV(par2 + d9, par4 + d13, par6 + d10, d14, d17);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            tessellator.addVertexWithUV(par2 + d7, par4 + d13, par6 + d8, d15, d17);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            tessellator.addVertexWithUV(par2 + d7, par4, par6 + d8, d15, d16);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            tessellator.addVertexWithUV(par2 + d11, par4, par6 + d12, d14, d16);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            tessellator.addVertexWithUV(par2 + d11, par4 + d13, par6 + d12, d14, d17);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            tessellator.addVertexWithUV(par2 + d9, par4 + d13, par6 + d10, d15, d17);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            tessellator.addVertexWithUV(par2 + d9, par4, par6 + d10, d15, d16);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            tessellator.addVertexWithUV(par2 + d5, par4, par6 + d6, d14, d16);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            tessellator.addVertexWithUV(par2 + d5, par4 + d13, par6 + d6, d14, d17);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            tessellator.draw();<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            GL11.glDepthMask(false);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            tessellator.startDrawingQuads();<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            tessellator.setColorRGBA(255, 255, 255, 32);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            double d18 = 0.2D;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            double d19 = 0.2D;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>            double d20 = 0.8D;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            double d21 = 0.2D;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            double d22 = 0.2D;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>            double d23 = 0.8D;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            double d24 = 0.8D;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            double d25 = 0.8D;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            double d26 = (double)(256.0F * f1);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            double d27 = 0.0D;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            double d28 = 1.0D;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            double d29 = (double)(-1.0F + f3);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            double d30 = (double)(256.0F * f1) + d29;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            tessellator.addVertexWithUV(par2 + d18, par4 + d26, par6 + d19, d28, d30);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            tessellator.addVertexWithUV(par2 + d18, par4, par6 + d19, d28, d29);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            tessellator.addVertexWithUV(par2 + d20, par4, par6 + d21, d27, d29);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            tessellator.addVertexWithUV(par2 + d20, par4 + d26, par6 + d21, d27, d30);<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            tessellator.addVertexWithUV(par2 + d24, par4 + d26, par6 + d25, d28, d30);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            tessellator.addVertexWithUV(par2 + d24, par4, par6 + d25, d28, d29);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            tessellator.addVertexWithUV(par2 + d22, par4, par6 + d23, d27, d29);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>            tessellator.addVertexWithUV(par2 + d22, par4 + d26, par6 + d23, d27, d30);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            tessellator.addVertexWithUV(par2 + d20, par4 + d26, par6 + d21, d28, d30);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            tessellator.addVertexWithUV(par2 + d20, par4, par6 + d21, d28, d29);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            tessellator.addVertexWithUV(par2 + d24, par4, par6 + d25, d27, d29);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            tessellator.addVertexWithUV(par2 + d24, par4 + d26, par6 + d25, d27, d30);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            tessellator.addVertexWithUV(par2 + d22, par4 + d26, par6 + d23, d28, d30);<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            tessellator.addVertexWithUV(par2 + d22, par4, par6 + d23, d28, d29);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            tessellator.addVertexWithUV(par2 + d18, par4, par6 + d19, d27, d29);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>            tessellator.addVertexWithUV(par2 + d18, par4 + d26, par6 + d19, d27, d30);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            tessellator.draw();<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            GL11.glEnable(GL11.GL_LIGHTING);<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            GL11.glDepthMask(true);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    }<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>    public void renderTileEntityAt(TileEntity par1TileEntity, double par2, double par4, double par6, float par8)<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        this.renderTileEntityBeaconAt((TileEntityBeacon)par1TileEntity, par2, par4, par6, par8);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    }<a name="line.113"></a>
+<span class="sourceLineNo">114</span>}<a name="line.114"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

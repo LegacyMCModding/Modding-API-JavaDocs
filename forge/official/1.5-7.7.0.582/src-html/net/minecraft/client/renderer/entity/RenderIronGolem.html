@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer.entity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.Block;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.client.model.ModelIronGolem;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.client.renderer.OpenGlHelper;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.entity.Entity;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.entity.EntityLiving;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.entity.monster.EntityIronGolem;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import org.lwjgl.opengl.GL11;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import org.lwjgl.opengl.GL12;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>@SideOnly(Side.CLIENT)<a name="line.14"></a>
+<span class="sourceLineNo">015</span>public class RenderIronGolem extends RenderLiving<a name="line.15"></a>
+<span class="sourceLineNo">016</span>{<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    /** Iron Golem's Model. */<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    private ModelIronGolem ironGolemModel;<a name="line.18"></a>
+<span class="sourceLineNo">019</span><a name="line.19"></a>
+<span class="sourceLineNo">020</span>    public RenderIronGolem()<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    {<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        super(new ModelIronGolem(), 0.5F);<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        this.ironGolemModel = (ModelIronGolem)this.mainModel;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    }<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    /**<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     * Renders the Iron Golem.<a name="line.27"></a>
+<span class="sourceLineNo">028</span>     */<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public void doRenderIronGolem(EntityIronGolem par1EntityIronGolem, double par2, double par4, double par6, float par8, float par9)<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        super.doRenderLiving(par1EntityIronGolem, par2, par4, par6, par8, par9);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    }<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>    /**<a name="line.34"></a>
+<span class="sourceLineNo">035</span>     * Rotates Iron Golem corpse.<a name="line.35"></a>
+<span class="sourceLineNo">036</span>     */<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    protected void rotateIronGolemCorpse(EntityIronGolem par1EntityIronGolem, float par2, float par3, float par4)<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        super.rotateCorpse(par1EntityIronGolem, par2, par3, par4);<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>        if ((double)par1EntityIronGolem.limbYaw &gt;= 0.01D)<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>            float f3 = 13.0F;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>            float f4 = par1EntityIronGolem.limbSwing - par1EntityIronGolem.limbYaw * (1.0F - par4) + 6.0F;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>            float f5 = (Math.abs(f4 % f3 - f3 * 0.5F) - f3 * 0.25F) / (f3 * 0.25F);<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            GL11.glRotatef(6.5F * f5, 0.0F, 0.0F, 1.0F);<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        }<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    }<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * Renders Iron Golem Equipped items.<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     */<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    protected void renderIronGolemEquippedItems(EntityIronGolem par1EntityIronGolem, float par2)<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        super.renderEquippedItems(par1EntityIronGolem, par2);<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>        if (par1EntityIronGolem.getHoldRoseTick() != 0)<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            GL11.glEnable(GL12.GL_RESCALE_NORMAL);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            GL11.glPushMatrix();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            GL11.glRotatef(5.0F + 180.0F * this.ironGolemModel.ironGolemRightArm.rotateAngleX / (float)Math.PI, 1.0F, 0.0F, 0.0F);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            GL11.glTranslatef(-0.6875F, 1.25F, -0.9375F);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            float f1 = 0.8F;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            GL11.glScalef(f1, -f1, f1);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            int i = par1EntityIronGolem.getBrightnessForRender(par2);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            int j = i % 65536;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            int k = i / 65536;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            this.loadTexture("/terrain.png");<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            this.renderBlocks.renderBlockAsItem(Block.plantRed, 0, 1.0F);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            GL11.glPopMatrix();<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            GL11.glDisable(GL12.GL_RESCALE_NORMAL);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        }<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    }<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>    protected void renderEquippedItems(EntityLiving par1EntityLiving, float par2)<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        this.renderIronGolemEquippedItems((EntityIronGolem)par1EntityLiving, par2);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    }<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>    protected void rotateCorpse(EntityLiving par1EntityLiving, float par2, float par3, float par4)<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        this.rotateIronGolemCorpse((EntityIronGolem)par1EntityLiving, par2, par3, par4);<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    }<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>    public void doRenderLiving(EntityLiving par1EntityLiving, double par2, double par4, double par6, float par8, float par9)<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        this.doRenderIronGolem((EntityIronGolem)par1EntityLiving, par2, par4, par6, par8, par9);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    }<a name="line.92"></a>
+<span class="sourceLineNo">093</span><a name="line.93"></a>
+<span class="sourceLineNo">094</span>    /**<a name="line.94"></a>
+<span class="sourceLineNo">095</span>     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.95"></a>
+<span class="sourceLineNo">096</span>     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.96"></a>
+<span class="sourceLineNo">097</span>     * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.97"></a>
+<span class="sourceLineNo">098</span>     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.98"></a>
+<span class="sourceLineNo">099</span>     */<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    {<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        this.doRenderIronGolem((EntityIronGolem)par1Entity, par2, par4, par6, par8, par9);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    }<a name="line.103"></a>
+<span class="sourceLineNo">104</span>}<a name="line.104"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

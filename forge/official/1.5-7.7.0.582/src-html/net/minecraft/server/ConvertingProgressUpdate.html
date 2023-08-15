@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.server;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.util.IProgressUpdate;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>public class ConvertingProgressUpdate implements IProgressUpdate<a name="line.7"></a>
+<span class="sourceLineNo">008</span>{<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    private long field_96245_b;<a name="line.9"></a>
+<span class="sourceLineNo">010</span><a name="line.10"></a>
+<span class="sourceLineNo">011</span>    /** Reference to the MinecraftServer object. */<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    final MinecraftServer mcServer;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public ConvertingProgressUpdate(MinecraftServer par1)<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    {<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.mcServer = par1;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        this.field_96245_b = System.currentTimeMillis();<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    }<a name="line.18"></a>
+<span class="sourceLineNo">019</span><a name="line.19"></a>
+<span class="sourceLineNo">020</span>    /**<a name="line.20"></a>
+<span class="sourceLineNo">021</span>     * "Saving level", or the loading,or downloading equivelent<a name="line.21"></a>
+<span class="sourceLineNo">022</span>     */<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public void displayProgressMessage(String par1Str) {}<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /**<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     * Updates the progress bar on the loading screen to the specified amount. Args: loadProgress<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     */<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    public void setLoadingProgress(int par1)<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    {<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        if (System.currentTimeMillis() - this.field_96245_b &gt;= 1000L)<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>            this.field_96245_b = System.currentTimeMillis();<a name="line.32"></a>
+<span class="sourceLineNo">033</span>            this.mcServer.func_98033_al().func_98233_a("Converting... " + par1 + "%");<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        }<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    }<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>    @SideOnly(Side.CLIENT)<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>    /**<a name="line.39"></a>
+<span class="sourceLineNo">040</span>     * this string, followed by "working..." and then the "% complete" are the 3 lines shown. This resets progress to 0,<a name="line.40"></a>
+<span class="sourceLineNo">041</span>     * and the WorkingString to "working...".<a name="line.41"></a>
+<span class="sourceLineNo">042</span>     */<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    public void resetProgressAndMessage(String par1Str) {}<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    @SideOnly(Side.CLIENT)<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>    /**<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * called when there is no more progress to be had, both on completion and failure<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     */<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    public void onNoMoreProgress() {}<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>    /**<a name="line.52"></a>
+<span class="sourceLineNo">053</span>     * This is called with "Working..." by resetProgressAndMessage<a name="line.53"></a>
+<span class="sourceLineNo">054</span>     */<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    public void resetProgresAndWorkingMessage(String par1Str) {}<a name="line.55"></a>
+<span class="sourceLineNo">056</span>}<a name="line.56"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

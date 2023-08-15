@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a name="line.1"></a>
+<span class="sourceLineNo">002</span>package ibxm;<a name="line.2"></a>
+<span class="sourceLineNo">003</span><a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.io.*;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>public class FastTracker2 {<a name="line.6"></a>
+<span class="sourceLineNo">007</span>    public static boolean is_xm( byte[] header_60_bytes ) {<a name="line.7"></a>
+<span class="sourceLineNo">008</span>        String xm_identifier;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>        xm_identifier = ascii_text( header_60_bytes, 0, 17 );<a name="line.9"></a>
+<span class="sourceLineNo">010</span>        return xm_identifier.equals( "Extended Module: " );<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    }<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public static Module load_xm( byte[] header_60_bytes, DataInput data_input ) throws IOException {<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        int xm_version, song_header_length, sequence_length;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        int num_channels, num_patterns, num_instruments, xm_flags, idx;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        byte[] structure_header, song_header;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        boolean delta_env;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        String tracker_name;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        Instrument instrument;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        Module module;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        if( !is_xm( header_60_bytes ) ) {<a name="line.21"></a>
+<span class="sourceLineNo">022</span>            throw new IllegalArgumentException( "Not an XM file!" );<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        }<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        xm_version = unsigned_short_le( header_60_bytes, 58 );<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        if( xm_version != 0x0104 ) {<a name="line.25"></a>
+<span class="sourceLineNo">026</span>            throw new IllegalArgumentException( "Sorry, XM version " + xm_version + " is not supported!" );<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        }<a name="line.27"></a>
+<span class="sourceLineNo">028</span>        module = new Module();<a name="line.28"></a>
+<span class="sourceLineNo">029</span>        module.song_title = ascii_text( header_60_bytes, 17, 20 );<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        tracker_name = ascii_text( header_60_bytes, 38, 20 );<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        delta_env = tracker_name.startsWith( "DigiBooster Pro" );<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        structure_header = new byte[ 4 ];<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        data_input.readFully( structure_header );<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        song_header_length = int_le( structure_header, 0 );<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        song_header = new byte[ song_header_length ];<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        data_input.readFully( song_header, 4, song_header_length - 4 );<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        sequence_length = unsigned_short_le( song_header, 4 );<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        module.restart_sequence_index = unsigned_short_le( song_header, 6 );<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        num_channels = unsigned_short_le( song_header, 8 );<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        num_patterns = unsigned_short_le( song_header, 10 );<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        num_instruments = unsigned_short_le( song_header, 12 );<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        xm_flags = unsigned_short_le( song_header, 14 );<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        module.linear_periods = ( xm_flags &amp; 0x1 ) == 0x1;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        module.global_volume = 64;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        module.channel_gain = IBXM.FP_ONE * 3 / 8;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        module.default_speed = unsigned_short_le( song_header, 16 );<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        module.default_tempo = unsigned_short_le( song_header, 18 );<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        module.set_num_channels( num_channels );<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        for( idx = 0; idx &lt; num_channels; idx++ ) {<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            module.set_initial_panning( idx, 128 );<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        }<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        module.set_sequence_length( sequence_length );      <a name="line.52"></a>
+<span class="sourceLineNo">053</span>        for( idx = 0; idx &lt; sequence_length; idx++ ) {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>            module.set_sequence( idx, song_header[ 20 + idx ] &amp; 0xFF );<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        }<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        module.set_num_patterns( num_patterns );<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        for( idx = 0; idx &lt; num_patterns; idx++ ) {<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            module.set_pattern( idx, read_xm_pattern( data_input, num_channels ) );<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        }<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        module.set_num_instruments( num_instruments );<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        for( idx = 1; idx &lt;= num_instruments; idx++ ) {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            try {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>                instrument = read_xm_instrument( data_input, delta_env );<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                module.set_instrument( idx, instrument );<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            } catch( EOFException e ) {<a name="line.65"></a>
+<span class="sourceLineNo">066</span>                System.out.println( "Instrument " + idx + " is missing!" );<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            }<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        }<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        return module;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>    private static Pattern read_xm_pattern( DataInput data_input, int num_channels ) throws IOException {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        int pattern_header_length, packing_type, num_rows, pattern_data_length;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        byte[] structure_header, pattern_header, pattern_data;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        Pattern pattern;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        structure_header = new byte[ 4 ];<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        data_input.readFully( structure_header );<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        pattern_header_length = int_le( structure_header, 0 );<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        pattern_header = new byte[ pattern_header_length ];<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        data_input.readFully( pattern_header, 4, pattern_header_length - 4 );<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        packing_type = pattern_header[ 4 ];<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        if( packing_type != 0 ) {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            throw new IllegalArgumentException( "Pattern packing type " + packing_type + " is not supported!" );<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        }<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        pattern = new Pattern();<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        pattern.num_rows = unsigned_short_le( pattern_header, 5 );<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        pattern_data_length = unsigned_short_le( pattern_header, 7 );<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        pattern_data = new byte[ pattern_data_length ];<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        data_input.readFully( pattern_data );       <a name="line.89"></a>
+<span class="sourceLineNo">090</span>        pattern.set_pattern_data( pattern_data );<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        return pattern;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    }<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    <a name="line.93"></a>
+<span class="sourceLineNo">094</span>    private static Instrument read_xm_instrument( DataInput data_input, boolean delta_env ) throws IOException {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        int instrument_header_length, num_samples, idx;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        int env_tick, env_ampl, env_num_points, flags;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        byte[] structure_header, instrument_header, sample_headers;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        Instrument instrument;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        Envelope envelope;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        structure_header = new byte[ 4 ];<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        data_input.readFully( structure_header );<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        instrument_header_length = int_le( structure_header, 0 );<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        instrument_header = new byte[ instrument_header_length ];<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        data_input.readFully( instrument_header, 4, instrument_header_length - 4 );<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        instrument = new Instrument();<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        instrument.name = ascii_text( instrument_header, 4, 22 );<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        num_samples = unsigned_short_le( instrument_header, 27 );<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        if( num_samples &gt; 0 ) {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>            instrument.set_num_samples( num_samples );<a name="line.109"></a>
+<span class="sourceLineNo">110</span>            for( idx = 0; idx &lt; 96; idx++ ) {<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                instrument.set_key_to_sample( idx + 1, instrument_header[ 33 + idx ] &amp; 0xFF );<a name="line.111"></a>
+<span class="sourceLineNo">112</span>            }<a name="line.112"></a>
+<span class="sourceLineNo">113</span>            envelope = new Envelope();<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            env_num_points = instrument_header[ 225 ] &amp; 0xFF;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>            envelope.set_num_points( env_num_points );<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            for( idx = 0; idx &lt; env_num_points; idx++ ) {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                env_tick = unsigned_short_le( instrument_header, 129 + idx * 4 );<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                env_ampl = unsigned_short_le( instrument_header, 131 + idx * 4 );<a name="line.118"></a>
+<span class="sourceLineNo">119</span>                envelope.set_point( idx, env_tick, env_ampl, delta_env );<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            }<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            envelope.set_sustain_point( instrument_header[ 227 ] &amp; 0xFF );<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            envelope.set_loop_points( instrument_header[ 228 ] &amp; 0xFF, instrument_header[ 229 ] &amp; 0xFF );<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            flags = instrument_header[ 233 ] &amp; 0xFF;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            instrument.volume_envelope_active = ( flags &amp; 0x1 ) == 0x1;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            envelope.sustain = ( flags &amp; 0x2 ) == 0x2;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            envelope.looped = ( flags &amp; 0x4 ) == 0x4;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>            instrument.set_volume_envelope( envelope );<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            envelope = new Envelope();<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            env_num_points = instrument_header[ 226 ] &amp; 0xFF;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>            envelope.set_num_points( env_num_points );<a name="line.130"></a>
+<span class="sourceLineNo">131</span>            for( idx = 0; idx &lt; env_num_points; idx++ ) {<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                env_tick = unsigned_short_le( instrument_header, 177 + idx * 4 );<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                env_ampl = unsigned_short_le( instrument_header, 179 + idx * 4 );<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                envelope.set_point( idx, env_tick, env_ampl, delta_env );<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            envelope.set_sustain_point( instrument_header[ 230 ] &amp; 0xFF );<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            envelope.set_loop_points( instrument_header[ 231 ] &amp; 0xFF, instrument_header[ 232 ] &amp; 0xFF );<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            flags = instrument_header[ 234 ] &amp; 0xFF;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            instrument.panning_envelope_active = ( flags &amp; 0x1 ) == 0x1;<a name="line.139"></a>
+<span class="sourceLineNo">140</span>            envelope.sustain = ( flags &amp; 0x2 ) == 0x2;<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            envelope.looped = ( flags &amp; 0x4 ) == 0x4;<a name="line.141"></a>
+<span class="sourceLineNo">142</span>            instrument.set_panning_envelope( envelope );<a name="line.142"></a>
+<span class="sourceLineNo">143</span>            instrument.vibrato_type = instrument_header[ 235 ] &amp; 0xFF;<a name="line.143"></a>
+<span class="sourceLineNo">144</span>            instrument.vibrato_sweep = instrument_header[ 236 ] &amp; 0xFF;<a name="line.144"></a>
+<span class="sourceLineNo">145</span>            instrument.vibrato_depth = instrument_header[ 237 ] &amp; 0xFF;<a name="line.145"></a>
+<span class="sourceLineNo">146</span>            instrument.vibrato_rate = instrument_header[ 238 ] &amp; 0xFF;<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            instrument.volume_fade_out = unsigned_short_le( instrument_header, 239 );<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            sample_headers = new byte[ num_samples * 40 ];<a name="line.148"></a>
+<span class="sourceLineNo">149</span>            data_input.readFully( sample_headers );<a name="line.149"></a>
+<span class="sourceLineNo">150</span>            for( idx = 0; idx &lt; num_samples; idx++ ) {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>                instrument.set_sample( idx, read_xm_sample( sample_headers, idx, data_input ) );<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            }<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        }<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        return instrument;<a name="line.154"></a>
+<span class="sourceLineNo">155</span>    }<a name="line.155"></a>
+<span class="sourceLineNo">156</span><a name="line.156"></a>
+<span class="sourceLineNo">157</span>    private static Sample read_xm_sample( byte[] sample_headers, int sample_idx, DataInput data_input ) throws IOException {<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        int header_offset, sample_length, loop_start, loop_length;<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        int flags, in_idx, out_idx, sam, last_sam;<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        int fine_tune, relative_note;<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        boolean sixteen_bit, ping_pong;<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        byte[] raw_sample_data;<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        short[] decoded_sample_data;<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        Sample sample;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        header_offset = sample_idx * 40;<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        sample = new Sample();<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        sample_length = int_le( sample_headers, header_offset );        <a name="line.167"></a>
+<span class="sourceLineNo">168</span>        loop_start = int_le( sample_headers, header_offset + 4 );<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        loop_length = int_le( sample_headers, header_offset + 8 );<a name="line.169"></a>
+<span class="sourceLineNo">170</span>        sample.volume = sample_headers[ header_offset + 12 ] &amp; 0xFF;<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        fine_tune = sample_headers[ header_offset + 13 ];<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        fine_tune = ( fine_tune &lt;&lt; IBXM.FP_SHIFT ) / 1536;<a name="line.172"></a>
+<span class="sourceLineNo">173</span>        sample.set_panning = true;<a name="line.173"></a>
+<span class="sourceLineNo">174</span>        flags = sample_headers[ header_offset + 14 ] &amp; 0xFF;<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        if( ( flags &amp; 0x03 ) == 0 ) {<a name="line.175"></a>
+<span class="sourceLineNo">176</span>            loop_length = 0;<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        }<a name="line.177"></a>
+<span class="sourceLineNo">178</span>        ping_pong = ( flags &amp; 0x02 ) == 0x02;<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        sixteen_bit = ( flags &amp; 0x10 ) == 0x10;<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        sample.panning = sample_headers[ header_offset + 15 ] &amp; 0xFF;<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        relative_note = sample_headers[ header_offset + 16 ];<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        relative_note = ( relative_note &lt;&lt; IBXM.FP_SHIFT ) / 12;<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        sample.transpose = relative_note + fine_tune;<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        sample.name = ascii_text( sample_headers, header_offset + 18, 22 );<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        raw_sample_data = new byte[ sample_length ];<a name="line.185"></a>
+<span class="sourceLineNo">186</span>        try {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            data_input.readFully( raw_sample_data );<a name="line.187"></a>
+<span class="sourceLineNo">188</span>        } catch( EOFException e ) {<a name="line.188"></a>
+<span class="sourceLineNo">189</span>            System.out.println( "Sample has been truncated!" );<a name="line.189"></a>
+<span class="sourceLineNo">190</span>        }<a name="line.190"></a>
+<span class="sourceLineNo">191</span>        in_idx = 0;<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        out_idx = 0;<a name="line.192"></a>
+<span class="sourceLineNo">193</span>        sam = 0;<a name="line.193"></a>
+<span class="sourceLineNo">194</span>        last_sam = 0;<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        if( sixteen_bit ) {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>            decoded_sample_data = new short[ sample_length &gt;&gt; 1 ];<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            while( in_idx &lt; raw_sample_data.length ) {<a name="line.197"></a>
+<span class="sourceLineNo">198</span>                sam = raw_sample_data[ in_idx ] &amp; 0xFF;<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                sam = sam | ( ( raw_sample_data[ in_idx + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.199"></a>
+<span class="sourceLineNo">200</span>                last_sam = last_sam + sam;<a name="line.200"></a>
+<span class="sourceLineNo">201</span>                decoded_sample_data[ out_idx ] = ( short ) last_sam;<a name="line.201"></a>
+<span class="sourceLineNo">202</span>                in_idx += 2;<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                out_idx += 1;<a name="line.203"></a>
+<span class="sourceLineNo">204</span>            }<a name="line.204"></a>
+<span class="sourceLineNo">205</span>            sample.set_sample_data( decoded_sample_data, loop_start &gt;&gt; 1, loop_length &gt;&gt; 1, ping_pong );<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        } else {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>            decoded_sample_data = new short[ sample_length ];<a name="line.207"></a>
+<span class="sourceLineNo">208</span>            while( in_idx &lt; raw_sample_data.length ) {<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                sam = raw_sample_data[ in_idx ] &amp; 0xFF;<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                last_sam = last_sam + sam;<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                decoded_sample_data[ out_idx ] = ( short ) ( last_sam &lt;&lt; 8 );<a name="line.211"></a>
+<span class="sourceLineNo">212</span>                in_idx += 1;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                out_idx += 1;<a name="line.213"></a>
+<span class="sourceLineNo">214</span>            }<a name="line.214"></a>
+<span class="sourceLineNo">215</span>            sample.set_sample_data( decoded_sample_data, loop_start, loop_length, ping_pong );<a name="line.215"></a>
+<span class="sourceLineNo">216</span>        }<a name="line.216"></a>
+<span class="sourceLineNo">217</span>        return sample;<a name="line.217"></a>
+<span class="sourceLineNo">218</span>    }<a name="line.218"></a>
+<span class="sourceLineNo">219</span><a name="line.219"></a>
+<span class="sourceLineNo">220</span>    private static int unsigned_short_le( byte[] buffer, int offset ) {<a name="line.220"></a>
+<span class="sourceLineNo">221</span>        int value;<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        value = buffer[ offset ] &amp; 0xFF;<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        value = value | ( ( buffer[ offset + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        return value;<a name="line.224"></a>
+<span class="sourceLineNo">225</span>    }<a name="line.225"></a>
+<span class="sourceLineNo">226</span><a name="line.226"></a>
+<span class="sourceLineNo">227</span>    private static int int_le( byte[] buffer, int offset ) {<a name="line.227"></a>
+<span class="sourceLineNo">228</span>        int value;<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        value = buffer[ offset ] &amp; 0xFF;<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        value = value | ( ( buffer[ offset + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        value = value | ( ( buffer[ offset + 2 ] &amp; 0xFF ) &lt;&lt; 16 );<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        value = value | ( ( buffer[ offset + 3 ] &amp; 0x7F ) &lt;&lt; 24 );<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        return value;<a name="line.233"></a>
+<span class="sourceLineNo">234</span>    }<a name="line.234"></a>
+<span class="sourceLineNo">235</span>    <a name="line.235"></a>
+<span class="sourceLineNo">236</span>    private static String ascii_text( byte[] buffer, int offset, int length ) {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>        int idx, chr;<a name="line.237"></a>
+<span class="sourceLineNo">238</span>        byte[] string_buffer;<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        String string;<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        string_buffer = new byte[ length ];<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        for( idx = 0; idx &lt; length; idx++ ) {<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            chr = buffer[ offset + idx ];<a name="line.242"></a>
+<span class="sourceLineNo">243</span>            if( chr &lt; 32 ) {<a name="line.243"></a>
+<span class="sourceLineNo">244</span>                chr = 32;<a name="line.244"></a>
+<span class="sourceLineNo">245</span>            }<a name="line.245"></a>
+<span class="sourceLineNo">246</span>            string_buffer[ idx ] = ( byte ) chr;<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        }<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        try {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>            string = new String( string_buffer, 0, length, "ISO-8859-1" );<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        } catch( UnsupportedEncodingException e ) {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>            string = "";<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        return string;<a name="line.253"></a>
+<span class="sourceLineNo">254</span>    }<a name="line.254"></a>
+<span class="sourceLineNo">255</span>}<a name="line.255"></a>
+<span class="sourceLineNo">256</span><a name="line.256"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
