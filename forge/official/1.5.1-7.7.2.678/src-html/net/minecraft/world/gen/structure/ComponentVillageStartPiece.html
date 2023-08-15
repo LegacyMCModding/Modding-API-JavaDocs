@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.ArrayList;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Random;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.world.biome.BiomeGenBase;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.world.biome.WorldChunkManager;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class ComponentVillageStartPiece extends ComponentVillageWell<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    public final WorldChunkManager worldChunkMngr;<a name="line.10"></a>
+<span class="sourceLineNo">011</span><a name="line.11"></a>
+<span class="sourceLineNo">012</span>    /** Boolean that determines if the village is in a desert or not. */<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public final boolean inDesert;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public final BiomeGenBase biome;<a name="line.14"></a>
+<span class="sourceLineNo">015</span><a name="line.15"></a>
+<span class="sourceLineNo">016</span>    /** World terrain type, 0 for normal, 1 for flap map */<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public final int terrainType;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public StructureVillagePieceWeight structVillagePieceWeight;<a name="line.18"></a>
+<span class="sourceLineNo">019</span><a name="line.19"></a>
+<span class="sourceLineNo">020</span>    /**<a name="line.20"></a>
+<span class="sourceLineNo">021</span>     * Contains List of all spawnable Structure Piece Weights. If no more Pieces of a type can be spawned, they are<a name="line.21"></a>
+<span class="sourceLineNo">022</span>     * removed from this list<a name="line.22"></a>
+<span class="sourceLineNo">023</span>     */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public ArrayList structureVillageWeightedPieceList;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    public ArrayList field_74932_i = new ArrayList();<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    public ArrayList field_74930_j = new ArrayList();<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>    public ComponentVillageStartPiece(WorldChunkManager par1WorldChunkManager, int par2, Random par3Random, int par4, int par5, ArrayList par6ArrayList, int par7)<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    {<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        super((ComponentVillageStartPiece)null, 0, par3Random, par4, par5);<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        this.worldChunkMngr = par1WorldChunkManager;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        this.structureVillageWeightedPieceList = par6ArrayList;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        this.terrainType = par7;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        BiomeGenBase biomegenbase = par1WorldChunkManager.getBiomeGenAt(par4, par5);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        this.inDesert = biomegenbase == BiomeGenBase.desert || biomegenbase == BiomeGenBase.desertHills;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        this.biome = biomegenbase;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        this.startPiece = this;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    }<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>    public WorldChunkManager getWorldChunkManager()<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        return this.worldChunkMngr;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    }<a name="line.43"></a>
+<span class="sourceLineNo">044</span>}<a name="line.44"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

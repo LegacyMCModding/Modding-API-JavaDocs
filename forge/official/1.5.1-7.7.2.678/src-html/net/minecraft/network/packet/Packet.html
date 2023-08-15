@@ -1,0 +1,528 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.network.packet;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.io.DataInputStream;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.io.DataOutputStream;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import java.io.EOFException;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import java.io.IOException;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import java.net.Socket;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import java.util.HashMap;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import java.util.HashSet;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import java.util.Map;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import java.util.Set;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.item.ItemStack;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.logging.ILogAgent;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.nbt.CompressedStreamTools;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.nbt.NBTTagCompound;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.util.IntHashMap;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>public abstract class Packet<a name="line.18"></a>
+<span class="sourceLineNo">019</span>{<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    /** Maps packet id to packet class */<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    public static IntHashMap packetIdToClassMap = new IntHashMap();<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    /** Maps packet class to packet id */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    private static Map packetClassToIdMap = new HashMap();<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    /** List of the client's packet IDs. */<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    private static Set clientPacketIdList = new HashSet();<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    /** List of the server's packet IDs. */<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    private static Set serverPacketIdList = new HashSet();<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    protected ILogAgent field_98193_m;<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>    /** the system time in milliseconds when this packet was created. */<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    public final long creationTimeMillis = System.currentTimeMillis();<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    public static long receivedID;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public static long receivedSize;<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>    /** Assumed to be sequential by the profiler. */<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    public static long sentID;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    public static long sentSize;<a name="line.40"></a>
+<span class="sourceLineNo">041</span><a name="line.41"></a>
+<span class="sourceLineNo">042</span>    /**<a name="line.42"></a>
+<span class="sourceLineNo">043</span>     * Only true for Packet51MapChunk, Packet52MultiBlockChange, Packet53BlockChange and Packet59ComplexEntity. Used to<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     * separate them into a different send queue.<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     */<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    public boolean isChunkDataPacket = false;<a name="line.46"></a>
+<span class="sourceLineNo">047</span><a name="line.47"></a>
+<span class="sourceLineNo">048</span>    /**<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     * Adds a two way mapping between the packet ID and packet class.<a name="line.49"></a>
+<span class="sourceLineNo">050</span>     */<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    public static void addIdClassMapping(int par0, boolean par1, boolean par2, Class par3Class)<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    {<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        if (packetIdToClassMap.containsItem(par0))<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            throw new IllegalArgumentException("Duplicate packet id:" + par0);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        }<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        else if (packetClassToIdMap.containsKey(par3Class))<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            throw new IllegalArgumentException("Duplicate packet class:" + par3Class);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        }<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        else<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            packetIdToClassMap.addKey(par0, par3Class);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            packetClassToIdMap.put(par3Class, Integer.valueOf(par0));<a name="line.64"></a>
+<span class="sourceLineNo">065</span><a name="line.65"></a>
+<span class="sourceLineNo">066</span>            if (par1)<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>                clientPacketIdList.add(Integer.valueOf(par0));<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            }<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>            if (par2)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                serverPacketIdList.add(Integer.valueOf(par0));<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            }<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        }<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    }<a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77"></a>
+<span class="sourceLineNo">078</span>    /**<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     * Returns a new instance of the specified Packet class.<a name="line.79"></a>
+<span class="sourceLineNo">080</span>     */<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    public static Packet getNewPacket(ILogAgent par0ILogAgent, int par1)<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        try<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            Class oclass = (Class)packetIdToClassMap.lookup(par1);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            return oclass == null ? null : (Packet)oclass.newInstance();<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        }<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        catch (Exception exception)<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            exception.printStackTrace();<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            par0ILogAgent.logSevere("Skipping packet with id " + par1);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            return null;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    }<a name="line.94"></a>
+<span class="sourceLineNo">095</span><a name="line.95"></a>
+<span class="sourceLineNo">096</span>    /**<a name="line.96"></a>
+<span class="sourceLineNo">097</span>     * Writes a byte array to the DataOutputStream<a name="line.97"></a>
+<span class="sourceLineNo">098</span>     */<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    public static void writeByteArray(DataOutputStream par0DataOutputStream, byte[] par1ArrayOfByte) throws IOException<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        par0DataOutputStream.writeShort(par1ArrayOfByte.length);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        par0DataOutputStream.write(par1ArrayOfByte);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    }<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>    /**<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     * the first short in the stream indicates the number of bytes to read<a name="line.106"></a>
+<span class="sourceLineNo">107</span>     */<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    public static byte[] readBytesFromStream(DataInputStream par0DataInputStream) throws IOException<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    {<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        short short1 = par0DataInputStream.readShort();<a name="line.110"></a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+<span class="sourceLineNo">112</span>        if (short1 &lt; 0)<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            throw new IOException("Key was smaller than nothing!  Weird key!");<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        }<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        else<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        {<a name="line.117"></a>
+<span class="sourceLineNo">118</span>            byte[] abyte = new byte[short1];<a name="line.118"></a>
+<span class="sourceLineNo">119</span>            par0DataInputStream.readFully(abyte);<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            return abyte;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        }<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    }<a name="line.122"></a>
+<span class="sourceLineNo">123</span><a name="line.123"></a>
+<span class="sourceLineNo">124</span>    /**<a name="line.124"></a>
+<span class="sourceLineNo">125</span>     * Returns the ID of this packet.<a name="line.125"></a>
+<span class="sourceLineNo">126</span>     */<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    public final int getPacketId()<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        return ((Integer)packetClassToIdMap.get(this.getClass())).intValue();<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    }<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>    /**<a name="line.132"></a>
+<span class="sourceLineNo">133</span>     * Read a packet, prefixed by its ID, from the data stream.<a name="line.133"></a>
+<span class="sourceLineNo">134</span>     */<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    public static Packet readPacket(ILogAgent par0ILogAgent, DataInputStream par1DataInputStream, boolean par2, Socket par3Socket) throws IOException<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        boolean flag1 = false;<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        Packet packet = null;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        int i = par3Socket.getSoTimeout();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        int j;<a name="line.140"></a>
+<span class="sourceLineNo">141</span><a name="line.141"></a>
+<span class="sourceLineNo">142</span>        try<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        {<a name="line.143"></a>
+<span class="sourceLineNo">144</span>            j = par1DataInputStream.read();<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>            if (j == -1)<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>                return null;<a name="line.148"></a>
+<span class="sourceLineNo">149</span>            }<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>            if (par2 &amp;&amp; !serverPacketIdList.contains(Integer.valueOf(j)) || !par2 &amp;&amp; !clientPacketIdList.contains(Integer.valueOf(j)))<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                throw new IOException("Bad packet id " + j);<a name="line.153"></a>
+<span class="sourceLineNo">154</span>            }<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>            packet = getNewPacket(par0ILogAgent, j);<a name="line.156"></a>
+<span class="sourceLineNo">157</span><a name="line.157"></a>
+<span class="sourceLineNo">158</span>            if (packet == null)<a name="line.158"></a>
+<span class="sourceLineNo">159</span>            {<a name="line.159"></a>
+<span class="sourceLineNo">160</span>                throw new IOException("Bad packet id " + j);<a name="line.160"></a>
+<span class="sourceLineNo">161</span>            }<a name="line.161"></a>
+<span class="sourceLineNo">162</span><a name="line.162"></a>
+<span class="sourceLineNo">163</span>            packet.field_98193_m = par0ILogAgent;<a name="line.163"></a>
+<span class="sourceLineNo">164</span><a name="line.164"></a>
+<span class="sourceLineNo">165</span>            if (packet instanceof Packet254ServerPing)<a name="line.165"></a>
+<span class="sourceLineNo">166</span>            {<a name="line.166"></a>
+<span class="sourceLineNo">167</span>                par3Socket.setSoTimeout(1500);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>            }<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>            packet.readPacketData(par1DataInputStream);<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            ++receivedID;<a name="line.171"></a>
+<span class="sourceLineNo">172</span>            receivedSize += (long)packet.getPacketSize();<a name="line.172"></a>
+<span class="sourceLineNo">173</span>        }<a name="line.173"></a>
+<span class="sourceLineNo">174</span>        catch (EOFException eofexception)<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        {<a name="line.175"></a>
+<span class="sourceLineNo">176</span>            par0ILogAgent.logSevere("Reached end of stream");<a name="line.176"></a>
+<span class="sourceLineNo">177</span>            return null;<a name="line.177"></a>
+<span class="sourceLineNo">178</span>        }<a name="line.178"></a>
+<span class="sourceLineNo">179</span><a name="line.179"></a>
+<span class="sourceLineNo">180</span>        PacketCount.countPacket(j, (long)packet.getPacketSize());<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        ++receivedID;<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        receivedSize += (long)packet.getPacketSize();<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        par3Socket.setSoTimeout(i);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        return packet;<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    }<a name="line.185"></a>
+<span class="sourceLineNo">186</span><a name="line.186"></a>
+<span class="sourceLineNo">187</span>    /**<a name="line.187"></a>
+<span class="sourceLineNo">188</span>     * Writes a packet, prefixed by its ID, to the data stream.<a name="line.188"></a>
+<span class="sourceLineNo">189</span>     */<a name="line.189"></a>
+<span class="sourceLineNo">190</span>    public static void writePacket(Packet par0Packet, DataOutputStream par1DataOutputStream) throws IOException<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    {<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        par1DataOutputStream.write(par0Packet.getPacketId());<a name="line.192"></a>
+<span class="sourceLineNo">193</span>        par0Packet.writePacketData(par1DataOutputStream);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>        ++sentID;<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        sentSize += (long)par0Packet.getPacketSize();<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    }<a name="line.196"></a>
+<span class="sourceLineNo">197</span><a name="line.197"></a>
+<span class="sourceLineNo">198</span>    /**<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     * Writes a String to the DataOutputStream<a name="line.199"></a>
+<span class="sourceLineNo">200</span>     */<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    public static void writeString(String par0Str, DataOutputStream par1DataOutputStream) throws IOException<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        if (par0Str.length() &gt; 32767)<a name="line.203"></a>
+<span class="sourceLineNo">204</span>        {<a name="line.204"></a>
+<span class="sourceLineNo">205</span>            throw new IOException("String too big");<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        }<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        else<a name="line.207"></a>
+<span class="sourceLineNo">208</span>        {<a name="line.208"></a>
+<span class="sourceLineNo">209</span>            par1DataOutputStream.writeShort(par0Str.length());<a name="line.209"></a>
+<span class="sourceLineNo">210</span>            par1DataOutputStream.writeChars(par0Str);<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        }<a name="line.211"></a>
+<span class="sourceLineNo">212</span>    }<a name="line.212"></a>
+<span class="sourceLineNo">213</span><a name="line.213"></a>
+<span class="sourceLineNo">214</span>    /**<a name="line.214"></a>
+<span class="sourceLineNo">215</span>     * Reads a string from a packet<a name="line.215"></a>
+<span class="sourceLineNo">216</span>     */<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    public static String readString(DataInputStream par0DataInputStream, int par1) throws IOException<a name="line.217"></a>
+<span class="sourceLineNo">218</span>    {<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        short short1 = par0DataInputStream.readShort();<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>        if (short1 &gt; par1)<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        {<a name="line.222"></a>
+<span class="sourceLineNo">223</span>            throw new IOException("Received string length longer than maximum allowed (" + short1 + " &gt; " + par1 + ")");<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        }<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        else if (short1 &lt; 0)<a name="line.225"></a>
+<span class="sourceLineNo">226</span>        {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>            throw new IOException("Received string length is less than zero! Weird string!");<a name="line.227"></a>
+<span class="sourceLineNo">228</span>        }<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        else<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>            StringBuilder stringbuilder = new StringBuilder();<a name="line.231"></a>
+<span class="sourceLineNo">232</span><a name="line.232"></a>
+<span class="sourceLineNo">233</span>            for (int j = 0; j &lt; short1; ++j)<a name="line.233"></a>
+<span class="sourceLineNo">234</span>            {<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                stringbuilder.append(par0DataInputStream.readChar());<a name="line.235"></a>
+<span class="sourceLineNo">236</span>            }<a name="line.236"></a>
+<span class="sourceLineNo">237</span><a name="line.237"></a>
+<span class="sourceLineNo">238</span>            return stringbuilder.toString();<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>    }<a name="line.240"></a>
+<span class="sourceLineNo">241</span><a name="line.241"></a>
+<span class="sourceLineNo">242</span>    /**<a name="line.242"></a>
+<span class="sourceLineNo">243</span>     * Abstract. Reads the raw packet data from the data stream.<a name="line.243"></a>
+<span class="sourceLineNo">244</span>     */<a name="line.244"></a>
+<span class="sourceLineNo">245</span>    public abstract void readPacketData(DataInputStream datainputstream) throws IOException;<a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246"></a>
+<span class="sourceLineNo">247</span>    /**<a name="line.247"></a>
+<span class="sourceLineNo">248</span>     * Abstract. Writes the raw packet data to the data stream.<a name="line.248"></a>
+<span class="sourceLineNo">249</span>     */<a name="line.249"></a>
+<span class="sourceLineNo">250</span>    public abstract void writePacketData(DataOutputStream dataoutputstream) throws IOException;<a name="line.250"></a>
+<span class="sourceLineNo">251</span><a name="line.251"></a>
+<span class="sourceLineNo">252</span>    /**<a name="line.252"></a>
+<span class="sourceLineNo">253</span>     * Passes this Packet on to the NetHandler for processing.<a name="line.253"></a>
+<span class="sourceLineNo">254</span>     */<a name="line.254"></a>
+<span class="sourceLineNo">255</span>    public abstract void processPacket(NetHandler nethandler);<a name="line.255"></a>
+<span class="sourceLineNo">256</span><a name="line.256"></a>
+<span class="sourceLineNo">257</span>    /**<a name="line.257"></a>
+<span class="sourceLineNo">258</span>     * Abstract. Return the size of the packet (not counting the header).<a name="line.258"></a>
+<span class="sourceLineNo">259</span>     */<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    public abstract int getPacketSize();<a name="line.260"></a>
+<span class="sourceLineNo">261</span><a name="line.261"></a>
+<span class="sourceLineNo">262</span>    /**<a name="line.262"></a>
+<span class="sourceLineNo">263</span>     * only false for the abstract Packet class, all real packets return true<a name="line.263"></a>
+<span class="sourceLineNo">264</span>     */<a name="line.264"></a>
+<span class="sourceLineNo">265</span>    public boolean isRealPacket()<a name="line.265"></a>
+<span class="sourceLineNo">266</span>    {<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        return false;<a name="line.267"></a>
+<span class="sourceLineNo">268</span>    }<a name="line.268"></a>
+<span class="sourceLineNo">269</span><a name="line.269"></a>
+<span class="sourceLineNo">270</span>    /**<a name="line.270"></a>
+<span class="sourceLineNo">271</span>     * eg return packet30entity.entityId == entityId; WARNING : will throw if you compare a packet to a different packet<a name="line.271"></a>
+<span class="sourceLineNo">272</span>     * class<a name="line.272"></a>
+<span class="sourceLineNo">273</span>     */<a name="line.273"></a>
+<span class="sourceLineNo">274</span>    public boolean containsSameEntityIDAs(Packet par1Packet)<a name="line.274"></a>
+<span class="sourceLineNo">275</span>    {<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        return false;<a name="line.276"></a>
+<span class="sourceLineNo">277</span>    }<a name="line.277"></a>
+<span class="sourceLineNo">278</span><a name="line.278"></a>
+<span class="sourceLineNo">279</span>    /**<a name="line.279"></a>
+<span class="sourceLineNo">280</span>     * If this returns true, the packet may be processed on any thread; otherwise it is queued for the main thread to<a name="line.280"></a>
+<span class="sourceLineNo">281</span>     * handle.<a name="line.281"></a>
+<span class="sourceLineNo">282</span>     */<a name="line.282"></a>
+<span class="sourceLineNo">283</span>    public boolean canProcessAsync()<a name="line.283"></a>
+<span class="sourceLineNo">284</span>    {<a name="line.284"></a>
+<span class="sourceLineNo">285</span>        return false;<a name="line.285"></a>
+<span class="sourceLineNo">286</span>    }<a name="line.286"></a>
+<span class="sourceLineNo">287</span><a name="line.287"></a>
+<span class="sourceLineNo">288</span>    public String toString()<a name="line.288"></a>
+<span class="sourceLineNo">289</span>    {<a name="line.289"></a>
+<span class="sourceLineNo">290</span>        String s = this.getClass().getSimpleName();<a name="line.290"></a>
+<span class="sourceLineNo">291</span>        return s;<a name="line.291"></a>
+<span class="sourceLineNo">292</span>    }<a name="line.292"></a>
+<span class="sourceLineNo">293</span><a name="line.293"></a>
+<span class="sourceLineNo">294</span>    /**<a name="line.294"></a>
+<span class="sourceLineNo">295</span>     * Reads a ItemStack from the InputStream<a name="line.295"></a>
+<span class="sourceLineNo">296</span>     */<a name="line.296"></a>
+<span class="sourceLineNo">297</span>    public static ItemStack readItemStack(DataInputStream par0DataInputStream) throws IOException<a name="line.297"></a>
+<span class="sourceLineNo">298</span>    {<a name="line.298"></a>
+<span class="sourceLineNo">299</span>        ItemStack itemstack = null;<a name="line.299"></a>
+<span class="sourceLineNo">300</span>        short short1 = par0DataInputStream.readShort();<a name="line.300"></a>
+<span class="sourceLineNo">301</span><a name="line.301"></a>
+<span class="sourceLineNo">302</span>        if (short1 &gt;= 0)<a name="line.302"></a>
+<span class="sourceLineNo">303</span>        {<a name="line.303"></a>
+<span class="sourceLineNo">304</span>            byte b0 = par0DataInputStream.readByte();<a name="line.304"></a>
+<span class="sourceLineNo">305</span>            short short2 = par0DataInputStream.readShort();<a name="line.305"></a>
+<span class="sourceLineNo">306</span>            itemstack = new ItemStack(short1, b0, short2);<a name="line.306"></a>
+<span class="sourceLineNo">307</span>            itemstack.stackTagCompound = readNBTTagCompound(par0DataInputStream);<a name="line.307"></a>
+<span class="sourceLineNo">308</span>        }<a name="line.308"></a>
+<span class="sourceLineNo">309</span><a name="line.309"></a>
+<span class="sourceLineNo">310</span>        return itemstack;<a name="line.310"></a>
+<span class="sourceLineNo">311</span>    }<a name="line.311"></a>
+<span class="sourceLineNo">312</span><a name="line.312"></a>
+<span class="sourceLineNo">313</span>    /**<a name="line.313"></a>
+<span class="sourceLineNo">314</span>     * Writes the ItemStack's ID (short), then size (byte), then damage. (short)<a name="line.314"></a>
+<span class="sourceLineNo">315</span>     */<a name="line.315"></a>
+<span class="sourceLineNo">316</span>    public static void writeItemStack(ItemStack par0ItemStack, DataOutputStream par1DataOutputStream) throws IOException<a name="line.316"></a>
+<span class="sourceLineNo">317</span>    {<a name="line.317"></a>
+<span class="sourceLineNo">318</span>        if (par0ItemStack == null)<a name="line.318"></a>
+<span class="sourceLineNo">319</span>        {<a name="line.319"></a>
+<span class="sourceLineNo">320</span>            par1DataOutputStream.writeShort(-1);<a name="line.320"></a>
+<span class="sourceLineNo">321</span>        }<a name="line.321"></a>
+<span class="sourceLineNo">322</span>        else<a name="line.322"></a>
+<span class="sourceLineNo">323</span>        {<a name="line.323"></a>
+<span class="sourceLineNo">324</span>            par1DataOutputStream.writeShort(par0ItemStack.itemID);<a name="line.324"></a>
+<span class="sourceLineNo">325</span>            par1DataOutputStream.writeByte(par0ItemStack.stackSize);<a name="line.325"></a>
+<span class="sourceLineNo">326</span>            par1DataOutputStream.writeShort(par0ItemStack.getItemDamage());<a name="line.326"></a>
+<span class="sourceLineNo">327</span>            NBTTagCompound nbttagcompound = null;<a name="line.327"></a>
+<span class="sourceLineNo">328</span><a name="line.328"></a>
+<span class="sourceLineNo">329</span>            if (par0ItemStack.getItem().isDamageable() || par0ItemStack.getItem().getShareTag())<a name="line.329"></a>
+<span class="sourceLineNo">330</span>            {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>                nbttagcompound = par0ItemStack.stackTagCompound;<a name="line.331"></a>
+<span class="sourceLineNo">332</span>            }<a name="line.332"></a>
+<span class="sourceLineNo">333</span><a name="line.333"></a>
+<span class="sourceLineNo">334</span>            writeNBTTagCompound(nbttagcompound, par1DataOutputStream);<a name="line.334"></a>
+<span class="sourceLineNo">335</span>        }<a name="line.335"></a>
+<span class="sourceLineNo">336</span>    }<a name="line.336"></a>
+<span class="sourceLineNo">337</span><a name="line.337"></a>
+<span class="sourceLineNo">338</span>    /**<a name="line.338"></a>
+<span class="sourceLineNo">339</span>     * Reads a compressed NBTTagCompound from the InputStream<a name="line.339"></a>
+<span class="sourceLineNo">340</span>     */<a name="line.340"></a>
+<span class="sourceLineNo">341</span>    public static NBTTagCompound readNBTTagCompound(DataInputStream par0DataInputStream) throws IOException<a name="line.341"></a>
+<span class="sourceLineNo">342</span>    {<a name="line.342"></a>
+<span class="sourceLineNo">343</span>        short short1 = par0DataInputStream.readShort();<a name="line.343"></a>
+<span class="sourceLineNo">344</span><a name="line.344"></a>
+<span class="sourceLineNo">345</span>        if (short1 &lt; 0)<a name="line.345"></a>
+<span class="sourceLineNo">346</span>        {<a name="line.346"></a>
+<span class="sourceLineNo">347</span>            return null;<a name="line.347"></a>
+<span class="sourceLineNo">348</span>        }<a name="line.348"></a>
+<span class="sourceLineNo">349</span>        else<a name="line.349"></a>
+<span class="sourceLineNo">350</span>        {<a name="line.350"></a>
+<span class="sourceLineNo">351</span>            byte[] abyte = new byte[short1];<a name="line.351"></a>
+<span class="sourceLineNo">352</span>            par0DataInputStream.readFully(abyte);<a name="line.352"></a>
+<span class="sourceLineNo">353</span>            return CompressedStreamTools.decompress(abyte);<a name="line.353"></a>
+<span class="sourceLineNo">354</span>        }<a name="line.354"></a>
+<span class="sourceLineNo">355</span>    }<a name="line.355"></a>
+<span class="sourceLineNo">356</span><a name="line.356"></a>
+<span class="sourceLineNo">357</span>    /**<a name="line.357"></a>
+<span class="sourceLineNo">358</span>     * Writes a compressed NBTTagCompound to the OutputStream<a name="line.358"></a>
+<span class="sourceLineNo">359</span>     */<a name="line.359"></a>
+<span class="sourceLineNo">360</span>    protected static void writeNBTTagCompound(NBTTagCompound par0NBTTagCompound, DataOutputStream par1DataOutputStream) throws IOException<a name="line.360"></a>
+<span class="sourceLineNo">361</span>    {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>        if (par0NBTTagCompound == null)<a name="line.362"></a>
+<span class="sourceLineNo">363</span>        {<a name="line.363"></a>
+<span class="sourceLineNo">364</span>            par1DataOutputStream.writeShort(-1);<a name="line.364"></a>
+<span class="sourceLineNo">365</span>        }<a name="line.365"></a>
+<span class="sourceLineNo">366</span>        else<a name="line.366"></a>
+<span class="sourceLineNo">367</span>        {<a name="line.367"></a>
+<span class="sourceLineNo">368</span>            byte[] abyte = CompressedStreamTools.compress(par0NBTTagCompound);<a name="line.368"></a>
+<span class="sourceLineNo">369</span>            par1DataOutputStream.writeShort((short)abyte.length);<a name="line.369"></a>
+<span class="sourceLineNo">370</span>            par1DataOutputStream.write(abyte);<a name="line.370"></a>
+<span class="sourceLineNo">371</span>        }<a name="line.371"></a>
+<span class="sourceLineNo">372</span>    }<a name="line.372"></a>
+<span class="sourceLineNo">373</span><a name="line.373"></a>
+<span class="sourceLineNo">374</span>    static<a name="line.374"></a>
+<span class="sourceLineNo">375</span>    {<a name="line.375"></a>
+<span class="sourceLineNo">376</span>        addIdClassMapping(0, true, true, Packet0KeepAlive.class);<a name="line.376"></a>
+<span class="sourceLineNo">377</span>        addIdClassMapping(1, true, true, Packet1Login.class);<a name="line.377"></a>
+<span class="sourceLineNo">378</span>        addIdClassMapping(2, false, true, Packet2ClientProtocol.class);<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        addIdClassMapping(3, true, true, Packet3Chat.class);<a name="line.379"></a>
+<span class="sourceLineNo">380</span>        addIdClassMapping(4, true, false, Packet4UpdateTime.class);<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        addIdClassMapping(5, true, false, Packet5PlayerInventory.class);<a name="line.381"></a>
+<span class="sourceLineNo">382</span>        addIdClassMapping(6, true, false, Packet6SpawnPosition.class);<a name="line.382"></a>
+<span class="sourceLineNo">383</span>        addIdClassMapping(7, false, true, Packet7UseEntity.class);<a name="line.383"></a>
+<span class="sourceLineNo">384</span>        addIdClassMapping(8, true, false, Packet8UpdateHealth.class);<a name="line.384"></a>
+<span class="sourceLineNo">385</span>        addIdClassMapping(9, true, true, Packet9Respawn.class);<a name="line.385"></a>
+<span class="sourceLineNo">386</span>        addIdClassMapping(10, true, true, Packet10Flying.class);<a name="line.386"></a>
+<span class="sourceLineNo">387</span>        addIdClassMapping(11, true, true, Packet11PlayerPosition.class);<a name="line.387"></a>
+<span class="sourceLineNo">388</span>        addIdClassMapping(12, true, true, Packet12PlayerLook.class);<a name="line.388"></a>
+<span class="sourceLineNo">389</span>        addIdClassMapping(13, true, true, Packet13PlayerLookMove.class);<a name="line.389"></a>
+<span class="sourceLineNo">390</span>        addIdClassMapping(14, false, true, Packet14BlockDig.class);<a name="line.390"></a>
+<span class="sourceLineNo">391</span>        addIdClassMapping(15, false, true, Packet15Place.class);<a name="line.391"></a>
+<span class="sourceLineNo">392</span>        addIdClassMapping(16, true, true, Packet16BlockItemSwitch.class);<a name="line.392"></a>
+<span class="sourceLineNo">393</span>        addIdClassMapping(17, true, false, Packet17Sleep.class);<a name="line.393"></a>
+<span class="sourceLineNo">394</span>        addIdClassMapping(18, true, true, Packet18Animation.class);<a name="line.394"></a>
+<span class="sourceLineNo">395</span>        addIdClassMapping(19, false, true, Packet19EntityAction.class);<a name="line.395"></a>
+<span class="sourceLineNo">396</span>        addIdClassMapping(20, true, false, Packet20NamedEntitySpawn.class);<a name="line.396"></a>
+<span class="sourceLineNo">397</span>        addIdClassMapping(22, true, false, Packet22Collect.class);<a name="line.397"></a>
+<span class="sourceLineNo">398</span>        addIdClassMapping(23, true, false, Packet23VehicleSpawn.class);<a name="line.398"></a>
+<span class="sourceLineNo">399</span>        addIdClassMapping(24, true, false, Packet24MobSpawn.class);<a name="line.399"></a>
+<span class="sourceLineNo">400</span>        addIdClassMapping(25, true, false, Packet25EntityPainting.class);<a name="line.400"></a>
+<span class="sourceLineNo">401</span>        addIdClassMapping(26, true, false, Packet26EntityExpOrb.class);<a name="line.401"></a>
+<span class="sourceLineNo">402</span>        addIdClassMapping(28, true, false, Packet28EntityVelocity.class);<a name="line.402"></a>
+<span class="sourceLineNo">403</span>        addIdClassMapping(29, true, false, Packet29DestroyEntity.class);<a name="line.403"></a>
+<span class="sourceLineNo">404</span>        addIdClassMapping(30, true, false, Packet30Entity.class);<a name="line.404"></a>
+<span class="sourceLineNo">405</span>        addIdClassMapping(31, true, false, Packet31RelEntityMove.class);<a name="line.405"></a>
+<span class="sourceLineNo">406</span>        addIdClassMapping(32, true, false, Packet32EntityLook.class);<a name="line.406"></a>
+<span class="sourceLineNo">407</span>        addIdClassMapping(33, true, false, Packet33RelEntityMoveLook.class);<a name="line.407"></a>
+<span class="sourceLineNo">408</span>        addIdClassMapping(34, true, false, Packet34EntityTeleport.class);<a name="line.408"></a>
+<span class="sourceLineNo">409</span>        addIdClassMapping(35, true, false, Packet35EntityHeadRotation.class);<a name="line.409"></a>
+<span class="sourceLineNo">410</span>        addIdClassMapping(38, true, false, Packet38EntityStatus.class);<a name="line.410"></a>
+<span class="sourceLineNo">411</span>        addIdClassMapping(39, true, false, Packet39AttachEntity.class);<a name="line.411"></a>
+<span class="sourceLineNo">412</span>        addIdClassMapping(40, true, false, Packet40EntityMetadata.class);<a name="line.412"></a>
+<span class="sourceLineNo">413</span>        addIdClassMapping(41, true, false, Packet41EntityEffect.class);<a name="line.413"></a>
+<span class="sourceLineNo">414</span>        addIdClassMapping(42, true, false, Packet42RemoveEntityEffect.class);<a name="line.414"></a>
+<span class="sourceLineNo">415</span>        addIdClassMapping(43, true, false, Packet43Experience.class);<a name="line.415"></a>
+<span class="sourceLineNo">416</span>        addIdClassMapping(51, true, false, Packet51MapChunk.class);<a name="line.416"></a>
+<span class="sourceLineNo">417</span>        addIdClassMapping(52, true, false, Packet52MultiBlockChange.class);<a name="line.417"></a>
+<span class="sourceLineNo">418</span>        addIdClassMapping(53, true, false, Packet53BlockChange.class);<a name="line.418"></a>
+<span class="sourceLineNo">419</span>        addIdClassMapping(54, true, false, Packet54PlayNoteBlock.class);<a name="line.419"></a>
+<span class="sourceLineNo">420</span>        addIdClassMapping(55, true, false, Packet55BlockDestroy.class);<a name="line.420"></a>
+<span class="sourceLineNo">421</span>        addIdClassMapping(56, true, false, Packet56MapChunks.class);<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        addIdClassMapping(60, true, false, Packet60Explosion.class);<a name="line.422"></a>
+<span class="sourceLineNo">423</span>        addIdClassMapping(61, true, false, Packet61DoorChange.class);<a name="line.423"></a>
+<span class="sourceLineNo">424</span>        addIdClassMapping(62, true, false, Packet62LevelSound.class);<a name="line.424"></a>
+<span class="sourceLineNo">425</span>        addIdClassMapping(63, true, false, Packet63WorldParticles.class);<a name="line.425"></a>
+<span class="sourceLineNo">426</span>        addIdClassMapping(70, true, false, Packet70GameEvent.class);<a name="line.426"></a>
+<span class="sourceLineNo">427</span>        addIdClassMapping(71, true, false, Packet71Weather.class);<a name="line.427"></a>
+<span class="sourceLineNo">428</span>        addIdClassMapping(100, true, false, Packet100OpenWindow.class);<a name="line.428"></a>
+<span class="sourceLineNo">429</span>        addIdClassMapping(101, true, true, Packet101CloseWindow.class);<a name="line.429"></a>
+<span class="sourceLineNo">430</span>        addIdClassMapping(102, false, true, Packet102WindowClick.class);<a name="line.430"></a>
+<span class="sourceLineNo">431</span>        addIdClassMapping(103, true, false, Packet103SetSlot.class);<a name="line.431"></a>
+<span class="sourceLineNo">432</span>        addIdClassMapping(104, true, false, Packet104WindowItems.class);<a name="line.432"></a>
+<span class="sourceLineNo">433</span>        addIdClassMapping(105, true, false, Packet105UpdateProgressbar.class);<a name="line.433"></a>
+<span class="sourceLineNo">434</span>        addIdClassMapping(106, true, true, Packet106Transaction.class);<a name="line.434"></a>
+<span class="sourceLineNo">435</span>        addIdClassMapping(107, true, true, Packet107CreativeSetSlot.class);<a name="line.435"></a>
+<span class="sourceLineNo">436</span>        addIdClassMapping(108, false, true, Packet108EnchantItem.class);<a name="line.436"></a>
+<span class="sourceLineNo">437</span>        addIdClassMapping(130, true, true, Packet130UpdateSign.class);<a name="line.437"></a>
+<span class="sourceLineNo">438</span>        addIdClassMapping(131, true, true, Packet131MapData.class);<a name="line.438"></a>
+<span class="sourceLineNo">439</span>        addIdClassMapping(132, true, false, Packet132TileEntityData.class);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>        addIdClassMapping(200, true, false, Packet200Statistic.class);<a name="line.440"></a>
+<span class="sourceLineNo">441</span>        addIdClassMapping(201, true, false, Packet201PlayerInfo.class);<a name="line.441"></a>
+<span class="sourceLineNo">442</span>        addIdClassMapping(202, true, true, Packet202PlayerAbilities.class);<a name="line.442"></a>
+<span class="sourceLineNo">443</span>        addIdClassMapping(203, true, true, Packet203AutoComplete.class);<a name="line.443"></a>
+<span class="sourceLineNo">444</span>        addIdClassMapping(204, false, true, Packet204ClientInfo.class);<a name="line.444"></a>
+<span class="sourceLineNo">445</span>        addIdClassMapping(205, false, true, Packet205ClientCommand.class);<a name="line.445"></a>
+<span class="sourceLineNo">446</span>        addIdClassMapping(206, true, false, Packet206SetObjective.class);<a name="line.446"></a>
+<span class="sourceLineNo">447</span>        addIdClassMapping(207, true, false, Packet207SetScore.class);<a name="line.447"></a>
+<span class="sourceLineNo">448</span>        addIdClassMapping(208, true, false, Packet208SetDisplayObjective.class);<a name="line.448"></a>
+<span class="sourceLineNo">449</span>        addIdClassMapping(209, true, false, Packet209SetPlayerTeam.class);<a name="line.449"></a>
+<span class="sourceLineNo">450</span>        addIdClassMapping(250, true, true, Packet250CustomPayload.class);<a name="line.450"></a>
+<span class="sourceLineNo">451</span>        addIdClassMapping(252, true, true, Packet252SharedKey.class);<a name="line.451"></a>
+<span class="sourceLineNo">452</span>        addIdClassMapping(253, true, false, Packet253ServerAuthData.class);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>        addIdClassMapping(254, false, true, Packet254ServerPing.class);<a name="line.453"></a>
+<span class="sourceLineNo">454</span>        addIdClassMapping(255, true, true, Packet255KickDisconnect.class);<a name="line.454"></a>
+<span class="sourceLineNo">455</span>    }<a name="line.455"></a>
+<span class="sourceLineNo">456</span>}<a name="line.456"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

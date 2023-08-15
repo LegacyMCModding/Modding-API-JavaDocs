@@ -1,0 +1,650 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.tileentity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.List;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.block.Block;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.BlockChest;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.block.BlockHopper;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.command.IEntitySelector;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.entity.Entity;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.entity.item.EntityItem;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.entity.player.EntityPlayer;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.inventory.IInventory;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.inventory.ISidedInventory;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.item.ItemStack;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.nbt.NBTTagCompound;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.nbt.NBTTagList;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.util.AxisAlignedBB;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import net.minecraft.util.Facing;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import net.minecraft.util.MathHelper;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import net.minecraft.world.World;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>public class TileEntityHopper extends TileEntity implements Hopper<a name="line.21"></a>
+<span class="sourceLineNo">022</span>{<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    private ItemStack[] hopperItemStacks = new ItemStack[5];<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /** The name that is displayed if the hopper was renamed */<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    private String inventoryName;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    private int transferCooldown = -1;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    /**<a name="line.29"></a>
+<span class="sourceLineNo">030</span>     * Reads a tile entity from NBT.<a name="line.30"></a>
+<span class="sourceLineNo">031</span>     */<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    public void readFromNBT(NBTTagCompound par1NBTTagCompound)<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    {<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        super.readFromNBT(par1NBTTagCompound);<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        NBTTagList nbttaglist = par1NBTTagCompound.getTagList("Items");<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        this.hopperItemStacks = new ItemStack[this.getSizeInventory()];<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>        if (par1NBTTagCompound.hasKey("CustomName"))<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>            this.inventoryName = par1NBTTagCompound.getString("CustomName");<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        }<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.transferCooldown = par1NBTTagCompound.getInteger("TransferCooldown");<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>        for (int i = 0; i &lt; nbttaglist.tagCount(); ++i)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>            NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.tagAt(i);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            byte b0 = nbttagcompound1.getByte("Slot");<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>            if (b0 &gt;= 0 &amp;&amp; b0 &lt; this.hopperItemStacks.length)<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>                this.hopperItemStacks[b0] = ItemStack.loadItemStackFromNBT(nbttagcompound1);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            }<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        }<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    }<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    /**<a name="line.57"></a>
+<span class="sourceLineNo">058</span>     * Writes a tile entity to NBT.<a name="line.58"></a>
+<span class="sourceLineNo">059</span>     */<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    public void writeToNBT(NBTTagCompound par1NBTTagCompound)<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        super.writeToNBT(par1NBTTagCompound);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        NBTTagList nbttaglist = new NBTTagList();<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>        for (int i = 0; i &lt; this.hopperItemStacks.length; ++i)<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            if (this.hopperItemStacks[i] != null)<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                NBTTagCompound nbttagcompound1 = new NBTTagCompound();<a name="line.69"></a>
+<span class="sourceLineNo">070</span>                nbttagcompound1.setByte("Slot", (byte)i);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                this.hopperItemStacks[i].writeToNBT(nbttagcompound1);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                nbttaglist.appendTag(nbttagcompound1);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            }<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        }<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>        par1NBTTagCompound.setTag("Items", nbttaglist);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        par1NBTTagCompound.setInteger("TransferCooldown", this.transferCooldown);<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>        if (this.isInvNameLocalized())<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            par1NBTTagCompound.setString("CustomName", this.inventoryName);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    }<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>    /**<a name="line.85"></a>
+<span class="sourceLineNo">086</span>     * Called when an the contents of an Inventory change, usually<a name="line.86"></a>
+<span class="sourceLineNo">087</span>     */<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    public void onInventoryChanged()<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        super.onInventoryChanged();<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    }<a name="line.91"></a>
+<span class="sourceLineNo">092</span><a name="line.92"></a>
+<span class="sourceLineNo">093</span>    /**<a name="line.93"></a>
+<span class="sourceLineNo">094</span>     * Returns the number of slots in the inventory.<a name="line.94"></a>
+<span class="sourceLineNo">095</span>     */<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    public int getSizeInventory()<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        return this.hopperItemStacks.length;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    }<a name="line.99"></a>
+<span class="sourceLineNo">100</span><a name="line.100"></a>
+<span class="sourceLineNo">101</span>    /**<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     * Returns the stack in slot i<a name="line.102"></a>
+<span class="sourceLineNo">103</span>     */<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    public ItemStack getStackInSlot(int par1)<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        return this.hopperItemStacks[par1];<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    }<a name="line.107"></a>
+<span class="sourceLineNo">108</span><a name="line.108"></a>
+<span class="sourceLineNo">109</span>    /**<a name="line.109"></a>
+<span class="sourceLineNo">110</span>     * Removes from an inventory slot (first arg) up to a specified number (second arg) of items and returns them in a<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     * new stack.<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     */<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    public ItemStack decrStackSize(int par1, int par2)<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    {<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        if (this.hopperItemStacks[par1] != null)<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            ItemStack itemstack;<a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span>            if (this.hopperItemStacks[par1].stackSize &lt;= par2)<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>                itemstack = this.hopperItemStacks[par1];<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                this.hopperItemStacks[par1] = null;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>                return itemstack;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            }<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            else<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                itemstack = this.hopperItemStacks[par1].splitStack(par2);<a name="line.127"></a>
+<span class="sourceLineNo">128</span><a name="line.128"></a>
+<span class="sourceLineNo">129</span>                if (this.hopperItemStacks[par1].stackSize == 0)<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                    this.hopperItemStacks[par1] = null;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                }<a name="line.132"></a>
+<span class="sourceLineNo">133</span><a name="line.133"></a>
+<span class="sourceLineNo">134</span>                return itemstack;<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>        }<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        else<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        {<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            return null;<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        }<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    }<a name="line.141"></a>
+<span class="sourceLineNo">142</span><a name="line.142"></a>
+<span class="sourceLineNo">143</span>    /**<a name="line.143"></a>
+<span class="sourceLineNo">144</span>     * When some containers are closed they call this on each slot, then drop whatever it returns as an EntityItem -<a name="line.144"></a>
+<span class="sourceLineNo">145</span>     * like when you close a workbench GUI.<a name="line.145"></a>
+<span class="sourceLineNo">146</span>     */<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    public ItemStack getStackInSlotOnClosing(int par1)<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    {<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        if (this.hopperItemStacks[par1] != null)<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>            ItemStack itemstack = this.hopperItemStacks[par1];<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            this.hopperItemStacks[par1] = null;<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            return itemstack;<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        }<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        else<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        {<a name="line.156"></a>
+<span class="sourceLineNo">157</span>            return null;<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        }<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    }<a name="line.159"></a>
+<span class="sourceLineNo">160</span><a name="line.160"></a>
+<span class="sourceLineNo">161</span>    /**<a name="line.161"></a>
+<span class="sourceLineNo">162</span>     * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).<a name="line.162"></a>
+<span class="sourceLineNo">163</span>     */<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    public void setInventorySlotContents(int par1, ItemStack par2ItemStack)<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    {<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        this.hopperItemStacks[par1] = par2ItemStack;<a name="line.166"></a>
+<span class="sourceLineNo">167</span><a name="line.167"></a>
+<span class="sourceLineNo">168</span>        if (par2ItemStack != null &amp;&amp; par2ItemStack.stackSize &gt; this.getInventoryStackLimit())<a name="line.168"></a>
+<span class="sourceLineNo">169</span>        {<a name="line.169"></a>
+<span class="sourceLineNo">170</span>            par2ItemStack.stackSize = this.getInventoryStackLimit();<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        }<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    }<a name="line.172"></a>
+<span class="sourceLineNo">173</span><a name="line.173"></a>
+<span class="sourceLineNo">174</span>    /**<a name="line.174"></a>
+<span class="sourceLineNo">175</span>     * Returns the name of the inventory.<a name="line.175"></a>
+<span class="sourceLineNo">176</span>     */<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    public String getInvName()<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        return this.isInvNameLocalized() ? this.inventoryName : "container.hopper";<a name="line.179"></a>
+<span class="sourceLineNo">180</span>    }<a name="line.180"></a>
+<span class="sourceLineNo">181</span><a name="line.181"></a>
+<span class="sourceLineNo">182</span>    /**<a name="line.182"></a>
+<span class="sourceLineNo">183</span>     * If this returns false, the inventory name will be used as an unlocalized name, and translated into the player's<a name="line.183"></a>
+<span class="sourceLineNo">184</span>     * language. Otherwise it will be used directly.<a name="line.184"></a>
+<span class="sourceLineNo">185</span>     */<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    public boolean isInvNameLocalized()<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    {<a name="line.187"></a>
+<span class="sourceLineNo">188</span>        return this.inventoryName != null &amp;&amp; this.inventoryName.length() &gt; 0;<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    }<a name="line.189"></a>
+<span class="sourceLineNo">190</span><a name="line.190"></a>
+<span class="sourceLineNo">191</span>    public void func_96115_a(String par1Str)<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    {<a name="line.192"></a>
+<span class="sourceLineNo">193</span>        this.inventoryName = par1Str;<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    }<a name="line.194"></a>
+<span class="sourceLineNo">195</span><a name="line.195"></a>
+<span class="sourceLineNo">196</span>    /**<a name="line.196"></a>
+<span class="sourceLineNo">197</span>     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended. *Isn't<a name="line.197"></a>
+<span class="sourceLineNo">198</span>     * this more of a set than a get?*<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     */<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    public int getInventoryStackLimit()<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>        return 64;<a name="line.202"></a>
+<span class="sourceLineNo">203</span>    }<a name="line.203"></a>
+<span class="sourceLineNo">204</span><a name="line.204"></a>
+<span class="sourceLineNo">205</span>    /**<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     * Do not make give this method the name canInteractWith because it clashes with Container<a name="line.206"></a>
+<span class="sourceLineNo">207</span>     */<a name="line.207"></a>
+<span class="sourceLineNo">208</span>    public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)<a name="line.208"></a>
+<span class="sourceLineNo">209</span>    {<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        return this.worldObj.getBlockTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : par1EntityPlayer.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D, (double)this.zCoord + 0.5D) &lt;= 64.0D;<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    }<a name="line.211"></a>
+<span class="sourceLineNo">212</span><a name="line.212"></a>
+<span class="sourceLineNo">213</span>    public void openChest() {}<a name="line.213"></a>
+<span class="sourceLineNo">214</span><a name="line.214"></a>
+<span class="sourceLineNo">215</span>    public void closeChest() {}<a name="line.215"></a>
+<span class="sourceLineNo">216</span><a name="line.216"></a>
+<span class="sourceLineNo">217</span>    /**<a name="line.217"></a>
+<span class="sourceLineNo">218</span>     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.<a name="line.218"></a>
+<span class="sourceLineNo">219</span>     */<a name="line.219"></a>
+<span class="sourceLineNo">220</span>    public boolean isStackValidForSlot(int par1, ItemStack par2ItemStack)<a name="line.220"></a>
+<span class="sourceLineNo">221</span>    {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        return true;<a name="line.222"></a>
+<span class="sourceLineNo">223</span>    }<a name="line.223"></a>
+<span class="sourceLineNo">224</span><a name="line.224"></a>
+<span class="sourceLineNo">225</span>    /**<a name="line.225"></a>
+<span class="sourceLineNo">226</span>     * Allows the entity to update its state. Overridden in most subclasses, e.g. the mob spawner uses this to count<a name="line.226"></a>
+<span class="sourceLineNo">227</span>     * ticks and creates a new spawn inside its implementation.<a name="line.227"></a>
+<span class="sourceLineNo">228</span>     */<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    public void updateEntity()<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        if (this.worldObj != null &amp;&amp; !this.worldObj.isRemote)<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        {<a name="line.232"></a>
+<span class="sourceLineNo">233</span>            --this.transferCooldown;<a name="line.233"></a>
+<span class="sourceLineNo">234</span><a name="line.234"></a>
+<span class="sourceLineNo">235</span>            if (!this.func_98047_l())<a name="line.235"></a>
+<span class="sourceLineNo">236</span>            {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                this.func_98046_c(0);<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                this.func_98045_j();<a name="line.238"></a>
+<span class="sourceLineNo">239</span>            }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        }<a name="line.240"></a>
+<span class="sourceLineNo">241</span>    }<a name="line.241"></a>
+<span class="sourceLineNo">242</span><a name="line.242"></a>
+<span class="sourceLineNo">243</span>    public boolean func_98045_j()<a name="line.243"></a>
+<span class="sourceLineNo">244</span>    {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>        if (this.worldObj != null &amp;&amp; !this.worldObj.isRemote)<a name="line.245"></a>
+<span class="sourceLineNo">246</span>        {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>            if (!this.func_98047_l() &amp;&amp; BlockHopper.func_94452_d(this.getBlockMetadata()))<a name="line.247"></a>
+<span class="sourceLineNo">248</span>            {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>                boolean flag = this.insertItemToInventory() | suckItemsIntoHopper(this);<a name="line.249"></a>
+<span class="sourceLineNo">250</span><a name="line.250"></a>
+<span class="sourceLineNo">251</span>                if (flag)<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                {<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                    this.func_98046_c(8);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>                    this.onInventoryChanged();<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                    return true;<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                }<a name="line.256"></a>
+<span class="sourceLineNo">257</span>            }<a name="line.257"></a>
+<span class="sourceLineNo">258</span><a name="line.258"></a>
+<span class="sourceLineNo">259</span>            return false;<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        }<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        else<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        {<a name="line.262"></a>
+<span class="sourceLineNo">263</span>            return false;<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        }<a name="line.264"></a>
+<span class="sourceLineNo">265</span>    }<a name="line.265"></a>
+<span class="sourceLineNo">266</span><a name="line.266"></a>
+<span class="sourceLineNo">267</span>    /**<a name="line.267"></a>
+<span class="sourceLineNo">268</span>     * Inserts one item from the hopper into the inventory the hopper is pointing at.<a name="line.268"></a>
+<span class="sourceLineNo">269</span>     */<a name="line.269"></a>
+<span class="sourceLineNo">270</span>    private boolean insertItemToInventory()<a name="line.270"></a>
+<span class="sourceLineNo">271</span>    {<a name="line.271"></a>
+<span class="sourceLineNo">272</span>        IInventory iinventory = this.getOutputInventory();<a name="line.272"></a>
+<span class="sourceLineNo">273</span><a name="line.273"></a>
+<span class="sourceLineNo">274</span>        if (iinventory == null)<a name="line.274"></a>
+<span class="sourceLineNo">275</span>        {<a name="line.275"></a>
+<span class="sourceLineNo">276</span>            return false;<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        }<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        else<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>            for (int i = 0; i &lt; this.getSizeInventory(); ++i)<a name="line.280"></a>
+<span class="sourceLineNo">281</span>            {<a name="line.281"></a>
+<span class="sourceLineNo">282</span>                if (this.getStackInSlot(i) != null)<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                {<a name="line.283"></a>
+<span class="sourceLineNo">284</span>                    ItemStack itemstack = this.getStackInSlot(i).copy();<a name="line.284"></a>
+<span class="sourceLineNo">285</span>                    ItemStack itemstack1 = insertStack(iinventory, this.decrStackSize(i, 1), Facing.oppositeSide[BlockHopper.getDirectionFromMetadata(this.getBlockMetadata())]);<a name="line.285"></a>
+<span class="sourceLineNo">286</span><a name="line.286"></a>
+<span class="sourceLineNo">287</span>                    if (itemstack1 == null || itemstack1.stackSize == 0)<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                    {<a name="line.288"></a>
+<span class="sourceLineNo">289</span>                        iinventory.onInventoryChanged();<a name="line.289"></a>
+<span class="sourceLineNo">290</span>                        return true;<a name="line.290"></a>
+<span class="sourceLineNo">291</span>                    }<a name="line.291"></a>
+<span class="sourceLineNo">292</span><a name="line.292"></a>
+<span class="sourceLineNo">293</span>                    this.setInventorySlotContents(i, itemstack);<a name="line.293"></a>
+<span class="sourceLineNo">294</span>                }<a name="line.294"></a>
+<span class="sourceLineNo">295</span>            }<a name="line.295"></a>
+<span class="sourceLineNo">296</span><a name="line.296"></a>
+<span class="sourceLineNo">297</span>            return false;<a name="line.297"></a>
+<span class="sourceLineNo">298</span>        }<a name="line.298"></a>
+<span class="sourceLineNo">299</span>    }<a name="line.299"></a>
+<span class="sourceLineNo">300</span><a name="line.300"></a>
+<span class="sourceLineNo">301</span>    /**<a name="line.301"></a>
+<span class="sourceLineNo">302</span>     * Sucks one item into the given hopper from an inventory or EntityItem above it.<a name="line.302"></a>
+<span class="sourceLineNo">303</span>     */<a name="line.303"></a>
+<span class="sourceLineNo">304</span>    public static boolean suckItemsIntoHopper(Hopper par0Hopper)<a name="line.304"></a>
+<span class="sourceLineNo">305</span>    {<a name="line.305"></a>
+<span class="sourceLineNo">306</span>        IInventory iinventory = func_96118_b(par0Hopper);<a name="line.306"></a>
+<span class="sourceLineNo">307</span><a name="line.307"></a>
+<span class="sourceLineNo">308</span>        if (iinventory != null)<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        {<a name="line.309"></a>
+<span class="sourceLineNo">310</span>            byte b0 = 0;<a name="line.310"></a>
+<span class="sourceLineNo">311</span><a name="line.311"></a>
+<span class="sourceLineNo">312</span>            if (iinventory instanceof ISidedInventory &amp;&amp; b0 &gt; -1)<a name="line.312"></a>
+<span class="sourceLineNo">313</span>            {<a name="line.313"></a>
+<span class="sourceLineNo">314</span>                ISidedInventory isidedinventory = (ISidedInventory)iinventory;<a name="line.314"></a>
+<span class="sourceLineNo">315</span>                int[] aint = isidedinventory.getSizeInventorySide(b0);<a name="line.315"></a>
+<span class="sourceLineNo">316</span><a name="line.316"></a>
+<span class="sourceLineNo">317</span>                for (int i = 0; i &lt; aint.length; ++i)<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                {<a name="line.318"></a>
+<span class="sourceLineNo">319</span>                    if (func_102012_a(par0Hopper, iinventory, aint[i], b0))<a name="line.319"></a>
+<span class="sourceLineNo">320</span>                    {<a name="line.320"></a>
+<span class="sourceLineNo">321</span>                        return true;<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                    }<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                }<a name="line.323"></a>
+<span class="sourceLineNo">324</span>            }<a name="line.324"></a>
+<span class="sourceLineNo">325</span>            else<a name="line.325"></a>
+<span class="sourceLineNo">326</span>            {<a name="line.326"></a>
+<span class="sourceLineNo">327</span>                int j = iinventory.getSizeInventory();<a name="line.327"></a>
+<span class="sourceLineNo">328</span><a name="line.328"></a>
+<span class="sourceLineNo">329</span>                for (int k = 0; k &lt; j; ++k)<a name="line.329"></a>
+<span class="sourceLineNo">330</span>                {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>                    if (func_102012_a(par0Hopper, iinventory, k, b0))<a name="line.331"></a>
+<span class="sourceLineNo">332</span>                    {<a name="line.332"></a>
+<span class="sourceLineNo">333</span>                        return true;<a name="line.333"></a>
+<span class="sourceLineNo">334</span>                    }<a name="line.334"></a>
+<span class="sourceLineNo">335</span>                }<a name="line.335"></a>
+<span class="sourceLineNo">336</span>            }<a name="line.336"></a>
+<span class="sourceLineNo">337</span>        }<a name="line.337"></a>
+<span class="sourceLineNo">338</span>        else<a name="line.338"></a>
+<span class="sourceLineNo">339</span>        {<a name="line.339"></a>
+<span class="sourceLineNo">340</span>            EntityItem entityitem = func_96119_a(par0Hopper.getWorldObj(), par0Hopper.getXPos(), par0Hopper.getYPos() + 1.0D, par0Hopper.getZPos());<a name="line.340"></a>
+<span class="sourceLineNo">341</span><a name="line.341"></a>
+<span class="sourceLineNo">342</span>            if (entityitem != null)<a name="line.342"></a>
+<span class="sourceLineNo">343</span>            {<a name="line.343"></a>
+<span class="sourceLineNo">344</span>                return func_96114_a(par0Hopper, entityitem);<a name="line.344"></a>
+<span class="sourceLineNo">345</span>            }<a name="line.345"></a>
+<span class="sourceLineNo">346</span>        }<a name="line.346"></a>
+<span class="sourceLineNo">347</span><a name="line.347"></a>
+<span class="sourceLineNo">348</span>        return false;<a name="line.348"></a>
+<span class="sourceLineNo">349</span>    }<a name="line.349"></a>
+<span class="sourceLineNo">350</span><a name="line.350"></a>
+<span class="sourceLineNo">351</span>    private static boolean func_102012_a(Hopper par0Hopper, IInventory par1IInventory, int par2, int par3)<a name="line.351"></a>
+<span class="sourceLineNo">352</span>    {<a name="line.352"></a>
+<span class="sourceLineNo">353</span>        ItemStack itemstack = par1IInventory.getStackInSlot(par2);<a name="line.353"></a>
+<span class="sourceLineNo">354</span><a name="line.354"></a>
+<span class="sourceLineNo">355</span>        if (itemstack != null &amp;&amp; func_102013_b(par1IInventory, itemstack, par2, par3))<a name="line.355"></a>
+<span class="sourceLineNo">356</span>        {<a name="line.356"></a>
+<span class="sourceLineNo">357</span>            ItemStack itemstack1 = itemstack.copy();<a name="line.357"></a>
+<span class="sourceLineNo">358</span>            ItemStack itemstack2 = insertStack(par0Hopper, par1IInventory.decrStackSize(par2, 1), -1);<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>            if (itemstack2 == null || itemstack2.stackSize == 0)<a name="line.360"></a>
+<span class="sourceLineNo">361</span>            {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                par1IInventory.onInventoryChanged();<a name="line.362"></a>
+<span class="sourceLineNo">363</span>                return true;<a name="line.363"></a>
+<span class="sourceLineNo">364</span>            }<a name="line.364"></a>
+<span class="sourceLineNo">365</span><a name="line.365"></a>
+<span class="sourceLineNo">366</span>            par1IInventory.setInventorySlotContents(par2, itemstack1);<a name="line.366"></a>
+<span class="sourceLineNo">367</span>        }<a name="line.367"></a>
+<span class="sourceLineNo">368</span><a name="line.368"></a>
+<span class="sourceLineNo">369</span>        return false;<a name="line.369"></a>
+<span class="sourceLineNo">370</span>    }<a name="line.370"></a>
+<span class="sourceLineNo">371</span><a name="line.371"></a>
+<span class="sourceLineNo">372</span>    public static boolean func_96114_a(IInventory par0IInventory, EntityItem par1EntityItem)<a name="line.372"></a>
+<span class="sourceLineNo">373</span>    {<a name="line.373"></a>
+<span class="sourceLineNo">374</span>        boolean flag = false;<a name="line.374"></a>
+<span class="sourceLineNo">375</span><a name="line.375"></a>
+<span class="sourceLineNo">376</span>        if (par1EntityItem == null)<a name="line.376"></a>
+<span class="sourceLineNo">377</span>        {<a name="line.377"></a>
+<span class="sourceLineNo">378</span>            return false;<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        }<a name="line.379"></a>
+<span class="sourceLineNo">380</span>        else<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        {<a name="line.381"></a>
+<span class="sourceLineNo">382</span>            ItemStack itemstack = par1EntityItem.getEntityItem().copy();<a name="line.382"></a>
+<span class="sourceLineNo">383</span>            ItemStack itemstack1 = insertStack(par0IInventory, itemstack, -1);<a name="line.383"></a>
+<span class="sourceLineNo">384</span><a name="line.384"></a>
+<span class="sourceLineNo">385</span>            if (itemstack1 != null &amp;&amp; itemstack1.stackSize != 0)<a name="line.385"></a>
+<span class="sourceLineNo">386</span>            {<a name="line.386"></a>
+<span class="sourceLineNo">387</span>                par1EntityItem.setEntityItemStack(itemstack1);<a name="line.387"></a>
+<span class="sourceLineNo">388</span>            }<a name="line.388"></a>
+<span class="sourceLineNo">389</span>            else<a name="line.389"></a>
+<span class="sourceLineNo">390</span>            {<a name="line.390"></a>
+<span class="sourceLineNo">391</span>                flag = true;<a name="line.391"></a>
+<span class="sourceLineNo">392</span>                par1EntityItem.setDead();<a name="line.392"></a>
+<span class="sourceLineNo">393</span>            }<a name="line.393"></a>
+<span class="sourceLineNo">394</span><a name="line.394"></a>
+<span class="sourceLineNo">395</span>            return flag;<a name="line.395"></a>
+<span class="sourceLineNo">396</span>        }<a name="line.396"></a>
+<span class="sourceLineNo">397</span>    }<a name="line.397"></a>
+<span class="sourceLineNo">398</span><a name="line.398"></a>
+<span class="sourceLineNo">399</span>    /**<a name="line.399"></a>
+<span class="sourceLineNo">400</span>     * Inserts a stack into an inventory. Args: Inventory, stack, side. Returns leftover items.<a name="line.400"></a>
+<span class="sourceLineNo">401</span>     */<a name="line.401"></a>
+<span class="sourceLineNo">402</span>    public static ItemStack insertStack(IInventory par1IInventory, ItemStack par2ItemStack, int par3)<a name="line.402"></a>
+<span class="sourceLineNo">403</span>    {<a name="line.403"></a>
+<span class="sourceLineNo">404</span>        if (par1IInventory instanceof ISidedInventory &amp;&amp; par3 &gt; -1)<a name="line.404"></a>
+<span class="sourceLineNo">405</span>        {<a name="line.405"></a>
+<span class="sourceLineNo">406</span>            ISidedInventory isidedinventory = (ISidedInventory)par1IInventory;<a name="line.406"></a>
+<span class="sourceLineNo">407</span>            int[] aint = isidedinventory.getSizeInventorySide(par3);<a name="line.407"></a>
+<span class="sourceLineNo">408</span><a name="line.408"></a>
+<span class="sourceLineNo">409</span>            for (int j = 0; j &lt; aint.length &amp;&amp; par2ItemStack != null &amp;&amp; par2ItemStack.stackSize &gt; 0; ++j)<a name="line.409"></a>
+<span class="sourceLineNo">410</span>            {<a name="line.410"></a>
+<span class="sourceLineNo">411</span>                par2ItemStack = func_102014_c(par1IInventory, par2ItemStack, aint[j], par3);<a name="line.411"></a>
+<span class="sourceLineNo">412</span>            }<a name="line.412"></a>
+<span class="sourceLineNo">413</span>        }<a name="line.413"></a>
+<span class="sourceLineNo">414</span>        else<a name="line.414"></a>
+<span class="sourceLineNo">415</span>        {<a name="line.415"></a>
+<span class="sourceLineNo">416</span>            int k = par1IInventory.getSizeInventory();<a name="line.416"></a>
+<span class="sourceLineNo">417</span><a name="line.417"></a>
+<span class="sourceLineNo">418</span>            for (int l = 0; l &lt; k &amp;&amp; par2ItemStack != null &amp;&amp; par2ItemStack.stackSize &gt; 0; ++l)<a name="line.418"></a>
+<span class="sourceLineNo">419</span>            {<a name="line.419"></a>
+<span class="sourceLineNo">420</span>                par2ItemStack = func_102014_c(par1IInventory, par2ItemStack, l, par3);<a name="line.420"></a>
+<span class="sourceLineNo">421</span>            }<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        }<a name="line.422"></a>
+<span class="sourceLineNo">423</span><a name="line.423"></a>
+<span class="sourceLineNo">424</span>        if (par2ItemStack != null &amp;&amp; par2ItemStack.stackSize == 0)<a name="line.424"></a>
+<span class="sourceLineNo">425</span>        {<a name="line.425"></a>
+<span class="sourceLineNo">426</span>            par2ItemStack = null;<a name="line.426"></a>
+<span class="sourceLineNo">427</span>        }<a name="line.427"></a>
+<span class="sourceLineNo">428</span><a name="line.428"></a>
+<span class="sourceLineNo">429</span>        return par2ItemStack;<a name="line.429"></a>
+<span class="sourceLineNo">430</span>    }<a name="line.430"></a>
+<span class="sourceLineNo">431</span><a name="line.431"></a>
+<span class="sourceLineNo">432</span>    private static boolean func_102015_a(IInventory par0IInventory, ItemStack par1ItemStack, int par2, int par3)<a name="line.432"></a>
+<span class="sourceLineNo">433</span>    {<a name="line.433"></a>
+<span class="sourceLineNo">434</span>        return !par0IInventory.isStackValidForSlot(par2, par1ItemStack) ? false : !(par0IInventory instanceof ISidedInventory) || ((ISidedInventory)par0IInventory).func_102007_a(par2, par1ItemStack, par3);<a name="line.434"></a>
+<span class="sourceLineNo">435</span>    }<a name="line.435"></a>
+<span class="sourceLineNo">436</span><a name="line.436"></a>
+<span class="sourceLineNo">437</span>    private static boolean func_102013_b(IInventory par0IInventory, ItemStack par1ItemStack, int par2, int par3)<a name="line.437"></a>
+<span class="sourceLineNo">438</span>    {<a name="line.438"></a>
+<span class="sourceLineNo">439</span>        return !(par0IInventory instanceof ISidedInventory) || ((ISidedInventory)par0IInventory).func_102008_b(par2, par1ItemStack, par3);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>    }<a name="line.440"></a>
+<span class="sourceLineNo">441</span><a name="line.441"></a>
+<span class="sourceLineNo">442</span>    private static ItemStack func_102014_c(IInventory par0IInventory, ItemStack par1ItemStack, int par2, int par3)<a name="line.442"></a>
+<span class="sourceLineNo">443</span>    {<a name="line.443"></a>
+<span class="sourceLineNo">444</span>        ItemStack itemstack1 = par0IInventory.getStackInSlot(par2);<a name="line.444"></a>
+<span class="sourceLineNo">445</span><a name="line.445"></a>
+<span class="sourceLineNo">446</span>        if (func_102015_a(par0IInventory, par1ItemStack, par2, par3))<a name="line.446"></a>
+<span class="sourceLineNo">447</span>        {<a name="line.447"></a>
+<span class="sourceLineNo">448</span>            boolean flag = false;<a name="line.448"></a>
+<span class="sourceLineNo">449</span><a name="line.449"></a>
+<span class="sourceLineNo">450</span>            if (itemstack1 == null)<a name="line.450"></a>
+<span class="sourceLineNo">451</span>            {<a name="line.451"></a>
+<span class="sourceLineNo">452</span>                par0IInventory.setInventorySlotContents(par2, par1ItemStack);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>                par1ItemStack = null;<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                flag = true;<a name="line.454"></a>
+<span class="sourceLineNo">455</span>            }<a name="line.455"></a>
+<span class="sourceLineNo">456</span>            else if (func_94114_a(itemstack1, par1ItemStack))<a name="line.456"></a>
+<span class="sourceLineNo">457</span>            {<a name="line.457"></a>
+<span class="sourceLineNo">458</span>                int k = par1ItemStack.getMaxStackSize() - itemstack1.stackSize;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>                int l = Math.min(par1ItemStack.stackSize, k);<a name="line.459"></a>
+<span class="sourceLineNo">460</span>                par1ItemStack.stackSize -= l;<a name="line.460"></a>
+<span class="sourceLineNo">461</span>                itemstack1.stackSize += l;<a name="line.461"></a>
+<span class="sourceLineNo">462</span>                flag = l &gt; 0;<a name="line.462"></a>
+<span class="sourceLineNo">463</span>            }<a name="line.463"></a>
+<span class="sourceLineNo">464</span><a name="line.464"></a>
+<span class="sourceLineNo">465</span>            if (flag)<a name="line.465"></a>
+<span class="sourceLineNo">466</span>            {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>                if (par0IInventory instanceof TileEntityHopper)<a name="line.467"></a>
+<span class="sourceLineNo">468</span>                {<a name="line.468"></a>
+<span class="sourceLineNo">469</span>                    ((TileEntityHopper)par0IInventory).func_98046_c(8);<a name="line.469"></a>
+<span class="sourceLineNo">470</span>                }<a name="line.470"></a>
+<span class="sourceLineNo">471</span><a name="line.471"></a>
+<span class="sourceLineNo">472</span>                par0IInventory.onInventoryChanged();<a name="line.472"></a>
+<span class="sourceLineNo">473</span>            }<a name="line.473"></a>
+<span class="sourceLineNo">474</span>        }<a name="line.474"></a>
+<span class="sourceLineNo">475</span><a name="line.475"></a>
+<span class="sourceLineNo">476</span>        return par1ItemStack;<a name="line.476"></a>
+<span class="sourceLineNo">477</span>    }<a name="line.477"></a>
+<span class="sourceLineNo">478</span><a name="line.478"></a>
+<span class="sourceLineNo">479</span>    /**<a name="line.479"></a>
+<span class="sourceLineNo">480</span>     * Gets the inventory the hopper is pointing at.<a name="line.480"></a>
+<span class="sourceLineNo">481</span>     */<a name="line.481"></a>
+<span class="sourceLineNo">482</span>    private IInventory getOutputInventory()<a name="line.482"></a>
+<span class="sourceLineNo">483</span>    {<a name="line.483"></a>
+<span class="sourceLineNo">484</span>        int i = BlockHopper.getDirectionFromMetadata(this.getBlockMetadata());<a name="line.484"></a>
+<span class="sourceLineNo">485</span>        return getInventoryAtLocation(this.getWorldObj(), (double)(this.xCoord + Facing.offsetsXForSide[i]), (double)(this.yCoord + Facing.offsetsYForSide[i]), (double)(this.zCoord + Facing.offsetsZForSide[i]));<a name="line.485"></a>
+<span class="sourceLineNo">486</span>    }<a name="line.486"></a>
+<span class="sourceLineNo">487</span><a name="line.487"></a>
+<span class="sourceLineNo">488</span>    public static IInventory func_96118_b(Hopper par0Hopper)<a name="line.488"></a>
+<span class="sourceLineNo">489</span>    {<a name="line.489"></a>
+<span class="sourceLineNo">490</span>        return getInventoryAtLocation(par0Hopper.getWorldObj(), par0Hopper.getXPos(), par0Hopper.getYPos() + 1.0D, par0Hopper.getZPos());<a name="line.490"></a>
+<span class="sourceLineNo">491</span>    }<a name="line.491"></a>
+<span class="sourceLineNo">492</span><a name="line.492"></a>
+<span class="sourceLineNo">493</span>    public static EntityItem func_96119_a(World par0World, double par1, double par3, double par5)<a name="line.493"></a>
+<span class="sourceLineNo">494</span>    {<a name="line.494"></a>
+<span class="sourceLineNo">495</span>        List list = par0World.selectEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().getAABB(par1, par3, par5, par1 + 1.0D, par3 + 1.0D, par5 + 1.0D), IEntitySelector.selectAnything);<a name="line.495"></a>
+<span class="sourceLineNo">496</span>        return list.size() &gt; 0 ? (EntityItem)list.get(0) : null;<a name="line.496"></a>
+<span class="sourceLineNo">497</span>    }<a name="line.497"></a>
+<span class="sourceLineNo">498</span><a name="line.498"></a>
+<span class="sourceLineNo">499</span>    /**<a name="line.499"></a>
+<span class="sourceLineNo">500</span>     * Gets an inventory at the given location to extract items into or take items from. Can find either a tile entity<a name="line.500"></a>
+<span class="sourceLineNo">501</span>     * or regular entity implementing IInventory.<a name="line.501"></a>
+<span class="sourceLineNo">502</span>     */<a name="line.502"></a>
+<span class="sourceLineNo">503</span>    public static IInventory getInventoryAtLocation(World par0World, double par1, double par3, double par5)<a name="line.503"></a>
+<span class="sourceLineNo">504</span>    {<a name="line.504"></a>
+<span class="sourceLineNo">505</span>        IInventory iinventory = null;<a name="line.505"></a>
+<span class="sourceLineNo">506</span>        int i = MathHelper.floor_double(par1);<a name="line.506"></a>
+<span class="sourceLineNo">507</span>        int j = MathHelper.floor_double(par3);<a name="line.507"></a>
+<span class="sourceLineNo">508</span>        int k = MathHelper.floor_double(par5);<a name="line.508"></a>
+<span class="sourceLineNo">509</span>        TileEntity tileentity = par0World.getBlockTileEntity(i, j, k);<a name="line.509"></a>
+<span class="sourceLineNo">510</span><a name="line.510"></a>
+<span class="sourceLineNo">511</span>        if (tileentity != null &amp;&amp; tileentity instanceof IInventory)<a name="line.511"></a>
+<span class="sourceLineNo">512</span>        {<a name="line.512"></a>
+<span class="sourceLineNo">513</span>            iinventory = (IInventory)tileentity;<a name="line.513"></a>
+<span class="sourceLineNo">514</span><a name="line.514"></a>
+<span class="sourceLineNo">515</span>            if (iinventory instanceof TileEntityChest)<a name="line.515"></a>
+<span class="sourceLineNo">516</span>            {<a name="line.516"></a>
+<span class="sourceLineNo">517</span>                int l = par0World.getBlockId(i, j, k);<a name="line.517"></a>
+<span class="sourceLineNo">518</span>                Block block = Block.blocksList[l];<a name="line.518"></a>
+<span class="sourceLineNo">519</span><a name="line.519"></a>
+<span class="sourceLineNo">520</span>                if (block instanceof BlockChest)<a name="line.520"></a>
+<span class="sourceLineNo">521</span>                {<a name="line.521"></a>
+<span class="sourceLineNo">522</span>                    iinventory = ((BlockChest)block).getInventory(par0World, i, j, k);<a name="line.522"></a>
+<span class="sourceLineNo">523</span>                }<a name="line.523"></a>
+<span class="sourceLineNo">524</span>            }<a name="line.524"></a>
+<span class="sourceLineNo">525</span>        }<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>        if (iinventory == null)<a name="line.527"></a>
+<span class="sourceLineNo">528</span>        {<a name="line.528"></a>
+<span class="sourceLineNo">529</span>            List list = par0World.getEntitiesWithinAABBExcludingEntity((Entity)null, AxisAlignedBB.getAABBPool().getAABB(par1, par3, par5, par1 + 1.0D, par3 + 1.0D, par5 + 1.0D), IEntitySelector.selectInventories);<a name="line.529"></a>
+<span class="sourceLineNo">530</span><a name="line.530"></a>
+<span class="sourceLineNo">531</span>            if (list != null &amp;&amp; list.size() &gt; 0)<a name="line.531"></a>
+<span class="sourceLineNo">532</span>            {<a name="line.532"></a>
+<span class="sourceLineNo">533</span>                iinventory = (IInventory)list.get(par0World.rand.nextInt(list.size()));<a name="line.533"></a>
+<span class="sourceLineNo">534</span>            }<a name="line.534"></a>
+<span class="sourceLineNo">535</span>        }<a name="line.535"></a>
+<span class="sourceLineNo">536</span><a name="line.536"></a>
+<span class="sourceLineNo">537</span>        return iinventory;<a name="line.537"></a>
+<span class="sourceLineNo">538</span>    }<a name="line.538"></a>
+<span class="sourceLineNo">539</span><a name="line.539"></a>
+<span class="sourceLineNo">540</span>    private static boolean func_94114_a(ItemStack par1ItemStack, ItemStack par2ItemStack)<a name="line.540"></a>
+<span class="sourceLineNo">541</span>    {<a name="line.541"></a>
+<span class="sourceLineNo">542</span>        return par1ItemStack.itemID != par2ItemStack.itemID ? false : (par1ItemStack.getItemDamage() != par2ItemStack.getItemDamage() ? false : (par1ItemStack.stackSize &gt; par1ItemStack.getMaxStackSize() ? false : ItemStack.areItemStackTagsEqual(par1ItemStack, par2ItemStack)));<a name="line.542"></a>
+<span class="sourceLineNo">543</span>    }<a name="line.543"></a>
+<span class="sourceLineNo">544</span><a name="line.544"></a>
+<span class="sourceLineNo">545</span>    /**<a name="line.545"></a>
+<span class="sourceLineNo">546</span>     * Gets the world X position for this hopper entity.<a name="line.546"></a>
+<span class="sourceLineNo">547</span>     */<a name="line.547"></a>
+<span class="sourceLineNo">548</span>    public double getXPos()<a name="line.548"></a>
+<span class="sourceLineNo">549</span>    {<a name="line.549"></a>
+<span class="sourceLineNo">550</span>        return (double)this.xCoord;<a name="line.550"></a>
+<span class="sourceLineNo">551</span>    }<a name="line.551"></a>
+<span class="sourceLineNo">552</span><a name="line.552"></a>
+<span class="sourceLineNo">553</span>    /**<a name="line.553"></a>
+<span class="sourceLineNo">554</span>     * Gets the world Y position for this hopper entity.<a name="line.554"></a>
+<span class="sourceLineNo">555</span>     */<a name="line.555"></a>
+<span class="sourceLineNo">556</span>    public double getYPos()<a name="line.556"></a>
+<span class="sourceLineNo">557</span>    {<a name="line.557"></a>
+<span class="sourceLineNo">558</span>        return (double)this.yCoord;<a name="line.558"></a>
+<span class="sourceLineNo">559</span>    }<a name="line.559"></a>
+<span class="sourceLineNo">560</span><a name="line.560"></a>
+<span class="sourceLineNo">561</span>    /**<a name="line.561"></a>
+<span class="sourceLineNo">562</span>     * Gets the world Z position for this hopper entity.<a name="line.562"></a>
+<span class="sourceLineNo">563</span>     */<a name="line.563"></a>
+<span class="sourceLineNo">564</span>    public double getZPos()<a name="line.564"></a>
+<span class="sourceLineNo">565</span>    {<a name="line.565"></a>
+<span class="sourceLineNo">566</span>        return (double)this.zCoord;<a name="line.566"></a>
+<span class="sourceLineNo">567</span>    }<a name="line.567"></a>
+<span class="sourceLineNo">568</span><a name="line.568"></a>
+<span class="sourceLineNo">569</span>    public void func_98046_c(int par1)<a name="line.569"></a>
+<span class="sourceLineNo">570</span>    {<a name="line.570"></a>
+<span class="sourceLineNo">571</span>        this.transferCooldown = par1;<a name="line.571"></a>
+<span class="sourceLineNo">572</span>    }<a name="line.572"></a>
+<span class="sourceLineNo">573</span><a name="line.573"></a>
+<span class="sourceLineNo">574</span>    public boolean func_98047_l()<a name="line.574"></a>
+<span class="sourceLineNo">575</span>    {<a name="line.575"></a>
+<span class="sourceLineNo">576</span>        return this.transferCooldown &gt; 0;<a name="line.576"></a>
+<span class="sourceLineNo">577</span>    }<a name="line.577"></a>
+<span class="sourceLineNo">578</span>}<a name="line.578"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

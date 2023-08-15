@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.biome;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.Random;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.block.Block;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.world.World;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.world.gen.feature.WorldGenDesertWells;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class BiomeGenDesert extends BiomeGenBase<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    public BiomeGenDesert(int par1)<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    {<a name="line.11"></a>
+<span class="sourceLineNo">012</span>        super(par1);<a name="line.12"></a>
+<span class="sourceLineNo">013</span>        this.spawnableCreatureList.clear();<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        this.topBlock = (byte)Block.sand.blockID;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        this.fillerBlock = (byte)Block.sand.blockID;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.theBiomeDecorator.treesPerChunk = -999;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        this.theBiomeDecorator.deadBushPerChunk = 2;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        this.theBiomeDecorator.reedsPerChunk = 50;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        this.theBiomeDecorator.cactiPerChunk = 10;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    }<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>    public void decorate(World par1World, Random par2Random, int par3, int par4)<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    {<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        super.decorate(par1World, par2Random, par3, par4);<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>        if (par2Random.nextInt(1000) == 0)<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        {<a name="line.27"></a>
+<span class="sourceLineNo">028</span>            int k = par3 + par2Random.nextInt(16) + 8;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>            int l = par4 + par2Random.nextInt(16) + 8;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>            WorldGenDesertWells worldgendesertwells = new WorldGenDesertWells();<a name="line.30"></a>
+<span class="sourceLineNo">031</span>            worldgendesertwells.generate(par1World, par2Random, k, par1World.getHeightValue(k, l) + 1, l);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        }<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    }<a name="line.33"></a>
+<span class="sourceLineNo">034</span>}<a name="line.34"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.gui;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.client.Minecraft;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import org.lwjgl.opengl.GL11;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>@SideOnly(Side.CLIENT)<a name="line.8"></a>
+<span class="sourceLineNo">009</span>public class GuiButton extends Gui<a name="line.9"></a>
+<span class="sourceLineNo">010</span>{<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    /** Button width in pixels */<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    protected int width;<a name="line.12"></a>
+<span class="sourceLineNo">013</span><a name="line.13"></a>
+<span class="sourceLineNo">014</span>    /** Button height in pixels */<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    protected int height;<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>    /** The x position of this control. */<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public int xPosition;<a name="line.18"></a>
+<span class="sourceLineNo">019</span><a name="line.19"></a>
+<span class="sourceLineNo">020</span>    /** The y position of this control. */<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    public int yPosition;<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    /** The string displayed on this control. */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public String displayString;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    /** ID for this control. */<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    public int id;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    /** True if this control is enabled, false to disable. */<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    public boolean enabled;<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>    /** Hides the button completely if false. */<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    public boolean drawButton;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    protected boolean field_82253_i;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public GuiButton(int par1, int par2, int par3, String par4Str)<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    {<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        this(par1, par2, par3, 200, 20, par4Str);<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    }<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public GuiButton(int par1, int par2, int par3, int par4, int par5, String par6Str)<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.width = 200;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.height = 20;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        this.enabled = true;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        this.drawButton = true;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        this.id = par1;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.xPosition = par2;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        this.yPosition = par3;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.width = par4;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        this.height = par5;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        this.displayString = par6Str;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    }<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    /**<a name="line.55"></a>
+<span class="sourceLineNo">056</span>     * Returns 0 if the button is disabled, 1 if the mouse is NOT hovering over this button and 2 if it IS hovering over<a name="line.56"></a>
+<span class="sourceLineNo">057</span>     * this button.<a name="line.57"></a>
+<span class="sourceLineNo">058</span>     */<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    protected int getHoverState(boolean par1)<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    {<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        byte b0 = 1;<a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62"></a>
+<span class="sourceLineNo">063</span>        if (!this.enabled)<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            b0 = 0;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        }<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        else if (par1)<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            b0 = 2;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        }<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>        return b0;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    }<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    /**<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * Draws this button to the screen.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     */<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    public void drawButton(Minecraft par1Minecraft, int par2, int par3)<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        if (this.drawButton)<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            FontRenderer fontrenderer = par1Minecraft.fontRenderer;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            par1Minecraft.renderEngine.bindTexture("/gui/gui.png");<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            this.field_82253_i = par2 &gt;= this.xPosition &amp;&amp; par3 &gt;= this.yPosition &amp;&amp; par2 &lt; this.xPosition + this.width &amp;&amp; par3 &lt; this.yPosition + this.height;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            int k = this.getHoverState(this.field_82253_i);<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + k * 20, this.width / 2, this.height);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            this.mouseDragged(par1Minecraft, par2, par3);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            int l = 14737632;<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>            if (!this.enabled)<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                l = -6250336;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            }<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            else if (this.field_82253_i)<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                l = 16777120;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            }<a name="line.99"></a>
+<span class="sourceLineNo">100</span><a name="line.100"></a>
+<span class="sourceLineNo">101</span>            this.drawCenteredString(fontrenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, l);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        }<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    }<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>    /**<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     * Fired when the mouse button is dragged. Equivalent of MouseListener.mouseDragged(MouseEvent e).<a name="line.106"></a>
+<span class="sourceLineNo">107</span>     */<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    protected void mouseDragged(Minecraft par1Minecraft, int par2, int par3) {}<a name="line.108"></a>
+<span class="sourceLineNo">109</span><a name="line.109"></a>
+<span class="sourceLineNo">110</span>    /**<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     * Fired when the mouse button is released. Equivalent of MouseListener.mouseReleased(MouseEvent e).<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     */<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    public void mouseReleased(int par1, int par2) {}<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>    /**<a name="line.115"></a>
+<span class="sourceLineNo">116</span>     * Returns true if the mouse has been pressed on this control. Equivalent of MouseListener.mousePressed(MouseEvent<a name="line.116"></a>
+<span class="sourceLineNo">117</span>     * e).<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     */<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    public boolean mousePressed(Minecraft par1Minecraft, int par2, int par3)<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        return this.enabled &amp;&amp; this.drawButton &amp;&amp; par2 &gt;= this.xPosition &amp;&amp; par3 &gt;= this.yPosition &amp;&amp; par2 &lt; this.xPosition + this.width &amp;&amp; par3 &lt; this.yPosition + this.height;<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    }<a name="line.122"></a>
+<span class="sourceLineNo">123</span><a name="line.123"></a>
+<span class="sourceLineNo">124</span>    public boolean func_82252_a()<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    {<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        return this.field_82253_i;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    }<a name="line.127"></a>
+<span class="sourceLineNo">128</span><a name="line.128"></a>
+<span class="sourceLineNo">129</span>    public void func_82251_b(int par1, int par2) {}<a name="line.129"></a>
+<span class="sourceLineNo">130</span>}<a name="line.130"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.List;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Random;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.Block;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.world.World;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class ComponentVillageHall extends ComponentVillage<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    private int averageGroundLevel = -1;<a name="line.10"></a>
+<span class="sourceLineNo">011</span><a name="line.11"></a>
+<span class="sourceLineNo">012</span>    public ComponentVillageHall(ComponentVillageStartPiece par1ComponentVillageStartPiece, int par2, Random par3Random, StructureBoundingBox par4StructureBoundingBox, int par5)<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    {<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        super(par1ComponentVillageStartPiece, par2);<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        this.coordBaseMode = par5;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        this.boundingBox = par4StructureBoundingBox;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    }<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public static ComponentVillageHall func_74906_a(ComponentVillageStartPiece par0ComponentVillageStartPiece, List par1List, Random par2Random, int par3, int par4, int par5, int par6, int par7)<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    {<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(par3, par4, par5, 0, 0, 0, 9, 7, 11, par6);<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        return canVillageGoDeeper(structureboundingbox) &amp;&amp; StructureComponent.findIntersecting(par1List, structureboundingbox) == null ? new ComponentVillageHall(par0ComponentVillageStartPiece, par7, par2Random, structureboundingbox, par6) : null;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    }<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /**<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     * second Part of Structure generating, this for example places Spiderwebs, Mob Spawners, it closes Mineshafts at<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     * the end, it adds Fences...<a name="line.27"></a>
+<span class="sourceLineNo">028</span>     */<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public boolean addComponentParts(World par1World, Random par2Random, StructureBoundingBox par3StructureBoundingBox)<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    {<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        if (this.averageGroundLevel &lt; 0)<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        {<a name="line.32"></a>
+<span class="sourceLineNo">033</span>            this.averageGroundLevel = this.getAverageGroundLevel(par1World, par3StructureBoundingBox);<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>            if (this.averageGroundLevel &lt; 0)<a name="line.35"></a>
+<span class="sourceLineNo">036</span>            {<a name="line.36"></a>
+<span class="sourceLineNo">037</span>                return true;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>            }<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>            this.boundingBox.offset(0, this.averageGroundLevel - this.boundingBox.maxY + 7 - 1, 0);<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        }<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 1, 1, 7, 4, 4, 0, 0, false);<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 2, 1, 6, 8, 4, 10, 0, 0, false);<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 2, 0, 6, 8, 0, 10, Block.dirt.blockID, Block.dirt.blockID, false);<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        this.placeBlockAtCurrentPosition(par1World, Block.cobblestone.blockID, 0, 6, 0, 6, par3StructureBoundingBox);<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 2, 1, 6, 2, 1, 10, Block.fence.blockID, Block.fence.blockID, false);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 8, 1, 6, 8, 1, 10, Block.fence.blockID, Block.fence.blockID, false);<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 3, 1, 10, 7, 1, 10, Block.fence.blockID, Block.fence.blockID, false);<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 0, 1, 7, 0, 4, Block.planks.blockID, Block.planks.blockID, false);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, 0, 0, 0, 3, 5, Block.cobblestone.blockID, Block.cobblestone.blockID, false);<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 8, 0, 0, 8, 3, 5, Block.cobblestone.blockID, Block.cobblestone.blockID, false);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 0, 0, 7, 1, 0, Block.cobblestone.blockID, Block.cobblestone.blockID, false);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 0, 5, 7, 1, 5, Block.cobblestone.blockID, Block.cobblestone.blockID, false);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 2, 0, 7, 3, 0, Block.planks.blockID, Block.planks.blockID, false);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 2, 5, 7, 3, 5, Block.planks.blockID, Block.planks.blockID, false);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, 4, 1, 8, 4, 1, Block.planks.blockID, Block.planks.blockID, false);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, 4, 4, 8, 4, 4, Block.planks.blockID, Block.planks.blockID, false);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, 5, 2, 8, 5, 3, Block.planks.blockID, Block.planks.blockID, false);<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        this.placeBlockAtCurrentPosition(par1World, Block.planks.blockID, 0, 0, 4, 2, par3StructureBoundingBox);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        this.placeBlockAtCurrentPosition(par1World, Block.planks.blockID, 0, 0, 4, 3, par3StructureBoundingBox);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        this.placeBlockAtCurrentPosition(par1World, Block.planks.blockID, 0, 8, 4, 2, par3StructureBoundingBox);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        this.placeBlockAtCurrentPosition(par1World, Block.planks.blockID, 0, 8, 4, 3, par3StructureBoundingBox);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        int i = this.getMetadataWithOffset(Block.stairsWoodOak.blockID, 3);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        int j = this.getMetadataWithOffset(Block.stairsWoodOak.blockID, 2);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        int k;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        int l;<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>        for (k = -1; k &lt;= 2; ++k)<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            for (l = 0; l &lt;= 8; ++l)<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                this.placeBlockAtCurrentPosition(par1World, Block.stairsWoodOak.blockID, i, l, 4 + k, k, par3StructureBoundingBox);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>                this.placeBlockAtCurrentPosition(par1World, Block.stairsWoodOak.blockID, j, l, 4 + k, 5 - k, par3StructureBoundingBox);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            }<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        }<a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77"></a>
+<span class="sourceLineNo">078</span>        this.placeBlockAtCurrentPosition(par1World, Block.wood.blockID, 0, 0, 2, 1, par3StructureBoundingBox);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        this.placeBlockAtCurrentPosition(par1World, Block.wood.blockID, 0, 0, 2, 4, par3StructureBoundingBox);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        this.placeBlockAtCurrentPosition(par1World, Block.wood.blockID, 0, 8, 2, 1, par3StructureBoundingBox);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        this.placeBlockAtCurrentPosition(par1World, Block.wood.blockID, 0, 8, 2, 4, par3StructureBoundingBox);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 0, 2, 2, par3StructureBoundingBox);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 0, 2, 3, par3StructureBoundingBox);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 8, 2, 2, par3StructureBoundingBox);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 8, 2, 3, par3StructureBoundingBox);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 2, 2, 5, par3StructureBoundingBox);<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 3, 2, 5, par3StructureBoundingBox);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 5, 2, 0, par3StructureBoundingBox);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        this.placeBlockAtCurrentPosition(par1World, Block.thinGlass.blockID, 0, 6, 2, 5, par3StructureBoundingBox);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        this.placeBlockAtCurrentPosition(par1World, Block.fence.blockID, 0, 2, 1, 3, par3StructureBoundingBox);<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        this.placeBlockAtCurrentPosition(par1World, Block.pressurePlatePlanks.blockID, 0, 2, 2, 3, par3StructureBoundingBox);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        this.placeBlockAtCurrentPosition(par1World, Block.planks.blockID, 0, 1, 1, 4, par3StructureBoundingBox);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        this.placeBlockAtCurrentPosition(par1World, Block.stairsWoodOak.blockID, this.getMetadataWithOffset(Block.stairsWoodOak.blockID, 3), 2, 1, 4, par3StructureBoundingBox);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        this.placeBlockAtCurrentPosition(par1World, Block.stairsWoodOak.blockID, this.getMetadataWithOffset(Block.stairsWoodOak.blockID, 1), 1, 1, 3, par3StructureBoundingBox);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        this.fillWithBlocks(par1World, par3StructureBoundingBox, 5, 0, 1, 7, 0, 3, Block.stoneDoubleSlab.blockID, Block.stoneDoubleSlab.blockID, false);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        this.placeBlockAtCurrentPosition(par1World, Block.stoneDoubleSlab.blockID, 0, 6, 1, 1, par3StructureBoundingBox);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        this.placeBlockAtCurrentPosition(par1World, Block.stoneDoubleSlab.blockID, 0, 6, 1, 2, par3StructureBoundingBox);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        this.placeBlockAtCurrentPosition(par1World, 0, 0, 2, 1, 0, par3StructureBoundingBox);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        this.placeBlockAtCurrentPosition(par1World, 0, 0, 2, 2, 0, par3StructureBoundingBox);<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        this.placeBlockAtCurrentPosition(par1World, Block.torchWood.blockID, 0, 2, 3, 1, par3StructureBoundingBox);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        this.placeDoorAtCurrentPosition(par1World, par3StructureBoundingBox, par2Random, 2, 1, 0, this.getMetadataWithOffset(Block.doorWood.blockID, 1));<a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>        if (this.getBlockIdAtCurrentPosition(par1World, 2, 0, -1, par3StructureBoundingBox) == 0 &amp;&amp; this.getBlockIdAtCurrentPosition(par1World, 2, -1, -1, par3StructureBoundingBox) != 0)<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            this.placeBlockAtCurrentPosition(par1World, Block.stairsCobblestone.blockID, this.getMetadataWithOffset(Block.stairsCobblestone.blockID, 3), 2, 0, -1, par3StructureBoundingBox);<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        }<a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>        this.placeBlockAtCurrentPosition(par1World, 0, 0, 6, 1, 5, par3StructureBoundingBox);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        this.placeBlockAtCurrentPosition(par1World, 0, 0, 6, 2, 5, par3StructureBoundingBox);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        this.placeBlockAtCurrentPosition(par1World, Block.torchWood.blockID, 0, 6, 3, 4, par3StructureBoundingBox);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        this.placeDoorAtCurrentPosition(par1World, par3StructureBoundingBox, par2Random, 6, 1, 5, this.getMetadataWithOffset(Block.doorWood.blockID, 1));<a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112"></a>
+<span class="sourceLineNo">113</span>        for (k = 0; k &lt; 5; ++k)<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        {<a name="line.114"></a>
+<span class="sourceLineNo">115</span>            for (l = 0; l &lt; 9; ++l)<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            {<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                this.clearCurrentPositionBlocksUpwards(par1World, l, 7, k, par3StructureBoundingBox);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                this.fillCurrentPositionBlocksDownwards(par1World, Block.cobblestone.blockID, 0, l, -1, k, par3StructureBoundingBox);<a name="line.118"></a>
+<span class="sourceLineNo">119</span>            }<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        }<a name="line.120"></a>
+<span class="sourceLineNo">121</span><a name="line.121"></a>
+<span class="sourceLineNo">122</span>        this.spawnVillagers(par1World, par3StructureBoundingBox, 4, 1, 2, 2);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        return true;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    }<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>    /**<a name="line.126"></a>
+<span class="sourceLineNo">127</span>     * Returns the villager type to spawn in this component, based on the number of villagers already spawned.<a name="line.127"></a>
+<span class="sourceLineNo">128</span>     */<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    protected int getVillagerType(int par1)<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        return par1 == 0 ? 4 : 0;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>}<a name="line.133"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

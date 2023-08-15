@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.pathfinding;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import net.minecraft.util.MathHelper;<a name="line.3"></a>
+<span class="sourceLineNo">004</span><a name="line.4"></a>
+<span class="sourceLineNo">005</span>public class PathPoint<a name="line.5"></a>
+<span class="sourceLineNo">006</span>{<a name="line.6"></a>
+<span class="sourceLineNo">007</span>    /** The x coordinate of this point */<a name="line.7"></a>
+<span class="sourceLineNo">008</span>    public final int xCoord;<a name="line.8"></a>
+<span class="sourceLineNo">009</span><a name="line.9"></a>
+<span class="sourceLineNo">010</span>    /** The y coordinate of this point */<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    public final int yCoord;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>    /** The z coordinate of this point */<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public final int zCoord;<a name="line.14"></a>
+<span class="sourceLineNo">015</span><a name="line.15"></a>
+<span class="sourceLineNo">016</span>    /** A hash of the coordinates used to identify this point */<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    private final int hash;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>    /** The index of this point in its assigned path */<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    int index = -1;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>    /** The distance along the path to this point */<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    float totalPathDistance;<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /** The linear distance to the next point */<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    float distanceToNext;<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>    /** The distance to the target */<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    float distanceToTarget;<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>    /** The point preceding this in its assigned path */<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    PathPoint previous;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>    /** Indicates this is the origin */<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    public boolean isFirst = false;<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>    public PathPoint(int par1, int par2, int par3)<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    {<a name="line.38"></a>
+<span class="sourceLineNo">039</span>        this.xCoord = par1;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        this.yCoord = par2;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.zCoord = par3;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.hash = makeHash(par1, par2, par3);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    }<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    public static int makeHash(int par0, int par1, int par2)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        return par1 &amp; 255 | (par0 &amp; 32767) &lt;&lt; 8 | (par2 &amp; 32767) &lt;&lt; 24 | (par0 &lt; 0 ? Integer.MIN_VALUE : 0) | (par2 &lt; 0 ? 32768 : 0);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    }<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * Returns the linear distance to another path point<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     */<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    public float distanceTo(PathPoint par1PathPoint)<a name="line.53"></a>
+<span class="sourceLineNo">054</span>    {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        float f = (float)(par1PathPoint.xCoord - this.xCoord);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        float f1 = (float)(par1PathPoint.yCoord - this.yCoord);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        float f2 = (float)(par1PathPoint.zCoord - this.zCoord);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        return MathHelper.sqrt_float(f * f + f1 * f1 + f2 * f2);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    }<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>    public float func_75832_b(PathPoint par1PathPoint)<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        float f = (float)(par1PathPoint.xCoord - this.xCoord);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>        float f1 = (float)(par1PathPoint.yCoord - this.yCoord);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        float f2 = (float)(par1PathPoint.zCoord - this.zCoord);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        return f * f + f1 * f1 + f2 * f2;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    }<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>    public boolean equals(Object par1Obj)<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    {<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        if (!(par1Obj instanceof PathPoint))<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            return false;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        }<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        else<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            PathPoint pathpoint = (PathPoint)par1Obj;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            return this.hash == pathpoint.hash &amp;&amp; this.xCoord == pathpoint.xCoord &amp;&amp; this.yCoord == pathpoint.yCoord &amp;&amp; this.zCoord == pathpoint.zCoord;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        }<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    }<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>    public int hashCode()<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        return this.hash;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    }<a name="line.85"></a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span>    /**<a name="line.87"></a>
+<span class="sourceLineNo">088</span>     * Returns true if this point has already been assigned to a path<a name="line.88"></a>
+<span class="sourceLineNo">089</span>     */<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    public boolean isAssigned()<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    {<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        return this.index &gt;= 0;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    }<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>    public String toString()<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        return this.xCoord + ", " + this.yCoord + ", " + this.zCoord;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>    }<a name="line.98"></a>
+<span class="sourceLineNo">099</span>}<a name="line.99"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

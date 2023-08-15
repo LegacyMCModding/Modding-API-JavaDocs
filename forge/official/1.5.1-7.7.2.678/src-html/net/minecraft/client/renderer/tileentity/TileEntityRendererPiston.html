@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer.tileentity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.Block;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.block.BlockPistonBase;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.client.Minecraft;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.client.renderer.RenderBlocks;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.client.renderer.RenderHelper;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.client.renderer.Tessellator;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.tileentity.TileEntity;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import net.minecraft.tileentity.TileEntityPiston;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.world.World;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import org.lwjgl.opengl.GL11;<a name="line.14"></a>
+<span class="sourceLineNo">015</span><a name="line.15"></a>
+<span class="sourceLineNo">016</span>@SideOnly(Side.CLIENT)<a name="line.16"></a>
+<span class="sourceLineNo">017</span>public class TileEntityRendererPiston extends TileEntitySpecialRenderer<a name="line.17"></a>
+<span class="sourceLineNo">018</span>{<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    /** instance of RenderBlocks used to draw the piston base and extension. */<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    private RenderBlocks blockRenderer;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>    public void renderPiston(TileEntityPiston par1TileEntityPiston, double par2, double par4, double par6, float par8)<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    {<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        Block block = Block.blocksList[par1TileEntityPiston.getStoredBlockID()];<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>        if (block != null &amp;&amp; par1TileEntityPiston.getProgress(par8) &lt; 1.0F)<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        {<a name="line.27"></a>
+<span class="sourceLineNo">028</span>            Tessellator tessellator = Tessellator.instance;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>            this.bindTextureByName("/terrain.png");<a name="line.29"></a>
+<span class="sourceLineNo">030</span>            RenderHelper.disableStandardItemLighting();<a name="line.30"></a>
+<span class="sourceLineNo">031</span>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>            GL11.glEnable(GL11.GL_BLEND);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>            GL11.glDisable(GL11.GL_CULL_FACE);<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>            if (Minecraft.isAmbientOcclusionEnabled())<a name="line.35"></a>
+<span class="sourceLineNo">036</span>            {<a name="line.36"></a>
+<span class="sourceLineNo">037</span>                GL11.glShadeModel(GL11.GL_SMOOTH);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>            }<a name="line.38"></a>
+<span class="sourceLineNo">039</span>            else<a name="line.39"></a>
+<span class="sourceLineNo">040</span>            {<a name="line.40"></a>
+<span class="sourceLineNo">041</span>                GL11.glShadeModel(GL11.GL_FLAT);<a name="line.41"></a>
+<span class="sourceLineNo">042</span>            }<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>            tessellator.startDrawingQuads();<a name="line.44"></a>
+<span class="sourceLineNo">045</span>            tessellator.setTranslation((double)((float)par2 - (float)par1TileEntityPiston.xCoord + par1TileEntityPiston.getOffsetX(par8)), (double)((float)par4 - (float)par1TileEntityPiston.yCoord + par1TileEntityPiston.getOffsetY(par8)), (double)((float)par6 - (float)par1TileEntityPiston.zCoord + par1TileEntityPiston.getOffsetZ(par8)));<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            tessellator.setColorOpaque(1, 1, 1);<a name="line.46"></a>
+<span class="sourceLineNo">047</span><a name="line.47"></a>
+<span class="sourceLineNo">048</span>            if (block == Block.pistonExtension &amp;&amp; par1TileEntityPiston.getProgress(par8) &lt; 0.5F)<a name="line.48"></a>
+<span class="sourceLineNo">049</span>            {<a name="line.49"></a>
+<span class="sourceLineNo">050</span>                this.blockRenderer.renderPistonExtensionAllFaces(block, par1TileEntityPiston.xCoord, par1TileEntityPiston.yCoord, par1TileEntityPiston.zCoord, false);<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            }<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            else if (par1TileEntityPiston.shouldRenderHead() &amp;&amp; !par1TileEntityPiston.isExtending())<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>                Block.pistonExtension.setHeadTexture(((BlockPistonBase)block).getPistonExtensionTexture());<a name="line.54"></a>
+<span class="sourceLineNo">055</span>                this.blockRenderer.renderPistonExtensionAllFaces(Block.pistonExtension, par1TileEntityPiston.xCoord, par1TileEntityPiston.yCoord, par1TileEntityPiston.zCoord, par1TileEntityPiston.getProgress(par8) &lt; 0.5F);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>                Block.pistonExtension.clearHeadTexture();<a name="line.56"></a>
+<span class="sourceLineNo">057</span>                tessellator.setTranslation((double)((float)par2 - (float)par1TileEntityPiston.xCoord), (double)((float)par4 - (float)par1TileEntityPiston.yCoord), (double)((float)par6 - (float)par1TileEntityPiston.zCoord));<a name="line.57"></a>
+<span class="sourceLineNo">058</span>                this.blockRenderer.renderPistonBaseAllFaces(block, par1TileEntityPiston.xCoord, par1TileEntityPiston.yCoord, par1TileEntityPiston.zCoord);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            }<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            else<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>                this.blockRenderer.renderBlockAllFaces(block, par1TileEntityPiston.xCoord, par1TileEntityPiston.yCoord, par1TileEntityPiston.zCoord);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            }<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>            tessellator.setTranslation(0.0D, 0.0D, 0.0D);<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            tessellator.draw();<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            RenderHelper.enableStandardItemLighting();<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        }<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    }<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>    /**<a name="line.71"></a>
+<span class="sourceLineNo">072</span>     * Called when the ingame world being rendered changes (e.g. on world -&gt; nether travel) due to using one renderer<a name="line.72"></a>
+<span class="sourceLineNo">073</span>     * per tile entity type, rather than instance<a name="line.73"></a>
+<span class="sourceLineNo">074</span>     */<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    public void onWorldChange(World par1World)<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        this.blockRenderer = new RenderBlocks(par1World);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    }<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>    public void renderTileEntityAt(TileEntity par1TileEntity, double par2, double par4, double par6, float par8)<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        this.renderPiston((TileEntityPiston)par1TileEntity, par2, par4, par6, par8);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    }<a name="line.83"></a>
+<span class="sourceLineNo">084</span>}<a name="line.84"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

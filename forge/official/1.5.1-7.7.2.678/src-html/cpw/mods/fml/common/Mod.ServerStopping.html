@@ -1,0 +1,342 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * Forge Mod Loader<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Copyright (c) 2012-2013 cpw.<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * All rights reserved. This program and the accompanying materials<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * are made available under the terms of the GNU Lesser Public License v2.1<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * which accompanies this distribution, and is available at<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * <a name="line.8"></a>
+<span class="sourceLineNo">009</span> * Contributors:<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *     cpw - implementation<a name="line.10"></a>
+<span class="sourceLineNo">011</span> */<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>package cpw.mods.fml.common;<a name="line.13"></a>
+<span class="sourceLineNo">014</span><a name="line.14"></a>
+<span class="sourceLineNo">015</span>import java.lang.annotation.ElementType;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import java.lang.annotation.Retention;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import java.lang.annotation.RetentionPolicy;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import java.lang.annotation.Target;<a name="line.18"></a>
+<span class="sourceLineNo">019</span><a name="line.19"></a>
+<span class="sourceLineNo">020</span>import net.minecraft.item.ItemBlock;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>import cpw.mods.fml.common.event.FMLInterModComms;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import cpw.mods.fml.common.event.FMLInterModComms.IMCMessage;<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>/**<a name="line.25"></a>
+<span class="sourceLineNo">026</span> * The new mod style in FML 1.3<a name="line.26"></a>
+<span class="sourceLineNo">027</span> *<a name="line.27"></a>
+<span class="sourceLineNo">028</span> * @author cpw<a name="line.28"></a>
+<span class="sourceLineNo">029</span> *<a name="line.29"></a>
+<span class="sourceLineNo">030</span> */<a name="line.30"></a>
+<span class="sourceLineNo">031</span>@Retention(RetentionPolicy.RUNTIME)<a name="line.31"></a>
+<span class="sourceLineNo">032</span>@Target(ElementType.TYPE)<a name="line.32"></a>
+<span class="sourceLineNo">033</span>public @interface Mod<a name="line.33"></a>
+<span class="sourceLineNo">034</span>{<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    /**<a name="line.35"></a>
+<span class="sourceLineNo">036</span>     * The unique mod identifier for this mod<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     */<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    String modid();<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    /**<a name="line.39"></a>
+<span class="sourceLineNo">040</span>     * A user friendly name for the mod<a name="line.40"></a>
+<span class="sourceLineNo">041</span>     */<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    String name() default "";<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    /**<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     * A version string for this mod<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     */<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    String version() default "";<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    /**<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * A simple dependency string for this mod (see modloader's "priorities" string specification)<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     */<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    String dependencies() default "";<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    /**<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     * Whether to use the mcmod.info metadata by default for this mod.<a name="line.52"></a>
+<span class="sourceLineNo">053</span>     * If true, settings in the mcmod.info file will override settings in these annotations.<a name="line.53"></a>
+<span class="sourceLineNo">054</span>     */<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    boolean useMetadata() default false;<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    /**<a name="line.57"></a>
+<span class="sourceLineNo">058</span>     * The acceptable range of minecraft versions that this mod will load and run in<a name="line.58"></a>
+<span class="sourceLineNo">059</span>     * The default ("empty string") indicates that only the current minecraft version is acceptable.<a name="line.59"></a>
+<span class="sourceLineNo">060</span>     * FML will refuse to run with an error if the minecraft version is not in this range across all mods.<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     * @return A version range as specified by the maven version range specification or the empty string<a name="line.61"></a>
+<span class="sourceLineNo">062</span>     */<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    String acceptedMinecraftVersions() default "";<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    /**<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * An optional bukkit plugin that will be injected into the bukkit plugin framework if<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     * this mod is loaded into the FML framework and the bukkit coremod is present.<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     * Instances of the bukkit plugin can be obtained via the {@link BukkitPluginRef} annotation on fields.<a name="line.67"></a>
+<span class="sourceLineNo">068</span>     * @return The name of the plugin to load for this mod<a name="line.68"></a>
+<span class="sourceLineNo">069</span>     */<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    String bukkitPlugin() default "";<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    /**<a name="line.71"></a>
+<span class="sourceLineNo">072</span>     * Mods that this mod will &lt;strong&gt;not&lt;/strong&gt; load with.<a name="line.72"></a>
+<span class="sourceLineNo">073</span>     * An optional comma separated string of (+|-)(*|modid[@value]) which specify mods that<a name="line.73"></a>
+<span class="sourceLineNo">074</span>     * this mod will refuse to load with, resulting in the game failing to start.<a name="line.74"></a>
+<span class="sourceLineNo">075</span>     * Entries can be prefixed with a + for a positive exclusion assertion, or - for a negative exclusion<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * assertion. Asterisk is the wildcard and represents &lt;strong&gt;all&lt;/strong&gt; mods.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     *<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     * The &lt;strong&gt;only&lt;/strong&gt; mods that cannot be excluded are FML and MCP, trivially.<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     * Other special values:<a name="line.79"></a>
+<span class="sourceLineNo">080</span>     * &lt;ul&gt;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>     * &lt;li&gt;+f indicates that the mod will accept a minecraft forge environment.&lt;/li&gt;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>     * &lt;li&gt;-* indicates that the mod will not accept any other mods.&lt;/li&gt;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>     * &lt;/ul&gt;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     *<a name="line.84"></a>
+<span class="sourceLineNo">085</span>     * Some examples:<a name="line.85"></a>
+<span class="sourceLineNo">086</span>     * &lt;ul&gt;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>     * &lt;li&gt;&lt;em&gt;-*,+f,+IronChest&lt;/em&gt;: Will run only in a minecraft forge environment with the mod IronChests.<a name="line.87"></a>
+<span class="sourceLineNo">088</span>     * The -* forces all mods to be excluded, then the +f and +IronChest add into the "allowed list".&lt;/li&gt;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>     * &lt;li&gt;&lt;em&gt;+f,-IC2&lt;/em&gt;: Will run in a minecraft forge environment but will &lt;strong&gt;not&lt;/strong&gt; run if<a name="line.89"></a>
+<span class="sourceLineNo">090</span>     * IndustrialCraft 2 (IC2) is loaded alongside.&lt;/li&gt;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     * &lt;li&gt;&lt;em&gt;-*&lt;/em&gt;: Will not run if &lt;strong&gt;any&lt;/strong&gt; othe mod is loaded except MCP/FML itself.&lt;/li&gt;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>     * &lt;/ul&gt;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>     *<a name="line.93"></a>
+<span class="sourceLineNo">094</span>     * If a mod is present on the excluded list, the game will stop and show an error screen. If the<a name="line.94"></a>
+<span class="sourceLineNo">095</span>     * class containing the {@link Mod} annotation has a "getCustomErrorException" method, it will be<a name="line.95"></a>
+<span class="sourceLineNo">096</span>     * called to retrieve a custom error message for display in this case. If two mods have a declared<a name="line.96"></a>
+<span class="sourceLineNo">097</span>     * exclusion which is matched, the screen that is shown is indeterminate.<a name="line.97"></a>
+<span class="sourceLineNo">098</span>     *<a name="line.98"></a>
+<span class="sourceLineNo">099</span>     * @return A string listing modids to exclude from loading with this mod.<a name="line.99"></a>
+<span class="sourceLineNo">100</span>     */<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    String modExclusionList() default "";<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    /**<a name="line.102"></a>
+<span class="sourceLineNo">103</span>     * Specifying this field allows for a mod to expect a signed jar with a fingerprint matching this value.<a name="line.103"></a>
+<span class="sourceLineNo">104</span>     * The fingerprint should be SHA-1 encoded, lowercase with ':' removed. An empty value indicates that<a name="line.104"></a>
+<span class="sourceLineNo">105</span>     * the mod is not expecting to be signed.<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     *<a name="line.106"></a>
+<span class="sourceLineNo">107</span>     * Any incorrectness of the fingerprint, be it missing or wrong, will result in the {@link FingerprintWarning}<a name="line.107"></a>
+<span class="sourceLineNo">108</span>     * method firing &lt;i&gt;prior to any other event on the mod&lt;/i&gt;.<a name="line.108"></a>
+<span class="sourceLineNo">109</span>     *<a name="line.109"></a>
+<span class="sourceLineNo">110</span>     * @return A certificate fingerprint that is expected for this mod.<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     */<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    String certificateFingerprint() default "";<a name="line.112"></a>
+<span class="sourceLineNo">113</span><a name="line.113"></a>
+<span class="sourceLineNo">114</span>    /**<a name="line.114"></a>
+<span class="sourceLineNo">115</span>     * The language the mod is authored in. This will be used to control certain libraries being downloaded.<a name="line.115"></a>
+<span class="sourceLineNo">116</span>     * Valid values are currently "java", "scala"<a name="line.116"></a>
+<span class="sourceLineNo">117</span>     *<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     * @return The language the mod is authored in<a name="line.118"></a>
+<span class="sourceLineNo">119</span>     */<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    String modLanguage() default "java";<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    /**<a name="line.121"></a>
+<span class="sourceLineNo">122</span>     * An optional ASM hook class, that can be used to apply ASM to classes loaded from this mod. It is also given<a name="line.122"></a>
+<span class="sourceLineNo">123</span>     * the ASM tree of the class declaring {@link Mod} to with what it will.<a name="line.123"></a>
+<span class="sourceLineNo">124</span>     *<a name="line.124"></a>
+<span class="sourceLineNo">125</span>     * @return The name of a class to be loaded and executed. Must implement {@link IASMHook}.<a name="line.125"></a>
+<span class="sourceLineNo">126</span>     */<a name="line.126"></a>
+<span class="sourceLineNo">127</span>    String asmHookClass() default "";<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    /**<a name="line.128"></a>
+<span class="sourceLineNo">129</span>     * Mark the designated method as to be called at if there is something wrong with the certificate fingerprint of<a name="line.129"></a>
+<span class="sourceLineNo">130</span>     * the mod's jar, or it is missing, or otherwise a problem.<a name="line.130"></a>
+<span class="sourceLineNo">131</span>     * @author cpw<a name="line.131"></a>
+<span class="sourceLineNo">132</span>     *<a name="line.132"></a>
+<span class="sourceLineNo">133</span>     */<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    @Target(ElementType.METHOD)<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    public @interface FingerprintWarning {}<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    /**<a name="line.137"></a>
+<span class="sourceLineNo">138</span>     * Mark the designated method as being called at the "pre-initialization" phase<a name="line.138"></a>
+<span class="sourceLineNo">139</span>     * @author cpw<a name="line.139"></a>
+<span class="sourceLineNo">140</span>     *<a name="line.140"></a>
+<span class="sourceLineNo">141</span>     */<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    @Target(ElementType.METHOD)<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    public @interface PreInit {}<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    /**<a name="line.145"></a>
+<span class="sourceLineNo">146</span>     * Mark the designated method as being called at the "initialization" phase<a name="line.146"></a>
+<span class="sourceLineNo">147</span>     * @author cpw<a name="line.147"></a>
+<span class="sourceLineNo">148</span>     *<a name="line.148"></a>
+<span class="sourceLineNo">149</span>     */<a name="line.149"></a>
+<span class="sourceLineNo">150</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    @Target(ElementType.METHOD)<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    public @interface Init {}<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    /**<a name="line.153"></a>
+<span class="sourceLineNo">154</span>     * Mark the designated method as being called at the "post-initialization" phase<a name="line.154"></a>
+<span class="sourceLineNo">155</span>     * @author cpw<a name="line.155"></a>
+<span class="sourceLineNo">156</span>     *<a name="line.156"></a>
+<span class="sourceLineNo">157</span>     */<a name="line.157"></a>
+<span class="sourceLineNo">158</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    @Target(ElementType.METHOD)<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    public @interface PostInit {}<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    /**<a name="line.161"></a>
+<span class="sourceLineNo">162</span>     * Mark the designated method as being called at the "server-about-to-start" phase<a name="line.162"></a>
+<span class="sourceLineNo">163</span>     * @author cpw<a name="line.163"></a>
+<span class="sourceLineNo">164</span>     *<a name="line.164"></a>
+<span class="sourceLineNo">165</span>     */<a name="line.165"></a>
+<span class="sourceLineNo">166</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.166"></a>
+<span class="sourceLineNo">167</span>    @Target(ElementType.METHOD)<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    public @interface ServerAboutToStart {}<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    /**<a name="line.169"></a>
+<span class="sourceLineNo">170</span>     * Mark the designated method as being called at the "server-starting" phase<a name="line.170"></a>
+<span class="sourceLineNo">171</span>     * @author cpw<a name="line.171"></a>
+<span class="sourceLineNo">172</span>     *<a name="line.172"></a>
+<span class="sourceLineNo">173</span>     */<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.174"></a>
+<span class="sourceLineNo">175</span>    @Target(ElementType.METHOD)<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    public @interface ServerStarting {}<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    /**<a name="line.177"></a>
+<span class="sourceLineNo">178</span>     * Mark the designated method as being called at the "server-started" phase<a name="line.178"></a>
+<span class="sourceLineNo">179</span>     * @author cpw<a name="line.179"></a>
+<span class="sourceLineNo">180</span>     *<a name="line.180"></a>
+<span class="sourceLineNo">181</span>     */<a name="line.181"></a>
+<span class="sourceLineNo">182</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.182"></a>
+<span class="sourceLineNo">183</span>    @Target(ElementType.METHOD)<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    public @interface ServerStarted {}<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    /**<a name="line.185"></a>
+<span class="sourceLineNo">186</span>     * Mark the designated method as being called at the "server-stopping" phase<a name="line.186"></a>
+<span class="sourceLineNo">187</span>     * @author cpw<a name="line.187"></a>
+<span class="sourceLineNo">188</span>     *<a name="line.188"></a>
+<span class="sourceLineNo">189</span>     */<a name="line.189"></a>
+<span class="sourceLineNo">190</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    @Target(ElementType.METHOD)<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    public @interface ServerStopping {}<a name="line.192"></a>
+<span class="sourceLineNo">193</span>    /**<a name="line.193"></a>
+<span class="sourceLineNo">194</span>     * Mark the designated method as being called at the "server-stopped" phase<a name="line.194"></a>
+<span class="sourceLineNo">195</span>     * @author cpw<a name="line.195"></a>
+<span class="sourceLineNo">196</span>     *<a name="line.196"></a>
+<span class="sourceLineNo">197</span>     */<a name="line.197"></a>
+<span class="sourceLineNo">198</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    @Target(ElementType.METHOD)<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    public @interface ServerStopped {}<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    /**<a name="line.201"></a>
+<span class="sourceLineNo">202</span>     * Mark the designated method as the receiver for {@link FMLInterModComms} messages<a name="line.202"></a>
+<span class="sourceLineNo">203</span>     * Called between {@link Init} and {@link PostInit}<a name="line.203"></a>
+<span class="sourceLineNo">204</span>     * @author cpw<a name="line.204"></a>
+<span class="sourceLineNo">205</span>     *<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     */<a name="line.206"></a>
+<span class="sourceLineNo">207</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.207"></a>
+<span class="sourceLineNo">208</span>    @Target(ElementType.METHOD)<a name="line.208"></a>
+<span class="sourceLineNo">209</span>    public @interface IMCCallback {}<a name="line.209"></a>
+<span class="sourceLineNo">210</span>    /**<a name="line.210"></a>
+<span class="sourceLineNo">211</span>     * Populate the annotated field with the mod instance.<a name="line.211"></a>
+<span class="sourceLineNo">212</span>     * @author cpw<a name="line.212"></a>
+<span class="sourceLineNo">213</span>     *<a name="line.213"></a>
+<span class="sourceLineNo">214</span>     */<a name="line.214"></a>
+<span class="sourceLineNo">215</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.215"></a>
+<span class="sourceLineNo">216</span>    @Target(ElementType.FIELD)<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    public @interface Instance {<a name="line.217"></a>
+<span class="sourceLineNo">218</span>        /**<a name="line.218"></a>
+<span class="sourceLineNo">219</span>         * The mod object to inject into this field<a name="line.219"></a>
+<span class="sourceLineNo">220</span>         */<a name="line.220"></a>
+<span class="sourceLineNo">221</span>        String value() default "";<a name="line.221"></a>
+<span class="sourceLineNo">222</span>    }<a name="line.222"></a>
+<span class="sourceLineNo">223</span>    /**<a name="line.223"></a>
+<span class="sourceLineNo">224</span>     * Populate the annotated field with the mod's metadata.<a name="line.224"></a>
+<span class="sourceLineNo">225</span>     * @author cpw<a name="line.225"></a>
+<span class="sourceLineNo">226</span>     *<a name="line.226"></a>
+<span class="sourceLineNo">227</span>     */<a name="line.227"></a>
+<span class="sourceLineNo">228</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    @Target(ElementType.FIELD)<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    public @interface Metadata {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        /**<a name="line.231"></a>
+<span class="sourceLineNo">232</span>         * The mod id specifying the metadata to load here<a name="line.232"></a>
+<span class="sourceLineNo">233</span>         */<a name="line.233"></a>
+<span class="sourceLineNo">234</span>        String value() default "";<a name="line.234"></a>
+<span class="sourceLineNo">235</span>    }<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    /**<a name="line.236"></a>
+<span class="sourceLineNo">237</span>     * Populate the annotated field with an instance of the Block as specified<a name="line.237"></a>
+<span class="sourceLineNo">238</span>     * @author cpw<a name="line.238"></a>
+<span class="sourceLineNo">239</span>     *<a name="line.239"></a>
+<span class="sourceLineNo">240</span>     */<a name="line.240"></a>
+<span class="sourceLineNo">241</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    @Target(ElementType.FIELD)<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    public @interface Block {<a name="line.243"></a>
+<span class="sourceLineNo">244</span>        /**<a name="line.244"></a>
+<span class="sourceLineNo">245</span>         * The block's name<a name="line.245"></a>
+<span class="sourceLineNo">246</span>         */<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        String name();<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        /**<a name="line.248"></a>
+<span class="sourceLineNo">249</span>         * The associated ItemBlock subtype for the item (can be null for an ItemBlock)<a name="line.249"></a>
+<span class="sourceLineNo">250</span>         */<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        Class&lt;?&gt; itemTypeClass() default ItemBlock.class;<a name="line.251"></a>
+<span class="sourceLineNo">252</span>    }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    /**<a name="line.253"></a>
+<span class="sourceLineNo">254</span>     * Populate the annotated field with an Item<a name="line.254"></a>
+<span class="sourceLineNo">255</span>     * @author cpw<a name="line.255"></a>
+<span class="sourceLineNo">256</span>     *<a name="line.256"></a>
+<span class="sourceLineNo">257</span>     */<a name="line.257"></a>
+<span class="sourceLineNo">258</span>    @Retention(RetentionPolicy.RUNTIME)<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    @Target(ElementType.FIELD)<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    public @interface Item {<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        /**<a name="line.261"></a>
+<span class="sourceLineNo">262</span>         * The name of the item<a name="line.262"></a>
+<span class="sourceLineNo">263</span>         */<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        String name();<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        /**<a name="line.265"></a>
+<span class="sourceLineNo">266</span>         * The type of the item<a name="line.266"></a>
+<span class="sourceLineNo">267</span>         */<a name="line.267"></a>
+<span class="sourceLineNo">268</span>        String typeClass();<a name="line.268"></a>
+<span class="sourceLineNo">269</span>    }<a name="line.269"></a>
+<span class="sourceLineNo">270</span>}<a name="line.270"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

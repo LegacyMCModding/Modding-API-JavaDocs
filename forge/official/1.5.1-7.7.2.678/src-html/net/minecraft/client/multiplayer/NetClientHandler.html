@@ -1,0 +1,1849 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.multiplayer;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.common.network.FMLNetworkHandler;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.Side;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import java.io.BufferedReader;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import java.io.ByteArrayInputStream;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import java.io.DataInputStream;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import java.io.IOException;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import java.io.InputStreamReader;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import java.math.BigInteger;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import java.net.InetAddress;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import java.net.Socket;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import java.net.URL;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import java.net.URLEncoder;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import java.security.PublicKey;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import java.util.ArrayList;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import java.util.HashMap;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import java.util.Iterator;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import java.util.List;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import java.util.Map;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.util.Random;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import javax.crypto.SecretKey;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import net.minecraft.client.Minecraft;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import net.minecraft.client.entity.EntityClientPlayerMP;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import net.minecraft.client.entity.EntityOtherPlayerMP;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import net.minecraft.client.gui.GuiChat;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import net.minecraft.client.gui.GuiDisconnected;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import net.minecraft.client.gui.GuiDownloadTerrain;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import net.minecraft.client.gui.GuiMainMenu;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import net.minecraft.client.gui.GuiMerchant;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import net.minecraft.client.gui.GuiMultiplayer;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import net.minecraft.client.gui.GuiPlayerInfo;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import net.minecraft.client.gui.GuiScreen;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import net.minecraft.client.gui.GuiScreenDemo;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import net.minecraft.client.gui.GuiScreenDisconnectedOnline;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import net.minecraft.client.gui.GuiWinGame;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import net.minecraft.client.gui.GuiYesNo;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import net.minecraft.client.gui.inventory.GuiContainerCreative;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import net.minecraft.client.particle.EntityCrit2FX;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import net.minecraft.client.particle.EntityPickupFX;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import net.minecraft.client.settings.GameSettings;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import net.minecraft.creativetab.CreativeTabs;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import net.minecraft.entity.Entity;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import net.minecraft.entity.EntityList;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import net.minecraft.entity.EntityLiving;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import net.minecraft.entity.IMerchant;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import net.minecraft.entity.NpcMerchant;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import net.minecraft.entity.effect.EntityLightningBolt;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import net.minecraft.entity.item.EntityBoat;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import net.minecraft.entity.item.EntityEnderCrystal;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import net.minecraft.entity.item.EntityEnderEye;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import net.minecraft.entity.item.EntityEnderPearl;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import net.minecraft.entity.item.EntityExpBottle;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import net.minecraft.entity.item.EntityFallingSand;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import net.minecraft.entity.item.EntityFireworkRocket;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import net.minecraft.entity.item.EntityItem;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import net.minecraft.entity.item.EntityItemFrame;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>import net.minecraft.entity.item.EntityMinecart;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>import net.minecraft.entity.item.EntityPainting;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>import net.minecraft.entity.item.EntityTNTPrimed;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>import net.minecraft.entity.item.EntityXPOrb;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>import net.minecraft.entity.player.EntityPlayer;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>import net.minecraft.entity.player.InventoryPlayer;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>import net.minecraft.entity.projectile.EntityArrow;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>import net.minecraft.entity.projectile.EntityEgg;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>import net.minecraft.entity.projectile.EntityFishHook;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>import net.minecraft.entity.projectile.EntityLargeFireball;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>import net.minecraft.entity.projectile.EntityPotion;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>import net.minecraft.entity.projectile.EntitySmallFireball;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>import net.minecraft.entity.projectile.EntitySnowball;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>import net.minecraft.entity.projectile.EntityWitherSkull;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>import net.minecraft.inventory.Container;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>import net.minecraft.inventory.InventoryBasic;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>import net.minecraft.item.Item;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>import net.minecraft.item.ItemMap;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>import net.minecraft.item.ItemStack;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>import net.minecraft.network.INetworkManager;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>import net.minecraft.network.MemoryConnection;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>import net.minecraft.network.TcpConnection;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>import net.minecraft.network.packet.NetHandler;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>import net.minecraft.network.packet.Packet;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>import net.minecraft.network.packet.Packet0KeepAlive;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>import net.minecraft.network.packet.Packet100OpenWindow;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>import net.minecraft.network.packet.Packet101CloseWindow;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>import net.minecraft.network.packet.Packet103SetSlot;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>import net.minecraft.network.packet.Packet104WindowItems;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>import net.minecraft.network.packet.Packet105UpdateProgressbar;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>import net.minecraft.network.packet.Packet106Transaction;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>import net.minecraft.network.packet.Packet10Flying;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>import net.minecraft.network.packet.Packet130UpdateSign;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>import net.minecraft.network.packet.Packet131MapData;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>import net.minecraft.network.packet.Packet132TileEntityData;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>import net.minecraft.network.packet.Packet16BlockItemSwitch;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>import net.minecraft.network.packet.Packet17Sleep;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>import net.minecraft.network.packet.Packet18Animation;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>import net.minecraft.network.packet.Packet1Login;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>import net.minecraft.network.packet.Packet200Statistic;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>import net.minecraft.network.packet.Packet201PlayerInfo;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>import net.minecraft.network.packet.Packet202PlayerAbilities;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>import net.minecraft.network.packet.Packet203AutoComplete;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>import net.minecraft.network.packet.Packet205ClientCommand;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>import net.minecraft.network.packet.Packet206SetObjective;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>import net.minecraft.network.packet.Packet207SetScore;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>import net.minecraft.network.packet.Packet208SetDisplayObjective;<a name="line.105"></a>
+<span class="sourceLineNo">106</span>import net.minecraft.network.packet.Packet209SetPlayerTeam;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>import net.minecraft.network.packet.Packet20NamedEntitySpawn;<a name="line.107"></a>
+<span class="sourceLineNo">108</span>import net.minecraft.network.packet.Packet22Collect;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>import net.minecraft.network.packet.Packet23VehicleSpawn;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>import net.minecraft.network.packet.Packet24MobSpawn;<a name="line.110"></a>
+<span class="sourceLineNo">111</span>import net.minecraft.network.packet.Packet250CustomPayload;<a name="line.111"></a>
+<span class="sourceLineNo">112</span>import net.minecraft.network.packet.Packet252SharedKey;<a name="line.112"></a>
+<span class="sourceLineNo">113</span>import net.minecraft.network.packet.Packet253ServerAuthData;<a name="line.113"></a>
+<span class="sourceLineNo">114</span>import net.minecraft.network.packet.Packet255KickDisconnect;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>import net.minecraft.network.packet.Packet25EntityPainting;<a name="line.115"></a>
+<span class="sourceLineNo">116</span>import net.minecraft.network.packet.Packet26EntityExpOrb;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>import net.minecraft.network.packet.Packet28EntityVelocity;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>import net.minecraft.network.packet.Packet29DestroyEntity;<a name="line.118"></a>
+<span class="sourceLineNo">119</span>import net.minecraft.network.packet.Packet30Entity;<a name="line.119"></a>
+<span class="sourceLineNo">120</span>import net.minecraft.network.packet.Packet34EntityTeleport;<a name="line.120"></a>
+<span class="sourceLineNo">121</span>import net.minecraft.network.packet.Packet35EntityHeadRotation;<a name="line.121"></a>
+<span class="sourceLineNo">122</span>import net.minecraft.network.packet.Packet38EntityStatus;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>import net.minecraft.network.packet.Packet39AttachEntity;<a name="line.123"></a>
+<span class="sourceLineNo">124</span>import net.minecraft.network.packet.Packet3Chat;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>import net.minecraft.network.packet.Packet40EntityMetadata;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>import net.minecraft.network.packet.Packet41EntityEffect;<a name="line.126"></a>
+<span class="sourceLineNo">127</span>import net.minecraft.network.packet.Packet42RemoveEntityEffect;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>import net.minecraft.network.packet.Packet43Experience;<a name="line.128"></a>
+<span class="sourceLineNo">129</span>import net.minecraft.network.packet.Packet4UpdateTime;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>import net.minecraft.network.packet.Packet51MapChunk;<a name="line.130"></a>
+<span class="sourceLineNo">131</span>import net.minecraft.network.packet.Packet52MultiBlockChange;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>import net.minecraft.network.packet.Packet53BlockChange;<a name="line.132"></a>
+<span class="sourceLineNo">133</span>import net.minecraft.network.packet.Packet54PlayNoteBlock;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>import net.minecraft.network.packet.Packet55BlockDestroy;<a name="line.134"></a>
+<span class="sourceLineNo">135</span>import net.minecraft.network.packet.Packet56MapChunks;<a name="line.135"></a>
+<span class="sourceLineNo">136</span>import net.minecraft.network.packet.Packet5PlayerInventory;<a name="line.136"></a>
+<span class="sourceLineNo">137</span>import net.minecraft.network.packet.Packet60Explosion;<a name="line.137"></a>
+<span class="sourceLineNo">138</span>import net.minecraft.network.packet.Packet61DoorChange;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>import net.minecraft.network.packet.Packet62LevelSound;<a name="line.139"></a>
+<span class="sourceLineNo">140</span>import net.minecraft.network.packet.Packet63WorldParticles;<a name="line.140"></a>
+<span class="sourceLineNo">141</span>import net.minecraft.network.packet.Packet6SpawnPosition;<a name="line.141"></a>
+<span class="sourceLineNo">142</span>import net.minecraft.network.packet.Packet70GameEvent;<a name="line.142"></a>
+<span class="sourceLineNo">143</span>import net.minecraft.network.packet.Packet71Weather;<a name="line.143"></a>
+<span class="sourceLineNo">144</span>import net.minecraft.network.packet.Packet8UpdateHealth;<a name="line.144"></a>
+<span class="sourceLineNo">145</span>import net.minecraft.network.packet.Packet9Respawn;<a name="line.145"></a>
+<span class="sourceLineNo">146</span>import net.minecraft.potion.PotionEffect;<a name="line.146"></a>
+<span class="sourceLineNo">147</span>import net.minecraft.scoreboard.Score;<a name="line.147"></a>
+<span class="sourceLineNo">148</span>import net.minecraft.scoreboard.ScoreObjective;<a name="line.148"></a>
+<span class="sourceLineNo">149</span>import net.minecraft.scoreboard.ScoreObjectiveCriteria;<a name="line.149"></a>
+<span class="sourceLineNo">150</span>import net.minecraft.scoreboard.ScorePlayerTeam;<a name="line.150"></a>
+<span class="sourceLineNo">151</span>import net.minecraft.scoreboard.Scoreboard;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>import net.minecraft.server.integrated.IntegratedServer;<a name="line.152"></a>
+<span class="sourceLineNo">153</span>import net.minecraft.stats.StatList;<a name="line.153"></a>
+<span class="sourceLineNo">154</span>import net.minecraft.tileentity.TileEntity;<a name="line.154"></a>
+<span class="sourceLineNo">155</span>import net.minecraft.tileentity.TileEntityBeacon;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>import net.minecraft.tileentity.TileEntityBrewingStand;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>import net.minecraft.tileentity.TileEntityCommandBlock;<a name="line.157"></a>
+<span class="sourceLineNo">158</span>import net.minecraft.tileentity.TileEntityDispenser;<a name="line.158"></a>
+<span class="sourceLineNo">159</span>import net.minecraft.tileentity.TileEntityDropper;<a name="line.159"></a>
+<span class="sourceLineNo">160</span>import net.minecraft.tileentity.TileEntityFurnace;<a name="line.160"></a>
+<span class="sourceLineNo">161</span>import net.minecraft.tileentity.TileEntityHopper;<a name="line.161"></a>
+<span class="sourceLineNo">162</span>import net.minecraft.tileentity.TileEntityMobSpawner;<a name="line.162"></a>
+<span class="sourceLineNo">163</span>import net.minecraft.tileentity.TileEntitySign;<a name="line.163"></a>
+<span class="sourceLineNo">164</span>import net.minecraft.tileentity.TileEntitySkull;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>import net.minecraft.util.ChunkCoordinates;<a name="line.165"></a>
+<span class="sourceLineNo">166</span>import net.minecraft.util.CryptManager;<a name="line.166"></a>
+<span class="sourceLineNo">167</span>import net.minecraft.util.MathHelper;<a name="line.167"></a>
+<span class="sourceLineNo">168</span>import net.minecraft.util.StringTranslate;<a name="line.168"></a>
+<span class="sourceLineNo">169</span>import net.minecraft.village.MerchantRecipeList;<a name="line.169"></a>
+<span class="sourceLineNo">170</span>import net.minecraft.world.EnumGameType;<a name="line.170"></a>
+<span class="sourceLineNo">171</span>import net.minecraft.world.Explosion;<a name="line.171"></a>
+<span class="sourceLineNo">172</span>import net.minecraft.world.WorldProviderSurface;<a name="line.172"></a>
+<span class="sourceLineNo">173</span>import net.minecraft.world.WorldSettings;<a name="line.173"></a>
+<span class="sourceLineNo">174</span>import net.minecraft.world.chunk.Chunk;<a name="line.174"></a>
+<span class="sourceLineNo">175</span>import net.minecraft.world.storage.ISaveHandler;<a name="line.175"></a>
+<span class="sourceLineNo">176</span>import net.minecraft.world.storage.MapStorage;<a name="line.176"></a>
+<span class="sourceLineNo">177</span>import org.lwjgl.input.Keyboard;<a name="line.177"></a>
+<span class="sourceLineNo">178</span><a name="line.178"></a>
+<span class="sourceLineNo">179</span>import net.minecraftforge.client.ForgeHooksClient;<a name="line.179"></a>
+<span class="sourceLineNo">180</span>import net.minecraftforge.client.event.ClientChatReceivedEvent;<a name="line.180"></a>
+<span class="sourceLineNo">181</span>import net.minecraftforge.common.ForgeHooks;<a name="line.181"></a>
+<span class="sourceLineNo">182</span>import net.minecraftforge.common.MinecraftForge;<a name="line.182"></a>
+<span class="sourceLineNo">183</span><a name="line.183"></a>
+<span class="sourceLineNo">184</span>@SideOnly(Side.CLIENT)<a name="line.184"></a>
+<span class="sourceLineNo">185</span>public class NetClientHandler extends NetHandler<a name="line.185"></a>
+<span class="sourceLineNo">186</span>{<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    /** True if kicked or disconnected from the server. */<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    private boolean disconnected = false;<a name="line.188"></a>
+<span class="sourceLineNo">189</span><a name="line.189"></a>
+<span class="sourceLineNo">190</span>    /** Reference to the NetworkManager object. */<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    private INetworkManager netManager;<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    public String field_72560_a;<a name="line.192"></a>
+<span class="sourceLineNo">193</span><a name="line.193"></a>
+<span class="sourceLineNo">194</span>    /** Reference to the Minecraft object. */<a name="line.194"></a>
+<span class="sourceLineNo">195</span>    private Minecraft mc;<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    private WorldClient worldClient;<a name="line.196"></a>
+<span class="sourceLineNo">197</span><a name="line.197"></a>
+<span class="sourceLineNo">198</span>    /**<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     * True if the client has finished downloading terrain and may spawn. Set upon receipt of a player position packet,<a name="line.199"></a>
+<span class="sourceLineNo">200</span>     * reset upon respawning.<a name="line.200"></a>
+<span class="sourceLineNo">201</span>     */<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    private boolean doneLoadingTerrain = false;<a name="line.202"></a>
+<span class="sourceLineNo">203</span>    public MapStorage mapStorage = new MapStorage((ISaveHandler)null);<a name="line.203"></a>
+<span class="sourceLineNo">204</span><a name="line.204"></a>
+<span class="sourceLineNo">205</span>    /** A HashMap of all player names and their player information objects */<a name="line.205"></a>
+<span class="sourceLineNo">206</span>    private Map playerInfoMap = new HashMap();<a name="line.206"></a>
+<span class="sourceLineNo">207</span><a name="line.207"></a>
+<span class="sourceLineNo">208</span>    /**<a name="line.208"></a>
+<span class="sourceLineNo">209</span>     * An ArrayList of GuiPlayerInfo (includes all the players' GuiPlayerInfo on the current server)<a name="line.209"></a>
+<span class="sourceLineNo">210</span>     */<a name="line.210"></a>
+<span class="sourceLineNo">211</span>    public List playerInfoList = new ArrayList();<a name="line.211"></a>
+<span class="sourceLineNo">212</span>    public int currentServerMaxPlayers = 20;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>    private GuiScreen field_98183_l = null;<a name="line.213"></a>
+<span class="sourceLineNo">214</span><a name="line.214"></a>
+<span class="sourceLineNo">215</span>    /** RNG. */<a name="line.215"></a>
+<span class="sourceLineNo">216</span>    Random rand = new Random();<a name="line.216"></a>
+<span class="sourceLineNo">217</span><a name="line.217"></a>
+<span class="sourceLineNo">218</span>    private static byte connectionCompatibilityLevel;<a name="line.218"></a>
+<span class="sourceLineNo">219</span><a name="line.219"></a>
+<span class="sourceLineNo">220</span>    public NetClientHandler(Minecraft par1Minecraft, String par2Str, int par3) throws IOException<a name="line.220"></a>
+<span class="sourceLineNo">221</span>    {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        this.mc = par1Minecraft;<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        Socket socket = new Socket(InetAddress.getByName(par2Str), par3);<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        this.netManager = new TcpConnection(par1Minecraft.getLogAgent(), socket, "Client", this);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        FMLNetworkHandler.onClientConnectionToRemoteServer(this, par2Str, par3, this.netManager);<a name="line.225"></a>
+<span class="sourceLineNo">226</span>    }<a name="line.226"></a>
+<span class="sourceLineNo">227</span><a name="line.227"></a>
+<span class="sourceLineNo">228</span>    public NetClientHandler(Minecraft par1Minecraft, String par2Str, int par3, GuiScreen par4GuiScreen) throws IOException<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    {<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        this.mc = par1Minecraft;<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        this.field_98183_l = par4GuiScreen;<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        Socket socket = new Socket(InetAddress.getByName(par2Str), par3);<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        this.netManager = new TcpConnection(par1Minecraft.getLogAgent(), socket, "Client", this);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>        FMLNetworkHandler.onClientConnectionToRemoteServer(this, par2Str, par3, this.netManager);<a name="line.234"></a>
+<span class="sourceLineNo">235</span>    }<a name="line.235"></a>
+<span class="sourceLineNo">236</span><a name="line.236"></a>
+<span class="sourceLineNo">237</span>    public NetClientHandler(Minecraft par1Minecraft, IntegratedServer par2IntegratedServer) throws IOException<a name="line.237"></a>
+<span class="sourceLineNo">238</span>    {<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        this.mc = par1Minecraft;<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        this.netManager = new MemoryConnection(par1Minecraft.getLogAgent(), this);<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        par2IntegratedServer.getServerListeningThread().func_71754_a((MemoryConnection)this.netManager, par1Minecraft.session.username);<a name="line.241"></a>
+<span class="sourceLineNo">242</span>        FMLNetworkHandler.onClientConnectionToIntegratedServer(this, par2IntegratedServer, this.netManager);<a name="line.242"></a>
+<span class="sourceLineNo">243</span>    }<a name="line.243"></a>
+<span class="sourceLineNo">244</span><a name="line.244"></a>
+<span class="sourceLineNo">245</span>    /**<a name="line.245"></a>
+<span class="sourceLineNo">246</span>     * sets netManager and worldClient to null<a name="line.246"></a>
+<span class="sourceLineNo">247</span>     */<a name="line.247"></a>
+<span class="sourceLineNo">248</span>    public void cleanup()<a name="line.248"></a>
+<span class="sourceLineNo">249</span>    {<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        if (this.netManager != null)<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        {<a name="line.251"></a>
+<span class="sourceLineNo">252</span>            this.netManager.wakeThreads();<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        }<a name="line.253"></a>
+<span class="sourceLineNo">254</span><a name="line.254"></a>
+<span class="sourceLineNo">255</span>        this.netManager = null;<a name="line.255"></a>
+<span class="sourceLineNo">256</span>        this.worldClient = null;<a name="line.256"></a>
+<span class="sourceLineNo">257</span>    }<a name="line.257"></a>
+<span class="sourceLineNo">258</span><a name="line.258"></a>
+<span class="sourceLineNo">259</span>    /**<a name="line.259"></a>
+<span class="sourceLineNo">260</span>     * Processes the packets that have been read since the last call to this function.<a name="line.260"></a>
+<span class="sourceLineNo">261</span>     */<a name="line.261"></a>
+<span class="sourceLineNo">262</span>    public void processReadPackets()<a name="line.262"></a>
+<span class="sourceLineNo">263</span>    {<a name="line.263"></a>
+<span class="sourceLineNo">264</span>        if (!this.disconnected &amp;&amp; this.netManager != null)<a name="line.264"></a>
+<span class="sourceLineNo">265</span>        {<a name="line.265"></a>
+<span class="sourceLineNo">266</span>            this.netManager.processReadPackets();<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        }<a name="line.267"></a>
+<span class="sourceLineNo">268</span><a name="line.268"></a>
+<span class="sourceLineNo">269</span>        if (this.netManager != null)<a name="line.269"></a>
+<span class="sourceLineNo">270</span>        {<a name="line.270"></a>
+<span class="sourceLineNo">271</span>            this.netManager.wakeThreads();<a name="line.271"></a>
+<span class="sourceLineNo">272</span>        }<a name="line.272"></a>
+<span class="sourceLineNo">273</span>    }<a name="line.273"></a>
+<span class="sourceLineNo">274</span><a name="line.274"></a>
+<span class="sourceLineNo">275</span>    public void handleServerAuthData(Packet253ServerAuthData par1Packet253ServerAuthData)<a name="line.275"></a>
+<span class="sourceLineNo">276</span>    {<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        String s = par1Packet253ServerAuthData.getServerId().trim();<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        PublicKey publickey = par1Packet253ServerAuthData.getPublicKey();<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        SecretKey secretkey = CryptManager.createNewSharedKey();<a name="line.279"></a>
+<span class="sourceLineNo">280</span><a name="line.280"></a>
+<span class="sourceLineNo">281</span>        if (!"-".equals(s))<a name="line.281"></a>
+<span class="sourceLineNo">282</span>        {<a name="line.282"></a>
+<span class="sourceLineNo">283</span>            String s1 = (new BigInteger(CryptManager.getServerIdHash(s, publickey, secretkey))).toString(16);<a name="line.283"></a>
+<span class="sourceLineNo">284</span>            String s2 = this.sendSessionRequest(this.mc.session.username, this.mc.session.sessionId, s1);<a name="line.284"></a>
+<span class="sourceLineNo">285</span><a name="line.285"></a>
+<span class="sourceLineNo">286</span>            if (!"ok".equalsIgnoreCase(s2))<a name="line.286"></a>
+<span class="sourceLineNo">287</span>            {<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                this.netManager.networkShutdown("disconnect.loginFailedInfo", new Object[] {s2});<a name="line.288"></a>
+<span class="sourceLineNo">289</span>                return;<a name="line.289"></a>
+<span class="sourceLineNo">290</span>            }<a name="line.290"></a>
+<span class="sourceLineNo">291</span>        }<a name="line.291"></a>
+<span class="sourceLineNo">292</span><a name="line.292"></a>
+<span class="sourceLineNo">293</span>        this.addToSendQueue(new Packet252SharedKey(secretkey, publickey, par1Packet253ServerAuthData.getVerifyToken()));<a name="line.293"></a>
+<span class="sourceLineNo">294</span>    }<a name="line.294"></a>
+<span class="sourceLineNo">295</span><a name="line.295"></a>
+<span class="sourceLineNo">296</span>    /**<a name="line.296"></a>
+<span class="sourceLineNo">297</span>     * Send request to http://session.minecraft.net with user's sessionId and serverId hash<a name="line.297"></a>
+<span class="sourceLineNo">298</span>     */<a name="line.298"></a>
+<span class="sourceLineNo">299</span>    private String sendSessionRequest(String par1Str, String par2Str, String par3Str)<a name="line.299"></a>
+<span class="sourceLineNo">300</span>    {<a name="line.300"></a>
+<span class="sourceLineNo">301</span>        try<a name="line.301"></a>
+<span class="sourceLineNo">302</span>        {<a name="line.302"></a>
+<span class="sourceLineNo">303</span>            URL url = new URL("http://session.minecraft.net/game/joinserver.jsp?user=" + urlEncode(par1Str) + "&amp;sessionId=" + urlEncode(par2Str) + "&amp;serverId=" + urlEncode(par3Str));<a name="line.303"></a>
+<span class="sourceLineNo">304</span>            BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(url.openStream()));<a name="line.304"></a>
+<span class="sourceLineNo">305</span>            String s3 = bufferedreader.readLine();<a name="line.305"></a>
+<span class="sourceLineNo">306</span>            bufferedreader.close();<a name="line.306"></a>
+<span class="sourceLineNo">307</span>            return s3;<a name="line.307"></a>
+<span class="sourceLineNo">308</span>        }<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        catch (IOException ioexception)<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        {<a name="line.310"></a>
+<span class="sourceLineNo">311</span>            return ioexception.toString();<a name="line.311"></a>
+<span class="sourceLineNo">312</span>        }<a name="line.312"></a>
+<span class="sourceLineNo">313</span>    }<a name="line.313"></a>
+<span class="sourceLineNo">314</span><a name="line.314"></a>
+<span class="sourceLineNo">315</span>    /**<a name="line.315"></a>
+<span class="sourceLineNo">316</span>     * Encode the given string for insertion into a URL<a name="line.316"></a>
+<span class="sourceLineNo">317</span>     */<a name="line.317"></a>
+<span class="sourceLineNo">318</span>    private static String urlEncode(String par0Str) throws IOException<a name="line.318"></a>
+<span class="sourceLineNo">319</span>    {<a name="line.319"></a>
+<span class="sourceLineNo">320</span>        return URLEncoder.encode(par0Str, "UTF-8");<a name="line.320"></a>
+<span class="sourceLineNo">321</span>    }<a name="line.321"></a>
+<span class="sourceLineNo">322</span><a name="line.322"></a>
+<span class="sourceLineNo">323</span>    public void handleSharedKey(Packet252SharedKey par1Packet252SharedKey)<a name="line.323"></a>
+<span class="sourceLineNo">324</span>    {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>        this.addToSendQueue(FMLNetworkHandler.getFMLFakeLoginPacket());<a name="line.325"></a>
+<span class="sourceLineNo">326</span>        this.addToSendQueue(new Packet205ClientCommand(0));<a name="line.326"></a>
+<span class="sourceLineNo">327</span>    }<a name="line.327"></a>
+<span class="sourceLineNo">328</span><a name="line.328"></a>
+<span class="sourceLineNo">329</span>    public void handleLogin(Packet1Login par1Packet1Login)<a name="line.329"></a>
+<span class="sourceLineNo">330</span>    {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>        this.mc.playerController = new PlayerControllerMP(this.mc, this);<a name="line.331"></a>
+<span class="sourceLineNo">332</span>        this.mc.statFileWriter.readStat(StatList.joinMultiplayerStat, 1);<a name="line.332"></a>
+<span class="sourceLineNo">333</span>        this.worldClient = new WorldClient(this, new WorldSettings(0L, par1Packet1Login.gameType, false, par1Packet1Login.hardcoreMode, par1Packet1Login.terrainType), par1Packet1Login.dimension, par1Packet1Login.difficultySetting, this.mc.mcProfiler, this.mc.getLogAgent());<a name="line.333"></a>
+<span class="sourceLineNo">334</span>        this.worldClient.isRemote = true;<a name="line.334"></a>
+<span class="sourceLineNo">335</span>        this.mc.loadWorld(this.worldClient);<a name="line.335"></a>
+<span class="sourceLineNo">336</span>        this.mc.thePlayer.dimension = par1Packet1Login.dimension;<a name="line.336"></a>
+<span class="sourceLineNo">337</span>        this.mc.displayGuiScreen(new GuiDownloadTerrain(this));<a name="line.337"></a>
+<span class="sourceLineNo">338</span>        this.mc.thePlayer.entityId = par1Packet1Login.clientEntityId;<a name="line.338"></a>
+<span class="sourceLineNo">339</span>        this.currentServerMaxPlayers = par1Packet1Login.maxPlayers;<a name="line.339"></a>
+<span class="sourceLineNo">340</span>        this.mc.playerController.setGameType(par1Packet1Login.gameType);<a name="line.340"></a>
+<span class="sourceLineNo">341</span>        FMLNetworkHandler.onConnectionEstablishedToServer(this, netManager, par1Packet1Login);<a name="line.341"></a>
+<span class="sourceLineNo">342</span>        this.mc.gameSettings.sendSettingsToServer();<a name="line.342"></a>
+<span class="sourceLineNo">343</span>    }<a name="line.343"></a>
+<span class="sourceLineNo">344</span><a name="line.344"></a>
+<span class="sourceLineNo">345</span>    public void handleVehicleSpawn(Packet23VehicleSpawn par1Packet23VehicleSpawn)<a name="line.345"></a>
+<span class="sourceLineNo">346</span>    {<a name="line.346"></a>
+<span class="sourceLineNo">347</span>        double d0 = (double)par1Packet23VehicleSpawn.xPosition / 32.0D;<a name="line.347"></a>
+<span class="sourceLineNo">348</span>        double d1 = (double)par1Packet23VehicleSpawn.yPosition / 32.0D;<a name="line.348"></a>
+<span class="sourceLineNo">349</span>        double d2 = (double)par1Packet23VehicleSpawn.zPosition / 32.0D;<a name="line.349"></a>
+<span class="sourceLineNo">350</span>        Object object = null;<a name="line.350"></a>
+<span class="sourceLineNo">351</span><a name="line.351"></a>
+<span class="sourceLineNo">352</span>        if (par1Packet23VehicleSpawn.type == 10)<a name="line.352"></a>
+<span class="sourceLineNo">353</span>        {<a name="line.353"></a>
+<span class="sourceLineNo">354</span>            object = EntityMinecart.createMinecart(this.worldClient, d0, d1, d2, par1Packet23VehicleSpawn.throwerEntityId);<a name="line.354"></a>
+<span class="sourceLineNo">355</span>        }<a name="line.355"></a>
+<span class="sourceLineNo">356</span>        else if (par1Packet23VehicleSpawn.type == 90)<a name="line.356"></a>
+<span class="sourceLineNo">357</span>        {<a name="line.357"></a>
+<span class="sourceLineNo">358</span>            Entity entity = this.getEntityByID(par1Packet23VehicleSpawn.throwerEntityId);<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>            if (entity instanceof EntityPlayer)<a name="line.360"></a>
+<span class="sourceLineNo">361</span>            {<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                object = new EntityFishHook(this.worldClient, d0, d1, d2, (EntityPlayer)entity);<a name="line.362"></a>
+<span class="sourceLineNo">363</span>            }<a name="line.363"></a>
+<span class="sourceLineNo">364</span><a name="line.364"></a>
+<span class="sourceLineNo">365</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.365"></a>
+<span class="sourceLineNo">366</span>        }<a name="line.366"></a>
+<span class="sourceLineNo">367</span>        else if (par1Packet23VehicleSpawn.type == 60)<a name="line.367"></a>
+<span class="sourceLineNo">368</span>        {<a name="line.368"></a>
+<span class="sourceLineNo">369</span>            object = new EntityArrow(this.worldClient, d0, d1, d2);<a name="line.369"></a>
+<span class="sourceLineNo">370</span>        }<a name="line.370"></a>
+<span class="sourceLineNo">371</span>        else if (par1Packet23VehicleSpawn.type == 61)<a name="line.371"></a>
+<span class="sourceLineNo">372</span>        {<a name="line.372"></a>
+<span class="sourceLineNo">373</span>            object = new EntitySnowball(this.worldClient, d0, d1, d2);<a name="line.373"></a>
+<span class="sourceLineNo">374</span>        }<a name="line.374"></a>
+<span class="sourceLineNo">375</span>        else if (par1Packet23VehicleSpawn.type == 71)<a name="line.375"></a>
+<span class="sourceLineNo">376</span>        {<a name="line.376"></a>
+<span class="sourceLineNo">377</span>            object = new EntityItemFrame(this.worldClient, (int)d0, (int)d1, (int)d2, par1Packet23VehicleSpawn.throwerEntityId);<a name="line.377"></a>
+<span class="sourceLineNo">378</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        }<a name="line.379"></a>
+<span class="sourceLineNo">380</span>        else if (par1Packet23VehicleSpawn.type == 65)<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        {<a name="line.381"></a>
+<span class="sourceLineNo">382</span>            object = new EntityEnderPearl(this.worldClient, d0, d1, d2);<a name="line.382"></a>
+<span class="sourceLineNo">383</span>        }<a name="line.383"></a>
+<span class="sourceLineNo">384</span>        else if (par1Packet23VehicleSpawn.type == 72)<a name="line.384"></a>
+<span class="sourceLineNo">385</span>        {<a name="line.385"></a>
+<span class="sourceLineNo">386</span>            object = new EntityEnderEye(this.worldClient, d0, d1, d2);<a name="line.386"></a>
+<span class="sourceLineNo">387</span>        }<a name="line.387"></a>
+<span class="sourceLineNo">388</span>        else if (par1Packet23VehicleSpawn.type == 76)<a name="line.388"></a>
+<span class="sourceLineNo">389</span>        {<a name="line.389"></a>
+<span class="sourceLineNo">390</span>            object = new EntityFireworkRocket(this.worldClient, d0, d1, d2, (ItemStack)null);<a name="line.390"></a>
+<span class="sourceLineNo">391</span>        }<a name="line.391"></a>
+<span class="sourceLineNo">392</span>        else if (par1Packet23VehicleSpawn.type == 63)<a name="line.392"></a>
+<span class="sourceLineNo">393</span>        {<a name="line.393"></a>
+<span class="sourceLineNo">394</span>            object = new EntityLargeFireball(this.worldClient, d0, d1, d2, (double)par1Packet23VehicleSpawn.speedX / 8000.0D, (double)par1Packet23VehicleSpawn.speedY / 8000.0D, (double)par1Packet23VehicleSpawn.speedZ / 8000.0D);<a name="line.394"></a>
+<span class="sourceLineNo">395</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.395"></a>
+<span class="sourceLineNo">396</span>        }<a name="line.396"></a>
+<span class="sourceLineNo">397</span>        else if (par1Packet23VehicleSpawn.type == 64)<a name="line.397"></a>
+<span class="sourceLineNo">398</span>        {<a name="line.398"></a>
+<span class="sourceLineNo">399</span>            object = new EntitySmallFireball(this.worldClient, d0, d1, d2, (double)par1Packet23VehicleSpawn.speedX / 8000.0D, (double)par1Packet23VehicleSpawn.speedY / 8000.0D, (double)par1Packet23VehicleSpawn.speedZ / 8000.0D);<a name="line.399"></a>
+<span class="sourceLineNo">400</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.400"></a>
+<span class="sourceLineNo">401</span>        }<a name="line.401"></a>
+<span class="sourceLineNo">402</span>        else if (par1Packet23VehicleSpawn.type == 66)<a name="line.402"></a>
+<span class="sourceLineNo">403</span>        {<a name="line.403"></a>
+<span class="sourceLineNo">404</span>            object = new EntityWitherSkull(this.worldClient, d0, d1, d2, (double)par1Packet23VehicleSpawn.speedX / 8000.0D, (double)par1Packet23VehicleSpawn.speedY / 8000.0D, (double)par1Packet23VehicleSpawn.speedZ / 8000.0D);<a name="line.404"></a>
+<span class="sourceLineNo">405</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.405"></a>
+<span class="sourceLineNo">406</span>        }<a name="line.406"></a>
+<span class="sourceLineNo">407</span>        else if (par1Packet23VehicleSpawn.type == 62)<a name="line.407"></a>
+<span class="sourceLineNo">408</span>        {<a name="line.408"></a>
+<span class="sourceLineNo">409</span>            object = new EntityEgg(this.worldClient, d0, d1, d2);<a name="line.409"></a>
+<span class="sourceLineNo">410</span>        }<a name="line.410"></a>
+<span class="sourceLineNo">411</span>        else if (par1Packet23VehicleSpawn.type == 73)<a name="line.411"></a>
+<span class="sourceLineNo">412</span>        {<a name="line.412"></a>
+<span class="sourceLineNo">413</span>            object = new EntityPotion(this.worldClient, d0, d1, d2, par1Packet23VehicleSpawn.throwerEntityId);<a name="line.413"></a>
+<span class="sourceLineNo">414</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.414"></a>
+<span class="sourceLineNo">415</span>        }<a name="line.415"></a>
+<span class="sourceLineNo">416</span>        else if (par1Packet23VehicleSpawn.type == 75)<a name="line.416"></a>
+<span class="sourceLineNo">417</span>        {<a name="line.417"></a>
+<span class="sourceLineNo">418</span>            object = new EntityExpBottle(this.worldClient, d0, d1, d2);<a name="line.418"></a>
+<span class="sourceLineNo">419</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.419"></a>
+<span class="sourceLineNo">420</span>        }<a name="line.420"></a>
+<span class="sourceLineNo">421</span>        else if (par1Packet23VehicleSpawn.type == 1)<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        {<a name="line.422"></a>
+<span class="sourceLineNo">423</span>            object = new EntityBoat(this.worldClient, d0, d1, d2);<a name="line.423"></a>
+<span class="sourceLineNo">424</span>        }<a name="line.424"></a>
+<span class="sourceLineNo">425</span>        else if (par1Packet23VehicleSpawn.type == 50)<a name="line.425"></a>
+<span class="sourceLineNo">426</span>        {<a name="line.426"></a>
+<span class="sourceLineNo">427</span>            object = new EntityTNTPrimed(this.worldClient, d0, d1, d2, (EntityLiving)null);<a name="line.427"></a>
+<span class="sourceLineNo">428</span>        }<a name="line.428"></a>
+<span class="sourceLineNo">429</span>        else if (par1Packet23VehicleSpawn.type == 51)<a name="line.429"></a>
+<span class="sourceLineNo">430</span>        {<a name="line.430"></a>
+<span class="sourceLineNo">431</span>            object = new EntityEnderCrystal(this.worldClient, d0, d1, d2);<a name="line.431"></a>
+<span class="sourceLineNo">432</span>        }<a name="line.432"></a>
+<span class="sourceLineNo">433</span>        else if (par1Packet23VehicleSpawn.type == 2)<a name="line.433"></a>
+<span class="sourceLineNo">434</span>        {<a name="line.434"></a>
+<span class="sourceLineNo">435</span>            object = new EntityItem(this.worldClient, d0, d1, d2);<a name="line.435"></a>
+<span class="sourceLineNo">436</span>        }<a name="line.436"></a>
+<span class="sourceLineNo">437</span>        else if (par1Packet23VehicleSpawn.type == 70)<a name="line.437"></a>
+<span class="sourceLineNo">438</span>        {<a name="line.438"></a>
+<span class="sourceLineNo">439</span>            object = new EntityFallingSand(this.worldClient, d0, d1, d2, par1Packet23VehicleSpawn.throwerEntityId &amp; 65535, par1Packet23VehicleSpawn.throwerEntityId &gt;&gt; 16);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>            par1Packet23VehicleSpawn.throwerEntityId = 0;<a name="line.440"></a>
+<span class="sourceLineNo">441</span>        }<a name="line.441"></a>
+<span class="sourceLineNo">442</span><a name="line.442"></a>
+<span class="sourceLineNo">443</span>        if (object != null)<a name="line.443"></a>
+<span class="sourceLineNo">444</span>        {<a name="line.444"></a>
+<span class="sourceLineNo">445</span>            ((Entity)object).serverPosX = par1Packet23VehicleSpawn.xPosition;<a name="line.445"></a>
+<span class="sourceLineNo">446</span>            ((Entity)object).serverPosY = par1Packet23VehicleSpawn.yPosition;<a name="line.446"></a>
+<span class="sourceLineNo">447</span>            ((Entity)object).serverPosZ = par1Packet23VehicleSpawn.zPosition;<a name="line.447"></a>
+<span class="sourceLineNo">448</span>            ((Entity)object).rotationPitch = (float)(par1Packet23VehicleSpawn.pitch * 360) / 256.0F;<a name="line.448"></a>
+<span class="sourceLineNo">449</span>            ((Entity)object).rotationYaw = (float)(par1Packet23VehicleSpawn.yaw * 360) / 256.0F;<a name="line.449"></a>
+<span class="sourceLineNo">450</span>            Entity[] aentity = ((Entity)object).getParts();<a name="line.450"></a>
+<span class="sourceLineNo">451</span><a name="line.451"></a>
+<span class="sourceLineNo">452</span>            if (aentity != null)<a name="line.452"></a>
+<span class="sourceLineNo">453</span>            {<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                int i = par1Packet23VehicleSpawn.entityId - ((Entity)object).entityId;<a name="line.454"></a>
+<span class="sourceLineNo">455</span><a name="line.455"></a>
+<span class="sourceLineNo">456</span>                for (int j = 0; j &lt; aentity.length; ++j)<a name="line.456"></a>
+<span class="sourceLineNo">457</span>                {<a name="line.457"></a>
+<span class="sourceLineNo">458</span>                    aentity[j].entityId += i;<a name="line.458"></a>
+<span class="sourceLineNo">459</span>                }<a name="line.459"></a>
+<span class="sourceLineNo">460</span>            }<a name="line.460"></a>
+<span class="sourceLineNo">461</span><a name="line.461"></a>
+<span class="sourceLineNo">462</span>            ((Entity)object).entityId = par1Packet23VehicleSpawn.entityId;<a name="line.462"></a>
+<span class="sourceLineNo">463</span>            this.worldClient.addEntityToWorld(par1Packet23VehicleSpawn.entityId, (Entity)object);<a name="line.463"></a>
+<span class="sourceLineNo">464</span><a name="line.464"></a>
+<span class="sourceLineNo">465</span>            if (par1Packet23VehicleSpawn.throwerEntityId &gt; 0)<a name="line.465"></a>
+<span class="sourceLineNo">466</span>            {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>                if (par1Packet23VehicleSpawn.type == 60)<a name="line.467"></a>
+<span class="sourceLineNo">468</span>                {<a name="line.468"></a>
+<span class="sourceLineNo">469</span>                    Entity entity1 = this.getEntityByID(par1Packet23VehicleSpawn.throwerEntityId);<a name="line.469"></a>
+<span class="sourceLineNo">470</span><a name="line.470"></a>
+<span class="sourceLineNo">471</span>                    if (entity1 instanceof EntityLiving)<a name="line.471"></a>
+<span class="sourceLineNo">472</span>                    {<a name="line.472"></a>
+<span class="sourceLineNo">473</span>                        EntityArrow entityarrow = (EntityArrow)object;<a name="line.473"></a>
+<span class="sourceLineNo">474</span>                        entityarrow.shootingEntity = entity1;<a name="line.474"></a>
+<span class="sourceLineNo">475</span>                    }<a name="line.475"></a>
+<span class="sourceLineNo">476</span>                }<a name="line.476"></a>
+<span class="sourceLineNo">477</span><a name="line.477"></a>
+<span class="sourceLineNo">478</span>                ((Entity)object).setVelocity((double)par1Packet23VehicleSpawn.speedX / 8000.0D, (double)par1Packet23VehicleSpawn.speedY / 8000.0D, (double)par1Packet23VehicleSpawn.speedZ / 8000.0D);<a name="line.478"></a>
+<span class="sourceLineNo">479</span>            }<a name="line.479"></a>
+<span class="sourceLineNo">480</span>        }<a name="line.480"></a>
+<span class="sourceLineNo">481</span>    }<a name="line.481"></a>
+<span class="sourceLineNo">482</span><a name="line.482"></a>
+<span class="sourceLineNo">483</span>    /**<a name="line.483"></a>
+<span class="sourceLineNo">484</span>     * Handle a entity experience orb packet.<a name="line.484"></a>
+<span class="sourceLineNo">485</span>     */<a name="line.485"></a>
+<span class="sourceLineNo">486</span>    public void handleEntityExpOrb(Packet26EntityExpOrb par1Packet26EntityExpOrb)<a name="line.486"></a>
+<span class="sourceLineNo">487</span>    {<a name="line.487"></a>
+<span class="sourceLineNo">488</span>        EntityXPOrb entityxporb = new EntityXPOrb(this.worldClient, (double)par1Packet26EntityExpOrb.posX, (double)par1Packet26EntityExpOrb.posY, (double)par1Packet26EntityExpOrb.posZ, par1Packet26EntityExpOrb.xpValue);<a name="line.488"></a>
+<span class="sourceLineNo">489</span>        entityxporb.serverPosX = par1Packet26EntityExpOrb.posX;<a name="line.489"></a>
+<span class="sourceLineNo">490</span>        entityxporb.serverPosY = par1Packet26EntityExpOrb.posY;<a name="line.490"></a>
+<span class="sourceLineNo">491</span>        entityxporb.serverPosZ = par1Packet26EntityExpOrb.posZ;<a name="line.491"></a>
+<span class="sourceLineNo">492</span>        entityxporb.rotationYaw = 0.0F;<a name="line.492"></a>
+<span class="sourceLineNo">493</span>        entityxporb.rotationPitch = 0.0F;<a name="line.493"></a>
+<span class="sourceLineNo">494</span>        entityxporb.entityId = par1Packet26EntityExpOrb.entityId;<a name="line.494"></a>
+<span class="sourceLineNo">495</span>        this.worldClient.addEntityToWorld(par1Packet26EntityExpOrb.entityId, entityxporb);<a name="line.495"></a>
+<span class="sourceLineNo">496</span>    }<a name="line.496"></a>
+<span class="sourceLineNo">497</span><a name="line.497"></a>
+<span class="sourceLineNo">498</span>    /**<a name="line.498"></a>
+<span class="sourceLineNo">499</span>     * Handles weather packet<a name="line.499"></a>
+<span class="sourceLineNo">500</span>     */<a name="line.500"></a>
+<span class="sourceLineNo">501</span>    public void handleWeather(Packet71Weather par1Packet71Weather)<a name="line.501"></a>
+<span class="sourceLineNo">502</span>    {<a name="line.502"></a>
+<span class="sourceLineNo">503</span>        double d0 = (double)par1Packet71Weather.posX / 32.0D;<a name="line.503"></a>
+<span class="sourceLineNo">504</span>        double d1 = (double)par1Packet71Weather.posY / 32.0D;<a name="line.504"></a>
+<span class="sourceLineNo">505</span>        double d2 = (double)par1Packet71Weather.posZ / 32.0D;<a name="line.505"></a>
+<span class="sourceLineNo">506</span>        EntityLightningBolt entitylightningbolt = null;<a name="line.506"></a>
+<span class="sourceLineNo">507</span><a name="line.507"></a>
+<span class="sourceLineNo">508</span>        if (par1Packet71Weather.isLightningBolt == 1)<a name="line.508"></a>
+<span class="sourceLineNo">509</span>        {<a name="line.509"></a>
+<span class="sourceLineNo">510</span>            entitylightningbolt = new EntityLightningBolt(this.worldClient, d0, d1, d2);<a name="line.510"></a>
+<span class="sourceLineNo">511</span>        }<a name="line.511"></a>
+<span class="sourceLineNo">512</span><a name="line.512"></a>
+<span class="sourceLineNo">513</span>        if (entitylightningbolt != null)<a name="line.513"></a>
+<span class="sourceLineNo">514</span>        {<a name="line.514"></a>
+<span class="sourceLineNo">515</span>            entitylightningbolt.serverPosX = par1Packet71Weather.posX;<a name="line.515"></a>
+<span class="sourceLineNo">516</span>            entitylightningbolt.serverPosY = par1Packet71Weather.posY;<a name="line.516"></a>
+<span class="sourceLineNo">517</span>            entitylightningbolt.serverPosZ = par1Packet71Weather.posZ;<a name="line.517"></a>
+<span class="sourceLineNo">518</span>            entitylightningbolt.rotationYaw = 0.0F;<a name="line.518"></a>
+<span class="sourceLineNo">519</span>            entitylightningbolt.rotationPitch = 0.0F;<a name="line.519"></a>
+<span class="sourceLineNo">520</span>            entitylightningbolt.entityId = par1Packet71Weather.entityID;<a name="line.520"></a>
+<span class="sourceLineNo">521</span>            this.worldClient.addWeatherEffect(entitylightningbolt);<a name="line.521"></a>
+<span class="sourceLineNo">522</span>        }<a name="line.522"></a>
+<span class="sourceLineNo">523</span>    }<a name="line.523"></a>
+<span class="sourceLineNo">524</span><a name="line.524"></a>
+<span class="sourceLineNo">525</span>    /**<a name="line.525"></a>
+<span class="sourceLineNo">526</span>     * Packet handler<a name="line.526"></a>
+<span class="sourceLineNo">527</span>     */<a name="line.527"></a>
+<span class="sourceLineNo">528</span>    public void handleEntityPainting(Packet25EntityPainting par1Packet25EntityPainting)<a name="line.528"></a>
+<span class="sourceLineNo">529</span>    {<a name="line.529"></a>
+<span class="sourceLineNo">530</span>        EntityPainting entitypainting = new EntityPainting(this.worldClient, par1Packet25EntityPainting.xPosition, par1Packet25EntityPainting.yPosition, par1Packet25EntityPainting.zPosition, par1Packet25EntityPainting.direction, par1Packet25EntityPainting.title);<a name="line.530"></a>
+<span class="sourceLineNo">531</span>        this.worldClient.addEntityToWorld(par1Packet25EntityPainting.entityId, entitypainting);<a name="line.531"></a>
+<span class="sourceLineNo">532</span>    }<a name="line.532"></a>
+<span class="sourceLineNo">533</span><a name="line.533"></a>
+<span class="sourceLineNo">534</span>    /**<a name="line.534"></a>
+<span class="sourceLineNo">535</span>     * Packet handler<a name="line.535"></a>
+<span class="sourceLineNo">536</span>     */<a name="line.536"></a>
+<span class="sourceLineNo">537</span>    public void handleEntityVelocity(Packet28EntityVelocity par1Packet28EntityVelocity)<a name="line.537"></a>
+<span class="sourceLineNo">538</span>    {<a name="line.538"></a>
+<span class="sourceLineNo">539</span>        Entity entity = this.getEntityByID(par1Packet28EntityVelocity.entityId);<a name="line.539"></a>
+<span class="sourceLineNo">540</span><a name="line.540"></a>
+<span class="sourceLineNo">541</span>        if (entity != null)<a name="line.541"></a>
+<span class="sourceLineNo">542</span>        {<a name="line.542"></a>
+<span class="sourceLineNo">543</span>            entity.setVelocity((double)par1Packet28EntityVelocity.motionX / 8000.0D, (double)par1Packet28EntityVelocity.motionY / 8000.0D, (double)par1Packet28EntityVelocity.motionZ / 8000.0D);<a name="line.543"></a>
+<span class="sourceLineNo">544</span>        }<a name="line.544"></a>
+<span class="sourceLineNo">545</span>    }<a name="line.545"></a>
+<span class="sourceLineNo">546</span><a name="line.546"></a>
+<span class="sourceLineNo">547</span>    /**<a name="line.547"></a>
+<span class="sourceLineNo">548</span>     * Packet handler<a name="line.548"></a>
+<span class="sourceLineNo">549</span>     */<a name="line.549"></a>
+<span class="sourceLineNo">550</span>    public void handleEntityMetadata(Packet40EntityMetadata par1Packet40EntityMetadata)<a name="line.550"></a>
+<span class="sourceLineNo">551</span>    {<a name="line.551"></a>
+<span class="sourceLineNo">552</span>        Entity entity = this.getEntityByID(par1Packet40EntityMetadata.entityId);<a name="line.552"></a>
+<span class="sourceLineNo">553</span><a name="line.553"></a>
+<span class="sourceLineNo">554</span>        if (entity != null &amp;&amp; par1Packet40EntityMetadata.getMetadata() != null)<a name="line.554"></a>
+<span class="sourceLineNo">555</span>        {<a name="line.555"></a>
+<span class="sourceLineNo">556</span>            entity.getDataWatcher().updateWatchedObjectsFromList(par1Packet40EntityMetadata.getMetadata());<a name="line.556"></a>
+<span class="sourceLineNo">557</span>        }<a name="line.557"></a>
+<span class="sourceLineNo">558</span>    }<a name="line.558"></a>
+<span class="sourceLineNo">559</span><a name="line.559"></a>
+<span class="sourceLineNo">560</span>    public void handleNamedEntitySpawn(Packet20NamedEntitySpawn par1Packet20NamedEntitySpawn)<a name="line.560"></a>
+<span class="sourceLineNo">561</span>    {<a name="line.561"></a>
+<span class="sourceLineNo">562</span>        double d0 = (double)par1Packet20NamedEntitySpawn.xPosition / 32.0D;<a name="line.562"></a>
+<span class="sourceLineNo">563</span>        double d1 = (double)par1Packet20NamedEntitySpawn.yPosition / 32.0D;<a name="line.563"></a>
+<span class="sourceLineNo">564</span>        double d2 = (double)par1Packet20NamedEntitySpawn.zPosition / 32.0D;<a name="line.564"></a>
+<span class="sourceLineNo">565</span>        float f = (float)(par1Packet20NamedEntitySpawn.rotation * 360) / 256.0F;<a name="line.565"></a>
+<span class="sourceLineNo">566</span>        float f1 = (float)(par1Packet20NamedEntitySpawn.pitch * 360) / 256.0F;<a name="line.566"></a>
+<span class="sourceLineNo">567</span>        EntityOtherPlayerMP entityotherplayermp = new EntityOtherPlayerMP(this.mc.theWorld, par1Packet20NamedEntitySpawn.name);<a name="line.567"></a>
+<span class="sourceLineNo">568</span>        entityotherplayermp.prevPosX = entityotherplayermp.lastTickPosX = (double)(entityotherplayermp.serverPosX = par1Packet20NamedEntitySpawn.xPosition);<a name="line.568"></a>
+<span class="sourceLineNo">569</span>        entityotherplayermp.prevPosY = entityotherplayermp.lastTickPosY = (double)(entityotherplayermp.serverPosY = par1Packet20NamedEntitySpawn.yPosition);<a name="line.569"></a>
+<span class="sourceLineNo">570</span>        entityotherplayermp.prevPosZ = entityotherplayermp.lastTickPosZ = (double)(entityotherplayermp.serverPosZ = par1Packet20NamedEntitySpawn.zPosition);<a name="line.570"></a>
+<span class="sourceLineNo">571</span>        int i = par1Packet20NamedEntitySpawn.currentItem;<a name="line.571"></a>
+<span class="sourceLineNo">572</span><a name="line.572"></a>
+<span class="sourceLineNo">573</span>        if (i == 0)<a name="line.573"></a>
+<span class="sourceLineNo">574</span>        {<a name="line.574"></a>
+<span class="sourceLineNo">575</span>            entityotherplayermp.inventory.mainInventory[entityotherplayermp.inventory.currentItem] = null;<a name="line.575"></a>
+<span class="sourceLineNo">576</span>        }<a name="line.576"></a>
+<span class="sourceLineNo">577</span>        else<a name="line.577"></a>
+<span class="sourceLineNo">578</span>        {<a name="line.578"></a>
+<span class="sourceLineNo">579</span>            entityotherplayermp.inventory.mainInventory[entityotherplayermp.inventory.currentItem] = new ItemStack(i, 1, 0);<a name="line.579"></a>
+<span class="sourceLineNo">580</span>        }<a name="line.580"></a>
+<span class="sourceLineNo">581</span><a name="line.581"></a>
+<span class="sourceLineNo">582</span>        entityotherplayermp.setPositionAndRotation(d0, d1, d2, f, f1);<a name="line.582"></a>
+<span class="sourceLineNo">583</span>        this.worldClient.addEntityToWorld(par1Packet20NamedEntitySpawn.entityId, entityotherplayermp);<a name="line.583"></a>
+<span class="sourceLineNo">584</span>        List list = par1Packet20NamedEntitySpawn.getWatchedMetadata();<a name="line.584"></a>
+<span class="sourceLineNo">585</span><a name="line.585"></a>
+<span class="sourceLineNo">586</span>        if (list != null)<a name="line.586"></a>
+<span class="sourceLineNo">587</span>        {<a name="line.587"></a>
+<span class="sourceLineNo">588</span>            entityotherplayermp.getDataWatcher().updateWatchedObjectsFromList(list);<a name="line.588"></a>
+<span class="sourceLineNo">589</span>        }<a name="line.589"></a>
+<span class="sourceLineNo">590</span>    }<a name="line.590"></a>
+<span class="sourceLineNo">591</span><a name="line.591"></a>
+<span class="sourceLineNo">592</span>    public void handleEntityTeleport(Packet34EntityTeleport par1Packet34EntityTeleport)<a name="line.592"></a>
+<span class="sourceLineNo">593</span>    {<a name="line.593"></a>
+<span class="sourceLineNo">594</span>        Entity entity = this.getEntityByID(par1Packet34EntityTeleport.entityId);<a name="line.594"></a>
+<span class="sourceLineNo">595</span><a name="line.595"></a>
+<span class="sourceLineNo">596</span>        if (entity != null)<a name="line.596"></a>
+<span class="sourceLineNo">597</span>        {<a name="line.597"></a>
+<span class="sourceLineNo">598</span>            entity.serverPosX = par1Packet34EntityTeleport.xPosition;<a name="line.598"></a>
+<span class="sourceLineNo">599</span>            entity.serverPosY = par1Packet34EntityTeleport.yPosition;<a name="line.599"></a>
+<span class="sourceLineNo">600</span>            entity.serverPosZ = par1Packet34EntityTeleport.zPosition;<a name="line.600"></a>
+<span class="sourceLineNo">601</span>            double d0 = (double)entity.serverPosX / 32.0D;<a name="line.601"></a>
+<span class="sourceLineNo">602</span>            double d1 = (double)entity.serverPosY / 32.0D + 0.015625D;<a name="line.602"></a>
+<span class="sourceLineNo">603</span>            double d2 = (double)entity.serverPosZ / 32.0D;<a name="line.603"></a>
+<span class="sourceLineNo">604</span>            float f = (float)(par1Packet34EntityTeleport.yaw * 360) / 256.0F;<a name="line.604"></a>
+<span class="sourceLineNo">605</span>            float f1 = (float)(par1Packet34EntityTeleport.pitch * 360) / 256.0F;<a name="line.605"></a>
+<span class="sourceLineNo">606</span>            entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3);<a name="line.606"></a>
+<span class="sourceLineNo">607</span>        }<a name="line.607"></a>
+<span class="sourceLineNo">608</span>    }<a name="line.608"></a>
+<span class="sourceLineNo">609</span><a name="line.609"></a>
+<span class="sourceLineNo">610</span>    public void handleBlockItemSwitch(Packet16BlockItemSwitch par1Packet16BlockItemSwitch)<a name="line.610"></a>
+<span class="sourceLineNo">611</span>    {<a name="line.611"></a>
+<span class="sourceLineNo">612</span>        if (par1Packet16BlockItemSwitch.id &gt;= 0 &amp;&amp; par1Packet16BlockItemSwitch.id &lt; InventoryPlayer.getHotbarSize())<a name="line.612"></a>
+<span class="sourceLineNo">613</span>        {<a name="line.613"></a>
+<span class="sourceLineNo">614</span>            this.mc.thePlayer.inventory.currentItem = par1Packet16BlockItemSwitch.id;<a name="line.614"></a>
+<span class="sourceLineNo">615</span>        }<a name="line.615"></a>
+<span class="sourceLineNo">616</span>    }<a name="line.616"></a>
+<span class="sourceLineNo">617</span><a name="line.617"></a>
+<span class="sourceLineNo">618</span>    public void handleEntity(Packet30Entity par1Packet30Entity)<a name="line.618"></a>
+<span class="sourceLineNo">619</span>    {<a name="line.619"></a>
+<span class="sourceLineNo">620</span>        Entity entity = this.getEntityByID(par1Packet30Entity.entityId);<a name="line.620"></a>
+<span class="sourceLineNo">621</span><a name="line.621"></a>
+<span class="sourceLineNo">622</span>        if (entity != null)<a name="line.622"></a>
+<span class="sourceLineNo">623</span>        {<a name="line.623"></a>
+<span class="sourceLineNo">624</span>            entity.serverPosX += par1Packet30Entity.xPosition;<a name="line.624"></a>
+<span class="sourceLineNo">625</span>            entity.serverPosY += par1Packet30Entity.yPosition;<a name="line.625"></a>
+<span class="sourceLineNo">626</span>            entity.serverPosZ += par1Packet30Entity.zPosition;<a name="line.626"></a>
+<span class="sourceLineNo">627</span>            double d0 = (double)entity.serverPosX / 32.0D;<a name="line.627"></a>
+<span class="sourceLineNo">628</span>            double d1 = (double)entity.serverPosY / 32.0D;<a name="line.628"></a>
+<span class="sourceLineNo">629</span>            double d2 = (double)entity.serverPosZ / 32.0D;<a name="line.629"></a>
+<span class="sourceLineNo">630</span>            float f = par1Packet30Entity.rotating ? (float)(par1Packet30Entity.yaw * 360) / 256.0F : entity.rotationYaw;<a name="line.630"></a>
+<span class="sourceLineNo">631</span>            float f1 = par1Packet30Entity.rotating ? (float)(par1Packet30Entity.pitch * 360) / 256.0F : entity.rotationPitch;<a name="line.631"></a>
+<span class="sourceLineNo">632</span>            entity.setPositionAndRotation2(d0, d1, d2, f, f1, 3);<a name="line.632"></a>
+<span class="sourceLineNo">633</span>        }<a name="line.633"></a>
+<span class="sourceLineNo">634</span>    }<a name="line.634"></a>
+<span class="sourceLineNo">635</span><a name="line.635"></a>
+<span class="sourceLineNo">636</span>    public void handleEntityHeadRotation(Packet35EntityHeadRotation par1Packet35EntityHeadRotation)<a name="line.636"></a>
+<span class="sourceLineNo">637</span>    {<a name="line.637"></a>
+<span class="sourceLineNo">638</span>        Entity entity = this.getEntityByID(par1Packet35EntityHeadRotation.entityId);<a name="line.638"></a>
+<span class="sourceLineNo">639</span><a name="line.639"></a>
+<span class="sourceLineNo">640</span>        if (entity != null)<a name="line.640"></a>
+<span class="sourceLineNo">641</span>        {<a name="line.641"></a>
+<span class="sourceLineNo">642</span>            float f = (float)(par1Packet35EntityHeadRotation.headRotationYaw * 360) / 256.0F;<a name="line.642"></a>
+<span class="sourceLineNo">643</span>            entity.setRotationYawHead(f);<a name="line.643"></a>
+<span class="sourceLineNo">644</span>        }<a name="line.644"></a>
+<span class="sourceLineNo">645</span>    }<a name="line.645"></a>
+<span class="sourceLineNo">646</span><a name="line.646"></a>
+<span class="sourceLineNo">647</span>    public void handleDestroyEntity(Packet29DestroyEntity par1Packet29DestroyEntity)<a name="line.647"></a>
+<span class="sourceLineNo">648</span>    {<a name="line.648"></a>
+<span class="sourceLineNo">649</span>        for (int i = 0; i &lt; par1Packet29DestroyEntity.entityId.length; ++i)<a name="line.649"></a>
+<span class="sourceLineNo">650</span>        {<a name="line.650"></a>
+<span class="sourceLineNo">651</span>            this.worldClient.removeEntityFromWorld(par1Packet29DestroyEntity.entityId[i]);<a name="line.651"></a>
+<span class="sourceLineNo">652</span>        }<a name="line.652"></a>
+<span class="sourceLineNo">653</span>    }<a name="line.653"></a>
+<span class="sourceLineNo">654</span><a name="line.654"></a>
+<span class="sourceLineNo">655</span>    public void handleFlying(Packet10Flying par1Packet10Flying)<a name="line.655"></a>
+<span class="sourceLineNo">656</span>    {<a name="line.656"></a>
+<span class="sourceLineNo">657</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.657"></a>
+<span class="sourceLineNo">658</span>        double d0 = entityclientplayermp.posX;<a name="line.658"></a>
+<span class="sourceLineNo">659</span>        double d1 = entityclientplayermp.posY;<a name="line.659"></a>
+<span class="sourceLineNo">660</span>        double d2 = entityclientplayermp.posZ;<a name="line.660"></a>
+<span class="sourceLineNo">661</span>        float f = entityclientplayermp.rotationYaw;<a name="line.661"></a>
+<span class="sourceLineNo">662</span>        float f1 = entityclientplayermp.rotationPitch;<a name="line.662"></a>
+<span class="sourceLineNo">663</span><a name="line.663"></a>
+<span class="sourceLineNo">664</span>        if (par1Packet10Flying.moving)<a name="line.664"></a>
+<span class="sourceLineNo">665</span>        {<a name="line.665"></a>
+<span class="sourceLineNo">666</span>            d0 = par1Packet10Flying.xPosition;<a name="line.666"></a>
+<span class="sourceLineNo">667</span>            d1 = par1Packet10Flying.yPosition;<a name="line.667"></a>
+<span class="sourceLineNo">668</span>            d2 = par1Packet10Flying.zPosition;<a name="line.668"></a>
+<span class="sourceLineNo">669</span>        }<a name="line.669"></a>
+<span class="sourceLineNo">670</span><a name="line.670"></a>
+<span class="sourceLineNo">671</span>        if (par1Packet10Flying.rotating)<a name="line.671"></a>
+<span class="sourceLineNo">672</span>        {<a name="line.672"></a>
+<span class="sourceLineNo">673</span>            f = par1Packet10Flying.yaw;<a name="line.673"></a>
+<span class="sourceLineNo">674</span>            f1 = par1Packet10Flying.pitch;<a name="line.674"></a>
+<span class="sourceLineNo">675</span>        }<a name="line.675"></a>
+<span class="sourceLineNo">676</span><a name="line.676"></a>
+<span class="sourceLineNo">677</span>        entityclientplayermp.ySize = 0.0F;<a name="line.677"></a>
+<span class="sourceLineNo">678</span>        entityclientplayermp.motionX = entityclientplayermp.motionY = entityclientplayermp.motionZ = 0.0D;<a name="line.678"></a>
+<span class="sourceLineNo">679</span>        entityclientplayermp.setPositionAndRotation(d0, d1, d2, f, f1);<a name="line.679"></a>
+<span class="sourceLineNo">680</span>        par1Packet10Flying.xPosition = entityclientplayermp.posX;<a name="line.680"></a>
+<span class="sourceLineNo">681</span>        par1Packet10Flying.yPosition = entityclientplayermp.boundingBox.minY;<a name="line.681"></a>
+<span class="sourceLineNo">682</span>        par1Packet10Flying.zPosition = entityclientplayermp.posZ;<a name="line.682"></a>
+<span class="sourceLineNo">683</span>        par1Packet10Flying.stance = entityclientplayermp.posY;<a name="line.683"></a>
+<span class="sourceLineNo">684</span>        this.netManager.addToSendQueue(par1Packet10Flying);<a name="line.684"></a>
+<span class="sourceLineNo">685</span><a name="line.685"></a>
+<span class="sourceLineNo">686</span>        if (!this.doneLoadingTerrain)<a name="line.686"></a>
+<span class="sourceLineNo">687</span>        {<a name="line.687"></a>
+<span class="sourceLineNo">688</span>            this.mc.thePlayer.prevPosX = this.mc.thePlayer.posX;<a name="line.688"></a>
+<span class="sourceLineNo">689</span>            this.mc.thePlayer.prevPosY = this.mc.thePlayer.posY;<a name="line.689"></a>
+<span class="sourceLineNo">690</span>            this.mc.thePlayer.prevPosZ = this.mc.thePlayer.posZ;<a name="line.690"></a>
+<span class="sourceLineNo">691</span>            this.doneLoadingTerrain = true;<a name="line.691"></a>
+<span class="sourceLineNo">692</span>            this.mc.displayGuiScreen((GuiScreen)null);<a name="line.692"></a>
+<span class="sourceLineNo">693</span>        }<a name="line.693"></a>
+<span class="sourceLineNo">694</span>    }<a name="line.694"></a>
+<span class="sourceLineNo">695</span><a name="line.695"></a>
+<span class="sourceLineNo">696</span>    public void handleMultiBlockChange(Packet52MultiBlockChange par1Packet52MultiBlockChange)<a name="line.696"></a>
+<span class="sourceLineNo">697</span>    {<a name="line.697"></a>
+<span class="sourceLineNo">698</span>        int i = par1Packet52MultiBlockChange.xPosition * 16;<a name="line.698"></a>
+<span class="sourceLineNo">699</span>        int j = par1Packet52MultiBlockChange.zPosition * 16;<a name="line.699"></a>
+<span class="sourceLineNo">700</span><a name="line.700"></a>
+<span class="sourceLineNo">701</span>        if (par1Packet52MultiBlockChange.metadataArray != null)<a name="line.701"></a>
+<span class="sourceLineNo">702</span>        {<a name="line.702"></a>
+<span class="sourceLineNo">703</span>            DataInputStream datainputstream = new DataInputStream(new ByteArrayInputStream(par1Packet52MultiBlockChange.metadataArray));<a name="line.703"></a>
+<span class="sourceLineNo">704</span><a name="line.704"></a>
+<span class="sourceLineNo">705</span>            try<a name="line.705"></a>
+<span class="sourceLineNo">706</span>            {<a name="line.706"></a>
+<span class="sourceLineNo">707</span>                for (int k = 0; k &lt; par1Packet52MultiBlockChange.size; ++k)<a name="line.707"></a>
+<span class="sourceLineNo">708</span>                {<a name="line.708"></a>
+<span class="sourceLineNo">709</span>                    short short1 = datainputstream.readShort();<a name="line.709"></a>
+<span class="sourceLineNo">710</span>                    short short2 = datainputstream.readShort();<a name="line.710"></a>
+<span class="sourceLineNo">711</span>                    int l = short2 &gt;&gt; 4 &amp; 4095;<a name="line.711"></a>
+<span class="sourceLineNo">712</span>                    int i1 = short2 &amp; 15;<a name="line.712"></a>
+<span class="sourceLineNo">713</span>                    int j1 = short1 &gt;&gt; 12 &amp; 15;<a name="line.713"></a>
+<span class="sourceLineNo">714</span>                    int k1 = short1 &gt;&gt; 8 &amp; 15;<a name="line.714"></a>
+<span class="sourceLineNo">715</span>                    int l1 = short1 &amp; 255;<a name="line.715"></a>
+<span class="sourceLineNo">716</span>                    this.worldClient.setBlockAndMetadataAndInvalidate(j1 + i, l1, k1 + j, l, i1);<a name="line.716"></a>
+<span class="sourceLineNo">717</span>                }<a name="line.717"></a>
+<span class="sourceLineNo">718</span>            }<a name="line.718"></a>
+<span class="sourceLineNo">719</span>            catch (IOException ioexception)<a name="line.719"></a>
+<span class="sourceLineNo">720</span>            {<a name="line.720"></a>
+<span class="sourceLineNo">721</span>                ;<a name="line.721"></a>
+<span class="sourceLineNo">722</span>            }<a name="line.722"></a>
+<span class="sourceLineNo">723</span>        }<a name="line.723"></a>
+<span class="sourceLineNo">724</span>    }<a name="line.724"></a>
+<span class="sourceLineNo">725</span><a name="line.725"></a>
+<span class="sourceLineNo">726</span>    /**<a name="line.726"></a>
+<span class="sourceLineNo">727</span>     * Handle Packet51MapChunk (full chunk update of blocks, metadata, light levels, and optionally biome data)<a name="line.727"></a>
+<span class="sourceLineNo">728</span>     */<a name="line.728"></a>
+<span class="sourceLineNo">729</span>    public void handleMapChunk(Packet51MapChunk par1Packet51MapChunk)<a name="line.729"></a>
+<span class="sourceLineNo">730</span>    {<a name="line.730"></a>
+<span class="sourceLineNo">731</span>        if (par1Packet51MapChunk.includeInitialize)<a name="line.731"></a>
+<span class="sourceLineNo">732</span>        {<a name="line.732"></a>
+<span class="sourceLineNo">733</span>            if (par1Packet51MapChunk.yChMin == 0)<a name="line.733"></a>
+<span class="sourceLineNo">734</span>            {<a name="line.734"></a>
+<span class="sourceLineNo">735</span>                this.worldClient.doPreChunk(par1Packet51MapChunk.xCh, par1Packet51MapChunk.zCh, false);<a name="line.735"></a>
+<span class="sourceLineNo">736</span>                return;<a name="line.736"></a>
+<span class="sourceLineNo">737</span>            }<a name="line.737"></a>
+<span class="sourceLineNo">738</span><a name="line.738"></a>
+<span class="sourceLineNo">739</span>            this.worldClient.doPreChunk(par1Packet51MapChunk.xCh, par1Packet51MapChunk.zCh, true);<a name="line.739"></a>
+<span class="sourceLineNo">740</span>        }<a name="line.740"></a>
+<span class="sourceLineNo">741</span><a name="line.741"></a>
+<span class="sourceLineNo">742</span>        this.worldClient.invalidateBlockReceiveRegion(par1Packet51MapChunk.xCh &lt;&lt; 4, 0, par1Packet51MapChunk.zCh &lt;&lt; 4, (par1Packet51MapChunk.xCh &lt;&lt; 4) + 15, 256, (par1Packet51MapChunk.zCh &lt;&lt; 4) + 15);<a name="line.742"></a>
+<span class="sourceLineNo">743</span>        Chunk chunk = this.worldClient.getChunkFromChunkCoords(par1Packet51MapChunk.xCh, par1Packet51MapChunk.zCh);<a name="line.743"></a>
+<span class="sourceLineNo">744</span><a name="line.744"></a>
+<span class="sourceLineNo">745</span>        if (par1Packet51MapChunk.includeInitialize &amp;&amp; chunk == null)<a name="line.745"></a>
+<span class="sourceLineNo">746</span>        {<a name="line.746"></a>
+<span class="sourceLineNo">747</span>            this.worldClient.doPreChunk(par1Packet51MapChunk.xCh, par1Packet51MapChunk.zCh, true);<a name="line.747"></a>
+<span class="sourceLineNo">748</span>            chunk = this.worldClient.getChunkFromChunkCoords(par1Packet51MapChunk.xCh, par1Packet51MapChunk.zCh);<a name="line.748"></a>
+<span class="sourceLineNo">749</span>        }<a name="line.749"></a>
+<span class="sourceLineNo">750</span><a name="line.750"></a>
+<span class="sourceLineNo">751</span>        if (chunk != null)<a name="line.751"></a>
+<span class="sourceLineNo">752</span>        {<a name="line.752"></a>
+<span class="sourceLineNo">753</span>            chunk.fillChunk(par1Packet51MapChunk.getCompressedChunkData(), par1Packet51MapChunk.yChMin, par1Packet51MapChunk.yChMax, par1Packet51MapChunk.includeInitialize);<a name="line.753"></a>
+<span class="sourceLineNo">754</span>            this.worldClient.markBlockRangeForRenderUpdate(par1Packet51MapChunk.xCh &lt;&lt; 4, 0, par1Packet51MapChunk.zCh &lt;&lt; 4, (par1Packet51MapChunk.xCh &lt;&lt; 4) + 15, 256, (par1Packet51MapChunk.zCh &lt;&lt; 4) + 15);<a name="line.754"></a>
+<span class="sourceLineNo">755</span><a name="line.755"></a>
+<span class="sourceLineNo">756</span>            if (!par1Packet51MapChunk.includeInitialize || !(this.worldClient.provider instanceof WorldProviderSurface))<a name="line.756"></a>
+<span class="sourceLineNo">757</span>            {<a name="line.757"></a>
+<span class="sourceLineNo">758</span>                chunk.resetRelightChecks();<a name="line.758"></a>
+<span class="sourceLineNo">759</span>            }<a name="line.759"></a>
+<span class="sourceLineNo">760</span>        }<a name="line.760"></a>
+<span class="sourceLineNo">761</span>    }<a name="line.761"></a>
+<span class="sourceLineNo">762</span><a name="line.762"></a>
+<span class="sourceLineNo">763</span>    public void handleBlockChange(Packet53BlockChange par1Packet53BlockChange)<a name="line.763"></a>
+<span class="sourceLineNo">764</span>    {<a name="line.764"></a>
+<span class="sourceLineNo">765</span>        this.worldClient.setBlockAndMetadataAndInvalidate(par1Packet53BlockChange.xPosition, par1Packet53BlockChange.yPosition, par1Packet53BlockChange.zPosition, par1Packet53BlockChange.type, par1Packet53BlockChange.metadata);<a name="line.765"></a>
+<span class="sourceLineNo">766</span>    }<a name="line.766"></a>
+<span class="sourceLineNo">767</span><a name="line.767"></a>
+<span class="sourceLineNo">768</span>    public void handleKickDisconnect(Packet255KickDisconnect par1Packet255KickDisconnect)<a name="line.768"></a>
+<span class="sourceLineNo">769</span>    {<a name="line.769"></a>
+<span class="sourceLineNo">770</span>        this.netManager.networkShutdown("disconnect.kicked", par1Packet255KickDisconnect.reason);<a name="line.770"></a>
+<span class="sourceLineNo">771</span>        this.disconnected = true;<a name="line.771"></a>
+<span class="sourceLineNo">772</span>        this.mc.loadWorld((WorldClient)null);<a name="line.772"></a>
+<span class="sourceLineNo">773</span><a name="line.773"></a>
+<span class="sourceLineNo">774</span>        if (this.field_98183_l != null)<a name="line.774"></a>
+<span class="sourceLineNo">775</span>        {<a name="line.775"></a>
+<span class="sourceLineNo">776</span>            this.mc.displayGuiScreen(new GuiScreenDisconnectedOnline(this.field_98183_l, "disconnect.disconnected", "disconnect.genericReason", new Object[] {par1Packet255KickDisconnect.reason}));<a name="line.776"></a>
+<span class="sourceLineNo">777</span>        }<a name="line.777"></a>
+<span class="sourceLineNo">778</span>        else<a name="line.778"></a>
+<span class="sourceLineNo">779</span>        {<a name="line.779"></a>
+<span class="sourceLineNo">780</span>            this.mc.displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.disconnected", "disconnect.genericReason", new Object[] {par1Packet255KickDisconnect.reason}));<a name="line.780"></a>
+<span class="sourceLineNo">781</span>        }<a name="line.781"></a>
+<span class="sourceLineNo">782</span>    }<a name="line.782"></a>
+<span class="sourceLineNo">783</span><a name="line.783"></a>
+<span class="sourceLineNo">784</span>    public void handleErrorMessage(String par1Str, Object[] par2ArrayOfObj)<a name="line.784"></a>
+<span class="sourceLineNo">785</span>    {<a name="line.785"></a>
+<span class="sourceLineNo">786</span>        if (!this.disconnected)<a name="line.786"></a>
+<span class="sourceLineNo">787</span>        {<a name="line.787"></a>
+<span class="sourceLineNo">788</span>            this.disconnected = true;<a name="line.788"></a>
+<span class="sourceLineNo">789</span>            this.mc.loadWorld((WorldClient)null);<a name="line.789"></a>
+<span class="sourceLineNo">790</span><a name="line.790"></a>
+<span class="sourceLineNo">791</span>            if (this.field_98183_l != null)<a name="line.791"></a>
+<span class="sourceLineNo">792</span>            {<a name="line.792"></a>
+<span class="sourceLineNo">793</span>                this.mc.displayGuiScreen(new GuiScreenDisconnectedOnline(this.field_98183_l, "disconnect.lost", par1Str, par2ArrayOfObj));<a name="line.793"></a>
+<span class="sourceLineNo">794</span>            }<a name="line.794"></a>
+<span class="sourceLineNo">795</span>            else<a name="line.795"></a>
+<span class="sourceLineNo">796</span>            {<a name="line.796"></a>
+<span class="sourceLineNo">797</span>                this.mc.displayGuiScreen(new GuiDisconnected(new GuiMultiplayer(new GuiMainMenu()), "disconnect.lost", par1Str, par2ArrayOfObj));<a name="line.797"></a>
+<span class="sourceLineNo">798</span>            }<a name="line.798"></a>
+<span class="sourceLineNo">799</span>        }<a name="line.799"></a>
+<span class="sourceLineNo">800</span>    }<a name="line.800"></a>
+<span class="sourceLineNo">801</span><a name="line.801"></a>
+<span class="sourceLineNo">802</span>    public void quitWithPacket(Packet par1Packet)<a name="line.802"></a>
+<span class="sourceLineNo">803</span>    {<a name="line.803"></a>
+<span class="sourceLineNo">804</span>        if (!this.disconnected)<a name="line.804"></a>
+<span class="sourceLineNo">805</span>        {<a name="line.805"></a>
+<span class="sourceLineNo">806</span>            this.netManager.addToSendQueue(par1Packet);<a name="line.806"></a>
+<span class="sourceLineNo">807</span>            this.netManager.serverShutdown();<a name="line.807"></a>
+<span class="sourceLineNo">808</span>            FMLNetworkHandler.onConnectionClosed(this.netManager, this.getPlayer());<a name="line.808"></a>
+<span class="sourceLineNo">809</span>        }<a name="line.809"></a>
+<span class="sourceLineNo">810</span>    }<a name="line.810"></a>
+<span class="sourceLineNo">811</span><a name="line.811"></a>
+<span class="sourceLineNo">812</span>    /**<a name="line.812"></a>
+<span class="sourceLineNo">813</span>     * Adds the packet to the send queue<a name="line.813"></a>
+<span class="sourceLineNo">814</span>     */<a name="line.814"></a>
+<span class="sourceLineNo">815</span>    public void addToSendQueue(Packet par1Packet)<a name="line.815"></a>
+<span class="sourceLineNo">816</span>    {<a name="line.816"></a>
+<span class="sourceLineNo">817</span>        if (!this.disconnected)<a name="line.817"></a>
+<span class="sourceLineNo">818</span>        {<a name="line.818"></a>
+<span class="sourceLineNo">819</span>            this.netManager.addToSendQueue(par1Packet);<a name="line.819"></a>
+<span class="sourceLineNo">820</span>        }<a name="line.820"></a>
+<span class="sourceLineNo">821</span>    }<a name="line.821"></a>
+<span class="sourceLineNo">822</span><a name="line.822"></a>
+<span class="sourceLineNo">823</span>    public void handleCollect(Packet22Collect par1Packet22Collect)<a name="line.823"></a>
+<span class="sourceLineNo">824</span>    {<a name="line.824"></a>
+<span class="sourceLineNo">825</span>        Entity entity = this.getEntityByID(par1Packet22Collect.collectedEntityId);<a name="line.825"></a>
+<span class="sourceLineNo">826</span>        Object object = (EntityLiving)this.getEntityByID(par1Packet22Collect.collectorEntityId);<a name="line.826"></a>
+<span class="sourceLineNo">827</span><a name="line.827"></a>
+<span class="sourceLineNo">828</span>        if (object == null)<a name="line.828"></a>
+<span class="sourceLineNo">829</span>        {<a name="line.829"></a>
+<span class="sourceLineNo">830</span>            object = this.mc.thePlayer;<a name="line.830"></a>
+<span class="sourceLineNo">831</span>        }<a name="line.831"></a>
+<span class="sourceLineNo">832</span><a name="line.832"></a>
+<span class="sourceLineNo">833</span>        if (entity != null)<a name="line.833"></a>
+<span class="sourceLineNo">834</span>        {<a name="line.834"></a>
+<span class="sourceLineNo">835</span>            if (entity instanceof EntityXPOrb)<a name="line.835"></a>
+<span class="sourceLineNo">836</span>            {<a name="line.836"></a>
+<span class="sourceLineNo">837</span>                this.worldClient.playSoundAtEntity(entity, "random.orb", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);<a name="line.837"></a>
+<span class="sourceLineNo">838</span>            }<a name="line.838"></a>
+<span class="sourceLineNo">839</span>            else<a name="line.839"></a>
+<span class="sourceLineNo">840</span>            {<a name="line.840"></a>
+<span class="sourceLineNo">841</span>                this.worldClient.playSoundAtEntity(entity, "random.pop", 0.2F, ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);<a name="line.841"></a>
+<span class="sourceLineNo">842</span>            }<a name="line.842"></a>
+<span class="sourceLineNo">843</span><a name="line.843"></a>
+<span class="sourceLineNo">844</span>            this.mc.effectRenderer.addEffect(new EntityPickupFX(this.mc.theWorld, entity, (Entity)object, -0.5F));<a name="line.844"></a>
+<span class="sourceLineNo">845</span>            this.worldClient.removeEntityFromWorld(par1Packet22Collect.collectedEntityId);<a name="line.845"></a>
+<span class="sourceLineNo">846</span>        }<a name="line.846"></a>
+<span class="sourceLineNo">847</span>    }<a name="line.847"></a>
+<span class="sourceLineNo">848</span><a name="line.848"></a>
+<span class="sourceLineNo">849</span>    public void handleChat(Packet3Chat par1Packet3Chat)<a name="line.849"></a>
+<span class="sourceLineNo">850</span>    {<a name="line.850"></a>
+<span class="sourceLineNo">851</span>        par1Packet3Chat = FMLNetworkHandler.handleChatMessage(this, par1Packet3Chat);<a name="line.851"></a>
+<span class="sourceLineNo">852</span>        ClientChatReceivedEvent event = new ClientChatReceivedEvent(par1Packet3Chat.message);<a name="line.852"></a>
+<span class="sourceLineNo">853</span>        if (!MinecraftForge.EVENT_BUS.post(event) &amp;&amp; event.message != null)<a name="line.853"></a>
+<span class="sourceLineNo">854</span>        {<a name="line.854"></a>
+<span class="sourceLineNo">855</span>            this.mc.ingameGUI.getChatGUI().printChatMessage(par1Packet3Chat.message);<a name="line.855"></a>
+<span class="sourceLineNo">856</span>        }<a name="line.856"></a>
+<span class="sourceLineNo">857</span>    }<a name="line.857"></a>
+<span class="sourceLineNo">858</span><a name="line.858"></a>
+<span class="sourceLineNo">859</span>    public void handleAnimation(Packet18Animation par1Packet18Animation)<a name="line.859"></a>
+<span class="sourceLineNo">860</span>    {<a name="line.860"></a>
+<span class="sourceLineNo">861</span>        Entity entity = this.getEntityByID(par1Packet18Animation.entityId);<a name="line.861"></a>
+<span class="sourceLineNo">862</span><a name="line.862"></a>
+<span class="sourceLineNo">863</span>        if (entity != null)<a name="line.863"></a>
+<span class="sourceLineNo">864</span>        {<a name="line.864"></a>
+<span class="sourceLineNo">865</span>            if (par1Packet18Animation.animate == 1)<a name="line.865"></a>
+<span class="sourceLineNo">866</span>            {<a name="line.866"></a>
+<span class="sourceLineNo">867</span>                EntityLiving entityliving = (EntityLiving)entity;<a name="line.867"></a>
+<span class="sourceLineNo">868</span>                entityliving.swingItem();<a name="line.868"></a>
+<span class="sourceLineNo">869</span>            }<a name="line.869"></a>
+<span class="sourceLineNo">870</span>            else if (par1Packet18Animation.animate == 2)<a name="line.870"></a>
+<span class="sourceLineNo">871</span>            {<a name="line.871"></a>
+<span class="sourceLineNo">872</span>                entity.performHurtAnimation();<a name="line.872"></a>
+<span class="sourceLineNo">873</span>            }<a name="line.873"></a>
+<span class="sourceLineNo">874</span>            else if (par1Packet18Animation.animate == 3)<a name="line.874"></a>
+<span class="sourceLineNo">875</span>            {<a name="line.875"></a>
+<span class="sourceLineNo">876</span>                EntityPlayer entityplayer = (EntityPlayer)entity;<a name="line.876"></a>
+<span class="sourceLineNo">877</span>                entityplayer.wakeUpPlayer(false, false, false);<a name="line.877"></a>
+<span class="sourceLineNo">878</span>            }<a name="line.878"></a>
+<span class="sourceLineNo">879</span>            else if (par1Packet18Animation.animate != 4)<a name="line.879"></a>
+<span class="sourceLineNo">880</span>            {<a name="line.880"></a>
+<span class="sourceLineNo">881</span>                if (par1Packet18Animation.animate == 6)<a name="line.881"></a>
+<span class="sourceLineNo">882</span>                {<a name="line.882"></a>
+<span class="sourceLineNo">883</span>                    this.mc.effectRenderer.addEffect(new EntityCrit2FX(this.mc.theWorld, entity));<a name="line.883"></a>
+<span class="sourceLineNo">884</span>                }<a name="line.884"></a>
+<span class="sourceLineNo">885</span>                else if (par1Packet18Animation.animate == 7)<a name="line.885"></a>
+<span class="sourceLineNo">886</span>                {<a name="line.886"></a>
+<span class="sourceLineNo">887</span>                    EntityCrit2FX entitycrit2fx = new EntityCrit2FX(this.mc.theWorld, entity, "magicCrit");<a name="line.887"></a>
+<span class="sourceLineNo">888</span>                    this.mc.effectRenderer.addEffect(entitycrit2fx);<a name="line.888"></a>
+<span class="sourceLineNo">889</span>                }<a name="line.889"></a>
+<span class="sourceLineNo">890</span>                else if (par1Packet18Animation.animate == 5 &amp;&amp; entity instanceof EntityOtherPlayerMP)<a name="line.890"></a>
+<span class="sourceLineNo">891</span>                {<a name="line.891"></a>
+<span class="sourceLineNo">892</span>                    ;<a name="line.892"></a>
+<span class="sourceLineNo">893</span>                }<a name="line.893"></a>
+<span class="sourceLineNo">894</span>            }<a name="line.894"></a>
+<span class="sourceLineNo">895</span>        }<a name="line.895"></a>
+<span class="sourceLineNo">896</span>    }<a name="line.896"></a>
+<span class="sourceLineNo">897</span><a name="line.897"></a>
+<span class="sourceLineNo">898</span>    public void handleSleep(Packet17Sleep par1Packet17Sleep)<a name="line.898"></a>
+<span class="sourceLineNo">899</span>    {<a name="line.899"></a>
+<span class="sourceLineNo">900</span>        Entity entity = this.getEntityByID(par1Packet17Sleep.entityID);<a name="line.900"></a>
+<span class="sourceLineNo">901</span><a name="line.901"></a>
+<span class="sourceLineNo">902</span>        if (entity != null)<a name="line.902"></a>
+<span class="sourceLineNo">903</span>        {<a name="line.903"></a>
+<span class="sourceLineNo">904</span>            if (par1Packet17Sleep.field_73622_e == 0)<a name="line.904"></a>
+<span class="sourceLineNo">905</span>            {<a name="line.905"></a>
+<span class="sourceLineNo">906</span>                EntityPlayer entityplayer = (EntityPlayer)entity;<a name="line.906"></a>
+<span class="sourceLineNo">907</span>                entityplayer.sleepInBedAt(par1Packet17Sleep.bedX, par1Packet17Sleep.bedY, par1Packet17Sleep.bedZ);<a name="line.907"></a>
+<span class="sourceLineNo">908</span>            }<a name="line.908"></a>
+<span class="sourceLineNo">909</span>        }<a name="line.909"></a>
+<span class="sourceLineNo">910</span>    }<a name="line.910"></a>
+<span class="sourceLineNo">911</span><a name="line.911"></a>
+<span class="sourceLineNo">912</span>    /**<a name="line.912"></a>
+<span class="sourceLineNo">913</span>     * Disconnects the network connection.<a name="line.913"></a>
+<span class="sourceLineNo">914</span>     */<a name="line.914"></a>
+<span class="sourceLineNo">915</span>    public void disconnect()<a name="line.915"></a>
+<span class="sourceLineNo">916</span>    {<a name="line.916"></a>
+<span class="sourceLineNo">917</span>        this.disconnected = true;<a name="line.917"></a>
+<span class="sourceLineNo">918</span>        this.netManager.wakeThreads();<a name="line.918"></a>
+<span class="sourceLineNo">919</span>        this.netManager.networkShutdown("disconnect.closed", new Object[0]);<a name="line.919"></a>
+<span class="sourceLineNo">920</span>    }<a name="line.920"></a>
+<span class="sourceLineNo">921</span><a name="line.921"></a>
+<span class="sourceLineNo">922</span>    public void handleMobSpawn(Packet24MobSpawn par1Packet24MobSpawn)<a name="line.922"></a>
+<span class="sourceLineNo">923</span>    {<a name="line.923"></a>
+<span class="sourceLineNo">924</span>        double d0 = (double)par1Packet24MobSpawn.xPosition / 32.0D;<a name="line.924"></a>
+<span class="sourceLineNo">925</span>        double d1 = (double)par1Packet24MobSpawn.yPosition / 32.0D;<a name="line.925"></a>
+<span class="sourceLineNo">926</span>        double d2 = (double)par1Packet24MobSpawn.zPosition / 32.0D;<a name="line.926"></a>
+<span class="sourceLineNo">927</span>        float f = (float)(par1Packet24MobSpawn.yaw * 360) / 256.0F;<a name="line.927"></a>
+<span class="sourceLineNo">928</span>        float f1 = (float)(par1Packet24MobSpawn.pitch * 360) / 256.0F;<a name="line.928"></a>
+<span class="sourceLineNo">929</span>        EntityLiving entityliving = (EntityLiving)EntityList.createEntityByID(par1Packet24MobSpawn.type, this.mc.theWorld);<a name="line.929"></a>
+<span class="sourceLineNo">930</span>        entityliving.serverPosX = par1Packet24MobSpawn.xPosition;<a name="line.930"></a>
+<span class="sourceLineNo">931</span>        entityliving.serverPosY = par1Packet24MobSpawn.yPosition;<a name="line.931"></a>
+<span class="sourceLineNo">932</span>        entityliving.serverPosZ = par1Packet24MobSpawn.zPosition;<a name="line.932"></a>
+<span class="sourceLineNo">933</span>        entityliving.rotationYawHead = (float)(par1Packet24MobSpawn.headYaw * 360) / 256.0F;<a name="line.933"></a>
+<span class="sourceLineNo">934</span>        Entity[] aentity = entityliving.getParts();<a name="line.934"></a>
+<span class="sourceLineNo">935</span><a name="line.935"></a>
+<span class="sourceLineNo">936</span>        if (aentity != null)<a name="line.936"></a>
+<span class="sourceLineNo">937</span>        {<a name="line.937"></a>
+<span class="sourceLineNo">938</span>            int i = par1Packet24MobSpawn.entityId - entityliving.entityId;<a name="line.938"></a>
+<span class="sourceLineNo">939</span><a name="line.939"></a>
+<span class="sourceLineNo">940</span>            for (int j = 0; j &lt; aentity.length; ++j)<a name="line.940"></a>
+<span class="sourceLineNo">941</span>            {<a name="line.941"></a>
+<span class="sourceLineNo">942</span>                aentity[j].entityId += i;<a name="line.942"></a>
+<span class="sourceLineNo">943</span>            }<a name="line.943"></a>
+<span class="sourceLineNo">944</span>        }<a name="line.944"></a>
+<span class="sourceLineNo">945</span><a name="line.945"></a>
+<span class="sourceLineNo">946</span>        entityliving.entityId = par1Packet24MobSpawn.entityId;<a name="line.946"></a>
+<span class="sourceLineNo">947</span>        entityliving.setPositionAndRotation(d0, d1, d2, f, f1);<a name="line.947"></a>
+<span class="sourceLineNo">948</span>        entityliving.motionX = (double)((float)par1Packet24MobSpawn.velocityX / 8000.0F);<a name="line.948"></a>
+<span class="sourceLineNo">949</span>        entityliving.motionY = (double)((float)par1Packet24MobSpawn.velocityY / 8000.0F);<a name="line.949"></a>
+<span class="sourceLineNo">950</span>        entityliving.motionZ = (double)((float)par1Packet24MobSpawn.velocityZ / 8000.0F);<a name="line.950"></a>
+<span class="sourceLineNo">951</span>        this.worldClient.addEntityToWorld(par1Packet24MobSpawn.entityId, entityliving);<a name="line.951"></a>
+<span class="sourceLineNo">952</span>        List list = par1Packet24MobSpawn.getMetadata();<a name="line.952"></a>
+<span class="sourceLineNo">953</span><a name="line.953"></a>
+<span class="sourceLineNo">954</span>        if (list != null)<a name="line.954"></a>
+<span class="sourceLineNo">955</span>        {<a name="line.955"></a>
+<span class="sourceLineNo">956</span>            entityliving.getDataWatcher().updateWatchedObjectsFromList(list);<a name="line.956"></a>
+<span class="sourceLineNo">957</span>        }<a name="line.957"></a>
+<span class="sourceLineNo">958</span>    }<a name="line.958"></a>
+<span class="sourceLineNo">959</span><a name="line.959"></a>
+<span class="sourceLineNo">960</span>    public void handleUpdateTime(Packet4UpdateTime par1Packet4UpdateTime)<a name="line.960"></a>
+<span class="sourceLineNo">961</span>    {<a name="line.961"></a>
+<span class="sourceLineNo">962</span>        this.mc.theWorld.func_82738_a(par1Packet4UpdateTime.worldAge);<a name="line.962"></a>
+<span class="sourceLineNo">963</span>        this.mc.theWorld.setWorldTime(par1Packet4UpdateTime.time);<a name="line.963"></a>
+<span class="sourceLineNo">964</span>    }<a name="line.964"></a>
+<span class="sourceLineNo">965</span><a name="line.965"></a>
+<span class="sourceLineNo">966</span>    public void handleSpawnPosition(Packet6SpawnPosition par1Packet6SpawnPosition)<a name="line.966"></a>
+<span class="sourceLineNo">967</span>    {<a name="line.967"></a>
+<span class="sourceLineNo">968</span>        this.mc.thePlayer.setSpawnChunk(new ChunkCoordinates(par1Packet6SpawnPosition.xPosition, par1Packet6SpawnPosition.yPosition, par1Packet6SpawnPosition.zPosition), true);<a name="line.968"></a>
+<span class="sourceLineNo">969</span>        this.mc.theWorld.getWorldInfo().setSpawnPosition(par1Packet6SpawnPosition.xPosition, par1Packet6SpawnPosition.yPosition, par1Packet6SpawnPosition.zPosition);<a name="line.969"></a>
+<span class="sourceLineNo">970</span>    }<a name="line.970"></a>
+<span class="sourceLineNo">971</span><a name="line.971"></a>
+<span class="sourceLineNo">972</span>    /**<a name="line.972"></a>
+<span class="sourceLineNo">973</span>     * Packet handler<a name="line.973"></a>
+<span class="sourceLineNo">974</span>     */<a name="line.974"></a>
+<span class="sourceLineNo">975</span>    public void handleAttachEntity(Packet39AttachEntity par1Packet39AttachEntity)<a name="line.975"></a>
+<span class="sourceLineNo">976</span>    {<a name="line.976"></a>
+<span class="sourceLineNo">977</span>        Object object = this.getEntityByID(par1Packet39AttachEntity.entityId);<a name="line.977"></a>
+<span class="sourceLineNo">978</span>        Entity entity = this.getEntityByID(par1Packet39AttachEntity.vehicleEntityId);<a name="line.978"></a>
+<span class="sourceLineNo">979</span><a name="line.979"></a>
+<span class="sourceLineNo">980</span>        if (par1Packet39AttachEntity.entityId == this.mc.thePlayer.entityId)<a name="line.980"></a>
+<span class="sourceLineNo">981</span>        {<a name="line.981"></a>
+<span class="sourceLineNo">982</span>            object = this.mc.thePlayer;<a name="line.982"></a>
+<span class="sourceLineNo">983</span><a name="line.983"></a>
+<span class="sourceLineNo">984</span>            if (entity instanceof EntityBoat)<a name="line.984"></a>
+<span class="sourceLineNo">985</span>            {<a name="line.985"></a>
+<span class="sourceLineNo">986</span>                ((EntityBoat)entity).func_70270_d(false);<a name="line.986"></a>
+<span class="sourceLineNo">987</span>            }<a name="line.987"></a>
+<span class="sourceLineNo">988</span>        }<a name="line.988"></a>
+<span class="sourceLineNo">989</span>        else if (entity instanceof EntityBoat)<a name="line.989"></a>
+<span class="sourceLineNo">990</span>        {<a name="line.990"></a>
+<span class="sourceLineNo">991</span>            ((EntityBoat)entity).func_70270_d(true);<a name="line.991"></a>
+<span class="sourceLineNo">992</span>        }<a name="line.992"></a>
+<span class="sourceLineNo">993</span><a name="line.993"></a>
+<span class="sourceLineNo">994</span>        if (object != null)<a name="line.994"></a>
+<span class="sourceLineNo">995</span>        {<a name="line.995"></a>
+<span class="sourceLineNo">996</span>            ((Entity)object).mountEntity(entity);<a name="line.996"></a>
+<span class="sourceLineNo">997</span>        }<a name="line.997"></a>
+<span class="sourceLineNo">998</span>    }<a name="line.998"></a>
+<span class="sourceLineNo">999</span><a name="line.999"></a>
+<span class="sourceLineNo">1000</span>    /**<a name="line.1000"></a>
+<span class="sourceLineNo">1001</span>     * Packet handler<a name="line.1001"></a>
+<span class="sourceLineNo">1002</span>     */<a name="line.1002"></a>
+<span class="sourceLineNo">1003</span>    public void handleEntityStatus(Packet38EntityStatus par1Packet38EntityStatus)<a name="line.1003"></a>
+<span class="sourceLineNo">1004</span>    {<a name="line.1004"></a>
+<span class="sourceLineNo">1005</span>        Entity entity = this.getEntityByID(par1Packet38EntityStatus.entityId);<a name="line.1005"></a>
+<span class="sourceLineNo">1006</span><a name="line.1006"></a>
+<span class="sourceLineNo">1007</span>        if (entity != null)<a name="line.1007"></a>
+<span class="sourceLineNo">1008</span>        {<a name="line.1008"></a>
+<span class="sourceLineNo">1009</span>            entity.handleHealthUpdate(par1Packet38EntityStatus.entityStatus);<a name="line.1009"></a>
+<span class="sourceLineNo">1010</span>        }<a name="line.1010"></a>
+<span class="sourceLineNo">1011</span>    }<a name="line.1011"></a>
+<span class="sourceLineNo">1012</span><a name="line.1012"></a>
+<span class="sourceLineNo">1013</span>    private Entity getEntityByID(int par1)<a name="line.1013"></a>
+<span class="sourceLineNo">1014</span>    {<a name="line.1014"></a>
+<span class="sourceLineNo">1015</span>        return (Entity)(par1 == this.mc.thePlayer.entityId ? this.mc.thePlayer : this.worldClient.getEntityByID(par1));<a name="line.1015"></a>
+<span class="sourceLineNo">1016</span>    }<a name="line.1016"></a>
+<span class="sourceLineNo">1017</span><a name="line.1017"></a>
+<span class="sourceLineNo">1018</span>    /**<a name="line.1018"></a>
+<span class="sourceLineNo">1019</span>     * Recieves player health from the server and then proceeds to set it locally on the client.<a name="line.1019"></a>
+<span class="sourceLineNo">1020</span>     */<a name="line.1020"></a>
+<span class="sourceLineNo">1021</span>    public void handleUpdateHealth(Packet8UpdateHealth par1Packet8UpdateHealth)<a name="line.1021"></a>
+<span class="sourceLineNo">1022</span>    {<a name="line.1022"></a>
+<span class="sourceLineNo">1023</span>        this.mc.thePlayer.setHealth(par1Packet8UpdateHealth.healthMP);<a name="line.1023"></a>
+<span class="sourceLineNo">1024</span>        this.mc.thePlayer.getFoodStats().setFoodLevel(par1Packet8UpdateHealth.food);<a name="line.1024"></a>
+<span class="sourceLineNo">1025</span>        this.mc.thePlayer.getFoodStats().setFoodSaturationLevel(par1Packet8UpdateHealth.foodSaturation);<a name="line.1025"></a>
+<span class="sourceLineNo">1026</span>    }<a name="line.1026"></a>
+<span class="sourceLineNo">1027</span><a name="line.1027"></a>
+<span class="sourceLineNo">1028</span>    /**<a name="line.1028"></a>
+<span class="sourceLineNo">1029</span>     * Handle an experience packet.<a name="line.1029"></a>
+<span class="sourceLineNo">1030</span>     */<a name="line.1030"></a>
+<span class="sourceLineNo">1031</span>    public void handleExperience(Packet43Experience par1Packet43Experience)<a name="line.1031"></a>
+<span class="sourceLineNo">1032</span>    {<a name="line.1032"></a>
+<span class="sourceLineNo">1033</span>        this.mc.thePlayer.setXPStats(par1Packet43Experience.experience, par1Packet43Experience.experienceTotal, par1Packet43Experience.experienceLevel);<a name="line.1033"></a>
+<span class="sourceLineNo">1034</span>    }<a name="line.1034"></a>
+<span class="sourceLineNo">1035</span><a name="line.1035"></a>
+<span class="sourceLineNo">1036</span>    /**<a name="line.1036"></a>
+<span class="sourceLineNo">1037</span>     * respawns the player<a name="line.1037"></a>
+<span class="sourceLineNo">1038</span>     */<a name="line.1038"></a>
+<span class="sourceLineNo">1039</span>    public void handleRespawn(Packet9Respawn par1Packet9Respawn)<a name="line.1039"></a>
+<span class="sourceLineNo">1040</span>    {<a name="line.1040"></a>
+<span class="sourceLineNo">1041</span>        if (par1Packet9Respawn.respawnDimension != this.mc.thePlayer.dimension)<a name="line.1041"></a>
+<span class="sourceLineNo">1042</span>        {<a name="line.1042"></a>
+<span class="sourceLineNo">1043</span>            this.doneLoadingTerrain = false;<a name="line.1043"></a>
+<span class="sourceLineNo">1044</span>            Scoreboard scoreboard = this.worldClient.getScoreboard();<a name="line.1044"></a>
+<span class="sourceLineNo">1045</span>            this.worldClient = new WorldClient(this, new WorldSettings(0L, par1Packet9Respawn.gameType, false, this.mc.theWorld.getWorldInfo().isHardcoreModeEnabled(), par1Packet9Respawn.terrainType), par1Packet9Respawn.respawnDimension, par1Packet9Respawn.difficulty, this.mc.mcProfiler, this.mc.getLogAgent());<a name="line.1045"></a>
+<span class="sourceLineNo">1046</span>            this.worldClient.func_96443_a(scoreboard);<a name="line.1046"></a>
+<span class="sourceLineNo">1047</span>            this.worldClient.isRemote = true;<a name="line.1047"></a>
+<span class="sourceLineNo">1048</span>            this.mc.loadWorld(this.worldClient);<a name="line.1048"></a>
+<span class="sourceLineNo">1049</span>            this.mc.thePlayer.dimension = par1Packet9Respawn.respawnDimension;<a name="line.1049"></a>
+<span class="sourceLineNo">1050</span>            this.mc.displayGuiScreen(new GuiDownloadTerrain(this));<a name="line.1050"></a>
+<span class="sourceLineNo">1051</span>        }<a name="line.1051"></a>
+<span class="sourceLineNo">1052</span><a name="line.1052"></a>
+<span class="sourceLineNo">1053</span>        this.mc.setDimensionAndSpawnPlayer(par1Packet9Respawn.respawnDimension);<a name="line.1053"></a>
+<span class="sourceLineNo">1054</span>        this.mc.playerController.setGameType(par1Packet9Respawn.gameType);<a name="line.1054"></a>
+<span class="sourceLineNo">1055</span>    }<a name="line.1055"></a>
+<span class="sourceLineNo">1056</span><a name="line.1056"></a>
+<span class="sourceLineNo">1057</span>    public void handleExplosion(Packet60Explosion par1Packet60Explosion)<a name="line.1057"></a>
+<span class="sourceLineNo">1058</span>    {<a name="line.1058"></a>
+<span class="sourceLineNo">1059</span>        Explosion explosion = new Explosion(this.mc.theWorld, (Entity)null, par1Packet60Explosion.explosionX, par1Packet60Explosion.explosionY, par1Packet60Explosion.explosionZ, par1Packet60Explosion.explosionSize);<a name="line.1059"></a>
+<span class="sourceLineNo">1060</span>        explosion.affectedBlockPositions = par1Packet60Explosion.chunkPositionRecords;<a name="line.1060"></a>
+<span class="sourceLineNo">1061</span>        explosion.doExplosionB(true);<a name="line.1061"></a>
+<span class="sourceLineNo">1062</span>        this.mc.thePlayer.motionX += (double)par1Packet60Explosion.getPlayerVelocityX();<a name="line.1062"></a>
+<span class="sourceLineNo">1063</span>        this.mc.thePlayer.motionY += (double)par1Packet60Explosion.getPlayerVelocityY();<a name="line.1063"></a>
+<span class="sourceLineNo">1064</span>        this.mc.thePlayer.motionZ += (double)par1Packet60Explosion.getPlayerVelocityZ();<a name="line.1064"></a>
+<span class="sourceLineNo">1065</span>    }<a name="line.1065"></a>
+<span class="sourceLineNo">1066</span><a name="line.1066"></a>
+<span class="sourceLineNo">1067</span>    public void handleOpenWindow(Packet100OpenWindow par1Packet100OpenWindow)<a name="line.1067"></a>
+<span class="sourceLineNo">1068</span>    {<a name="line.1068"></a>
+<span class="sourceLineNo">1069</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1069"></a>
+<span class="sourceLineNo">1070</span><a name="line.1070"></a>
+<span class="sourceLineNo">1071</span>        switch (par1Packet100OpenWindow.inventoryType)<a name="line.1071"></a>
+<span class="sourceLineNo">1072</span>        {<a name="line.1072"></a>
+<span class="sourceLineNo">1073</span>            case 0:<a name="line.1073"></a>
+<span class="sourceLineNo">1074</span>                entityclientplayermp.displayGUIChest(new InventoryBasic(par1Packet100OpenWindow.windowTitle, par1Packet100OpenWindow.useProvidedWindowTitle, par1Packet100OpenWindow.slotsCount));<a name="line.1074"></a>
+<span class="sourceLineNo">1075</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1075"></a>
+<span class="sourceLineNo">1076</span>                break;<a name="line.1076"></a>
+<span class="sourceLineNo">1077</span>            case 1:<a name="line.1077"></a>
+<span class="sourceLineNo">1078</span>                entityclientplayermp.displayGUIWorkbench(MathHelper.floor_double(entityclientplayermp.posX), MathHelper.floor_double(entityclientplayermp.posY), MathHelper.floor_double(entityclientplayermp.posZ));<a name="line.1078"></a>
+<span class="sourceLineNo">1079</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1079"></a>
+<span class="sourceLineNo">1080</span>                break;<a name="line.1080"></a>
+<span class="sourceLineNo">1081</span>            case 2:<a name="line.1081"></a>
+<span class="sourceLineNo">1082</span>                TileEntityFurnace tileentityfurnace = new TileEntityFurnace();<a name="line.1082"></a>
+<span class="sourceLineNo">1083</span><a name="line.1083"></a>
+<span class="sourceLineNo">1084</span>                if (par1Packet100OpenWindow.useProvidedWindowTitle)<a name="line.1084"></a>
+<span class="sourceLineNo">1085</span>                {<a name="line.1085"></a>
+<span class="sourceLineNo">1086</span>                    tileentityfurnace.func_94129_a(par1Packet100OpenWindow.windowTitle);<a name="line.1086"></a>
+<span class="sourceLineNo">1087</span>                }<a name="line.1087"></a>
+<span class="sourceLineNo">1088</span><a name="line.1088"></a>
+<span class="sourceLineNo">1089</span>                entityclientplayermp.displayGUIFurnace(tileentityfurnace);<a name="line.1089"></a>
+<span class="sourceLineNo">1090</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1090"></a>
+<span class="sourceLineNo">1091</span>                break;<a name="line.1091"></a>
+<span class="sourceLineNo">1092</span>            case 3:<a name="line.1092"></a>
+<span class="sourceLineNo">1093</span>                TileEntityDispenser tileentitydispenser = new TileEntityDispenser();<a name="line.1093"></a>
+<span class="sourceLineNo">1094</span><a name="line.1094"></a>
+<span class="sourceLineNo">1095</span>                if (par1Packet100OpenWindow.useProvidedWindowTitle)<a name="line.1095"></a>
+<span class="sourceLineNo">1096</span>                {<a name="line.1096"></a>
+<span class="sourceLineNo">1097</span>                    tileentitydispenser.func_94049_a(par1Packet100OpenWindow.windowTitle);<a name="line.1097"></a>
+<span class="sourceLineNo">1098</span>                }<a name="line.1098"></a>
+<span class="sourceLineNo">1099</span><a name="line.1099"></a>
+<span class="sourceLineNo">1100</span>                entityclientplayermp.displayGUIDispenser(tileentitydispenser);<a name="line.1100"></a>
+<span class="sourceLineNo">1101</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1101"></a>
+<span class="sourceLineNo">1102</span>                break;<a name="line.1102"></a>
+<span class="sourceLineNo">1103</span>            case 4:<a name="line.1103"></a>
+<span class="sourceLineNo">1104</span>                entityclientplayermp.displayGUIEnchantment(MathHelper.floor_double(entityclientplayermp.posX), MathHelper.floor_double(entityclientplayermp.posY), MathHelper.floor_double(entityclientplayermp.posZ), par1Packet100OpenWindow.useProvidedWindowTitle ? par1Packet100OpenWindow.windowTitle : null);<a name="line.1104"></a>
+<span class="sourceLineNo">1105</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1105"></a>
+<span class="sourceLineNo">1106</span>                break;<a name="line.1106"></a>
+<span class="sourceLineNo">1107</span>            case 5:<a name="line.1107"></a>
+<span class="sourceLineNo">1108</span>                TileEntityBrewingStand tileentitybrewingstand = new TileEntityBrewingStand();<a name="line.1108"></a>
+<span class="sourceLineNo">1109</span><a name="line.1109"></a>
+<span class="sourceLineNo">1110</span>                if (par1Packet100OpenWindow.useProvidedWindowTitle)<a name="line.1110"></a>
+<span class="sourceLineNo">1111</span>                {<a name="line.1111"></a>
+<span class="sourceLineNo">1112</span>                    tileentitybrewingstand.func_94131_a(par1Packet100OpenWindow.windowTitle);<a name="line.1112"></a>
+<span class="sourceLineNo">1113</span>                }<a name="line.1113"></a>
+<span class="sourceLineNo">1114</span><a name="line.1114"></a>
+<span class="sourceLineNo">1115</span>                entityclientplayermp.displayGUIBrewingStand(tileentitybrewingstand);<a name="line.1115"></a>
+<span class="sourceLineNo">1116</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1116"></a>
+<span class="sourceLineNo">1117</span>                break;<a name="line.1117"></a>
+<span class="sourceLineNo">1118</span>            case 6:<a name="line.1118"></a>
+<span class="sourceLineNo">1119</span>                entityclientplayermp.displayGUIMerchant(new NpcMerchant(entityclientplayermp), par1Packet100OpenWindow.useProvidedWindowTitle ? par1Packet100OpenWindow.windowTitle : null);<a name="line.1119"></a>
+<span class="sourceLineNo">1120</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1120"></a>
+<span class="sourceLineNo">1121</span>                break;<a name="line.1121"></a>
+<span class="sourceLineNo">1122</span>            case 7:<a name="line.1122"></a>
+<span class="sourceLineNo">1123</span>                TileEntityBeacon tileentitybeacon = new TileEntityBeacon();<a name="line.1123"></a>
+<span class="sourceLineNo">1124</span>                entityclientplayermp.displayGUIBeacon(tileentitybeacon);<a name="line.1124"></a>
+<span class="sourceLineNo">1125</span><a name="line.1125"></a>
+<span class="sourceLineNo">1126</span>                if (par1Packet100OpenWindow.useProvidedWindowTitle)<a name="line.1126"></a>
+<span class="sourceLineNo">1127</span>                {<a name="line.1127"></a>
+<span class="sourceLineNo">1128</span>                    tileentitybeacon.func_94047_a(par1Packet100OpenWindow.windowTitle);<a name="line.1128"></a>
+<span class="sourceLineNo">1129</span>                }<a name="line.1129"></a>
+<span class="sourceLineNo">1130</span><a name="line.1130"></a>
+<span class="sourceLineNo">1131</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1131"></a>
+<span class="sourceLineNo">1132</span>                break;<a name="line.1132"></a>
+<span class="sourceLineNo">1133</span>            case 8:<a name="line.1133"></a>
+<span class="sourceLineNo">1134</span>                entityclientplayermp.displayGUIAnvil(MathHelper.floor_double(entityclientplayermp.posX), MathHelper.floor_double(entityclientplayermp.posY), MathHelper.floor_double(entityclientplayermp.posZ));<a name="line.1134"></a>
+<span class="sourceLineNo">1135</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1135"></a>
+<span class="sourceLineNo">1136</span>                break;<a name="line.1136"></a>
+<span class="sourceLineNo">1137</span>            case 9:<a name="line.1137"></a>
+<span class="sourceLineNo">1138</span>                TileEntityHopper tileentityhopper = new TileEntityHopper();<a name="line.1138"></a>
+<span class="sourceLineNo">1139</span><a name="line.1139"></a>
+<span class="sourceLineNo">1140</span>                if (par1Packet100OpenWindow.useProvidedWindowTitle)<a name="line.1140"></a>
+<span class="sourceLineNo">1141</span>                {<a name="line.1141"></a>
+<span class="sourceLineNo">1142</span>                    tileentityhopper.func_96115_a(par1Packet100OpenWindow.windowTitle);<a name="line.1142"></a>
+<span class="sourceLineNo">1143</span>                }<a name="line.1143"></a>
+<span class="sourceLineNo">1144</span><a name="line.1144"></a>
+<span class="sourceLineNo">1145</span>                entityclientplayermp.func_94064_a(tileentityhopper);<a name="line.1145"></a>
+<span class="sourceLineNo">1146</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1146"></a>
+<span class="sourceLineNo">1147</span>                break;<a name="line.1147"></a>
+<span class="sourceLineNo">1148</span>            case 10:<a name="line.1148"></a>
+<span class="sourceLineNo">1149</span>                TileEntityDropper tileentitydropper = new TileEntityDropper();<a name="line.1149"></a>
+<span class="sourceLineNo">1150</span><a name="line.1150"></a>
+<span class="sourceLineNo">1151</span>                if (par1Packet100OpenWindow.useProvidedWindowTitle)<a name="line.1151"></a>
+<span class="sourceLineNo">1152</span>                {<a name="line.1152"></a>
+<span class="sourceLineNo">1153</span>                    tileentitydropper.func_94049_a(par1Packet100OpenWindow.windowTitle);<a name="line.1153"></a>
+<span class="sourceLineNo">1154</span>                }<a name="line.1154"></a>
+<span class="sourceLineNo">1155</span><a name="line.1155"></a>
+<span class="sourceLineNo">1156</span>                entityclientplayermp.displayGUIDispenser(tileentitydropper);<a name="line.1156"></a>
+<span class="sourceLineNo">1157</span>                entityclientplayermp.openContainer.windowId = par1Packet100OpenWindow.windowId;<a name="line.1157"></a>
+<span class="sourceLineNo">1158</span>        }<a name="line.1158"></a>
+<span class="sourceLineNo">1159</span>    }<a name="line.1159"></a>
+<span class="sourceLineNo">1160</span><a name="line.1160"></a>
+<span class="sourceLineNo">1161</span>    public void handleSetSlot(Packet103SetSlot par1Packet103SetSlot)<a name="line.1161"></a>
+<span class="sourceLineNo">1162</span>    {<a name="line.1162"></a>
+<span class="sourceLineNo">1163</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1163"></a>
+<span class="sourceLineNo">1164</span><a name="line.1164"></a>
+<span class="sourceLineNo">1165</span>        if (par1Packet103SetSlot.windowId == -1)<a name="line.1165"></a>
+<span class="sourceLineNo">1166</span>        {<a name="line.1166"></a>
+<span class="sourceLineNo">1167</span>            entityclientplayermp.inventory.setItemStack(par1Packet103SetSlot.myItemStack);<a name="line.1167"></a>
+<span class="sourceLineNo">1168</span>        }<a name="line.1168"></a>
+<span class="sourceLineNo">1169</span>        else<a name="line.1169"></a>
+<span class="sourceLineNo">1170</span>        {<a name="line.1170"></a>
+<span class="sourceLineNo">1171</span>            boolean flag = false;<a name="line.1171"></a>
+<span class="sourceLineNo">1172</span><a name="line.1172"></a>
+<span class="sourceLineNo">1173</span>            if (this.mc.currentScreen instanceof GuiContainerCreative)<a name="line.1173"></a>
+<span class="sourceLineNo">1174</span>            {<a name="line.1174"></a>
+<span class="sourceLineNo">1175</span>                GuiContainerCreative guicontainercreative = (GuiContainerCreative)this.mc.currentScreen;<a name="line.1175"></a>
+<span class="sourceLineNo">1176</span>                flag = guicontainercreative.func_74230_h() != CreativeTabs.tabInventory.getTabIndex();<a name="line.1176"></a>
+<span class="sourceLineNo">1177</span>            }<a name="line.1177"></a>
+<span class="sourceLineNo">1178</span><a name="line.1178"></a>
+<span class="sourceLineNo">1179</span>            if (par1Packet103SetSlot.windowId == 0 &amp;&amp; par1Packet103SetSlot.itemSlot &gt;= 36 &amp;&amp; par1Packet103SetSlot.itemSlot &lt; 45)<a name="line.1179"></a>
+<span class="sourceLineNo">1180</span>            {<a name="line.1180"></a>
+<span class="sourceLineNo">1181</span>                ItemStack itemstack = entityclientplayermp.inventoryContainer.getSlot(par1Packet103SetSlot.itemSlot).getStack();<a name="line.1181"></a>
+<span class="sourceLineNo">1182</span><a name="line.1182"></a>
+<span class="sourceLineNo">1183</span>                if (par1Packet103SetSlot.myItemStack != null &amp;&amp; (itemstack == null || itemstack.stackSize &lt; par1Packet103SetSlot.myItemStack.stackSize))<a name="line.1183"></a>
+<span class="sourceLineNo">1184</span>                {<a name="line.1184"></a>
+<span class="sourceLineNo">1185</span>                    par1Packet103SetSlot.myItemStack.animationsToGo = 5;<a name="line.1185"></a>
+<span class="sourceLineNo">1186</span>                }<a name="line.1186"></a>
+<span class="sourceLineNo">1187</span><a name="line.1187"></a>
+<span class="sourceLineNo">1188</span>                entityclientplayermp.inventoryContainer.putStackInSlot(par1Packet103SetSlot.itemSlot, par1Packet103SetSlot.myItemStack);<a name="line.1188"></a>
+<span class="sourceLineNo">1189</span>            }<a name="line.1189"></a>
+<span class="sourceLineNo">1190</span>            else if (par1Packet103SetSlot.windowId == entityclientplayermp.openContainer.windowId &amp;&amp; (par1Packet103SetSlot.windowId != 0 || !flag))<a name="line.1190"></a>
+<span class="sourceLineNo">1191</span>            {<a name="line.1191"></a>
+<span class="sourceLineNo">1192</span>                entityclientplayermp.openContainer.putStackInSlot(par1Packet103SetSlot.itemSlot, par1Packet103SetSlot.myItemStack);<a name="line.1192"></a>
+<span class="sourceLineNo">1193</span>            }<a name="line.1193"></a>
+<span class="sourceLineNo">1194</span>        }<a name="line.1194"></a>
+<span class="sourceLineNo">1195</span>    }<a name="line.1195"></a>
+<span class="sourceLineNo">1196</span><a name="line.1196"></a>
+<span class="sourceLineNo">1197</span>    public void handleTransaction(Packet106Transaction par1Packet106Transaction)<a name="line.1197"></a>
+<span class="sourceLineNo">1198</span>    {<a name="line.1198"></a>
+<span class="sourceLineNo">1199</span>        Container container = null;<a name="line.1199"></a>
+<span class="sourceLineNo">1200</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1200"></a>
+<span class="sourceLineNo">1201</span><a name="line.1201"></a>
+<span class="sourceLineNo">1202</span>        if (par1Packet106Transaction.windowId == 0)<a name="line.1202"></a>
+<span class="sourceLineNo">1203</span>        {<a name="line.1203"></a>
+<span class="sourceLineNo">1204</span>            container = entityclientplayermp.inventoryContainer;<a name="line.1204"></a>
+<span class="sourceLineNo">1205</span>        }<a name="line.1205"></a>
+<span class="sourceLineNo">1206</span>        else if (par1Packet106Transaction.windowId == entityclientplayermp.openContainer.windowId)<a name="line.1206"></a>
+<span class="sourceLineNo">1207</span>        {<a name="line.1207"></a>
+<span class="sourceLineNo">1208</span>            container = entityclientplayermp.openContainer;<a name="line.1208"></a>
+<span class="sourceLineNo">1209</span>        }<a name="line.1209"></a>
+<span class="sourceLineNo">1210</span><a name="line.1210"></a>
+<span class="sourceLineNo">1211</span>        if (container != null &amp;&amp; !par1Packet106Transaction.accepted)<a name="line.1211"></a>
+<span class="sourceLineNo">1212</span>        {<a name="line.1212"></a>
+<span class="sourceLineNo">1213</span>            this.addToSendQueue(new Packet106Transaction(par1Packet106Transaction.windowId, par1Packet106Transaction.shortWindowId, true));<a name="line.1213"></a>
+<span class="sourceLineNo">1214</span>        }<a name="line.1214"></a>
+<span class="sourceLineNo">1215</span>    }<a name="line.1215"></a>
+<span class="sourceLineNo">1216</span><a name="line.1216"></a>
+<span class="sourceLineNo">1217</span>    public void handleWindowItems(Packet104WindowItems par1Packet104WindowItems)<a name="line.1217"></a>
+<span class="sourceLineNo">1218</span>    {<a name="line.1218"></a>
+<span class="sourceLineNo">1219</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1219"></a>
+<span class="sourceLineNo">1220</span><a name="line.1220"></a>
+<span class="sourceLineNo">1221</span>        if (par1Packet104WindowItems.windowId == 0)<a name="line.1221"></a>
+<span class="sourceLineNo">1222</span>        {<a name="line.1222"></a>
+<span class="sourceLineNo">1223</span>            entityclientplayermp.inventoryContainer.putStacksInSlots(par1Packet104WindowItems.itemStack);<a name="line.1223"></a>
+<span class="sourceLineNo">1224</span>        }<a name="line.1224"></a>
+<span class="sourceLineNo">1225</span>        else if (par1Packet104WindowItems.windowId == entityclientplayermp.openContainer.windowId)<a name="line.1225"></a>
+<span class="sourceLineNo">1226</span>        {<a name="line.1226"></a>
+<span class="sourceLineNo">1227</span>            entityclientplayermp.openContainer.putStacksInSlots(par1Packet104WindowItems.itemStack);<a name="line.1227"></a>
+<span class="sourceLineNo">1228</span>        }<a name="line.1228"></a>
+<span class="sourceLineNo">1229</span>    }<a name="line.1229"></a>
+<span class="sourceLineNo">1230</span><a name="line.1230"></a>
+<span class="sourceLineNo">1231</span>    /**<a name="line.1231"></a>
+<span class="sourceLineNo">1232</span>     * Updates Client side signs<a name="line.1232"></a>
+<span class="sourceLineNo">1233</span>     */<a name="line.1233"></a>
+<span class="sourceLineNo">1234</span>    public void handleUpdateSign(Packet130UpdateSign par1Packet130UpdateSign)<a name="line.1234"></a>
+<span class="sourceLineNo">1235</span>    {<a name="line.1235"></a>
+<span class="sourceLineNo">1236</span>        boolean flag = false;<a name="line.1236"></a>
+<span class="sourceLineNo">1237</span><a name="line.1237"></a>
+<span class="sourceLineNo">1238</span>        if (this.mc.theWorld.blockExists(par1Packet130UpdateSign.xPosition, par1Packet130UpdateSign.yPosition, par1Packet130UpdateSign.zPosition))<a name="line.1238"></a>
+<span class="sourceLineNo">1239</span>        {<a name="line.1239"></a>
+<span class="sourceLineNo">1240</span>            TileEntity tileentity = this.mc.theWorld.getBlockTileEntity(par1Packet130UpdateSign.xPosition, par1Packet130UpdateSign.yPosition, par1Packet130UpdateSign.zPosition);<a name="line.1240"></a>
+<span class="sourceLineNo">1241</span><a name="line.1241"></a>
+<span class="sourceLineNo">1242</span>            if (tileentity instanceof TileEntitySign)<a name="line.1242"></a>
+<span class="sourceLineNo">1243</span>            {<a name="line.1243"></a>
+<span class="sourceLineNo">1244</span>                TileEntitySign tileentitysign = (TileEntitySign)tileentity;<a name="line.1244"></a>
+<span class="sourceLineNo">1245</span><a name="line.1245"></a>
+<span class="sourceLineNo">1246</span>                if (tileentitysign.isEditable())<a name="line.1246"></a>
+<span class="sourceLineNo">1247</span>                {<a name="line.1247"></a>
+<span class="sourceLineNo">1248</span>                    for (int i = 0; i &lt; 4; ++i)<a name="line.1248"></a>
+<span class="sourceLineNo">1249</span>                    {<a name="line.1249"></a>
+<span class="sourceLineNo">1250</span>                        tileentitysign.signText[i] = par1Packet130UpdateSign.signLines[i];<a name="line.1250"></a>
+<span class="sourceLineNo">1251</span>                    }<a name="line.1251"></a>
+<span class="sourceLineNo">1252</span><a name="line.1252"></a>
+<span class="sourceLineNo">1253</span>                    tileentitysign.onInventoryChanged();<a name="line.1253"></a>
+<span class="sourceLineNo">1254</span>                }<a name="line.1254"></a>
+<span class="sourceLineNo">1255</span><a name="line.1255"></a>
+<span class="sourceLineNo">1256</span>                flag = true;<a name="line.1256"></a>
+<span class="sourceLineNo">1257</span>            }<a name="line.1257"></a>
+<span class="sourceLineNo">1258</span>        }<a name="line.1258"></a>
+<span class="sourceLineNo">1259</span><a name="line.1259"></a>
+<span class="sourceLineNo">1260</span>        if (!flag &amp;&amp; this.mc.thePlayer != null)<a name="line.1260"></a>
+<span class="sourceLineNo">1261</span>        {<a name="line.1261"></a>
+<span class="sourceLineNo">1262</span>            this.mc.thePlayer.sendChatToPlayer("Unable to locate sign at " + par1Packet130UpdateSign.xPosition + ", " + par1Packet130UpdateSign.yPosition + ", " + par1Packet130UpdateSign.zPosition);<a name="line.1262"></a>
+<span class="sourceLineNo">1263</span>        }<a name="line.1263"></a>
+<span class="sourceLineNo">1264</span>    }<a name="line.1264"></a>
+<span class="sourceLineNo">1265</span><a name="line.1265"></a>
+<span class="sourceLineNo">1266</span>    public void handleTileEntityData(Packet132TileEntityData par1Packet132TileEntityData)<a name="line.1266"></a>
+<span class="sourceLineNo">1267</span>    {<a name="line.1267"></a>
+<span class="sourceLineNo">1268</span>        if (this.mc.theWorld.blockExists(par1Packet132TileEntityData.xPosition, par1Packet132TileEntityData.yPosition, par1Packet132TileEntityData.zPosition))<a name="line.1268"></a>
+<span class="sourceLineNo">1269</span>        {<a name="line.1269"></a>
+<span class="sourceLineNo">1270</span>            TileEntity tileentity = this.mc.theWorld.getBlockTileEntity(par1Packet132TileEntityData.xPosition, par1Packet132TileEntityData.yPosition, par1Packet132TileEntityData.zPosition);<a name="line.1270"></a>
+<span class="sourceLineNo">1271</span><a name="line.1271"></a>
+<span class="sourceLineNo">1272</span>            if (tileentity != null)<a name="line.1272"></a>
+<span class="sourceLineNo">1273</span>            {<a name="line.1273"></a>
+<span class="sourceLineNo">1274</span>                if (par1Packet132TileEntityData.actionType == 1 &amp;&amp; tileentity instanceof TileEntityMobSpawner)<a name="line.1274"></a>
+<span class="sourceLineNo">1275</span>                {<a name="line.1275"></a>
+<span class="sourceLineNo">1276</span>                    tileentity.readFromNBT(par1Packet132TileEntityData.customParam1);<a name="line.1276"></a>
+<span class="sourceLineNo">1277</span>                }<a name="line.1277"></a>
+<span class="sourceLineNo">1278</span>                else if (par1Packet132TileEntityData.actionType == 2 &amp;&amp; tileentity instanceof TileEntityCommandBlock)<a name="line.1278"></a>
+<span class="sourceLineNo">1279</span>                {<a name="line.1279"></a>
+<span class="sourceLineNo">1280</span>                    tileentity.readFromNBT(par1Packet132TileEntityData.customParam1);<a name="line.1280"></a>
+<span class="sourceLineNo">1281</span>                }<a name="line.1281"></a>
+<span class="sourceLineNo">1282</span>                else if (par1Packet132TileEntityData.actionType == 3 &amp;&amp; tileentity instanceof TileEntityBeacon)<a name="line.1282"></a>
+<span class="sourceLineNo">1283</span>                {<a name="line.1283"></a>
+<span class="sourceLineNo">1284</span>                    tileentity.readFromNBT(par1Packet132TileEntityData.customParam1);<a name="line.1284"></a>
+<span class="sourceLineNo">1285</span>                }<a name="line.1285"></a>
+<span class="sourceLineNo">1286</span>                else if (par1Packet132TileEntityData.actionType == 4 &amp;&amp; tileentity instanceof TileEntitySkull)<a name="line.1286"></a>
+<span class="sourceLineNo">1287</span>                {<a name="line.1287"></a>
+<span class="sourceLineNo">1288</span>                    tileentity.readFromNBT(par1Packet132TileEntityData.customParam1);<a name="line.1288"></a>
+<span class="sourceLineNo">1289</span>                }<a name="line.1289"></a>
+<span class="sourceLineNo">1290</span>                else<a name="line.1290"></a>
+<span class="sourceLineNo">1291</span>                {<a name="line.1291"></a>
+<span class="sourceLineNo">1292</span>                    tileentity.onDataPacket(netManager,  par1Packet132TileEntityData);<a name="line.1292"></a>
+<span class="sourceLineNo">1293</span>                }<a name="line.1293"></a>
+<span class="sourceLineNo">1294</span>            }<a name="line.1294"></a>
+<span class="sourceLineNo">1295</span>        }<a name="line.1295"></a>
+<span class="sourceLineNo">1296</span>    }<a name="line.1296"></a>
+<span class="sourceLineNo">1297</span><a name="line.1297"></a>
+<span class="sourceLineNo">1298</span>    public void handleUpdateProgressbar(Packet105UpdateProgressbar par1Packet105UpdateProgressbar)<a name="line.1298"></a>
+<span class="sourceLineNo">1299</span>    {<a name="line.1299"></a>
+<span class="sourceLineNo">1300</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1300"></a>
+<span class="sourceLineNo">1301</span>        this.unexpectedPacket(par1Packet105UpdateProgressbar);<a name="line.1301"></a>
+<span class="sourceLineNo">1302</span><a name="line.1302"></a>
+<span class="sourceLineNo">1303</span>        if (entityclientplayermp.openContainer != null &amp;&amp; entityclientplayermp.openContainer.windowId == par1Packet105UpdateProgressbar.windowId)<a name="line.1303"></a>
+<span class="sourceLineNo">1304</span>        {<a name="line.1304"></a>
+<span class="sourceLineNo">1305</span>            entityclientplayermp.openContainer.updateProgressBar(par1Packet105UpdateProgressbar.progressBar, par1Packet105UpdateProgressbar.progressBarValue);<a name="line.1305"></a>
+<span class="sourceLineNo">1306</span>        }<a name="line.1306"></a>
+<span class="sourceLineNo">1307</span>    }<a name="line.1307"></a>
+<span class="sourceLineNo">1308</span><a name="line.1308"></a>
+<span class="sourceLineNo">1309</span>    public void handlePlayerInventory(Packet5PlayerInventory par1Packet5PlayerInventory)<a name="line.1309"></a>
+<span class="sourceLineNo">1310</span>    {<a name="line.1310"></a>
+<span class="sourceLineNo">1311</span>        Entity entity = this.getEntityByID(par1Packet5PlayerInventory.entityID);<a name="line.1311"></a>
+<span class="sourceLineNo">1312</span><a name="line.1312"></a>
+<span class="sourceLineNo">1313</span>        if (entity != null)<a name="line.1313"></a>
+<span class="sourceLineNo">1314</span>        {<a name="line.1314"></a>
+<span class="sourceLineNo">1315</span>            entity.setCurrentItemOrArmor(par1Packet5PlayerInventory.slot, par1Packet5PlayerInventory.getItemSlot());<a name="line.1315"></a>
+<span class="sourceLineNo">1316</span>        }<a name="line.1316"></a>
+<span class="sourceLineNo">1317</span>    }<a name="line.1317"></a>
+<span class="sourceLineNo">1318</span><a name="line.1318"></a>
+<span class="sourceLineNo">1319</span>    public void handleCloseWindow(Packet101CloseWindow par1Packet101CloseWindow)<a name="line.1319"></a>
+<span class="sourceLineNo">1320</span>    {<a name="line.1320"></a>
+<span class="sourceLineNo">1321</span>        this.mc.thePlayer.func_92015_f();<a name="line.1321"></a>
+<span class="sourceLineNo">1322</span>    }<a name="line.1322"></a>
+<span class="sourceLineNo">1323</span><a name="line.1323"></a>
+<span class="sourceLineNo">1324</span>    public void handleBlockEvent(Packet54PlayNoteBlock par1Packet54PlayNoteBlock)<a name="line.1324"></a>
+<span class="sourceLineNo">1325</span>    {<a name="line.1325"></a>
+<span class="sourceLineNo">1326</span>        this.mc.theWorld.addBlockEvent(par1Packet54PlayNoteBlock.xLocation, par1Packet54PlayNoteBlock.yLocation, par1Packet54PlayNoteBlock.zLocation, par1Packet54PlayNoteBlock.blockId, par1Packet54PlayNoteBlock.instrumentType, par1Packet54PlayNoteBlock.pitch);<a name="line.1326"></a>
+<span class="sourceLineNo">1327</span>    }<a name="line.1327"></a>
+<span class="sourceLineNo">1328</span><a name="line.1328"></a>
+<span class="sourceLineNo">1329</span>    public void handleBlockDestroy(Packet55BlockDestroy par1Packet55BlockDestroy)<a name="line.1329"></a>
+<span class="sourceLineNo">1330</span>    {<a name="line.1330"></a>
+<span class="sourceLineNo">1331</span>        this.mc.theWorld.destroyBlockInWorldPartially(par1Packet55BlockDestroy.getEntityId(), par1Packet55BlockDestroy.getPosX(), par1Packet55BlockDestroy.getPosY(), par1Packet55BlockDestroy.getPosZ(), par1Packet55BlockDestroy.getDestroyedStage());<a name="line.1331"></a>
+<span class="sourceLineNo">1332</span>    }<a name="line.1332"></a>
+<span class="sourceLineNo">1333</span><a name="line.1333"></a>
+<span class="sourceLineNo">1334</span>    public void handleMapChunks(Packet56MapChunks par1Packet56MapChunks)<a name="line.1334"></a>
+<span class="sourceLineNo">1335</span>    {<a name="line.1335"></a>
+<span class="sourceLineNo">1336</span>        for (int i = 0; i &lt; par1Packet56MapChunks.getNumberOfChunkInPacket(); ++i)<a name="line.1336"></a>
+<span class="sourceLineNo">1337</span>        {<a name="line.1337"></a>
+<span class="sourceLineNo">1338</span>            int j = par1Packet56MapChunks.getChunkPosX(i);<a name="line.1338"></a>
+<span class="sourceLineNo">1339</span>            int k = par1Packet56MapChunks.getChunkPosZ(i);<a name="line.1339"></a>
+<span class="sourceLineNo">1340</span>            this.worldClient.doPreChunk(j, k, true);<a name="line.1340"></a>
+<span class="sourceLineNo">1341</span>            this.worldClient.invalidateBlockReceiveRegion(j &lt;&lt; 4, 0, k &lt;&lt; 4, (j &lt;&lt; 4) + 15, 256, (k &lt;&lt; 4) + 15);<a name="line.1341"></a>
+<span class="sourceLineNo">1342</span>            Chunk chunk = this.worldClient.getChunkFromChunkCoords(j, k);<a name="line.1342"></a>
+<span class="sourceLineNo">1343</span><a name="line.1343"></a>
+<span class="sourceLineNo">1344</span>            if (chunk == null)<a name="line.1344"></a>
+<span class="sourceLineNo">1345</span>            {<a name="line.1345"></a>
+<span class="sourceLineNo">1346</span>                this.worldClient.doPreChunk(j, k, true);<a name="line.1346"></a>
+<span class="sourceLineNo">1347</span>                chunk = this.worldClient.getChunkFromChunkCoords(j, k);<a name="line.1347"></a>
+<span class="sourceLineNo">1348</span>            }<a name="line.1348"></a>
+<span class="sourceLineNo">1349</span><a name="line.1349"></a>
+<span class="sourceLineNo">1350</span>            if (chunk != null)<a name="line.1350"></a>
+<span class="sourceLineNo">1351</span>            {<a name="line.1351"></a>
+<span class="sourceLineNo">1352</span>                chunk.fillChunk(par1Packet56MapChunks.getChunkCompressedData(i), par1Packet56MapChunks.field_73590_a[i], par1Packet56MapChunks.field_73588_b[i], true);<a name="line.1352"></a>
+<span class="sourceLineNo">1353</span>                this.worldClient.markBlockRangeForRenderUpdate(j &lt;&lt; 4, 0, k &lt;&lt; 4, (j &lt;&lt; 4) + 15, 256, (k &lt;&lt; 4) + 15);<a name="line.1353"></a>
+<span class="sourceLineNo">1354</span><a name="line.1354"></a>
+<span class="sourceLineNo">1355</span>                if (!(this.worldClient.provider instanceof WorldProviderSurface))<a name="line.1355"></a>
+<span class="sourceLineNo">1356</span>                {<a name="line.1356"></a>
+<span class="sourceLineNo">1357</span>                    chunk.resetRelightChecks();<a name="line.1357"></a>
+<span class="sourceLineNo">1358</span>                }<a name="line.1358"></a>
+<span class="sourceLineNo">1359</span>            }<a name="line.1359"></a>
+<span class="sourceLineNo">1360</span>        }<a name="line.1360"></a>
+<span class="sourceLineNo">1361</span>    }<a name="line.1361"></a>
+<span class="sourceLineNo">1362</span><a name="line.1362"></a>
+<span class="sourceLineNo">1363</span>    /**<a name="line.1363"></a>
+<span class="sourceLineNo">1364</span>     * If this returns false, all packets will be queued for the main thread to handle, even if they would otherwise be<a name="line.1364"></a>
+<span class="sourceLineNo">1365</span>     * processed asynchronously. Used to avoid processing packets on the client before the world has been downloaded<a name="line.1365"></a>
+<span class="sourceLineNo">1366</span>     * (which happens on the main thread)<a name="line.1366"></a>
+<span class="sourceLineNo">1367</span>     */<a name="line.1367"></a>
+<span class="sourceLineNo">1368</span>    public boolean canProcessPacketsAsync()<a name="line.1368"></a>
+<span class="sourceLineNo">1369</span>    {<a name="line.1369"></a>
+<span class="sourceLineNo">1370</span>        return this.mc != null &amp;&amp; this.mc.theWorld != null &amp;&amp; this.mc.thePlayer != null &amp;&amp; this.worldClient != null;<a name="line.1370"></a>
+<span class="sourceLineNo">1371</span>    }<a name="line.1371"></a>
+<span class="sourceLineNo">1372</span><a name="line.1372"></a>
+<span class="sourceLineNo">1373</span>    public void handleGameEvent(Packet70GameEvent par1Packet70GameEvent)<a name="line.1373"></a>
+<span class="sourceLineNo">1374</span>    {<a name="line.1374"></a>
+<span class="sourceLineNo">1375</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1375"></a>
+<span class="sourceLineNo">1376</span>        int i = par1Packet70GameEvent.eventType;<a name="line.1376"></a>
+<span class="sourceLineNo">1377</span>        int j = par1Packet70GameEvent.gameMode;<a name="line.1377"></a>
+<span class="sourceLineNo">1378</span><a name="line.1378"></a>
+<span class="sourceLineNo">1379</span>        if (i &gt;= 0 &amp;&amp; i &lt; Packet70GameEvent.clientMessage.length &amp;&amp; Packet70GameEvent.clientMessage[i] != null)<a name="line.1379"></a>
+<span class="sourceLineNo">1380</span>        {<a name="line.1380"></a>
+<span class="sourceLineNo">1381</span>            entityclientplayermp.addChatMessage(Packet70GameEvent.clientMessage[i]);<a name="line.1381"></a>
+<span class="sourceLineNo">1382</span>        }<a name="line.1382"></a>
+<span class="sourceLineNo">1383</span><a name="line.1383"></a>
+<span class="sourceLineNo">1384</span>        if (i == 1)<a name="line.1384"></a>
+<span class="sourceLineNo">1385</span>        {<a name="line.1385"></a>
+<span class="sourceLineNo">1386</span>            this.worldClient.getWorldInfo().setRaining(true);<a name="line.1386"></a>
+<span class="sourceLineNo">1387</span>            this.worldClient.setRainStrength(0.0F);<a name="line.1387"></a>
+<span class="sourceLineNo">1388</span>        }<a name="line.1388"></a>
+<span class="sourceLineNo">1389</span>        else if (i == 2)<a name="line.1389"></a>
+<span class="sourceLineNo">1390</span>        {<a name="line.1390"></a>
+<span class="sourceLineNo">1391</span>            this.worldClient.getWorldInfo().setRaining(false);<a name="line.1391"></a>
+<span class="sourceLineNo">1392</span>            this.worldClient.setRainStrength(1.0F);<a name="line.1392"></a>
+<span class="sourceLineNo">1393</span>        }<a name="line.1393"></a>
+<span class="sourceLineNo">1394</span>        else if (i == 3)<a name="line.1394"></a>
+<span class="sourceLineNo">1395</span>        {<a name="line.1395"></a>
+<span class="sourceLineNo">1396</span>            this.mc.playerController.setGameType(EnumGameType.getByID(j));<a name="line.1396"></a>
+<span class="sourceLineNo">1397</span>        }<a name="line.1397"></a>
+<span class="sourceLineNo">1398</span>        else if (i == 4)<a name="line.1398"></a>
+<span class="sourceLineNo">1399</span>        {<a name="line.1399"></a>
+<span class="sourceLineNo">1400</span>            this.mc.displayGuiScreen(new GuiWinGame());<a name="line.1400"></a>
+<span class="sourceLineNo">1401</span>        }<a name="line.1401"></a>
+<span class="sourceLineNo">1402</span>        else if (i == 5)<a name="line.1402"></a>
+<span class="sourceLineNo">1403</span>        {<a name="line.1403"></a>
+<span class="sourceLineNo">1404</span>            GameSettings gamesettings = this.mc.gameSettings;<a name="line.1404"></a>
+<span class="sourceLineNo">1405</span><a name="line.1405"></a>
+<span class="sourceLineNo">1406</span>            if (j == 0)<a name="line.1406"></a>
+<span class="sourceLineNo">1407</span>            {<a name="line.1407"></a>
+<span class="sourceLineNo">1408</span>                this.mc.displayGuiScreen(new GuiScreenDemo());<a name="line.1408"></a>
+<span class="sourceLineNo">1409</span>            }<a name="line.1409"></a>
+<span class="sourceLineNo">1410</span>            else if (j == 101)<a name="line.1410"></a>
+<span class="sourceLineNo">1411</span>            {<a name="line.1411"></a>
+<span class="sourceLineNo">1412</span>                this.mc.ingameGUI.getChatGUI().addTranslatedMessage("demo.help.movement", new Object[] {Keyboard.getKeyName(gamesettings.keyBindForward.keyCode), Keyboard.getKeyName(gamesettings.keyBindLeft.keyCode), Keyboard.getKeyName(gamesettings.keyBindBack.keyCode), Keyboard.getKeyName(gamesettings.keyBindRight.keyCode)});<a name="line.1412"></a>
+<span class="sourceLineNo">1413</span>            }<a name="line.1413"></a>
+<span class="sourceLineNo">1414</span>            else if (j == 102)<a name="line.1414"></a>
+<span class="sourceLineNo">1415</span>            {<a name="line.1415"></a>
+<span class="sourceLineNo">1416</span>                this.mc.ingameGUI.getChatGUI().addTranslatedMessage("demo.help.jump", new Object[] {Keyboard.getKeyName(gamesettings.keyBindJump.keyCode)});<a name="line.1416"></a>
+<span class="sourceLineNo">1417</span>            }<a name="line.1417"></a>
+<span class="sourceLineNo">1418</span>            else if (j == 103)<a name="line.1418"></a>
+<span class="sourceLineNo">1419</span>            {<a name="line.1419"></a>
+<span class="sourceLineNo">1420</span>                this.mc.ingameGUI.getChatGUI().addTranslatedMessage("demo.help.inventory", new Object[] {Keyboard.getKeyName(gamesettings.keyBindInventory.keyCode)});<a name="line.1420"></a>
+<span class="sourceLineNo">1421</span>            }<a name="line.1421"></a>
+<span class="sourceLineNo">1422</span>        }<a name="line.1422"></a>
+<span class="sourceLineNo">1423</span>        else if (i == 6)<a name="line.1423"></a>
+<span class="sourceLineNo">1424</span>        {<a name="line.1424"></a>
+<span class="sourceLineNo">1425</span>            this.worldClient.playSound(entityclientplayermp.posX, entityclientplayermp.posY + (double)entityclientplayermp.getEyeHeight(), entityclientplayermp.posZ, "random.successful_hit", 0.18F, 0.45F, false);<a name="line.1425"></a>
+<span class="sourceLineNo">1426</span>        }<a name="line.1426"></a>
+<span class="sourceLineNo">1427</span>    }<a name="line.1427"></a>
+<span class="sourceLineNo">1428</span><a name="line.1428"></a>
+<span class="sourceLineNo">1429</span>    /**<a name="line.1429"></a>
+<span class="sourceLineNo">1430</span>     * Contains logic for handling packets containing arbitrary unique item data. Currently this is only for maps.<a name="line.1430"></a>
+<span class="sourceLineNo">1431</span>     */<a name="line.1431"></a>
+<span class="sourceLineNo">1432</span>    public void handleMapData(Packet131MapData par1Packet131MapData)<a name="line.1432"></a>
+<span class="sourceLineNo">1433</span>    {<a name="line.1433"></a>
+<span class="sourceLineNo">1434</span>        FMLNetworkHandler.handlePacket131Packet(this, par1Packet131MapData);<a name="line.1434"></a>
+<span class="sourceLineNo">1435</span>    }<a name="line.1435"></a>
+<span class="sourceLineNo">1436</span><a name="line.1436"></a>
+<span class="sourceLineNo">1437</span>    public void fmlPacket131Callback(Packet131MapData par1Packet131MapData)<a name="line.1437"></a>
+<span class="sourceLineNo">1438</span>    {<a name="line.1438"></a>
+<span class="sourceLineNo">1439</span>        if (par1Packet131MapData.itemID == Item.map.itemID)<a name="line.1439"></a>
+<span class="sourceLineNo">1440</span>        {<a name="line.1440"></a>
+<span class="sourceLineNo">1441</span>            ItemMap.getMPMapData(par1Packet131MapData.uniqueID, this.mc.theWorld).updateMPMapData(par1Packet131MapData.itemData);<a name="line.1441"></a>
+<span class="sourceLineNo">1442</span>        }<a name="line.1442"></a>
+<span class="sourceLineNo">1443</span>        else<a name="line.1443"></a>
+<span class="sourceLineNo">1444</span>        {<a name="line.1444"></a>
+<span class="sourceLineNo">1445</span>            this.mc.getLogAgent().logWarning("Unknown itemid: " + par1Packet131MapData.uniqueID);<a name="line.1445"></a>
+<span class="sourceLineNo">1446</span>        }<a name="line.1446"></a>
+<span class="sourceLineNo">1447</span>    }<a name="line.1447"></a>
+<span class="sourceLineNo">1448</span><a name="line.1448"></a>
+<span class="sourceLineNo">1449</span>    public void handleDoorChange(Packet61DoorChange par1Packet61DoorChange)<a name="line.1449"></a>
+<span class="sourceLineNo">1450</span>    {<a name="line.1450"></a>
+<span class="sourceLineNo">1451</span>        if (par1Packet61DoorChange.getRelativeVolumeDisabled())<a name="line.1451"></a>
+<span class="sourceLineNo">1452</span>        {<a name="line.1452"></a>
+<span class="sourceLineNo">1453</span>            this.mc.theWorld.func_82739_e(par1Packet61DoorChange.sfxID, par1Packet61DoorChange.posX, par1Packet61DoorChange.posY, par1Packet61DoorChange.posZ, par1Packet61DoorChange.auxData);<a name="line.1453"></a>
+<span class="sourceLineNo">1454</span>        }<a name="line.1454"></a>
+<span class="sourceLineNo">1455</span>        else<a name="line.1455"></a>
+<span class="sourceLineNo">1456</span>        {<a name="line.1456"></a>
+<span class="sourceLineNo">1457</span>            this.mc.theWorld.playAuxSFX(par1Packet61DoorChange.sfxID, par1Packet61DoorChange.posX, par1Packet61DoorChange.posY, par1Packet61DoorChange.posZ, par1Packet61DoorChange.auxData);<a name="line.1457"></a>
+<span class="sourceLineNo">1458</span>        }<a name="line.1458"></a>
+<span class="sourceLineNo">1459</span>    }<a name="line.1459"></a>
+<span class="sourceLineNo">1460</span><a name="line.1460"></a>
+<span class="sourceLineNo">1461</span>    /**<a name="line.1461"></a>
+<span class="sourceLineNo">1462</span>     * Increment player statistics<a name="line.1462"></a>
+<span class="sourceLineNo">1463</span>     */<a name="line.1463"></a>
+<span class="sourceLineNo">1464</span>    public void handleStatistic(Packet200Statistic par1Packet200Statistic)<a name="line.1464"></a>
+<span class="sourceLineNo">1465</span>    {<a name="line.1465"></a>
+<span class="sourceLineNo">1466</span>        this.mc.thePlayer.incrementStat(StatList.getOneShotStat(par1Packet200Statistic.statisticId), par1Packet200Statistic.amount);<a name="line.1466"></a>
+<span class="sourceLineNo">1467</span>    }<a name="line.1467"></a>
+<span class="sourceLineNo">1468</span><a name="line.1468"></a>
+<span class="sourceLineNo">1469</span>    /**<a name="line.1469"></a>
+<span class="sourceLineNo">1470</span>     * Handle an entity effect packet.<a name="line.1470"></a>
+<span class="sourceLineNo">1471</span>     */<a name="line.1471"></a>
+<span class="sourceLineNo">1472</span>    public void handleEntityEffect(Packet41EntityEffect par1Packet41EntityEffect)<a name="line.1472"></a>
+<span class="sourceLineNo">1473</span>    {<a name="line.1473"></a>
+<span class="sourceLineNo">1474</span>        Entity entity = this.getEntityByID(par1Packet41EntityEffect.entityId);<a name="line.1474"></a>
+<span class="sourceLineNo">1475</span><a name="line.1475"></a>
+<span class="sourceLineNo">1476</span>        if (entity instanceof EntityLiving)<a name="line.1476"></a>
+<span class="sourceLineNo">1477</span>        {<a name="line.1477"></a>
+<span class="sourceLineNo">1478</span>            PotionEffect potioneffect = new PotionEffect(par1Packet41EntityEffect.effectId, par1Packet41EntityEffect.duration, par1Packet41EntityEffect.effectAmplifier);<a name="line.1478"></a>
+<span class="sourceLineNo">1479</span>            potioneffect.setPotionDurationMax(par1Packet41EntityEffect.isDurationMax());<a name="line.1479"></a>
+<span class="sourceLineNo">1480</span>            ((EntityLiving)entity).addPotionEffect(potioneffect);<a name="line.1480"></a>
+<span class="sourceLineNo">1481</span>        }<a name="line.1481"></a>
+<span class="sourceLineNo">1482</span>    }<a name="line.1482"></a>
+<span class="sourceLineNo">1483</span><a name="line.1483"></a>
+<span class="sourceLineNo">1484</span>    /**<a name="line.1484"></a>
+<span class="sourceLineNo">1485</span>     * Handle a remove entity effect packet.<a name="line.1485"></a>
+<span class="sourceLineNo">1486</span>     */<a name="line.1486"></a>
+<span class="sourceLineNo">1487</span>    public void handleRemoveEntityEffect(Packet42RemoveEntityEffect par1Packet42RemoveEntityEffect)<a name="line.1487"></a>
+<span class="sourceLineNo">1488</span>    {<a name="line.1488"></a>
+<span class="sourceLineNo">1489</span>        Entity entity = this.getEntityByID(par1Packet42RemoveEntityEffect.entityId);<a name="line.1489"></a>
+<span class="sourceLineNo">1490</span><a name="line.1490"></a>
+<span class="sourceLineNo">1491</span>        if (entity instanceof EntityLiving)<a name="line.1491"></a>
+<span class="sourceLineNo">1492</span>        {<a name="line.1492"></a>
+<span class="sourceLineNo">1493</span>            ((EntityLiving)entity).removePotionEffectClient(par1Packet42RemoveEntityEffect.effectId);<a name="line.1493"></a>
+<span class="sourceLineNo">1494</span>        }<a name="line.1494"></a>
+<span class="sourceLineNo">1495</span>    }<a name="line.1495"></a>
+<span class="sourceLineNo">1496</span><a name="line.1496"></a>
+<span class="sourceLineNo">1497</span>    /**<a name="line.1497"></a>
+<span class="sourceLineNo">1498</span>     * determine if it is a server handler<a name="line.1498"></a>
+<span class="sourceLineNo">1499</span>     */<a name="line.1499"></a>
+<span class="sourceLineNo">1500</span>    public boolean isServerHandler()<a name="line.1500"></a>
+<span class="sourceLineNo">1501</span>    {<a name="line.1501"></a>
+<span class="sourceLineNo">1502</span>        return false;<a name="line.1502"></a>
+<span class="sourceLineNo">1503</span>    }<a name="line.1503"></a>
+<span class="sourceLineNo">1504</span><a name="line.1504"></a>
+<span class="sourceLineNo">1505</span>    /**<a name="line.1505"></a>
+<span class="sourceLineNo">1506</span>     * Handle a player information packet.<a name="line.1506"></a>
+<span class="sourceLineNo">1507</span>     */<a name="line.1507"></a>
+<span class="sourceLineNo">1508</span>    public void handlePlayerInfo(Packet201PlayerInfo par1Packet201PlayerInfo)<a name="line.1508"></a>
+<span class="sourceLineNo">1509</span>    {<a name="line.1509"></a>
+<span class="sourceLineNo">1510</span>        GuiPlayerInfo guiplayerinfo = (GuiPlayerInfo)this.playerInfoMap.get(par1Packet201PlayerInfo.playerName);<a name="line.1510"></a>
+<span class="sourceLineNo">1511</span><a name="line.1511"></a>
+<span class="sourceLineNo">1512</span>        if (guiplayerinfo == null &amp;&amp; par1Packet201PlayerInfo.isConnected)<a name="line.1512"></a>
+<span class="sourceLineNo">1513</span>        {<a name="line.1513"></a>
+<span class="sourceLineNo">1514</span>            guiplayerinfo = new GuiPlayerInfo(par1Packet201PlayerInfo.playerName);<a name="line.1514"></a>
+<span class="sourceLineNo">1515</span>            this.playerInfoMap.put(par1Packet201PlayerInfo.playerName, guiplayerinfo);<a name="line.1515"></a>
+<span class="sourceLineNo">1516</span>            this.playerInfoList.add(guiplayerinfo);<a name="line.1516"></a>
+<span class="sourceLineNo">1517</span>        }<a name="line.1517"></a>
+<span class="sourceLineNo">1518</span><a name="line.1518"></a>
+<span class="sourceLineNo">1519</span>        if (guiplayerinfo != null &amp;&amp; !par1Packet201PlayerInfo.isConnected)<a name="line.1519"></a>
+<span class="sourceLineNo">1520</span>        {<a name="line.1520"></a>
+<span class="sourceLineNo">1521</span>            this.playerInfoMap.remove(par1Packet201PlayerInfo.playerName);<a name="line.1521"></a>
+<span class="sourceLineNo">1522</span>            this.playerInfoList.remove(guiplayerinfo);<a name="line.1522"></a>
+<span class="sourceLineNo">1523</span>        }<a name="line.1523"></a>
+<span class="sourceLineNo">1524</span><a name="line.1524"></a>
+<span class="sourceLineNo">1525</span>        if (par1Packet201PlayerInfo.isConnected &amp;&amp; guiplayerinfo != null)<a name="line.1525"></a>
+<span class="sourceLineNo">1526</span>        {<a name="line.1526"></a>
+<span class="sourceLineNo">1527</span>            guiplayerinfo.responseTime = par1Packet201PlayerInfo.ping;<a name="line.1527"></a>
+<span class="sourceLineNo">1528</span>        }<a name="line.1528"></a>
+<span class="sourceLineNo">1529</span>    }<a name="line.1529"></a>
+<span class="sourceLineNo">1530</span><a name="line.1530"></a>
+<span class="sourceLineNo">1531</span>    /**<a name="line.1531"></a>
+<span class="sourceLineNo">1532</span>     * Handle a keep alive packet.<a name="line.1532"></a>
+<span class="sourceLineNo">1533</span>     */<a name="line.1533"></a>
+<span class="sourceLineNo">1534</span>    public void handleKeepAlive(Packet0KeepAlive par1Packet0KeepAlive)<a name="line.1534"></a>
+<span class="sourceLineNo">1535</span>    {<a name="line.1535"></a>
+<span class="sourceLineNo">1536</span>        this.addToSendQueue(new Packet0KeepAlive(par1Packet0KeepAlive.randomId));<a name="line.1536"></a>
+<span class="sourceLineNo">1537</span>    }<a name="line.1537"></a>
+<span class="sourceLineNo">1538</span><a name="line.1538"></a>
+<span class="sourceLineNo">1539</span>    /**<a name="line.1539"></a>
+<span class="sourceLineNo">1540</span>     * Handle a player abilities packet.<a name="line.1540"></a>
+<span class="sourceLineNo">1541</span>     */<a name="line.1541"></a>
+<span class="sourceLineNo">1542</span>    public void handlePlayerAbilities(Packet202PlayerAbilities par1Packet202PlayerAbilities)<a name="line.1542"></a>
+<span class="sourceLineNo">1543</span>    {<a name="line.1543"></a>
+<span class="sourceLineNo">1544</span>        EntityClientPlayerMP entityclientplayermp = this.mc.thePlayer;<a name="line.1544"></a>
+<span class="sourceLineNo">1545</span>        entityclientplayermp.capabilities.isFlying = par1Packet202PlayerAbilities.getFlying();<a name="line.1545"></a>
+<span class="sourceLineNo">1546</span>        entityclientplayermp.capabilities.isCreativeMode = par1Packet202PlayerAbilities.isCreativeMode();<a name="line.1546"></a>
+<span class="sourceLineNo">1547</span>        entityclientplayermp.capabilities.disableDamage = par1Packet202PlayerAbilities.getDisableDamage();<a name="line.1547"></a>
+<span class="sourceLineNo">1548</span>        entityclientplayermp.capabilities.allowFlying = par1Packet202PlayerAbilities.getAllowFlying();<a name="line.1548"></a>
+<span class="sourceLineNo">1549</span>        entityclientplayermp.capabilities.setFlySpeed(par1Packet202PlayerAbilities.getFlySpeed());<a name="line.1549"></a>
+<span class="sourceLineNo">1550</span>        entityclientplayermp.capabilities.setPlayerWalkSpeed(par1Packet202PlayerAbilities.getWalkSpeed());<a name="line.1550"></a>
+<span class="sourceLineNo">1551</span>    }<a name="line.1551"></a>
+<span class="sourceLineNo">1552</span><a name="line.1552"></a>
+<span class="sourceLineNo">1553</span>    public void handleAutoComplete(Packet203AutoComplete par1Packet203AutoComplete)<a name="line.1553"></a>
+<span class="sourceLineNo">1554</span>    {<a name="line.1554"></a>
+<span class="sourceLineNo">1555</span>        String[] astring = par1Packet203AutoComplete.getText().split("\u0000");<a name="line.1555"></a>
+<span class="sourceLineNo">1556</span><a name="line.1556"></a>
+<span class="sourceLineNo">1557</span>        if (this.mc.currentScreen instanceof GuiChat)<a name="line.1557"></a>
+<span class="sourceLineNo">1558</span>        {<a name="line.1558"></a>
+<span class="sourceLineNo">1559</span>            GuiChat guichat = (GuiChat)this.mc.currentScreen;<a name="line.1559"></a>
+<span class="sourceLineNo">1560</span>            guichat.func_73894_a(astring);<a name="line.1560"></a>
+<span class="sourceLineNo">1561</span>        }<a name="line.1561"></a>
+<span class="sourceLineNo">1562</span>    }<a name="line.1562"></a>
+<span class="sourceLineNo">1563</span><a name="line.1563"></a>
+<span class="sourceLineNo">1564</span>    public void handleLevelSound(Packet62LevelSound par1Packet62LevelSound)<a name="line.1564"></a>
+<span class="sourceLineNo">1565</span>    {<a name="line.1565"></a>
+<span class="sourceLineNo">1566</span>        this.mc.theWorld.playSound(par1Packet62LevelSound.getEffectX(), par1Packet62LevelSound.getEffectY(), par1Packet62LevelSound.getEffectZ(), par1Packet62LevelSound.getSoundName(), par1Packet62LevelSound.getVolume(), par1Packet62LevelSound.getPitch(), false);<a name="line.1566"></a>
+<span class="sourceLineNo">1567</span>    }<a name="line.1567"></a>
+<span class="sourceLineNo">1568</span><a name="line.1568"></a>
+<span class="sourceLineNo">1569</span>    public void handleCustomPayload(Packet250CustomPayload par1Packet250CustomPayload)<a name="line.1569"></a>
+<span class="sourceLineNo">1570</span>    {<a name="line.1570"></a>
+<span class="sourceLineNo">1571</span>        FMLNetworkHandler.handlePacket250Packet(par1Packet250CustomPayload, netManager, this);<a name="line.1571"></a>
+<span class="sourceLineNo">1572</span>    }<a name="line.1572"></a>
+<span class="sourceLineNo">1573</span><a name="line.1573"></a>
+<span class="sourceLineNo">1574</span>    public void handleVanilla250Packet(Packet250CustomPayload par1Packet250CustomPayload)<a name="line.1574"></a>
+<span class="sourceLineNo">1575</span>    {<a name="line.1575"></a>
+<span class="sourceLineNo">1576</span>        if ("MC|TPack".equals(par1Packet250CustomPayload.channel))<a name="line.1576"></a>
+<span class="sourceLineNo">1577</span>        {<a name="line.1577"></a>
+<span class="sourceLineNo">1578</span>            String[] astring = (new String(par1Packet250CustomPayload.data)).split("\u0000");<a name="line.1578"></a>
+<span class="sourceLineNo">1579</span>            String s = astring[0];<a name="line.1579"></a>
+<span class="sourceLineNo">1580</span><a name="line.1580"></a>
+<span class="sourceLineNo">1581</span>            if (astring[1].equals("16"))<a name="line.1581"></a>
+<span class="sourceLineNo">1582</span>            {<a name="line.1582"></a>
+<span class="sourceLineNo">1583</span>                if (this.mc.texturePackList.getAcceptsTextures())<a name="line.1583"></a>
+<span class="sourceLineNo">1584</span>                {<a name="line.1584"></a>
+<span class="sourceLineNo">1585</span>                    this.mc.texturePackList.requestDownloadOfTexture(s);<a name="line.1585"></a>
+<span class="sourceLineNo">1586</span>                }<a name="line.1586"></a>
+<span class="sourceLineNo">1587</span>                else if (this.mc.texturePackList.func_77300_f())<a name="line.1587"></a>
+<span class="sourceLineNo">1588</span>                {<a name="line.1588"></a>
+<span class="sourceLineNo">1589</span>                    this.mc.displayGuiScreen(new GuiYesNo(new NetClientWebTextures(this, s), StringTranslate.getInstance().translateKey("multiplayer.texturePrompt.line1"), StringTranslate.getInstance().translateKey("multiplayer.texturePrompt.line2"), 0));<a name="line.1589"></a>
+<span class="sourceLineNo">1590</span>                }<a name="line.1590"></a>
+<span class="sourceLineNo">1591</span>            }<a name="line.1591"></a>
+<span class="sourceLineNo">1592</span>        }<a name="line.1592"></a>
+<span class="sourceLineNo">1593</span>        else if ("MC|TrList".equals(par1Packet250CustomPayload.channel))<a name="line.1593"></a>
+<span class="sourceLineNo">1594</span>        {<a name="line.1594"></a>
+<span class="sourceLineNo">1595</span>            DataInputStream datainputstream = new DataInputStream(new ByteArrayInputStream(par1Packet250CustomPayload.data));<a name="line.1595"></a>
+<span class="sourceLineNo">1596</span><a name="line.1596"></a>
+<span class="sourceLineNo">1597</span>            try<a name="line.1597"></a>
+<span class="sourceLineNo">1598</span>            {<a name="line.1598"></a>
+<span class="sourceLineNo">1599</span>                int i = datainputstream.readInt();<a name="line.1599"></a>
+<span class="sourceLineNo">1600</span>                GuiScreen guiscreen = this.mc.currentScreen;<a name="line.1600"></a>
+<span class="sourceLineNo">1601</span><a name="line.1601"></a>
+<span class="sourceLineNo">1602</span>                if (guiscreen != null &amp;&amp; guiscreen instanceof GuiMerchant &amp;&amp; i == this.mc.thePlayer.openContainer.windowId)<a name="line.1602"></a>
+<span class="sourceLineNo">1603</span>                {<a name="line.1603"></a>
+<span class="sourceLineNo">1604</span>                    IMerchant imerchant = ((GuiMerchant)guiscreen).getIMerchant();<a name="line.1604"></a>
+<span class="sourceLineNo">1605</span>                    MerchantRecipeList merchantrecipelist = MerchantRecipeList.readRecipiesFromStream(datainputstream);<a name="line.1605"></a>
+<span class="sourceLineNo">1606</span>                    imerchant.setRecipes(merchantrecipelist);<a name="line.1606"></a>
+<span class="sourceLineNo">1607</span>                }<a name="line.1607"></a>
+<span class="sourceLineNo">1608</span>            }<a name="line.1608"></a>
+<span class="sourceLineNo">1609</span>            catch (IOException ioexception)<a name="line.1609"></a>
+<span class="sourceLineNo">1610</span>            {<a name="line.1610"></a>
+<span class="sourceLineNo">1611</span>                ioexception.printStackTrace();<a name="line.1611"></a>
+<span class="sourceLineNo">1612</span>            }<a name="line.1612"></a>
+<span class="sourceLineNo">1613</span>        }<a name="line.1613"></a>
+<span class="sourceLineNo">1614</span>    }<a name="line.1614"></a>
+<span class="sourceLineNo">1615</span><a name="line.1615"></a>
+<span class="sourceLineNo">1616</span>    /**<a name="line.1616"></a>
+<span class="sourceLineNo">1617</span>     * Handle a set objective packet.<a name="line.1617"></a>
+<span class="sourceLineNo">1618</span>     */<a name="line.1618"></a>
+<span class="sourceLineNo">1619</span>    public void handleSetObjective(Packet206SetObjective par1Packet206SetObjective)<a name="line.1619"></a>
+<span class="sourceLineNo">1620</span>    {<a name="line.1620"></a>
+<span class="sourceLineNo">1621</span>        Scoreboard scoreboard = this.worldClient.getScoreboard();<a name="line.1621"></a>
+<span class="sourceLineNo">1622</span>        ScoreObjective scoreobjective;<a name="line.1622"></a>
+<span class="sourceLineNo">1623</span><a name="line.1623"></a>
+<span class="sourceLineNo">1624</span>        if (par1Packet206SetObjective.change == 0)<a name="line.1624"></a>
+<span class="sourceLineNo">1625</span>        {<a name="line.1625"></a>
+<span class="sourceLineNo">1626</span>            scoreobjective = scoreboard.func_96535_a(par1Packet206SetObjective.objectiveName, ScoreObjectiveCriteria.field_96641_b);<a name="line.1626"></a>
+<span class="sourceLineNo">1627</span>            scoreobjective.setDisplayName(par1Packet206SetObjective.objectiveDisplayName);<a name="line.1627"></a>
+<span class="sourceLineNo">1628</span>        }<a name="line.1628"></a>
+<span class="sourceLineNo">1629</span>        else<a name="line.1629"></a>
+<span class="sourceLineNo">1630</span>        {<a name="line.1630"></a>
+<span class="sourceLineNo">1631</span>            scoreobjective = scoreboard.getObjective(par1Packet206SetObjective.objectiveName);<a name="line.1631"></a>
+<span class="sourceLineNo">1632</span><a name="line.1632"></a>
+<span class="sourceLineNo">1633</span>            if (par1Packet206SetObjective.change == 1)<a name="line.1633"></a>
+<span class="sourceLineNo">1634</span>            {<a name="line.1634"></a>
+<span class="sourceLineNo">1635</span>                scoreboard.func_96519_k(scoreobjective);<a name="line.1635"></a>
+<span class="sourceLineNo">1636</span>            }<a name="line.1636"></a>
+<span class="sourceLineNo">1637</span>            else if (par1Packet206SetObjective.change == 2)<a name="line.1637"></a>
+<span class="sourceLineNo">1638</span>            {<a name="line.1638"></a>
+<span class="sourceLineNo">1639</span>                scoreobjective.setDisplayName(par1Packet206SetObjective.objectiveDisplayName);<a name="line.1639"></a>
+<span class="sourceLineNo">1640</span>            }<a name="line.1640"></a>
+<span class="sourceLineNo">1641</span>        }<a name="line.1641"></a>
+<span class="sourceLineNo">1642</span>    }<a name="line.1642"></a>
+<span class="sourceLineNo">1643</span><a name="line.1643"></a>
+<span class="sourceLineNo">1644</span>    /**<a name="line.1644"></a>
+<span class="sourceLineNo">1645</span>     * Handle a set score packet.<a name="line.1645"></a>
+<span class="sourceLineNo">1646</span>     */<a name="line.1646"></a>
+<span class="sourceLineNo">1647</span>    public void handleSetScore(Packet207SetScore par1Packet207SetScore)<a name="line.1647"></a>
+<span class="sourceLineNo">1648</span>    {<a name="line.1648"></a>
+<span class="sourceLineNo">1649</span>        Scoreboard scoreboard = this.worldClient.getScoreboard();<a name="line.1649"></a>
+<span class="sourceLineNo">1650</span>        ScoreObjective scoreobjective = scoreboard.getObjective(par1Packet207SetScore.scoreName);<a name="line.1650"></a>
+<span class="sourceLineNo">1651</span><a name="line.1651"></a>
+<span class="sourceLineNo">1652</span>        if (par1Packet207SetScore.updateOrRemove == 0)<a name="line.1652"></a>
+<span class="sourceLineNo">1653</span>        {<a name="line.1653"></a>
+<span class="sourceLineNo">1654</span>            Score score = scoreboard.func_96529_a(par1Packet207SetScore.itemName, scoreobjective);<a name="line.1654"></a>
+<span class="sourceLineNo">1655</span>            score.func_96647_c(par1Packet207SetScore.value);<a name="line.1655"></a>
+<span class="sourceLineNo">1656</span>        }<a name="line.1656"></a>
+<span class="sourceLineNo">1657</span>        else if (par1Packet207SetScore.updateOrRemove == 1)<a name="line.1657"></a>
+<span class="sourceLineNo">1658</span>        {<a name="line.1658"></a>
+<span class="sourceLineNo">1659</span>            scoreboard.func_96515_c(par1Packet207SetScore.itemName);<a name="line.1659"></a>
+<span class="sourceLineNo">1660</span>        }<a name="line.1660"></a>
+<span class="sourceLineNo">1661</span>    }<a name="line.1661"></a>
+<span class="sourceLineNo">1662</span><a name="line.1662"></a>
+<span class="sourceLineNo">1663</span>    /**<a name="line.1663"></a>
+<span class="sourceLineNo">1664</span>     * Handle a set display objective packet.<a name="line.1664"></a>
+<span class="sourceLineNo">1665</span>     */<a name="line.1665"></a>
+<span class="sourceLineNo">1666</span>    public void handleSetDisplayObjective(Packet208SetDisplayObjective par1Packet208SetDisplayObjective)<a name="line.1666"></a>
+<span class="sourceLineNo">1667</span>    {<a name="line.1667"></a>
+<span class="sourceLineNo">1668</span>        Scoreboard scoreboard = this.worldClient.getScoreboard();<a name="line.1668"></a>
+<span class="sourceLineNo">1669</span><a name="line.1669"></a>
+<span class="sourceLineNo">1670</span>        if (par1Packet208SetDisplayObjective.scoreName.length() == 0)<a name="line.1670"></a>
+<span class="sourceLineNo">1671</span>        {<a name="line.1671"></a>
+<span class="sourceLineNo">1672</span>            scoreboard.func_96530_a(par1Packet208SetDisplayObjective.scoreboardPosition, (ScoreObjective)null);<a name="line.1672"></a>
+<span class="sourceLineNo">1673</span>        }<a name="line.1673"></a>
+<span class="sourceLineNo">1674</span>        else<a name="line.1674"></a>
+<span class="sourceLineNo">1675</span>        {<a name="line.1675"></a>
+<span class="sourceLineNo">1676</span>            ScoreObjective scoreobjective = scoreboard.getObjective(par1Packet208SetDisplayObjective.scoreName);<a name="line.1676"></a>
+<span class="sourceLineNo">1677</span>            scoreboard.func_96530_a(par1Packet208SetDisplayObjective.scoreboardPosition, scoreobjective);<a name="line.1677"></a>
+<span class="sourceLineNo">1678</span>        }<a name="line.1678"></a>
+<span class="sourceLineNo">1679</span>    }<a name="line.1679"></a>
+<span class="sourceLineNo">1680</span><a name="line.1680"></a>
+<span class="sourceLineNo">1681</span>    /**<a name="line.1681"></a>
+<span class="sourceLineNo">1682</span>     * Handle a set player team packet.<a name="line.1682"></a>
+<span class="sourceLineNo">1683</span>     */<a name="line.1683"></a>
+<span class="sourceLineNo">1684</span>    public void handleSetPlayerTeam(Packet209SetPlayerTeam par1Packet209SetPlayerTeam)<a name="line.1684"></a>
+<span class="sourceLineNo">1685</span>    {<a name="line.1685"></a>
+<span class="sourceLineNo">1686</span>        Scoreboard scoreboard = this.worldClient.getScoreboard();<a name="line.1686"></a>
+<span class="sourceLineNo">1687</span>        ScorePlayerTeam scoreplayerteam;<a name="line.1687"></a>
+<span class="sourceLineNo">1688</span><a name="line.1688"></a>
+<span class="sourceLineNo">1689</span>        if (par1Packet209SetPlayerTeam.mode == 0)<a name="line.1689"></a>
+<span class="sourceLineNo">1690</span>        {<a name="line.1690"></a>
+<span class="sourceLineNo">1691</span>            scoreplayerteam = scoreboard.func_96527_f(par1Packet209SetPlayerTeam.teamName);<a name="line.1691"></a>
+<span class="sourceLineNo">1692</span>        }<a name="line.1692"></a>
+<span class="sourceLineNo">1693</span>        else<a name="line.1693"></a>
+<span class="sourceLineNo">1694</span>        {<a name="line.1694"></a>
+<span class="sourceLineNo">1695</span>            scoreplayerteam = scoreboard.func_96508_e(par1Packet209SetPlayerTeam.teamName);<a name="line.1695"></a>
+<span class="sourceLineNo">1696</span>        }<a name="line.1696"></a>
+<span class="sourceLineNo">1697</span><a name="line.1697"></a>
+<span class="sourceLineNo">1698</span>        if (par1Packet209SetPlayerTeam.mode == 0 || par1Packet209SetPlayerTeam.mode == 2)<a name="line.1698"></a>
+<span class="sourceLineNo">1699</span>        {<a name="line.1699"></a>
+<span class="sourceLineNo">1700</span>            scoreplayerteam.func_96664_a(par1Packet209SetPlayerTeam.teamDisplayName);<a name="line.1700"></a>
+<span class="sourceLineNo">1701</span>            scoreplayerteam.func_96666_b(par1Packet209SetPlayerTeam.teamPrefix);<a name="line.1701"></a>
+<span class="sourceLineNo">1702</span>            scoreplayerteam.func_96662_c(par1Packet209SetPlayerTeam.teamSuffix);<a name="line.1702"></a>
+<span class="sourceLineNo">1703</span>            scoreplayerteam.func_98298_a(par1Packet209SetPlayerTeam.friendlyFire);<a name="line.1703"></a>
+<span class="sourceLineNo">1704</span>        }<a name="line.1704"></a>
+<span class="sourceLineNo">1705</span><a name="line.1705"></a>
+<span class="sourceLineNo">1706</span>        Iterator iterator;<a name="line.1706"></a>
+<span class="sourceLineNo">1707</span>        String s;<a name="line.1707"></a>
+<span class="sourceLineNo">1708</span><a name="line.1708"></a>
+<span class="sourceLineNo">1709</span>        if (par1Packet209SetPlayerTeam.mode == 0 || par1Packet209SetPlayerTeam.mode == 3)<a name="line.1709"></a>
+<span class="sourceLineNo">1710</span>        {<a name="line.1710"></a>
+<span class="sourceLineNo">1711</span>            iterator = par1Packet209SetPlayerTeam.playerNames.iterator();<a name="line.1711"></a>
+<span class="sourceLineNo">1712</span><a name="line.1712"></a>
+<span class="sourceLineNo">1713</span>            while (iterator.hasNext())<a name="line.1713"></a>
+<span class="sourceLineNo">1714</span>            {<a name="line.1714"></a>
+<span class="sourceLineNo">1715</span>                s = (String)iterator.next();<a name="line.1715"></a>
+<span class="sourceLineNo">1716</span>                scoreboard.func_96521_a(s, scoreplayerteam);<a name="line.1716"></a>
+<span class="sourceLineNo">1717</span>            }<a name="line.1717"></a>
+<span class="sourceLineNo">1718</span>        }<a name="line.1718"></a>
+<span class="sourceLineNo">1719</span><a name="line.1719"></a>
+<span class="sourceLineNo">1720</span>        if (par1Packet209SetPlayerTeam.mode == 4)<a name="line.1720"></a>
+<span class="sourceLineNo">1721</span>        {<a name="line.1721"></a>
+<span class="sourceLineNo">1722</span>            iterator = par1Packet209SetPlayerTeam.playerNames.iterator();<a name="line.1722"></a>
+<span class="sourceLineNo">1723</span><a name="line.1723"></a>
+<span class="sourceLineNo">1724</span>            while (iterator.hasNext())<a name="line.1724"></a>
+<span class="sourceLineNo">1725</span>            {<a name="line.1725"></a>
+<span class="sourceLineNo">1726</span>                s = (String)iterator.next();<a name="line.1726"></a>
+<span class="sourceLineNo">1727</span>                scoreboard.func_96512_b(s, scoreplayerteam);<a name="line.1727"></a>
+<span class="sourceLineNo">1728</span>            }<a name="line.1728"></a>
+<span class="sourceLineNo">1729</span>        }<a name="line.1729"></a>
+<span class="sourceLineNo">1730</span><a name="line.1730"></a>
+<span class="sourceLineNo">1731</span>        if (par1Packet209SetPlayerTeam.mode == 1)<a name="line.1731"></a>
+<span class="sourceLineNo">1732</span>        {<a name="line.1732"></a>
+<span class="sourceLineNo">1733</span>            scoreboard.func_96511_d(scoreplayerteam);<a name="line.1733"></a>
+<span class="sourceLineNo">1734</span>        }<a name="line.1734"></a>
+<span class="sourceLineNo">1735</span>    }<a name="line.1735"></a>
+<span class="sourceLineNo">1736</span><a name="line.1736"></a>
+<span class="sourceLineNo">1737</span>    /**<a name="line.1737"></a>
+<span class="sourceLineNo">1738</span>     * Handle a world particles packet.<a name="line.1738"></a>
+<span class="sourceLineNo">1739</span>     */<a name="line.1739"></a>
+<span class="sourceLineNo">1740</span>    public void handleWorldParticles(Packet63WorldParticles par1Packet63WorldParticles)<a name="line.1740"></a>
+<span class="sourceLineNo">1741</span>    {<a name="line.1741"></a>
+<span class="sourceLineNo">1742</span>        for (int i = 0; i &lt; par1Packet63WorldParticles.getQuantity(); ++i)<a name="line.1742"></a>
+<span class="sourceLineNo">1743</span>        {<a name="line.1743"></a>
+<span class="sourceLineNo">1744</span>            double d0 = this.rand.nextGaussian() * (double)par1Packet63WorldParticles.getOffsetX();<a name="line.1744"></a>
+<span class="sourceLineNo">1745</span>            double d1 = this.rand.nextGaussian() * (double)par1Packet63WorldParticles.getOffsetY();<a name="line.1745"></a>
+<span class="sourceLineNo">1746</span>            double d2 = this.rand.nextGaussian() * (double)par1Packet63WorldParticles.getOffsetZ();<a name="line.1746"></a>
+<span class="sourceLineNo">1747</span>            double d3 = this.rand.nextGaussian() * (double)par1Packet63WorldParticles.getSpeed();<a name="line.1747"></a>
+<span class="sourceLineNo">1748</span>            double d4 = this.rand.nextGaussian() * (double)par1Packet63WorldParticles.getSpeed();<a name="line.1748"></a>
+<span class="sourceLineNo">1749</span>            double d5 = this.rand.nextGaussian() * (double)par1Packet63WorldParticles.getSpeed();<a name="line.1749"></a>
+<span class="sourceLineNo">1750</span>            this.worldClient.spawnParticle(par1Packet63WorldParticles.getParticleName(), par1Packet63WorldParticles.getPositionX() + d0, par1Packet63WorldParticles.getPositionY() + d1, par1Packet63WorldParticles.getPositionZ() + d2, d3, d4, d5);<a name="line.1750"></a>
+<span class="sourceLineNo">1751</span>        }<a name="line.1751"></a>
+<span class="sourceLineNo">1752</span>    }<a name="line.1752"></a>
+<span class="sourceLineNo">1753</span><a name="line.1753"></a>
+<span class="sourceLineNo">1754</span>    /**<a name="line.1754"></a>
+<span class="sourceLineNo">1755</span>     * Return the NetworkManager instance used by this NetClientHandler<a name="line.1755"></a>
+<span class="sourceLineNo">1756</span>     */<a name="line.1756"></a>
+<span class="sourceLineNo">1757</span>    public INetworkManager getNetManager()<a name="line.1757"></a>
+<span class="sourceLineNo">1758</span>    {<a name="line.1758"></a>
+<span class="sourceLineNo">1759</span>        return this.netManager;<a name="line.1759"></a>
+<span class="sourceLineNo">1760</span>    }<a name="line.1760"></a>
+<span class="sourceLineNo">1761</span><a name="line.1761"></a>
+<span class="sourceLineNo">1762</span>    @Override<a name="line.1762"></a>
+<span class="sourceLineNo">1763</span>    public EntityPlayer getPlayer()<a name="line.1763"></a>
+<span class="sourceLineNo">1764</span>    {<a name="line.1764"></a>
+<span class="sourceLineNo">1765</span>        return mc.thePlayer;<a name="line.1765"></a>
+<span class="sourceLineNo">1766</span>    }<a name="line.1766"></a>
+<span class="sourceLineNo">1767</span><a name="line.1767"></a>
+<span class="sourceLineNo">1768</span>    public static void setConnectionCompatibilityLevel(byte connectionCompatibilityLevel)<a name="line.1768"></a>
+<span class="sourceLineNo">1769</span>    {<a name="line.1769"></a>
+<span class="sourceLineNo">1770</span>        NetClientHandler.connectionCompatibilityLevel = connectionCompatibilityLevel;<a name="line.1770"></a>
+<span class="sourceLineNo">1771</span>    }<a name="line.1771"></a>
+<span class="sourceLineNo">1772</span><a name="line.1772"></a>
+<span class="sourceLineNo">1773</span>    public static byte getConnectionCompatibilityLevel()<a name="line.1773"></a>
+<span class="sourceLineNo">1774</span>    {<a name="line.1774"></a>
+<span class="sourceLineNo">1775</span>        return connectionCompatibilityLevel;<a name="line.1775"></a>
+<span class="sourceLineNo">1776</span>    }<a name="line.1776"></a>
+<span class="sourceLineNo">1777</span>}<a name="line.1777"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

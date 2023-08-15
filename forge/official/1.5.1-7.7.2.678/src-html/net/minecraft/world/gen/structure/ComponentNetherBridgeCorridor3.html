@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.List;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Random;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.block.Block;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.world.World;<a name="line.6"></a>
+<span class="sourceLineNo">007</span><a name="line.7"></a>
+<span class="sourceLineNo">008</span>public class ComponentNetherBridgeCorridor3 extends ComponentNetherBridgePiece<a name="line.8"></a>
+<span class="sourceLineNo">009</span>{<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    public ComponentNetherBridgeCorridor3(int par1, Random par2Random, StructureBoundingBox par3StructureBoundingBox, int par4)<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    {<a name="line.11"></a>
+<span class="sourceLineNo">012</span>        super(par1);<a name="line.12"></a>
+<span class="sourceLineNo">013</span>        this.coordBaseMode = par4;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        this.boundingBox = par3StructureBoundingBox;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    }<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>    /**<a name="line.17"></a>
+<span class="sourceLineNo">018</span>     * Initiates construction of the Structure Component picked, at the current Location of StructGen<a name="line.18"></a>
+<span class="sourceLineNo">019</span>     */<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    public void buildComponent(StructureComponent par1StructureComponent, List par2List, Random par3Random)<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    {<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        this.getNextComponentNormal((ComponentNetherBridgeStartPiece)par1StructureComponent, par2List, par3Random, 1, 0, true);<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    }<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /**<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     * Creates and returns a new component piece. Or null if it could not find enough room to place it.<a name="line.26"></a>
+<span class="sourceLineNo">027</span>     */<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    public static ComponentNetherBridgeCorridor3 createValidComponent(List par0List, Random par1Random, int par2, int par3, int par4, int par5, int par6)<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    {<a name="line.29"></a>
+<span class="sourceLineNo">030</span>        StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(par2, par3, par4, -1, -7, 0, 5, 14, 10, par5);<a name="line.30"></a>
+<span class="sourceLineNo">031</span>        return isAboveGround(structureboundingbox) &amp;&amp; StructureComponent.findIntersecting(par0List, structureboundingbox) == null ? new ComponentNetherBridgeCorridor3(par6, par1Random, structureboundingbox, par5) : null;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    }<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>    /**<a name="line.34"></a>
+<span class="sourceLineNo">035</span>     * second Part of Structure generating, this for example places Spiderwebs, Mob Spawners, it closes Mineshafts at<a name="line.35"></a>
+<span class="sourceLineNo">036</span>     * the end, it adds Fences...<a name="line.36"></a>
+<span class="sourceLineNo">037</span>     */<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    public boolean addComponentParts(World par1World, Random par2Random, StructureBoundingBox par3StructureBoundingBox)<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    {<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        int i = this.getMetadataWithOffset(Block.stairsNetherBrick.blockID, 2);<a name="line.40"></a>
+<span class="sourceLineNo">041</span><a name="line.41"></a>
+<span class="sourceLineNo">042</span>        for (int j = 0; j &lt;= 9; ++j)<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        {<a name="line.43"></a>
+<span class="sourceLineNo">044</span>            int k = Math.max(1, 7 - j);<a name="line.44"></a>
+<span class="sourceLineNo">045</span>            int l = Math.min(Math.max(k + 5, 14 - j), 13);<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            int i1 = j;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, 0, j, 4, k, j, Block.netherBrick.blockID, Block.netherBrick.blockID, false);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, k + 1, j, 3, l - 1, j, 0, 0, false);<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>            if (j &lt;= 6)<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>                this.placeBlockAtCurrentPosition(par1World, Block.stairsNetherBrick.blockID, i, 1, k + 1, j, par3StructureBoundingBox);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>                this.placeBlockAtCurrentPosition(par1World, Block.stairsNetherBrick.blockID, i, 2, k + 1, j, par3StructureBoundingBox);<a name="line.53"></a>
+<span class="sourceLineNo">054</span>                this.placeBlockAtCurrentPosition(par1World, Block.stairsNetherBrick.blockID, i, 3, k + 1, j, par3StructureBoundingBox);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            }<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, l, j, 4, l, j, Block.netherBrick.blockID, Block.netherBrick.blockID, false);<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, k + 1, j, 0, l - 1, j, Block.netherBrick.blockID, Block.netherBrick.blockID, false);<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            this.fillWithBlocks(par1World, par3StructureBoundingBox, 4, k + 1, j, 4, l - 1, j, Block.netherBrick.blockID, Block.netherBrick.blockID, false);<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>            if ((j &amp; 1) == 0)<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>                this.fillWithBlocks(par1World, par3StructureBoundingBox, 0, k + 2, j, 0, k + 3, j, Block.netherFence.blockID, Block.netherFence.blockID, false);<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                this.fillWithBlocks(par1World, par3StructureBoundingBox, 4, k + 2, j, 4, k + 3, j, Block.netherFence.blockID, Block.netherFence.blockID, false);<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            }<a name="line.65"></a>
+<span class="sourceLineNo">066</span><a name="line.66"></a>
+<span class="sourceLineNo">067</span>            for (int j1 = 0; j1 &lt;= 4; ++j1)<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                this.fillCurrentPositionBlocksDownwards(par1World, Block.netherBrick.blockID, 0, j1, -1, i1, par3StructureBoundingBox);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            }<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        }<a name="line.71"></a>
+<span class="sourceLineNo">072</span><a name="line.72"></a>
+<span class="sourceLineNo">073</span>        return true;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    }<a name="line.74"></a>
+<span class="sourceLineNo">075</span>}<a name="line.75"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

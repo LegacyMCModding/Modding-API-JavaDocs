@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.dispenser;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import net.minecraft.block.Block;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.block.BlockDispenser;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.item.Item;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>public class DispenserBehaviors<a name="line.7"></a>
+<span class="sourceLineNo">008</span>{<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    public static void func_96467_a()<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    {<a name="line.10"></a>
+<span class="sourceLineNo">011</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.arrow, new DispenserBehaviorArrow());<a name="line.11"></a>
+<span class="sourceLineNo">012</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.egg, new DispenserBehaviorEgg());<a name="line.12"></a>
+<span class="sourceLineNo">013</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.snowball, new DispenserBehaviorSnowball());<a name="line.13"></a>
+<span class="sourceLineNo">014</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.expBottle, new DispenserBehaviorExperience());<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.potion, new DispenserBehaviorPotion());<a name="line.15"></a>
+<span class="sourceLineNo">016</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.monsterPlacer, new DispenserBehaviorMobEgg());<a name="line.16"></a>
+<span class="sourceLineNo">017</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.firework, new DispenserBehaviorFireworks());<a name="line.17"></a>
+<span class="sourceLineNo">018</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.fireballCharge, new DispenserBehaviorFireball());<a name="line.18"></a>
+<span class="sourceLineNo">019</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.boat, new DispenserBehaviorBoat());<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        DispenserBehaviorFilledBucket dispenserbehaviorfilledbucket = new DispenserBehaviorFilledBucket();<a name="line.20"></a>
+<span class="sourceLineNo">021</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.bucketLava, dispenserbehaviorfilledbucket);<a name="line.21"></a>
+<span class="sourceLineNo">022</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.bucketWater, dispenserbehaviorfilledbucket);<a name="line.22"></a>
+<span class="sourceLineNo">023</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.bucketEmpty, new DispenserBehaviorEmptyBucket());<a name="line.23"></a>
+<span class="sourceLineNo">024</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.flintAndSteel, new DispenserBehaviorFire());<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.dyePowder, new DispenserBehaviorDye());<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        BlockDispenser.dispenseBehaviorRegistry.putObject(Item.itemsList[Block.tnt.blockID], new DispenserBehaviorTNT());<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    }<a name="line.27"></a>
+<span class="sourceLineNo">028</span>}<a name="line.28"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

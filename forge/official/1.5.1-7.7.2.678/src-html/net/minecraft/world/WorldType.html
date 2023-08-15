@@ -1,0 +1,335 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.world;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>import java.util.Arrays;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import java.util.Random;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import java.util.Set;<a name="line.8"></a>
+<span class="sourceLineNo">009</span><a name="line.9"></a>
+<span class="sourceLineNo">010</span>import com.google.common.collect.ObjectArrays;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import com.google.common.collect.Sets;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>import net.minecraft.client.Minecraft;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import net.minecraft.client.gui.GuiCreateFlatWorld;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import net.minecraft.client.gui.GuiCreateWorld;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import net.minecraft.world.*;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>import net.minecraft.world.gen.*;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>import net.minecraft.world.biome.*;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import net.minecraft.world.chunk.IChunkProvider;<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>public class WorldType<a name="line.21"></a>
+<span class="sourceLineNo">022</span>{<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public static final BiomeGenBase[] base11Biomes = new BiomeGenBase[] {BiomeGenBase.desert, BiomeGenBase.forest, BiomeGenBase.extremeHills, BiomeGenBase.swampland, BiomeGenBase.plains, BiomeGenBase.taiga};<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public static final BiomeGenBase[] base12Biomes = ObjectArrays.concat(base11Biomes, BiomeGenBase.jungle);<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>    /** List of world types. */<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    public static final WorldType[] worldTypes = new WorldType[16];<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    /** Default world type. */<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    public static final WorldType DEFAULT = (new WorldType(0, "default", 1)).setVersioned();<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>    /** Flat world type. */<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    public static final WorldType FLAT = new WorldType(1, "flat");<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>    /** Large Biome world Type. */<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public static final WorldType LARGE_BIOMES = new WorldType(2, "largeBiomes");<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>    /** Default (1.1) world type. */<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    public static final WorldType DEFAULT_1_1 = (new WorldType(8, "default_1_1", 0)).setCanBeCreated(false);<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>    /** ID for this world type. */<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    private final int worldTypeId;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>    /** 'default' or 'flat' */<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    private final String worldType;<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>    /** The int version of the ChunkProvider that generated this world. */<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    private final int generatorVersion;<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * Whether this world type can be generated. Normally true; set to false for out-of-date generator versions.<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     */<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    private boolean canBeCreated;<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    /** Whether this WorldType has a version or not. */<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    private boolean isWorldTypeVersioned;<a name="line.56"></a>
+<span class="sourceLineNo">057</span><a name="line.57"></a>
+<span class="sourceLineNo">058</span>    protected BiomeGenBase[] biomesForWorldType;<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>    public WorldType(int par1, String par2Str)<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        this(par1, par2Str, 0);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    }<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>    public WorldType(int par1, String par2Str, int par3)<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        this.worldType = par2Str;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        this.generatorVersion = par3;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        this.canBeCreated = true;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.worldTypeId = par1;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        worldTypes[par1] = this;<a name="line.71"></a>
+<span class="sourceLineNo">072</span><a name="line.72"></a>
+<span class="sourceLineNo">073</span>        switch (par1)<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            case 8:<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                biomesForWorldType = base11Biomes;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                break;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            default:<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                biomesForWorldType = base12Biomes;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        }<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    }<a name="line.81"></a>
+<span class="sourceLineNo">082</span><a name="line.82"></a>
+<span class="sourceLineNo">083</span>    public String getWorldTypeName()<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        return this.worldType;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    }<a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>    @SideOnly(Side.CLIENT)<a name="line.88"></a>
+<span class="sourceLineNo">089</span><a name="line.89"></a>
+<span class="sourceLineNo">090</span>    /**<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     * Gets the translation key for the name of this world type.<a name="line.91"></a>
+<span class="sourceLineNo">092</span>     */<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    public String getTranslateName()<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        return "generator." + this.worldType;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    }<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>    /**<a name="line.98"></a>
+<span class="sourceLineNo">099</span>     * Returns generatorVersion.<a name="line.99"></a>
+<span class="sourceLineNo">100</span>     */<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    public int getGeneratorVersion()<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        return this.generatorVersion;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    }<a name="line.104"></a>
+<span class="sourceLineNo">105</span><a name="line.105"></a>
+<span class="sourceLineNo">106</span>    public WorldType getWorldTypeForGeneratorVersion(int par1)<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        return this == DEFAULT &amp;&amp; par1 == 0 ? DEFAULT_1_1 : this;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    }<a name="line.109"></a>
+<span class="sourceLineNo">110</span><a name="line.110"></a>
+<span class="sourceLineNo">111</span>    /**<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     * Sets canBeCreated to the provided value, and returns this.<a name="line.112"></a>
+<span class="sourceLineNo">113</span>     */<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    private WorldType setCanBeCreated(boolean par1)<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        this.canBeCreated = par1;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>        return this;<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    }<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>    @SideOnly(Side.CLIENT)<a name="line.120"></a>
+<span class="sourceLineNo">121</span><a name="line.121"></a>
+<span class="sourceLineNo">122</span>    /**<a name="line.122"></a>
+<span class="sourceLineNo">123</span>     * Gets whether this WorldType can be used to generate a new world.<a name="line.123"></a>
+<span class="sourceLineNo">124</span>     */<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    public boolean getCanBeCreated()<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        return this.canBeCreated;<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    }<a name="line.128"></a>
+<span class="sourceLineNo">129</span><a name="line.129"></a>
+<span class="sourceLineNo">130</span>    /**<a name="line.130"></a>
+<span class="sourceLineNo">131</span>     * Flags this world type as having an associated version.<a name="line.131"></a>
+<span class="sourceLineNo">132</span>     */<a name="line.132"></a>
+<span class="sourceLineNo">133</span>    private WorldType setVersioned()<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    {<a name="line.134"></a>
+<span class="sourceLineNo">135</span>        this.isWorldTypeVersioned = true;<a name="line.135"></a>
+<span class="sourceLineNo">136</span>        return this;<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    }<a name="line.137"></a>
+<span class="sourceLineNo">138</span><a name="line.138"></a>
+<span class="sourceLineNo">139</span>    /**<a name="line.139"></a>
+<span class="sourceLineNo">140</span>     * Returns true if this world Type has a version associated with it.<a name="line.140"></a>
+<span class="sourceLineNo">141</span>     */<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    public boolean isVersioned()<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    {<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        return this.isWorldTypeVersioned;<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    }<a name="line.145"></a>
+<span class="sourceLineNo">146</span><a name="line.146"></a>
+<span class="sourceLineNo">147</span>    public static WorldType parseWorldType(String par0Str)<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    {<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        for (int i = 0; i &lt; worldTypes.length; ++i)<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>            if (worldTypes[i] != null &amp;&amp; worldTypes[i].worldType.equalsIgnoreCase(par0Str))<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>                return worldTypes[i];<a name="line.153"></a>
+<span class="sourceLineNo">154</span>            }<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        }<a name="line.155"></a>
+<span class="sourceLineNo">156</span><a name="line.156"></a>
+<span class="sourceLineNo">157</span>        return null;<a name="line.157"></a>
+<span class="sourceLineNo">158</span>    }<a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159"></a>
+<span class="sourceLineNo">160</span>    public int getWorldTypeID()<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    {<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        return this.worldTypeId;<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    }<a name="line.163"></a>
+<span class="sourceLineNo">164</span><a name="line.164"></a>
+<span class="sourceLineNo">165</span>    public WorldChunkManager getChunkManager(World world)<a name="line.165"></a>
+<span class="sourceLineNo">166</span>    {<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        if (this == FLAT)<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        {<a name="line.168"></a>
+<span class="sourceLineNo">169</span>            FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());<a name="line.169"></a>
+<span class="sourceLineNo">170</span>            return new WorldChunkManagerHell(BiomeGenBase.biomeList[flatgeneratorinfo.getBiome()], 0.5F, 0.5F);<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        }<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        else<a name="line.172"></a>
+<span class="sourceLineNo">173</span>        {<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            return new WorldChunkManager(world);<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        }<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    }<a name="line.176"></a>
+<span class="sourceLineNo">177</span><a name="line.177"></a>
+<span class="sourceLineNo">178</span>    public IChunkProvider getChunkGenerator(World world, String generatorOptions)<a name="line.178"></a>
+<span class="sourceLineNo">179</span>    {<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        return (this == FLAT ? new ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions) : new ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled()));<a name="line.180"></a>
+<span class="sourceLineNo">181</span>    }<a name="line.181"></a>
+<span class="sourceLineNo">182</span><a name="line.182"></a>
+<span class="sourceLineNo">183</span>    public int getMinimumSpawnHeight(World world)<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    {<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        return this == FLAT ? 4 : 64;<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    }<a name="line.186"></a>
+<span class="sourceLineNo">187</span><a name="line.187"></a>
+<span class="sourceLineNo">188</span>    public double getHorizon(World world)<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    {<a name="line.189"></a>
+<span class="sourceLineNo">190</span>        return this == FLAT ? 0.0D : 63.0D;<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    }<a name="line.191"></a>
+<span class="sourceLineNo">192</span><a name="line.192"></a>
+<span class="sourceLineNo">193</span>    public boolean hasVoidParticles(boolean flag)<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        return this != FLAT &amp;&amp; !flag;<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    }<a name="line.196"></a>
+<span class="sourceLineNo">197</span><a name="line.197"></a>
+<span class="sourceLineNo">198</span>    public double voidFadeMagnitude()<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    {<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        return this == FLAT ? 1.0D : 0.03125D;<a name="line.200"></a>
+<span class="sourceLineNo">201</span>    }<a name="line.201"></a>
+<span class="sourceLineNo">202</span><a name="line.202"></a>
+<span class="sourceLineNo">203</span>    public BiomeGenBase[] getBiomesForWorldType() {<a name="line.203"></a>
+<span class="sourceLineNo">204</span>        return biomesForWorldType;<a name="line.204"></a>
+<span class="sourceLineNo">205</span>    }<a name="line.205"></a>
+<span class="sourceLineNo">206</span><a name="line.206"></a>
+<span class="sourceLineNo">207</span>    public void addNewBiome(BiomeGenBase biome)<a name="line.207"></a>
+<span class="sourceLineNo">208</span>    {<a name="line.208"></a>
+<span class="sourceLineNo">209</span>        Set&lt;BiomeGenBase&gt; newBiomesForWorld = Sets.newLinkedHashSet(Arrays.asList(biomesForWorldType));<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        newBiomesForWorld.add(biome);<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        biomesForWorldType = newBiomesForWorld.toArray(new BiomeGenBase[0]);<a name="line.211"></a>
+<span class="sourceLineNo">212</span>    }<a name="line.212"></a>
+<span class="sourceLineNo">213</span><a name="line.213"></a>
+<span class="sourceLineNo">214</span>    public void removeBiome(BiomeGenBase biome)<a name="line.214"></a>
+<span class="sourceLineNo">215</span>    {<a name="line.215"></a>
+<span class="sourceLineNo">216</span>        Set&lt;BiomeGenBase&gt; newBiomesForWorld = Sets.newLinkedHashSet(Arrays.asList(biomesForWorldType));<a name="line.216"></a>
+<span class="sourceLineNo">217</span>        newBiomesForWorld.remove(biome);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>        biomesForWorldType = newBiomesForWorld.toArray(new BiomeGenBase[0]);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>    }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>    public boolean handleSlimeSpawnReduction(Random random, World world)<a name="line.221"></a>
+<span class="sourceLineNo">222</span>    {<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        return this == FLAT ? random.nextInt(4) != 1 : false;<a name="line.223"></a>
+<span class="sourceLineNo">224</span>    }<a name="line.224"></a>
+<span class="sourceLineNo">225</span><a name="line.225"></a>
+<span class="sourceLineNo">226</span>    /**<a name="line.226"></a>
+<span class="sourceLineNo">227</span>     * Called when 'Create New World' button is pressed before starting game<a name="line.227"></a>
+<span class="sourceLineNo">228</span>     */<a name="line.228"></a>
+<span class="sourceLineNo">229</span>    public void onGUICreateWorldPress() { }<a name="line.229"></a>
+<span class="sourceLineNo">230</span><a name="line.230"></a>
+<span class="sourceLineNo">231</span>    /**<a name="line.231"></a>
+<span class="sourceLineNo">232</span>     * Gets the spawn fuzz for players who join the world.<a name="line.232"></a>
+<span class="sourceLineNo">233</span>     * Useful for void world types.<a name="line.233"></a>
+<span class="sourceLineNo">234</span>     * @return Fuzz for entity initial spawn in blocks.<a name="line.234"></a>
+<span class="sourceLineNo">235</span>     */<a name="line.235"></a>
+<span class="sourceLineNo">236</span>    public int getSpawnFuzz()<a name="line.236"></a>
+<span class="sourceLineNo">237</span>    {<a name="line.237"></a>
+<span class="sourceLineNo">238</span>        return 20;<a name="line.238"></a>
+<span class="sourceLineNo">239</span>    }<a name="line.239"></a>
+<span class="sourceLineNo">240</span><a name="line.240"></a>
+<span class="sourceLineNo">241</span>    /**<a name="line.241"></a>
+<span class="sourceLineNo">242</span>     * Called when the 'Customize' button is pressed on world creation GUI<a name="line.242"></a>
+<span class="sourceLineNo">243</span>     * @param instance The minecraft instance<a name="line.243"></a>
+<span class="sourceLineNo">244</span>     * @param guiCreateWorld the createworld GUI<a name="line.244"></a>
+<span class="sourceLineNo">245</span>     */<a name="line.245"></a>
+<span class="sourceLineNo">246</span>    @SideOnly(Side.CLIENT)<a name="line.246"></a>
+<span class="sourceLineNo">247</span>    public void onCustomizeButton(Minecraft instance, GuiCreateWorld guiCreateWorld)<a name="line.247"></a>
+<span class="sourceLineNo">248</span>    {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        if (this == FLAT)<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>            instance.displayGuiScreen(new GuiCreateFlatWorld(guiCreateWorld, guiCreateWorld.generatorOptionsToUse));<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    }<a name="line.253"></a>
+<span class="sourceLineNo">254</span><a name="line.254"></a>
+<span class="sourceLineNo">255</span>    /*<a name="line.255"></a>
+<span class="sourceLineNo">256</span>     * Should world creation GUI show 'Customize' button for this world type?<a name="line.256"></a>
+<span class="sourceLineNo">257</span>     * @return if this world type has customization parameters<a name="line.257"></a>
+<span class="sourceLineNo">258</span>     */<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    public boolean isCustomizable()<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    {<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        return this == FLAT;<a name="line.261"></a>
+<span class="sourceLineNo">262</span>    }<a name="line.262"></a>
+<span class="sourceLineNo">263</span>}<a name="line.263"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

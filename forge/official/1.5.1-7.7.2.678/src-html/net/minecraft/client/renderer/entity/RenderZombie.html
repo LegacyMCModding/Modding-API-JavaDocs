@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.renderer.entity;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.client.model.ModelBiped;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.client.model.ModelZombie;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.client.model.ModelZombieVillager;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.entity.Entity;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.entity.EntityLiving;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.entity.monster.EntityZombie;<a name="line.10"></a>
+<span class="sourceLineNo">011</span><a name="line.11"></a>
+<span class="sourceLineNo">012</span>@SideOnly(Side.CLIENT)<a name="line.12"></a>
+<span class="sourceLineNo">013</span>public class RenderZombie extends RenderBiped<a name="line.13"></a>
+<span class="sourceLineNo">014</span>{<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    private ModelBiped field_82434_o;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    private ModelZombieVillager field_82432_p;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    protected ModelBiped field_82437_k;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    protected ModelBiped field_82435_l;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    protected ModelBiped field_82436_m;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    protected ModelBiped field_82433_n;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    private int field_82431_q = 1;<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public RenderZombie()<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    {<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        super(new ModelZombie(), 0.5F, 1.0F);<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        this.field_82434_o = this.modelBipedMain;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        this.field_82432_p = new ModelZombieVillager();<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    }<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>    protected void func_82421_b()<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        this.field_82423_g = new ModelZombie(1.0F, true);<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        this.field_82425_h = new ModelZombie(0.5F, true);<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        this.field_82437_k = this.field_82423_g;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>        this.field_82435_l = this.field_82425_h;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        this.field_82436_m = new ModelZombieVillager(1.0F, 0.0F, true);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        this.field_82433_n = new ModelZombieVillager(0.5F, 0.0F, true);<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    }<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>    protected int func_82429_a(EntityZombie par1EntityZombie, int par2, float par3)<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.func_82427_a(par1EntityZombie);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        return super.shouldRenderPass(par1EntityZombie, par2, par3);<a name="line.43"></a>
+<span class="sourceLineNo">044</span>    }<a name="line.44"></a>
+<span class="sourceLineNo">045</span><a name="line.45"></a>
+<span class="sourceLineNo">046</span>    public void func_82426_a(EntityZombie par1EntityZombie, double par2, double par4, double par6, float par8, float par9)<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    {<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.func_82427_a(par1EntityZombie);<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        super.doRenderLiving(par1EntityZombie, par2, par4, par6, par8, par9);<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    }<a name="line.50"></a>
+<span class="sourceLineNo">051</span><a name="line.51"></a>
+<span class="sourceLineNo">052</span>    protected void func_82428_a(EntityZombie par1EntityZombie, float par2)<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    {<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        this.func_82427_a(par1EntityZombie);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        super.renderEquippedItems(par1EntityZombie, par2);<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    }<a name="line.56"></a>
+<span class="sourceLineNo">057</span><a name="line.57"></a>
+<span class="sourceLineNo">058</span>    private void func_82427_a(EntityZombie par1EntityZombie)<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    {<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        if (par1EntityZombie.isVillager())<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            if (this.field_82431_q != this.field_82432_p.func_82897_a())<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                this.field_82432_p = new ModelZombieVillager();<a name="line.64"></a>
+<span class="sourceLineNo">065</span>                this.field_82431_q = this.field_82432_p.func_82897_a();<a name="line.65"></a>
+<span class="sourceLineNo">066</span>                this.field_82436_m = new ModelZombieVillager(1.0F, 0.0F, true);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>                this.field_82433_n = new ModelZombieVillager(0.5F, 0.0F, true);<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            }<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>            this.mainModel = this.field_82432_p;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            this.field_82423_g = this.field_82436_m;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            this.field_82425_h = this.field_82433_n;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        }<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        else<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        {<a name="line.75"></a>
+<span class="sourceLineNo">076</span>            this.mainModel = this.field_82434_o;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            this.field_82423_g = this.field_82437_k;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            this.field_82425_h = this.field_82435_l;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        }<a name="line.79"></a>
+<span class="sourceLineNo">080</span><a name="line.80"></a>
+<span class="sourceLineNo">081</span>        this.modelBipedMain = (ModelBiped)this.mainModel;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    }<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>    protected void func_82430_a(EntityZombie par1EntityZombie, float par2, float par3, float par4)<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        if (par1EntityZombie.isConverting())<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            par3 += (float)(Math.cos((double)par1EntityZombie.ticksExisted * 3.25D) * Math.PI * 0.25D);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        }<a name="line.89"></a>
+<span class="sourceLineNo">090</span><a name="line.90"></a>
+<span class="sourceLineNo">091</span>        super.rotateCorpse(par1EntityZombie, par2, par3, par4);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    }<a name="line.92"></a>
+<span class="sourceLineNo">093</span><a name="line.93"></a>
+<span class="sourceLineNo">094</span>    protected void renderEquippedItems(EntityLiving par1EntityLiving, float par2)<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        this.func_82428_a((EntityZombie)par1EntityLiving, par2);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>    }<a name="line.97"></a>
+<span class="sourceLineNo">098</span><a name="line.98"></a>
+<span class="sourceLineNo">099</span>    public void doRenderLiving(EntityLiving par1EntityLiving, double par2, double par4, double par6, float par8, float par9)<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        this.func_82426_a((EntityZombie)par1EntityLiving, par2, par4, par6, par8, par9);<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    }<a name="line.102"></a>
+<span class="sourceLineNo">103</span><a name="line.103"></a>
+<span class="sourceLineNo">104</span>    /**<a name="line.104"></a>
+<span class="sourceLineNo">105</span>     * Queries whether should render the specified pass or not.<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     */<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    protected int shouldRenderPass(EntityLiving par1EntityLiving, int par2, float par3)<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        return this.func_82429_a((EntityZombie)par1EntityLiving, par2, par3);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    }<a name="line.110"></a>
+<span class="sourceLineNo">111</span><a name="line.111"></a>
+<span class="sourceLineNo">112</span>    protected void rotateCorpse(EntityLiving par1EntityLiving, float par2, float par3, float par4)<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        this.func_82430_a((EntityZombie)par1EntityLiving, par2, par3, par4);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    }<a name="line.115"></a>
+<span class="sourceLineNo">116</span><a name="line.116"></a>
+<span class="sourceLineNo">117</span>    /**<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.118"></a>
+<span class="sourceLineNo">119</span>     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.119"></a>
+<span class="sourceLineNo">120</span>     * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.120"></a>
+<span class="sourceLineNo">121</span>     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.121"></a>
+<span class="sourceLineNo">122</span>     */<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    {<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        this.func_82426_a((EntityZombie)par1Entity, par2, par4, par6, par8, par9);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    }<a name="line.126"></a>
+<span class="sourceLineNo">127</span>}<a name="line.127"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

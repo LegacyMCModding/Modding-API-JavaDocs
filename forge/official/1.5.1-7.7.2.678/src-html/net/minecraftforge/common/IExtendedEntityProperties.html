@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraftforge.common;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import net.minecraft.entity.Entity;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import net.minecraft.nbt.NBTTagCompound;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.world.World;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>/**<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * Allows for custom entity data and logic to be hooked to existing entity classes.<a name="line.8"></a>
+<span class="sourceLineNo">009</span> *<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * @author cpw, mithion<a name="line.10"></a>
+<span class="sourceLineNo">011</span> *<a name="line.11"></a>
+<span class="sourceLineNo">012</span> */<a name="line.12"></a>
+<span class="sourceLineNo">013</span>public interface IExtendedEntityProperties {<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    /**<a name="line.14"></a>
+<span class="sourceLineNo">015</span>     * Called when the entity that this class is attached to is saved.<a name="line.15"></a>
+<span class="sourceLineNo">016</span>     * Any custom entity data  that needs saving should be saved here.<a name="line.16"></a>
+<span class="sourceLineNo">017</span>     * @param compound The compound to save to.<a name="line.17"></a>
+<span class="sourceLineNo">018</span>     */<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public void saveNBTData(NBTTagCompound compound);<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>    /**<a name="line.21"></a>
+<span class="sourceLineNo">022</span>     * Called when the entity that this class is attached to is loaded.<a name="line.22"></a>
+<span class="sourceLineNo">023</span>     * In order to hook into this, you will need to subscribe to the EntityConstructing event.<a name="line.23"></a>
+<span class="sourceLineNo">024</span>     * Otherwise, you will need to initialize manually.<a name="line.24"></a>
+<span class="sourceLineNo">025</span>     * @param compound The compound to load from.<a name="line.25"></a>
+<span class="sourceLineNo">026</span>     */<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    public void loadNBTData(NBTTagCompound compound);<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    /**<a name="line.29"></a>
+<span class="sourceLineNo">030</span>     * Used to initialize the extended properties with the entity that this is attached to, as well<a name="line.30"></a>
+<span class="sourceLineNo">031</span>     * as the world object.<a name="line.31"></a>
+<span class="sourceLineNo">032</span>     * Called automatically if you register with the EntityConstructing event.<a name="line.32"></a>
+<span class="sourceLineNo">033</span>     * @param entity  The entity that this extended properties is attached to<a name="line.33"></a>
+<span class="sourceLineNo">034</span>     * @param world  The world in which the entity exists<a name="line.34"></a>
+<span class="sourceLineNo">035</span>     */<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public void init(Entity entity, World world);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>}<a name="line.37"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

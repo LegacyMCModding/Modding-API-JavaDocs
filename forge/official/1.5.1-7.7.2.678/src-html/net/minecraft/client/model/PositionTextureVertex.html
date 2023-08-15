@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.model;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.util.Vec3;<a name="line.5"></a>
+<span class="sourceLineNo">006</span><a name="line.6"></a>
+<span class="sourceLineNo">007</span>public class PositionTextureVertex<a name="line.7"></a>
+<span class="sourceLineNo">008</span>{<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    public Vec3 vector3D;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    public float texturePositionX;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    public float texturePositionY;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public PositionTextureVertex(float par1, float par2, float par3, float par4, float par5)<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    {<a name="line.14"></a>
+<span class="sourceLineNo">015</span>        this(Vec3.createVectorHelper((double)par1, (double)par2, (double)par3), par4, par5);<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    }<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public PositionTextureVertex setTexturePosition(float par1, float par2)<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    {<a name="line.19"></a>
+<span class="sourceLineNo">020</span>        return new PositionTextureVertex(this, par1, par2);<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    }<a name="line.21"></a>
+<span class="sourceLineNo">022</span><a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public PositionTextureVertex(PositionTextureVertex par1PositionTextureVertex, float par2, float par3)<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    {<a name="line.24"></a>
+<span class="sourceLineNo">025</span>        this.vector3D = par1PositionTextureVertex.vector3D;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>        this.texturePositionX = par2;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>        this.texturePositionY = par3;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    }<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>    public PositionTextureVertex(Vec3 par1Vec3, float par2, float par3)<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>        this.vector3D = par1Vec3;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>        this.texturePositionX = par2;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>        this.texturePositionY = par3;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    }<a name="line.35"></a>
+<span class="sourceLineNo">036</span>}<a name="line.36"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

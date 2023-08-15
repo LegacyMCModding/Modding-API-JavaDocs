@@ -1,0 +1,326 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package net.minecraft.client.particle;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import net.minecraft.client.renderer.RenderEngine;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import net.minecraft.client.renderer.Tessellator;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import net.minecraft.entity.Entity;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import net.minecraft.nbt.NBTTagCompound;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import net.minecraft.util.Icon;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import net.minecraft.util.MathHelper;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import net.minecraft.world.World;<a name="line.11"></a>
+<span class="sourceLineNo">012</span><a name="line.12"></a>
+<span class="sourceLineNo">013</span>@SideOnly(Side.CLIENT)<a name="line.13"></a>
+<span class="sourceLineNo">014</span>public class EntityFX extends Entity<a name="line.14"></a>
+<span class="sourceLineNo">015</span>{<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    protected int particleTextureIndexX;<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    protected int particleTextureIndexY;<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    protected float particleTextureJitterX;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    protected float particleTextureJitterY;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    protected int particleAge;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    protected int particleMaxAge;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    protected float particleScale;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    protected float particleGravity;<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>    /** The red amount of color. Used as a percentage, 1.0 = 255 and 0.0 = 0. */<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    protected float particleRed;<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>    /**<a name="line.28"></a>
+<span class="sourceLineNo">029</span>     * The green amount of color. Used as a percentage, 1.0 = 255 and 0.0 = 0.<a name="line.29"></a>
+<span class="sourceLineNo">030</span>     */<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    protected float particleGreen;<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>    /**<a name="line.33"></a>
+<span class="sourceLineNo">034</span>     * The blue amount of color. Used as a percentage, 1.0 = 255 and 0.0 = 0.<a name="line.34"></a>
+<span class="sourceLineNo">035</span>     */<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    protected float particleBlue;<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>    /** Particle alpha */<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    protected float particleAlpha;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    protected Icon particleTextureIndex;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public static double interpPosX;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    public static double interpPosY;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    public static double interpPosZ;<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    protected EntityFX(World par1World, double par2, double par4, double par6)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>    {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        super(par1World);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.particleAge = 0;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        this.particleMaxAge = 0;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.particleAlpha = 1.0F;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>        this.particleTextureIndex = null;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        this.setSize(0.2F, 0.2F);<a name="line.52"></a>
+<span class="sourceLineNo">053</span>        this.yOffset = this.height / 2.0F;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        this.setPosition(par2, par4, par6);<a name="line.54"></a>
+<span class="sourceLineNo">055</span>        this.lastTickPosX = par2;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        this.lastTickPosY = par4;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        this.lastTickPosZ = par6;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        this.particleRed = this.particleGreen = this.particleBlue = 1.0F;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        this.particleTextureJitterX = this.rand.nextFloat() * 3.0F;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        this.particleTextureJitterY = this.rand.nextFloat() * 3.0F;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        this.particleScale = (this.rand.nextFloat() * 0.5F + 0.5F) * 2.0F;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>        this.particleMaxAge = (int)(4.0F / (this.rand.nextFloat() * 0.9F + 0.1F));<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        this.particleAge = 0;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    }<a name="line.64"></a>
+<span class="sourceLineNo">065</span><a name="line.65"></a>
+<span class="sourceLineNo">066</span>    public EntityFX(World par1World, double par2, double par4, double par6, double par8, double par10, double par12)<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        this(par1World, par2, par4, par6);<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        this.motionX = par8 + (double)((float)(Math.random() * 2.0D - 1.0D) * 0.4F);<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.motionY = par10 + (double)((float)(Math.random() * 2.0D - 1.0D) * 0.4F);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        this.motionZ = par12 + (double)((float)(Math.random() * 2.0D - 1.0D) * 0.4F);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        float f = (float)(Math.random() + Math.random() + 1.0D) * 0.15F;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        float f1 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        this.motionX = this.motionX / (double)f1 * (double)f * 0.4000000059604645D;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        this.motionY = this.motionY / (double)f1 * (double)f * 0.4000000059604645D + 0.10000000149011612D;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        this.motionZ = this.motionZ / (double)f1 * (double)f * 0.4000000059604645D;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    }<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>    public EntityFX multiplyVelocity(float par1)<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        this.motionX *= (double)par1;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        this.motionY = (this.motionY - 0.10000000149011612D) * (double)par1 + 0.10000000149011612D;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        this.motionZ *= (double)par1;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        return this;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    }<a name="line.85"></a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span>    public EntityFX multipleParticleScaleBy(float par1)<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    {<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        this.setSize(0.2F * par1, 0.2F * par1);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        this.particleScale *= par1;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        return this;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    }<a name="line.92"></a>
+<span class="sourceLineNo">093</span><a name="line.93"></a>
+<span class="sourceLineNo">094</span>    public void setRBGColorF(float par1, float par2, float par3)<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        this.particleRed = par1;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        this.particleGreen = par2;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        this.particleBlue = par3;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    }<a name="line.99"></a>
+<span class="sourceLineNo">100</span><a name="line.100"></a>
+<span class="sourceLineNo">101</span>    /**<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     * Sets the particle alpha (float)<a name="line.102"></a>
+<span class="sourceLineNo">103</span>     */<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    public void setAlphaF(float par1)<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        this.particleAlpha = par1;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    }<a name="line.107"></a>
+<span class="sourceLineNo">108</span><a name="line.108"></a>
+<span class="sourceLineNo">109</span>    public float getRedColorF()<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    {<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        return this.particleRed;<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    }<a name="line.112"></a>
+<span class="sourceLineNo">113</span><a name="line.113"></a>
+<span class="sourceLineNo">114</span>    public float getGreenColorF()<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        return this.particleGreen;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    }<a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span>    public float getBlueColorF()<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        return this.particleBlue;<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    }<a name="line.122"></a>
+<span class="sourceLineNo">123</span><a name="line.123"></a>
+<span class="sourceLineNo">124</span>    /**<a name="line.124"></a>
+<span class="sourceLineNo">125</span>     * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to<a name="line.125"></a>
+<span class="sourceLineNo">126</span>     * prevent them from trampling crops<a name="line.126"></a>
+<span class="sourceLineNo">127</span>     */<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    protected boolean canTriggerWalking()<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        return false;<a name="line.130"></a>
+<span class="sourceLineNo">131</span>    }<a name="line.131"></a>
+<span class="sourceLineNo">132</span><a name="line.132"></a>
+<span class="sourceLineNo">133</span>    protected void entityInit() {}<a name="line.133"></a>
+<span class="sourceLineNo">134</span><a name="line.134"></a>
+<span class="sourceLineNo">135</span>    /**<a name="line.135"></a>
+<span class="sourceLineNo">136</span>     * Called to update the entity's position/logic.<a name="line.136"></a>
+<span class="sourceLineNo">137</span>     */<a name="line.137"></a>
+<span class="sourceLineNo">138</span>    public void onUpdate()<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    {<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        this.prevPosX = this.posX;<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        this.prevPosY = this.posY;<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        this.prevPosZ = this.posZ;<a name="line.142"></a>
+<span class="sourceLineNo">143</span><a name="line.143"></a>
+<span class="sourceLineNo">144</span>        if (this.particleAge++ &gt;= this.particleMaxAge)<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        {<a name="line.145"></a>
+<span class="sourceLineNo">146</span>            this.setDead();<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        }<a name="line.147"></a>
+<span class="sourceLineNo">148</span><a name="line.148"></a>
+<span class="sourceLineNo">149</span>        this.motionY -= 0.04D * (double)this.particleGravity;<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        this.moveEntity(this.motionX, this.motionY, this.motionZ);<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        this.motionX *= 0.9800000190734863D;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        this.motionY *= 0.9800000190734863D;<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        this.motionZ *= 0.9800000190734863D;<a name="line.153"></a>
+<span class="sourceLineNo">154</span><a name="line.154"></a>
+<span class="sourceLineNo">155</span>        if (this.onGround)<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        {<a name="line.156"></a>
+<span class="sourceLineNo">157</span>            this.motionX *= 0.699999988079071D;<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            this.motionZ *= 0.699999988079071D;<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        }<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    }<a name="line.160"></a>
+<span class="sourceLineNo">161</span><a name="line.161"></a>
+<span class="sourceLineNo">162</span>    public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    {<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        float f6 = (float)this.particleTextureIndexX / 16.0F;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        float f7 = f6 + 0.0624375F;<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        float f8 = (float)this.particleTextureIndexY / 16.0F;<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        float f9 = f8 + 0.0624375F;<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        float f10 = 0.1F * this.particleScale;<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>        if (this.particleTextureIndex != null)<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        {<a name="line.171"></a>
+<span class="sourceLineNo">172</span>            f6 = this.particleTextureIndex.getMinU();<a name="line.172"></a>
+<span class="sourceLineNo">173</span>            f7 = this.particleTextureIndex.getMaxU();<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            f8 = this.particleTextureIndex.getMinV();<a name="line.174"></a>
+<span class="sourceLineNo">175</span>            f9 = this.particleTextureIndex.getMaxV();<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        }<a name="line.176"></a>
+<span class="sourceLineNo">177</span><a name="line.177"></a>
+<span class="sourceLineNo">178</span>        float f11 = (float)(this.prevPosX + (this.posX - this.prevPosX) * (double)par2 - interpPosX);<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        float f12 = (float)(this.prevPosY + (this.posY - this.prevPosY) * (double)par2 - interpPosY);<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        float f13 = (float)(this.prevPosZ + (this.posZ - this.prevPosZ) * (double)par2 - interpPosZ);<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        float f14 = 1.0F;<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        par1Tessellator.setColorRGBA_F(this.particleRed * f14, this.particleGreen * f14, this.particleBlue * f14, this.particleAlpha);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        par1Tessellator.addVertexWithUV((double)(f11 - par3 * f10 - par6 * f10), (double)(f12 - par4 * f10), (double)(f13 - par5 * f10 - par7 * f10), (double)f7, (double)f9);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        par1Tessellator.addVertexWithUV((double)(f11 - par3 * f10 + par6 * f10), (double)(f12 + par4 * f10), (double)(f13 - par5 * f10 + par7 * f10), (double)f7, (double)f8);<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        par1Tessellator.addVertexWithUV((double)(f11 + par3 * f10 + par6 * f10), (double)(f12 + par4 * f10), (double)(f13 + par5 * f10 + par7 * f10), (double)f6, (double)f8);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>        par1Tessellator.addVertexWithUV((double)(f11 + par3 * f10 - par6 * f10), (double)(f12 - par4 * f10), (double)(f13 + par5 * f10 - par7 * f10), (double)f6, (double)f9);<a name="line.186"></a>
+<span class="sourceLineNo">187</span>    }<a name="line.187"></a>
+<span class="sourceLineNo">188</span><a name="line.188"></a>
+<span class="sourceLineNo">189</span>    public int getFXLayer()<a name="line.189"></a>
+<span class="sourceLineNo">190</span>    {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>        return 0;<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    }<a name="line.192"></a>
+<span class="sourceLineNo">193</span><a name="line.193"></a>
+<span class="sourceLineNo">194</span>    /**<a name="line.194"></a>
+<span class="sourceLineNo">195</span>     * (abstract) Protected helper method to write subclass entity data to NBT.<a name="line.195"></a>
+<span class="sourceLineNo">196</span>     */<a name="line.196"></a>
+<span class="sourceLineNo">197</span>    public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {}<a name="line.197"></a>
+<span class="sourceLineNo">198</span><a name="line.198"></a>
+<span class="sourceLineNo">199</span>    /**<a name="line.199"></a>
+<span class="sourceLineNo">200</span>     * (abstract) Protected helper method to read subclass entity data from NBT.<a name="line.200"></a>
+<span class="sourceLineNo">201</span>     */<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {}<a name="line.202"></a>
+<span class="sourceLineNo">203</span><a name="line.203"></a>
+<span class="sourceLineNo">204</span>    public void setParticleIcon(RenderEngine par1RenderEngine, Icon par2Icon)<a name="line.204"></a>
+<span class="sourceLineNo">205</span>    {<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        if (this.getFXLayer() == 1)<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        {<a name="line.207"></a>
+<span class="sourceLineNo">208</span>            this.particleTextureIndex = par2Icon;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>        }<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        else<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        {<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            if (this.getFXLayer() != 2)<a name="line.212"></a>
+<span class="sourceLineNo">213</span>            {<a name="line.213"></a>
+<span class="sourceLineNo">214</span>                throw new RuntimeException("Invalid call to Particle.setTex, use coordinate methods");<a name="line.214"></a>
+<span class="sourceLineNo">215</span>            }<a name="line.215"></a>
+<span class="sourceLineNo">216</span><a name="line.216"></a>
+<span class="sourceLineNo">217</span>            this.particleTextureIndex = par2Icon;<a name="line.217"></a>
+<span class="sourceLineNo">218</span>        }<a name="line.218"></a>
+<span class="sourceLineNo">219</span>    }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>    /**<a name="line.221"></a>
+<span class="sourceLineNo">222</span>     * Public method to set private field particleTextureIndex.<a name="line.222"></a>
+<span class="sourceLineNo">223</span>     */<a name="line.223"></a>
+<span class="sourceLineNo">224</span>    public void setParticleTextureIndex(int par1)<a name="line.224"></a>
+<span class="sourceLineNo">225</span>    {<a name="line.225"></a>
+<span class="sourceLineNo">226</span>        if (this.getFXLayer() != 0)<a name="line.226"></a>
+<span class="sourceLineNo">227</span>        {<a name="line.227"></a>
+<span class="sourceLineNo">228</span>            throw new RuntimeException("Invalid call to Particle.setMiscTex");<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        }<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        else<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>            this.particleTextureIndexX = par1 % 16;<a name="line.232"></a>
+<span class="sourceLineNo">233</span>            this.particleTextureIndexY = par1 / 16;<a name="line.233"></a>
+<span class="sourceLineNo">234</span>        }<a name="line.234"></a>
+<span class="sourceLineNo">235</span>    }<a name="line.235"></a>
+<span class="sourceLineNo">236</span><a name="line.236"></a>
+<span class="sourceLineNo">237</span>    public void nextTextureIndexX()<a name="line.237"></a>
+<span class="sourceLineNo">238</span>    {<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        ++this.particleTextureIndexX;<a name="line.239"></a>
+<span class="sourceLineNo">240</span>    }<a name="line.240"></a>
+<span class="sourceLineNo">241</span><a name="line.241"></a>
+<span class="sourceLineNo">242</span>    /**<a name="line.242"></a>
+<span class="sourceLineNo">243</span>     * If returns false, the item will not inflict any damage against entities.<a name="line.243"></a>
+<span class="sourceLineNo">244</span>     */<a name="line.244"></a>
+<span class="sourceLineNo">245</span>    public boolean canAttackWithItem()<a name="line.245"></a>
+<span class="sourceLineNo">246</span>    {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>        return false;<a name="line.247"></a>
+<span class="sourceLineNo">248</span>    }<a name="line.248"></a>
+<span class="sourceLineNo">249</span><a name="line.249"></a>
+<span class="sourceLineNo">250</span>    public String toString()<a name="line.250"></a>
+<span class="sourceLineNo">251</span>    {<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        return this.getClass().getSimpleName() + ", Pos (" + this.posX + "," + this.posY + "," + this.posZ + "), RGBA (" + this.particleRed + "," + this.particleGreen + "," + this.particleBlue + "," + this.particleAlpha + "), Age " + this.particleAge;<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    }<a name="line.253"></a>
+<span class="sourceLineNo">254</span>}<a name="line.254"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
