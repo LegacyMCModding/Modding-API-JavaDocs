@@ -1,3 +1,6 @@
 # LiteLoader
 
-* `1.7.10_04`: [client](1.7.10_04/index.html)
+[Website](http://www.liteloader.com/)
+
+## Generated  
+* `1.7.10_04`: [Client API](generated/1.7.10_04/index.html)
