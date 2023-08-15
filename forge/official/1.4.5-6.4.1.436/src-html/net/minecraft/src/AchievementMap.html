@@ -1,0 +1,111 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.io.BufferedReader;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.io.InputStreamReader;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.HashMap;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.Map;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    public class AchievementMap<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        /** Holds the singleton instance of AchievementMap. */<a name="line.10"></a>
+<FONT color="green">011</FONT>        public static AchievementMap instance = new AchievementMap();<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        /** Maps a achievement id with it's unique GUID. */<a name="line.13"></a>
+<FONT color="green">014</FONT>        private Map guidMap = new HashMap();<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        private AchievementMap()<a name="line.16"></a>
+<FONT color="green">017</FONT>        {<a name="line.17"></a>
+<FONT color="green">018</FONT>            try<a name="line.18"></a>
+<FONT color="green">019</FONT>            {<a name="line.19"></a>
+<FONT color="green">020</FONT>                BufferedReader var1 = new BufferedReader(new InputStreamReader(AchievementMap.class.getResourceAsStream("/achievement/map.txt")));<a name="line.20"></a>
+<FONT color="green">021</FONT>                String var2;<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>                while ((var2 = var1.readLine()) != null)<a name="line.23"></a>
+<FONT color="green">024</FONT>                {<a name="line.24"></a>
+<FONT color="green">025</FONT>                    String[] var3 = var2.split(",");<a name="line.25"></a>
+<FONT color="green">026</FONT>                    int var4 = Integer.parseInt(var3[0]);<a name="line.26"></a>
+<FONT color="green">027</FONT>                    this.guidMap.put(Integer.valueOf(var4), var3[1]);<a name="line.27"></a>
+<FONT color="green">028</FONT>                }<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>                var1.close();<a name="line.30"></a>
+<FONT color="green">031</FONT>            }<a name="line.31"></a>
+<FONT color="green">032</FONT>            catch (Exception var5)<a name="line.32"></a>
+<FONT color="green">033</FONT>            {<a name="line.33"></a>
+<FONT color="green">034</FONT>                var5.printStackTrace();<a name="line.34"></a>
+<FONT color="green">035</FONT>            }<a name="line.35"></a>
+<FONT color="green">036</FONT>        }<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>        /**<a name="line.38"></a>
+<FONT color="green">039</FONT>         * Returns the unique GUID of a achievement id.<a name="line.39"></a>
+<FONT color="green">040</FONT>         */<a name="line.40"></a>
+<FONT color="green">041</FONT>        public static String getGuid(int par0)<a name="line.41"></a>
+<FONT color="green">042</FONT>        {<a name="line.42"></a>
+<FONT color="green">043</FONT>            return (String)instance.guidMap.get(Integer.valueOf(par0));<a name="line.43"></a>
+<FONT color="green">044</FONT>        }<a name="line.44"></a>
+<FONT color="green">045</FONT>    }<a name="line.45"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

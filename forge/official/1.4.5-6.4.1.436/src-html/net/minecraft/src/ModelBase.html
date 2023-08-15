@@ -1,0 +1,125 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.ArrayList;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.HashMap;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.util.List;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import java.util.Map;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import java.util.Random;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>    public abstract class ModelBase<a name="line.11"></a>
+<FONT color="green">012</FONT>    {<a name="line.12"></a>
+<FONT color="green">013</FONT>        public float onGround;<a name="line.13"></a>
+<FONT color="green">014</FONT>        public boolean isRiding = false;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /**<a name="line.16"></a>
+<FONT color="green">017</FONT>         * This is a list of all the boxes (ModelRenderer.class) in the current model.<a name="line.17"></a>
+<FONT color="green">018</FONT>         */<a name="line.18"></a>
+<FONT color="green">019</FONT>        public List boxList = new ArrayList();<a name="line.19"></a>
+<FONT color="green">020</FONT>        public boolean isChild = true;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /** A mapping for all texture offsets */<a name="line.22"></a>
+<FONT color="green">023</FONT>        private Map modelTextureMap = new HashMap();<a name="line.23"></a>
+<FONT color="green">024</FONT>        public int textureWidth = 64;<a name="line.24"></a>
+<FONT color="green">025</FONT>        public int textureHeight = 32;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>        /**<a name="line.27"></a>
+<FONT color="green">028</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.28"></a>
+<FONT color="green">029</FONT>         */<a name="line.29"></a>
+<FONT color="green">030</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7) {}<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.33"></a>
+<FONT color="green">034</FONT>         * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.34"></a>
+<FONT color="green">035</FONT>         * "far" arms and legs can swing at most.<a name="line.35"></a>
+<FONT color="green">036</FONT>         */<a name="line.36"></a>
+<FONT color="green">037</FONT>        public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6, Entity par7Entity) {}<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        /**<a name="line.39"></a>
+<FONT color="green">040</FONT>         * Used for easily adding entity-dependent animations. The second and third float params here are the same second<a name="line.40"></a>
+<FONT color="green">041</FONT>         * and third as in the setRotationAngles method.<a name="line.41"></a>
+<FONT color="green">042</FONT>         */<a name="line.42"></a>
+<FONT color="green">043</FONT>        public void setLivingAnimations(EntityLiving par1EntityLiving, float par2, float par3, float par4) {}<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        public ModelRenderer func_85181_a(Random par1Random)<a name="line.45"></a>
+<FONT color="green">046</FONT>        {<a name="line.46"></a>
+<FONT color="green">047</FONT>            return (ModelRenderer)this.boxList.get(par1Random.nextInt(this.boxList.size()));<a name="line.47"></a>
+<FONT color="green">048</FONT>        }<a name="line.48"></a>
+<FONT color="green">049</FONT>    <a name="line.49"></a>
+<FONT color="green">050</FONT>        protected void setTextureOffset(String par1Str, int par2, int par3)<a name="line.50"></a>
+<FONT color="green">051</FONT>        {<a name="line.51"></a>
+<FONT color="green">052</FONT>            this.modelTextureMap.put(par1Str, new TextureOffset(par2, par3));<a name="line.52"></a>
+<FONT color="green">053</FONT>        }<a name="line.53"></a>
+<FONT color="green">054</FONT>    <a name="line.54"></a>
+<FONT color="green">055</FONT>        public TextureOffset getTextureOffset(String par1Str)<a name="line.55"></a>
+<FONT color="green">056</FONT>        {<a name="line.56"></a>
+<FONT color="green">057</FONT>            return (TextureOffset)this.modelTextureMap.get(par1Str);<a name="line.57"></a>
+<FONT color="green">058</FONT>        }<a name="line.58"></a>
+<FONT color="green">059</FONT>    }<a name="line.59"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

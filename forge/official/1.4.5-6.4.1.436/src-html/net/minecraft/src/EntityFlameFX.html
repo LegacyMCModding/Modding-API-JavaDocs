@@ -1,0 +1,174 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class EntityFlameFX extends EntityFX<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** the scale of the flame FX */<a name="line.9"></a>
+<FONT color="green">010</FONT>        private float flameScale;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        public EntityFlameFX(World par1World, double par2, double par4, double par6, double par8, double par10, double par12)<a name="line.12"></a>
+<FONT color="green">013</FONT>        {<a name="line.13"></a>
+<FONT color="green">014</FONT>            super(par1World, par2, par4, par6, par8, par10, par12);<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.motionX = this.motionX * 0.009999999776482582D + par8;<a name="line.15"></a>
+<FONT color="green">016</FONT>            this.motionY = this.motionY * 0.009999999776482582D + par10;<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.motionZ = this.motionZ * 0.009999999776482582D + par12;<a name="line.17"></a>
+<FONT color="green">018</FONT>            double var10000 = par2 + (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.05F);<a name="line.18"></a>
+<FONT color="green">019</FONT>            var10000 = par4 + (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.05F);<a name="line.19"></a>
+<FONT color="green">020</FONT>            var10000 = par6 + (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.05F);<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.flameScale = this.particleScale;<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.particleRed = this.particleGreen = this.particleBlue = 1.0F;<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.particleMaxAge = (int)(8.0D / (Math.random() * 0.8D + 0.2D)) + 4;<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.noClip = true;<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.setParticleTextureIndex(48);<a name="line.25"></a>
+<FONT color="green">026</FONT>        }<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.28"></a>
+<FONT color="green">029</FONT>        {<a name="line.29"></a>
+<FONT color="green">030</FONT>            float var8 = ((float)this.particleAge + par2) / (float)this.particleMaxAge;<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.particleScale = this.flameScale * (1.0F - var8 * var8 * 0.5F);<a name="line.31"></a>
+<FONT color="green">032</FONT>            super.renderParticle(par1Tessellator, par2, par3, par4, par5, par6, par7);<a name="line.32"></a>
+<FONT color="green">033</FONT>        }<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>        public int getBrightnessForRender(float par1)<a name="line.35"></a>
+<FONT color="green">036</FONT>        {<a name="line.36"></a>
+<FONT color="green">037</FONT>            float var2 = ((float)this.particleAge + par1) / (float)this.particleMaxAge;<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>            if (var2 &lt; 0.0F)<a name="line.39"></a>
+<FONT color="green">040</FONT>            {<a name="line.40"></a>
+<FONT color="green">041</FONT>                var2 = 0.0F;<a name="line.41"></a>
+<FONT color="green">042</FONT>            }<a name="line.42"></a>
+<FONT color="green">043</FONT>    <a name="line.43"></a>
+<FONT color="green">044</FONT>            if (var2 &gt; 1.0F)<a name="line.44"></a>
+<FONT color="green">045</FONT>            {<a name="line.45"></a>
+<FONT color="green">046</FONT>                var2 = 1.0F;<a name="line.46"></a>
+<FONT color="green">047</FONT>            }<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>            int var3 = super.getBrightnessForRender(par1);<a name="line.49"></a>
+<FONT color="green">050</FONT>            int var4 = var3 &amp; 255;<a name="line.50"></a>
+<FONT color="green">051</FONT>            int var5 = var3 &gt;&gt; 16 &amp; 255;<a name="line.51"></a>
+<FONT color="green">052</FONT>            var4 += (int)(var2 * 15.0F * 16.0F);<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>            if (var4 &gt; 240)<a name="line.54"></a>
+<FONT color="green">055</FONT>            {<a name="line.55"></a>
+<FONT color="green">056</FONT>                var4 = 240;<a name="line.56"></a>
+<FONT color="green">057</FONT>            }<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>            return var4 | var5 &lt;&lt; 16;<a name="line.59"></a>
+<FONT color="green">060</FONT>        }<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>        /**<a name="line.62"></a>
+<FONT color="green">063</FONT>         * Gets how bright this entity is.<a name="line.63"></a>
+<FONT color="green">064</FONT>         */<a name="line.64"></a>
+<FONT color="green">065</FONT>        public float getBrightness(float par1)<a name="line.65"></a>
+<FONT color="green">066</FONT>        {<a name="line.66"></a>
+<FONT color="green">067</FONT>            float var2 = ((float)this.particleAge + par1) / (float)this.particleMaxAge;<a name="line.67"></a>
+<FONT color="green">068</FONT>    <a name="line.68"></a>
+<FONT color="green">069</FONT>            if (var2 &lt; 0.0F)<a name="line.69"></a>
+<FONT color="green">070</FONT>            {<a name="line.70"></a>
+<FONT color="green">071</FONT>                var2 = 0.0F;<a name="line.71"></a>
+<FONT color="green">072</FONT>            }<a name="line.72"></a>
+<FONT color="green">073</FONT>    <a name="line.73"></a>
+<FONT color="green">074</FONT>            if (var2 &gt; 1.0F)<a name="line.74"></a>
+<FONT color="green">075</FONT>            {<a name="line.75"></a>
+<FONT color="green">076</FONT>                var2 = 1.0F;<a name="line.76"></a>
+<FONT color="green">077</FONT>            }<a name="line.77"></a>
+<FONT color="green">078</FONT>    <a name="line.78"></a>
+<FONT color="green">079</FONT>            float var3 = super.getBrightness(par1);<a name="line.79"></a>
+<FONT color="green">080</FONT>            return var3 * var2 + (1.0F - var2);<a name="line.80"></a>
+<FONT color="green">081</FONT>        }<a name="line.81"></a>
+<FONT color="green">082</FONT>    <a name="line.82"></a>
+<FONT color="green">083</FONT>        /**<a name="line.83"></a>
+<FONT color="green">084</FONT>         * Called to update the entity's position/logic.<a name="line.84"></a>
+<FONT color="green">085</FONT>         */<a name="line.85"></a>
+<FONT color="green">086</FONT>        public void onUpdate()<a name="line.86"></a>
+<FONT color="green">087</FONT>        {<a name="line.87"></a>
+<FONT color="green">088</FONT>            this.prevPosX = this.posX;<a name="line.88"></a>
+<FONT color="green">089</FONT>            this.prevPosY = this.posY;<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.prevPosZ = this.posZ;<a name="line.90"></a>
+<FONT color="green">091</FONT>    <a name="line.91"></a>
+<FONT color="green">092</FONT>            if (this.particleAge++ &gt;= this.particleMaxAge)<a name="line.92"></a>
+<FONT color="green">093</FONT>            {<a name="line.93"></a>
+<FONT color="green">094</FONT>                this.setDead();<a name="line.94"></a>
+<FONT color="green">095</FONT>            }<a name="line.95"></a>
+<FONT color="green">096</FONT>    <a name="line.96"></a>
+<FONT color="green">097</FONT>            this.moveEntity(this.motionX, this.motionY, this.motionZ);<a name="line.97"></a>
+<FONT color="green">098</FONT>            this.motionX *= 0.9599999785423279D;<a name="line.98"></a>
+<FONT color="green">099</FONT>            this.motionY *= 0.9599999785423279D;<a name="line.99"></a>
+<FONT color="green">100</FONT>            this.motionZ *= 0.9599999785423279D;<a name="line.100"></a>
+<FONT color="green">101</FONT>    <a name="line.101"></a>
+<FONT color="green">102</FONT>            if (this.onGround)<a name="line.102"></a>
+<FONT color="green">103</FONT>            {<a name="line.103"></a>
+<FONT color="green">104</FONT>                this.motionX *= 0.699999988079071D;<a name="line.104"></a>
+<FONT color="green">105</FONT>                this.motionZ *= 0.699999988079071D;<a name="line.105"></a>
+<FONT color="green">106</FONT>            }<a name="line.106"></a>
+<FONT color="green">107</FONT>        }<a name="line.107"></a>
+<FONT color="green">108</FONT>    }<a name="line.108"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

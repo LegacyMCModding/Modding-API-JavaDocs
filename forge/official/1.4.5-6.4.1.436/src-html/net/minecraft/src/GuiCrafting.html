@@ -1,0 +1,102 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class GuiCrafting extends GuiContainer<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        public GuiCrafting(InventoryPlayer par1InventoryPlayer, World par2World, int par3, int par4, int par5)<a name="line.10"></a>
+<FONT color="green">011</FONT>        {<a name="line.11"></a>
+<FONT color="green">012</FONT>            super(new ContainerWorkbench(par1InventoryPlayer, par2World, par3, par4, par5));<a name="line.12"></a>
+<FONT color="green">013</FONT>        }<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        /**<a name="line.15"></a>
+<FONT color="green">016</FONT>         * Draw the foreground layer for the GuiContainer (everything in front of the items)<a name="line.16"></a>
+<FONT color="green">017</FONT>         */<a name="line.17"></a>
+<FONT color="green">018</FONT>        protected void drawGuiContainerForegroundLayer(int par1, int par2)<a name="line.18"></a>
+<FONT color="green">019</FONT>        {<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.fontRenderer.drawString(StatCollector.translateToLocal("container.crafting"), 28, 6, 4210752);<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, 4210752);<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        /**<a name="line.24"></a>
+<FONT color="green">025</FONT>         * Draw the background layer for the GuiContainer (everything behind the items)<a name="line.25"></a>
+<FONT color="green">026</FONT>         */<a name="line.26"></a>
+<FONT color="green">027</FONT>        protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3)<a name="line.27"></a>
+<FONT color="green">028</FONT>        {<a name="line.28"></a>
+<FONT color="green">029</FONT>            int var4 = this.mc.renderEngine.getTexture("/gui/crafting.png");<a name="line.29"></a>
+<FONT color="green">030</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.mc.renderEngine.bindTexture(var4);<a name="line.31"></a>
+<FONT color="green">032</FONT>            int var5 = (this.width - this.xSize) / 2;<a name="line.32"></a>
+<FONT color="green">033</FONT>            int var6 = (this.height - this.ySize) / 2;<a name="line.33"></a>
+<FONT color="green">034</FONT>            this.drawTexturedModalRect(var5, var6, 0, 0, this.xSize, this.ySize);<a name="line.34"></a>
+<FONT color="green">035</FONT>        }<a name="line.35"></a>
+<FONT color="green">036</FONT>    }<a name="line.36"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
