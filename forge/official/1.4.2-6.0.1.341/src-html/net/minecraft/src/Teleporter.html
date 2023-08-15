@@ -1,0 +1,512 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Random;<a name="line.3"></a>
+<FONT color="green">004</FONT>    <a name="line.4"></a>
+<FONT color="green">005</FONT>    public class Teleporter<a name="line.5"></a>
+<FONT color="green">006</FONT>    {<a name="line.6"></a>
+<FONT color="green">007</FONT>        /** A private Random() function in Teleporter */<a name="line.7"></a>
+<FONT color="green">008</FONT>        private Random random = new Random();<a name="line.8"></a>
+<FONT color="green">009</FONT>    <a name="line.9"></a>
+<FONT color="green">010</FONT>        /**<a name="line.10"></a>
+<FONT color="green">011</FONT>         * Place an entity in a nearby portal, creating one if necessary.<a name="line.11"></a>
+<FONT color="green">012</FONT>         */<a name="line.12"></a>
+<FONT color="green">013</FONT>        public void placeInPortal(World par1World, Entity par2Entity, double par3, double par5, double par7, float par9)<a name="line.13"></a>
+<FONT color="green">014</FONT>        {<a name="line.14"></a>
+<FONT color="green">015</FONT>            if (par1World.provider.dimensionId != 1)<a name="line.15"></a>
+<FONT color="green">016</FONT>            {<a name="line.16"></a>
+<FONT color="green">017</FONT>                if (!this.placeInExistingPortal(par1World, par2Entity, par3, par5, par7, par9))<a name="line.17"></a>
+<FONT color="green">018</FONT>                {<a name="line.18"></a>
+<FONT color="green">019</FONT>                    this.createPortal(par1World, par2Entity);<a name="line.19"></a>
+<FONT color="green">020</FONT>                    this.placeInExistingPortal(par1World, par2Entity, par3, par5, par7, par9);<a name="line.20"></a>
+<FONT color="green">021</FONT>                }<a name="line.21"></a>
+<FONT color="green">022</FONT>            }<a name="line.22"></a>
+<FONT color="green">023</FONT>            else<a name="line.23"></a>
+<FONT color="green">024</FONT>            {<a name="line.24"></a>
+<FONT color="green">025</FONT>                int var10 = MathHelper.floor_double(par2Entity.posX);<a name="line.25"></a>
+<FONT color="green">026</FONT>                int var11 = MathHelper.floor_double(par2Entity.posY) - 1;<a name="line.26"></a>
+<FONT color="green">027</FONT>                int var12 = MathHelper.floor_double(par2Entity.posZ);<a name="line.27"></a>
+<FONT color="green">028</FONT>                byte var13 = 1;<a name="line.28"></a>
+<FONT color="green">029</FONT>                byte var14 = 0;<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>                for (int var15 = -2; var15 &lt;= 2; ++var15)<a name="line.31"></a>
+<FONT color="green">032</FONT>                {<a name="line.32"></a>
+<FONT color="green">033</FONT>                    for (int var16 = -2; var16 &lt;= 2; ++var16)<a name="line.33"></a>
+<FONT color="green">034</FONT>                    {<a name="line.34"></a>
+<FONT color="green">035</FONT>                        for (int var17 = -1; var17 &lt; 3; ++var17)<a name="line.35"></a>
+<FONT color="green">036</FONT>                        {<a name="line.36"></a>
+<FONT color="green">037</FONT>                            int var18 = var10 + var16 * var13 + var15 * var14;<a name="line.37"></a>
+<FONT color="green">038</FONT>                            int var19 = var11 + var17;<a name="line.38"></a>
+<FONT color="green">039</FONT>                            int var20 = var12 + var16 * var14 - var15 * var13;<a name="line.39"></a>
+<FONT color="green">040</FONT>                            boolean var21 = var17 &lt; 0;<a name="line.40"></a>
+<FONT color="green">041</FONT>                            par1World.setBlockWithNotify(var18, var19, var20, var21 ? Block.obsidian.blockID : 0);<a name="line.41"></a>
+<FONT color="green">042</FONT>                        }<a name="line.42"></a>
+<FONT color="green">043</FONT>                    }<a name="line.43"></a>
+<FONT color="green">044</FONT>                }<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>                par2Entity.setLocationAndAngles((double)var10, (double)var11, (double)var12, par2Entity.rotationYaw, 0.0F);<a name="line.46"></a>
+<FONT color="green">047</FONT>                par2Entity.motionX = par2Entity.motionY = par2Entity.motionZ = 0.0D;<a name="line.47"></a>
+<FONT color="green">048</FONT>            }<a name="line.48"></a>
+<FONT color="green">049</FONT>        }<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        /**<a name="line.51"></a>
+<FONT color="green">052</FONT>         * Place an entity in a nearby portal which already exists.<a name="line.52"></a>
+<FONT color="green">053</FONT>         */<a name="line.53"></a>
+<FONT color="green">054</FONT>        public boolean placeInExistingPortal(World par1World, Entity par2Entity, double par3, double par5, double par7, float par9)<a name="line.54"></a>
+<FONT color="green">055</FONT>        {<a name="line.55"></a>
+<FONT color="green">056</FONT>            short var10 = 128;<a name="line.56"></a>
+<FONT color="green">057</FONT>            double var11 = -1.0D;<a name="line.57"></a>
+<FONT color="green">058</FONT>            int var13 = 0;<a name="line.58"></a>
+<FONT color="green">059</FONT>            int var14 = 0;<a name="line.59"></a>
+<FONT color="green">060</FONT>            int var15 = 0;<a name="line.60"></a>
+<FONT color="green">061</FONT>            int var16 = MathHelper.floor_double(par2Entity.posX);<a name="line.61"></a>
+<FONT color="green">062</FONT>            int var17 = MathHelper.floor_double(par2Entity.posZ);<a name="line.62"></a>
+<FONT color="green">063</FONT>            int var18;<a name="line.63"></a>
+<FONT color="green">064</FONT>            double var25;<a name="line.64"></a>
+<FONT color="green">065</FONT>    <a name="line.65"></a>
+<FONT color="green">066</FONT>            for (var18 = var16 - var10; var18 &lt;= var16 + var10; ++var18)<a name="line.66"></a>
+<FONT color="green">067</FONT>            {<a name="line.67"></a>
+<FONT color="green">068</FONT>                double var19 = (double)var18 + 0.5D - par2Entity.posX;<a name="line.68"></a>
+<FONT color="green">069</FONT>    <a name="line.69"></a>
+<FONT color="green">070</FONT>                for (int var21 = var17 - var10; var21 &lt;= var17 + var10; ++var21)<a name="line.70"></a>
+<FONT color="green">071</FONT>                {<a name="line.71"></a>
+<FONT color="green">072</FONT>                    double var22 = (double)var21 + 0.5D - par2Entity.posZ;<a name="line.72"></a>
+<FONT color="green">073</FONT>    <a name="line.73"></a>
+<FONT color="green">074</FONT>                    for (int var24 = par1World.getActualHeight() - 1; var24 &gt;= 0; --var24)<a name="line.74"></a>
+<FONT color="green">075</FONT>                    {<a name="line.75"></a>
+<FONT color="green">076</FONT>                        if (par1World.getBlockId(var18, var24, var21) == Block.portal.blockID)<a name="line.76"></a>
+<FONT color="green">077</FONT>                        {<a name="line.77"></a>
+<FONT color="green">078</FONT>                            while (par1World.getBlockId(var18, var24 - 1, var21) == Block.portal.blockID)<a name="line.78"></a>
+<FONT color="green">079</FONT>                            {<a name="line.79"></a>
+<FONT color="green">080</FONT>                                --var24;<a name="line.80"></a>
+<FONT color="green">081</FONT>                            }<a name="line.81"></a>
+<FONT color="green">082</FONT>    <a name="line.82"></a>
+<FONT color="green">083</FONT>                            var25 = (double)var24 + 0.5D - par2Entity.posY;<a name="line.83"></a>
+<FONT color="green">084</FONT>                            double var27 = var19 * var19 + var25 * var25 + var22 * var22;<a name="line.84"></a>
+<FONT color="green">085</FONT>    <a name="line.85"></a>
+<FONT color="green">086</FONT>                            if (var11 &lt; 0.0D || var27 &lt; var11)<a name="line.86"></a>
+<FONT color="green">087</FONT>                            {<a name="line.87"></a>
+<FONT color="green">088</FONT>                                var11 = var27;<a name="line.88"></a>
+<FONT color="green">089</FONT>                                var13 = var18;<a name="line.89"></a>
+<FONT color="green">090</FONT>                                var14 = var24;<a name="line.90"></a>
+<FONT color="green">091</FONT>                                var15 = var21;<a name="line.91"></a>
+<FONT color="green">092</FONT>                            }<a name="line.92"></a>
+<FONT color="green">093</FONT>                        }<a name="line.93"></a>
+<FONT color="green">094</FONT>                    }<a name="line.94"></a>
+<FONT color="green">095</FONT>                }<a name="line.95"></a>
+<FONT color="green">096</FONT>            }<a name="line.96"></a>
+<FONT color="green">097</FONT>    <a name="line.97"></a>
+<FONT color="green">098</FONT>            if (var11 &lt; 0.0D)<a name="line.98"></a>
+<FONT color="green">099</FONT>            {<a name="line.99"></a>
+<FONT color="green">100</FONT>                return false;<a name="line.100"></a>
+<FONT color="green">101</FONT>            }<a name="line.101"></a>
+<FONT color="green">102</FONT>            else<a name="line.102"></a>
+<FONT color="green">103</FONT>            {<a name="line.103"></a>
+<FONT color="green">104</FONT>                double var46 = (double)var13 + 0.5D;<a name="line.104"></a>
+<FONT color="green">105</FONT>                double var23 = (double)var14 + 0.5D;<a name="line.105"></a>
+<FONT color="green">106</FONT>                var25 = (double)var15 + 0.5D;<a name="line.106"></a>
+<FONT color="green">107</FONT>                int var47 = -1;<a name="line.107"></a>
+<FONT color="green">108</FONT>    <a name="line.108"></a>
+<FONT color="green">109</FONT>                if (par1World.getBlockId(var13 - 1, var14, var15) == Block.portal.blockID)<a name="line.109"></a>
+<FONT color="green">110</FONT>                {<a name="line.110"></a>
+<FONT color="green">111</FONT>                    var47 = 2;<a name="line.111"></a>
+<FONT color="green">112</FONT>                }<a name="line.112"></a>
+<FONT color="green">113</FONT>    <a name="line.113"></a>
+<FONT color="green">114</FONT>                if (par1World.getBlockId(var13 + 1, var14, var15) == Block.portal.blockID)<a name="line.114"></a>
+<FONT color="green">115</FONT>                {<a name="line.115"></a>
+<FONT color="green">116</FONT>                    var47 = 0;<a name="line.116"></a>
+<FONT color="green">117</FONT>                }<a name="line.117"></a>
+<FONT color="green">118</FONT>    <a name="line.118"></a>
+<FONT color="green">119</FONT>                if (par1World.getBlockId(var13, var14, var15 - 1) == Block.portal.blockID)<a name="line.119"></a>
+<FONT color="green">120</FONT>                {<a name="line.120"></a>
+<FONT color="green">121</FONT>                    var47 = 3;<a name="line.121"></a>
+<FONT color="green">122</FONT>                }<a name="line.122"></a>
+<FONT color="green">123</FONT>    <a name="line.123"></a>
+<FONT color="green">124</FONT>                if (par1World.getBlockId(var13, var14, var15 + 1) == Block.portal.blockID)<a name="line.124"></a>
+<FONT color="green">125</FONT>                {<a name="line.125"></a>
+<FONT color="green">126</FONT>                    var47 = 1;<a name="line.126"></a>
+<FONT color="green">127</FONT>                }<a name="line.127"></a>
+<FONT color="green">128</FONT>    <a name="line.128"></a>
+<FONT color="green">129</FONT>                int var28 = par2Entity.func_82148_at();<a name="line.129"></a>
+<FONT color="green">130</FONT>    <a name="line.130"></a>
+<FONT color="green">131</FONT>                if (var47 &gt; -1)<a name="line.131"></a>
+<FONT color="green">132</FONT>                {<a name="line.132"></a>
+<FONT color="green">133</FONT>                    int var29 = Direction.field_71578_g[var47];<a name="line.133"></a>
+<FONT color="green">134</FONT>                    int var30 = Direction.offsetX[var47];<a name="line.134"></a>
+<FONT color="green">135</FONT>                    int var31 = Direction.offsetZ[var47];<a name="line.135"></a>
+<FONT color="green">136</FONT>                    int var32 = Direction.offsetX[var29];<a name="line.136"></a>
+<FONT color="green">137</FONT>                    int var33 = Direction.offsetZ[var29];<a name="line.137"></a>
+<FONT color="green">138</FONT>                    boolean var34 = !par1World.isAirBlock(var13 + var30 + var32, var14, var15 + var31 + var33) || !par1World.isAirBlock(var13 + var30 + var32, var14 + 1, var15 + var31 + var33);<a name="line.138"></a>
+<FONT color="green">139</FONT>                    boolean var35 = !par1World.isAirBlock(var13 + var30, var14, var15 + var31) || !par1World.isAirBlock(var13 + var30, var14 + 1, var15 + var31);<a name="line.139"></a>
+<FONT color="green">140</FONT>    <a name="line.140"></a>
+<FONT color="green">141</FONT>                    if (var34 &amp;&amp; var35)<a name="line.141"></a>
+<FONT color="green">142</FONT>                    {<a name="line.142"></a>
+<FONT color="green">143</FONT>                        var47 = Direction.footInvisibleFaceRemap[var47];<a name="line.143"></a>
+<FONT color="green">144</FONT>                        var29 = Direction.footInvisibleFaceRemap[var29];<a name="line.144"></a>
+<FONT color="green">145</FONT>                        var30 = Direction.offsetX[var47];<a name="line.145"></a>
+<FONT color="green">146</FONT>                        var31 = Direction.offsetZ[var47];<a name="line.146"></a>
+<FONT color="green">147</FONT>                        var32 = Direction.offsetX[var29];<a name="line.147"></a>
+<FONT color="green">148</FONT>                        var33 = Direction.offsetZ[var29];<a name="line.148"></a>
+<FONT color="green">149</FONT>                        var18 = var13 - var32;<a name="line.149"></a>
+<FONT color="green">150</FONT>                        var46 -= (double)var32;<a name="line.150"></a>
+<FONT color="green">151</FONT>                        int var20 = var15 - var33;<a name="line.151"></a>
+<FONT color="green">152</FONT>                        var25 -= (double)var33;<a name="line.152"></a>
+<FONT color="green">153</FONT>                        var34 = !par1World.isAirBlock(var18 + var30 + var32, var14, var20 + var31 + var33) || !par1World.isAirBlock(var18 + var30 + var32, var14 + 1, var20 + var31 + var33);<a name="line.153"></a>
+<FONT color="green">154</FONT>                        var35 = !par1World.isAirBlock(var18 + var30, var14, var20 + var31) || !par1World.isAirBlock(var18 + var30, var14 + 1, var20 + var31);<a name="line.154"></a>
+<FONT color="green">155</FONT>                    }<a name="line.155"></a>
+<FONT color="green">156</FONT>    <a name="line.156"></a>
+<FONT color="green">157</FONT>                    float var36 = 0.5F;<a name="line.157"></a>
+<FONT color="green">158</FONT>                    float var37 = 0.5F;<a name="line.158"></a>
+<FONT color="green">159</FONT>    <a name="line.159"></a>
+<FONT color="green">160</FONT>                    if (!var34 &amp;&amp; var35)<a name="line.160"></a>
+<FONT color="green">161</FONT>                    {<a name="line.161"></a>
+<FONT color="green">162</FONT>                        var36 = 1.0F;<a name="line.162"></a>
+<FONT color="green">163</FONT>                    }<a name="line.163"></a>
+<FONT color="green">164</FONT>                    else if (var34 &amp;&amp; !var35)<a name="line.164"></a>
+<FONT color="green">165</FONT>                    {<a name="line.165"></a>
+<FONT color="green">166</FONT>                        var36 = 0.0F;<a name="line.166"></a>
+<FONT color="green">167</FONT>                    }<a name="line.167"></a>
+<FONT color="green">168</FONT>                    else if (var34 &amp;&amp; var35)<a name="line.168"></a>
+<FONT color="green">169</FONT>                    {<a name="line.169"></a>
+<FONT color="green">170</FONT>                        var37 = 0.0F;<a name="line.170"></a>
+<FONT color="green">171</FONT>                    }<a name="line.171"></a>
+<FONT color="green">172</FONT>    <a name="line.172"></a>
+<FONT color="green">173</FONT>                    var46 += (double)((float)var32 * var36 + var37 * (float)var30);<a name="line.173"></a>
+<FONT color="green">174</FONT>                    var25 += (double)((float)var33 * var36 + var37 * (float)var31);<a name="line.174"></a>
+<FONT color="green">175</FONT>                    float var38 = 0.0F;<a name="line.175"></a>
+<FONT color="green">176</FONT>                    float var39 = 0.0F;<a name="line.176"></a>
+<FONT color="green">177</FONT>                    float var40 = 0.0F;<a name="line.177"></a>
+<FONT color="green">178</FONT>                    float var41 = 0.0F;<a name="line.178"></a>
+<FONT color="green">179</FONT>    <a name="line.179"></a>
+<FONT color="green">180</FONT>                    if (var47 == var28)<a name="line.180"></a>
+<FONT color="green">181</FONT>                    {<a name="line.181"></a>
+<FONT color="green">182</FONT>                        var38 = 1.0F;<a name="line.182"></a>
+<FONT color="green">183</FONT>                        var39 = 1.0F;<a name="line.183"></a>
+<FONT color="green">184</FONT>                    }<a name="line.184"></a>
+<FONT color="green">185</FONT>                    else if (var47 == Direction.footInvisibleFaceRemap[var28])<a name="line.185"></a>
+<FONT color="green">186</FONT>                    {<a name="line.186"></a>
+<FONT color="green">187</FONT>                        var38 = -1.0F;<a name="line.187"></a>
+<FONT color="green">188</FONT>                        var39 = -1.0F;<a name="line.188"></a>
+<FONT color="green">189</FONT>                    }<a name="line.189"></a>
+<FONT color="green">190</FONT>                    else if (var47 == Direction.enderEyeMetaToDirection[var28])<a name="line.190"></a>
+<FONT color="green">191</FONT>                    {<a name="line.191"></a>
+<FONT color="green">192</FONT>                        var40 = 1.0F;<a name="line.192"></a>
+<FONT color="green">193</FONT>                        var41 = -1.0F;<a name="line.193"></a>
+<FONT color="green">194</FONT>                    }<a name="line.194"></a>
+<FONT color="green">195</FONT>                    else<a name="line.195"></a>
+<FONT color="green">196</FONT>                    {<a name="line.196"></a>
+<FONT color="green">197</FONT>                        var40 = -1.0F;<a name="line.197"></a>
+<FONT color="green">198</FONT>                        var41 = 1.0F;<a name="line.198"></a>
+<FONT color="green">199</FONT>                    }<a name="line.199"></a>
+<FONT color="green">200</FONT>    <a name="line.200"></a>
+<FONT color="green">201</FONT>                    double var42 = par2Entity.motionX;<a name="line.201"></a>
+<FONT color="green">202</FONT>                    double var44 = par2Entity.motionZ;<a name="line.202"></a>
+<FONT color="green">203</FONT>                    par2Entity.motionX = var42 * (double)var38 + var44 * (double)var41;<a name="line.203"></a>
+<FONT color="green">204</FONT>                    par2Entity.motionZ = var42 * (double)var40 + var44 * (double)var39;<a name="line.204"></a>
+<FONT color="green">205</FONT>                    par2Entity.rotationYaw = par9 - (float)(var28 * 90) + (float)(var47 * 90);<a name="line.205"></a>
+<FONT color="green">206</FONT>                }<a name="line.206"></a>
+<FONT color="green">207</FONT>                else<a name="line.207"></a>
+<FONT color="green">208</FONT>                {<a name="line.208"></a>
+<FONT color="green">209</FONT>                    par2Entity.motionX = par2Entity.motionY = par2Entity.motionZ = 0.0D;<a name="line.209"></a>
+<FONT color="green">210</FONT>                }<a name="line.210"></a>
+<FONT color="green">211</FONT>    <a name="line.211"></a>
+<FONT color="green">212</FONT>                par2Entity.setLocationAndAngles(var46, var23, var25, par2Entity.rotationYaw, par2Entity.rotationPitch);<a name="line.212"></a>
+<FONT color="green">213</FONT>                return true;<a name="line.213"></a>
+<FONT color="green">214</FONT>            }<a name="line.214"></a>
+<FONT color="green">215</FONT>        }<a name="line.215"></a>
+<FONT color="green">216</FONT>    <a name="line.216"></a>
+<FONT color="green">217</FONT>        /**<a name="line.217"></a>
+<FONT color="green">218</FONT>         * Create a new portal near an entity.<a name="line.218"></a>
+<FONT color="green">219</FONT>         */<a name="line.219"></a>
+<FONT color="green">220</FONT>        public boolean createPortal(World par1World, Entity par2Entity)<a name="line.220"></a>
+<FONT color="green">221</FONT>        {<a name="line.221"></a>
+<FONT color="green">222</FONT>            byte var3 = 16;<a name="line.222"></a>
+<FONT color="green">223</FONT>            double var4 = -1.0D;<a name="line.223"></a>
+<FONT color="green">224</FONT>            int var6 = MathHelper.floor_double(par2Entity.posX);<a name="line.224"></a>
+<FONT color="green">225</FONT>            int var7 = MathHelper.floor_double(par2Entity.posY);<a name="line.225"></a>
+<FONT color="green">226</FONT>            int var8 = MathHelper.floor_double(par2Entity.posZ);<a name="line.226"></a>
+<FONT color="green">227</FONT>            int var9 = var6;<a name="line.227"></a>
+<FONT color="green">228</FONT>            int var10 = var7;<a name="line.228"></a>
+<FONT color="green">229</FONT>            int var11 = var8;<a name="line.229"></a>
+<FONT color="green">230</FONT>            int var12 = 0;<a name="line.230"></a>
+<FONT color="green">231</FONT>            int var13 = this.random.nextInt(4);<a name="line.231"></a>
+<FONT color="green">232</FONT>            int var14;<a name="line.232"></a>
+<FONT color="green">233</FONT>            double var15;<a name="line.233"></a>
+<FONT color="green">234</FONT>            int var17;<a name="line.234"></a>
+<FONT color="green">235</FONT>            double var18;<a name="line.235"></a>
+<FONT color="green">236</FONT>            int var21;<a name="line.236"></a>
+<FONT color="green">237</FONT>            int var20;<a name="line.237"></a>
+<FONT color="green">238</FONT>            int var23;<a name="line.238"></a>
+<FONT color="green">239</FONT>            int var22;<a name="line.239"></a>
+<FONT color="green">240</FONT>            int var25;<a name="line.240"></a>
+<FONT color="green">241</FONT>            int var24;<a name="line.241"></a>
+<FONT color="green">242</FONT>            int var27;<a name="line.242"></a>
+<FONT color="green">243</FONT>            int var26;<a name="line.243"></a>
+<FONT color="green">244</FONT>            int var28;<a name="line.244"></a>
+<FONT color="green">245</FONT>            double var34;<a name="line.245"></a>
+<FONT color="green">246</FONT>            double var32;<a name="line.246"></a>
+<FONT color="green">247</FONT>    <a name="line.247"></a>
+<FONT color="green">248</FONT>            for (var14 = var6 - var3; var14 &lt;= var6 + var3; ++var14)<a name="line.248"></a>
+<FONT color="green">249</FONT>            {<a name="line.249"></a>
+<FONT color="green">250</FONT>                var15 = (double)var14 + 0.5D - par2Entity.posX;<a name="line.250"></a>
+<FONT color="green">251</FONT>    <a name="line.251"></a>
+<FONT color="green">252</FONT>                for (var17 = var8 - var3; var17 &lt;= var8 + var3; ++var17)<a name="line.252"></a>
+<FONT color="green">253</FONT>                {<a name="line.253"></a>
+<FONT color="green">254</FONT>                    var18 = (double)var17 + 0.5D - par2Entity.posZ;<a name="line.254"></a>
+<FONT color="green">255</FONT>                    label274:<a name="line.255"></a>
+<FONT color="green">256</FONT>    <a name="line.256"></a>
+<FONT color="green">257</FONT>                    for (var20 = par1World.getActualHeight() - 1; var20 &gt;= 0; --var20)<a name="line.257"></a>
+<FONT color="green">258</FONT>                    {<a name="line.258"></a>
+<FONT color="green">259</FONT>                        if (par1World.isAirBlock(var14, var20, var17))<a name="line.259"></a>
+<FONT color="green">260</FONT>                        {<a name="line.260"></a>
+<FONT color="green">261</FONT>                            while (var20 &gt; 0 &amp;&amp; par1World.isAirBlock(var14, var20 - 1, var17))<a name="line.261"></a>
+<FONT color="green">262</FONT>                            {<a name="line.262"></a>
+<FONT color="green">263</FONT>                                --var20;<a name="line.263"></a>
+<FONT color="green">264</FONT>                            }<a name="line.264"></a>
+<FONT color="green">265</FONT>    <a name="line.265"></a>
+<FONT color="green">266</FONT>                            for (var21 = var13; var21 &lt; var13 + 4; ++var21)<a name="line.266"></a>
+<FONT color="green">267</FONT>                            {<a name="line.267"></a>
+<FONT color="green">268</FONT>                                var22 = var21 % 2;<a name="line.268"></a>
+<FONT color="green">269</FONT>                                var23 = 1 - var22;<a name="line.269"></a>
+<FONT color="green">270</FONT>    <a name="line.270"></a>
+<FONT color="green">271</FONT>                                if (var21 % 4 &gt;= 2)<a name="line.271"></a>
+<FONT color="green">272</FONT>                                {<a name="line.272"></a>
+<FONT color="green">273</FONT>                                    var22 = -var22;<a name="line.273"></a>
+<FONT color="green">274</FONT>                                    var23 = -var23;<a name="line.274"></a>
+<FONT color="green">275</FONT>                                }<a name="line.275"></a>
+<FONT color="green">276</FONT>    <a name="line.276"></a>
+<FONT color="green">277</FONT>                                for (var24 = 0; var24 &lt; 3; ++var24)<a name="line.277"></a>
+<FONT color="green">278</FONT>                                {<a name="line.278"></a>
+<FONT color="green">279</FONT>                                    for (var25 = 0; var25 &lt; 4; ++var25)<a name="line.279"></a>
+<FONT color="green">280</FONT>                                    {<a name="line.280"></a>
+<FONT color="green">281</FONT>                                        for (var26 = -1; var26 &lt; 4; ++var26)<a name="line.281"></a>
+<FONT color="green">282</FONT>                                        {<a name="line.282"></a>
+<FONT color="green">283</FONT>                                            var27 = var14 + (var25 - 1) * var22 + var24 * var23;<a name="line.283"></a>
+<FONT color="green">284</FONT>                                            var28 = var20 + var26;<a name="line.284"></a>
+<FONT color="green">285</FONT>                                            int var29 = var17 + (var25 - 1) * var23 - var24 * var22;<a name="line.285"></a>
+<FONT color="green">286</FONT>    <a name="line.286"></a>
+<FONT color="green">287</FONT>                                            if (var26 &lt; 0 &amp;&amp; !par1World.getBlockMaterial(var27, var28, var29).isSolid() || var26 &gt;= 0 &amp;&amp; !par1World.isAirBlock(var27, var28, var29))<a name="line.287"></a>
+<FONT color="green">288</FONT>                                            {<a name="line.288"></a>
+<FONT color="green">289</FONT>                                                continue label274;<a name="line.289"></a>
+<FONT color="green">290</FONT>                                            }<a name="line.290"></a>
+<FONT color="green">291</FONT>                                        }<a name="line.291"></a>
+<FONT color="green">292</FONT>                                    }<a name="line.292"></a>
+<FONT color="green">293</FONT>                                }<a name="line.293"></a>
+<FONT color="green">294</FONT>    <a name="line.294"></a>
+<FONT color="green">295</FONT>                                var32 = (double)var20 + 0.5D - par2Entity.posY;<a name="line.295"></a>
+<FONT color="green">296</FONT>                                var34 = var15 * var15 + var32 * var32 + var18 * var18;<a name="line.296"></a>
+<FONT color="green">297</FONT>    <a name="line.297"></a>
+<FONT color="green">298</FONT>                                if (var4 &lt; 0.0D || var34 &lt; var4)<a name="line.298"></a>
+<FONT color="green">299</FONT>                                {<a name="line.299"></a>
+<FONT color="green">300</FONT>                                    var4 = var34;<a name="line.300"></a>
+<FONT color="green">301</FONT>                                    var9 = var14;<a name="line.301"></a>
+<FONT color="green">302</FONT>                                    var10 = var20;<a name="line.302"></a>
+<FONT color="green">303</FONT>                                    var11 = var17;<a name="line.303"></a>
+<FONT color="green">304</FONT>                                    var12 = var21 % 4;<a name="line.304"></a>
+<FONT color="green">305</FONT>                                }<a name="line.305"></a>
+<FONT color="green">306</FONT>                            }<a name="line.306"></a>
+<FONT color="green">307</FONT>                        }<a name="line.307"></a>
+<FONT color="green">308</FONT>                    }<a name="line.308"></a>
+<FONT color="green">309</FONT>                }<a name="line.309"></a>
+<FONT color="green">310</FONT>            }<a name="line.310"></a>
+<FONT color="green">311</FONT>    <a name="line.311"></a>
+<FONT color="green">312</FONT>            if (var4 &lt; 0.0D)<a name="line.312"></a>
+<FONT color="green">313</FONT>            {<a name="line.313"></a>
+<FONT color="green">314</FONT>                for (var14 = var6 - var3; var14 &lt;= var6 + var3; ++var14)<a name="line.314"></a>
+<FONT color="green">315</FONT>                {<a name="line.315"></a>
+<FONT color="green">316</FONT>                    var15 = (double)var14 + 0.5D - par2Entity.posX;<a name="line.316"></a>
+<FONT color="green">317</FONT>    <a name="line.317"></a>
+<FONT color="green">318</FONT>                    for (var17 = var8 - var3; var17 &lt;= var8 + var3; ++var17)<a name="line.318"></a>
+<FONT color="green">319</FONT>                    {<a name="line.319"></a>
+<FONT color="green">320</FONT>                        var18 = (double)var17 + 0.5D - par2Entity.posZ;<a name="line.320"></a>
+<FONT color="green">321</FONT>                        label222:<a name="line.321"></a>
+<FONT color="green">322</FONT>    <a name="line.322"></a>
+<FONT color="green">323</FONT>                        for (var20 = par1World.getActualHeight() - 1; var20 &gt;= 0; --var20)<a name="line.323"></a>
+<FONT color="green">324</FONT>                        {<a name="line.324"></a>
+<FONT color="green">325</FONT>                            if (par1World.isAirBlock(var14, var20, var17))<a name="line.325"></a>
+<FONT color="green">326</FONT>                            {<a name="line.326"></a>
+<FONT color="green">327</FONT>                                while (var20 &gt; 0 &amp;&amp; par1World.isAirBlock(var14, var20 - 1, var17))<a name="line.327"></a>
+<FONT color="green">328</FONT>                                {<a name="line.328"></a>
+<FONT color="green">329</FONT>                                    --var20;<a name="line.329"></a>
+<FONT color="green">330</FONT>                                }<a name="line.330"></a>
+<FONT color="green">331</FONT>    <a name="line.331"></a>
+<FONT color="green">332</FONT>                                for (var21 = var13; var21 &lt; var13 + 2; ++var21)<a name="line.332"></a>
+<FONT color="green">333</FONT>                                {<a name="line.333"></a>
+<FONT color="green">334</FONT>                                    var22 = var21 % 2;<a name="line.334"></a>
+<FONT color="green">335</FONT>                                    var23 = 1 - var22;<a name="line.335"></a>
+<FONT color="green">336</FONT>    <a name="line.336"></a>
+<FONT color="green">337</FONT>                                    for (var24 = 0; var24 &lt; 4; ++var24)<a name="line.337"></a>
+<FONT color="green">338</FONT>                                    {<a name="line.338"></a>
+<FONT color="green">339</FONT>                                        for (var25 = -1; var25 &lt; 4; ++var25)<a name="line.339"></a>
+<FONT color="green">340</FONT>                                        {<a name="line.340"></a>
+<FONT color="green">341</FONT>                                            var26 = var14 + (var24 - 1) * var22;<a name="line.341"></a>
+<FONT color="green">342</FONT>                                            var27 = var20 + var25;<a name="line.342"></a>
+<FONT color="green">343</FONT>                                            var28 = var17 + (var24 - 1) * var23;<a name="line.343"></a>
+<FONT color="green">344</FONT>    <a name="line.344"></a>
+<FONT color="green">345</FONT>                                            if (var25 &lt; 0 &amp;&amp; !par1World.getBlockMaterial(var26, var27, var28).isSolid() || var25 &gt;= 0 &amp;&amp; !par1World.isAirBlock(var26, var27, var28))<a name="line.345"></a>
+<FONT color="green">346</FONT>                                            {<a name="line.346"></a>
+<FONT color="green">347</FONT>                                                continue label222;<a name="line.347"></a>
+<FONT color="green">348</FONT>                                            }<a name="line.348"></a>
+<FONT color="green">349</FONT>                                        }<a name="line.349"></a>
+<FONT color="green">350</FONT>                                    }<a name="line.350"></a>
+<FONT color="green">351</FONT>    <a name="line.351"></a>
+<FONT color="green">352</FONT>                                    var32 = (double)var20 + 0.5D - par2Entity.posY;<a name="line.352"></a>
+<FONT color="green">353</FONT>                                    var34 = var15 * var15 + var32 * var32 + var18 * var18;<a name="line.353"></a>
+<FONT color="green">354</FONT>    <a name="line.354"></a>
+<FONT color="green">355</FONT>                                    if (var4 &lt; 0.0D || var34 &lt; var4)<a name="line.355"></a>
+<FONT color="green">356</FONT>                                    {<a name="line.356"></a>
+<FONT color="green">357</FONT>                                        var4 = var34;<a name="line.357"></a>
+<FONT color="green">358</FONT>                                        var9 = var14;<a name="line.358"></a>
+<FONT color="green">359</FONT>                                        var10 = var20;<a name="line.359"></a>
+<FONT color="green">360</FONT>                                        var11 = var17;<a name="line.360"></a>
+<FONT color="green">361</FONT>                                        var12 = var21 % 2;<a name="line.361"></a>
+<FONT color="green">362</FONT>                                    }<a name="line.362"></a>
+<FONT color="green">363</FONT>                                }<a name="line.363"></a>
+<FONT color="green">364</FONT>                            }<a name="line.364"></a>
+<FONT color="green">365</FONT>                        }<a name="line.365"></a>
+<FONT color="green">366</FONT>                    }<a name="line.366"></a>
+<FONT color="green">367</FONT>                }<a name="line.367"></a>
+<FONT color="green">368</FONT>            }<a name="line.368"></a>
+<FONT color="green">369</FONT>    <a name="line.369"></a>
+<FONT color="green">370</FONT>            int var30 = var9;<a name="line.370"></a>
+<FONT color="green">371</FONT>            int var16 = var10;<a name="line.371"></a>
+<FONT color="green">372</FONT>            var17 = var11;<a name="line.372"></a>
+<FONT color="green">373</FONT>            int var31 = var12 % 2;<a name="line.373"></a>
+<FONT color="green">374</FONT>            int var19 = 1 - var31;<a name="line.374"></a>
+<FONT color="green">375</FONT>    <a name="line.375"></a>
+<FONT color="green">376</FONT>            if (var12 % 4 &gt;= 2)<a name="line.376"></a>
+<FONT color="green">377</FONT>            {<a name="line.377"></a>
+<FONT color="green">378</FONT>                var31 = -var31;<a name="line.378"></a>
+<FONT color="green">379</FONT>                var19 = -var19;<a name="line.379"></a>
+<FONT color="green">380</FONT>            }<a name="line.380"></a>
+<FONT color="green">381</FONT>    <a name="line.381"></a>
+<FONT color="green">382</FONT>            boolean var33;<a name="line.382"></a>
+<FONT color="green">383</FONT>    <a name="line.383"></a>
+<FONT color="green">384</FONT>            if (var4 &lt; 0.0D)<a name="line.384"></a>
+<FONT color="green">385</FONT>            {<a name="line.385"></a>
+<FONT color="green">386</FONT>                if (var10 &lt; 70)<a name="line.386"></a>
+<FONT color="green">387</FONT>                {<a name="line.387"></a>
+<FONT color="green">388</FONT>                    var10 = 70;<a name="line.388"></a>
+<FONT color="green">389</FONT>                }<a name="line.389"></a>
+<FONT color="green">390</FONT>    <a name="line.390"></a>
+<FONT color="green">391</FONT>                if (var10 &gt; par1World.getActualHeight() - 10)<a name="line.391"></a>
+<FONT color="green">392</FONT>                {<a name="line.392"></a>
+<FONT color="green">393</FONT>                    var10 = par1World.getActualHeight() - 10;<a name="line.393"></a>
+<FONT color="green">394</FONT>                }<a name="line.394"></a>
+<FONT color="green">395</FONT>    <a name="line.395"></a>
+<FONT color="green">396</FONT>                var16 = var10;<a name="line.396"></a>
+<FONT color="green">397</FONT>    <a name="line.397"></a>
+<FONT color="green">398</FONT>                for (var20 = -1; var20 &lt;= 1; ++var20)<a name="line.398"></a>
+<FONT color="green">399</FONT>                {<a name="line.399"></a>
+<FONT color="green">400</FONT>                    for (var21 = 1; var21 &lt; 3; ++var21)<a name="line.400"></a>
+<FONT color="green">401</FONT>                    {<a name="line.401"></a>
+<FONT color="green">402</FONT>                        for (var22 = -1; var22 &lt; 3; ++var22)<a name="line.402"></a>
+<FONT color="green">403</FONT>                        {<a name="line.403"></a>
+<FONT color="green">404</FONT>                            var23 = var30 + (var21 - 1) * var31 + var20 * var19;<a name="line.404"></a>
+<FONT color="green">405</FONT>                            var24 = var16 + var22;<a name="line.405"></a>
+<FONT color="green">406</FONT>                            var25 = var17 + (var21 - 1) * var19 - var20 * var31;<a name="line.406"></a>
+<FONT color="green">407</FONT>                            var33 = var22 &lt; 0;<a name="line.407"></a>
+<FONT color="green">408</FONT>                            par1World.setBlockWithNotify(var23, var24, var25, var33 ? Block.obsidian.blockID : 0);<a name="line.408"></a>
+<FONT color="green">409</FONT>                        }<a name="line.409"></a>
+<FONT color="green">410</FONT>                    }<a name="line.410"></a>
+<FONT color="green">411</FONT>                }<a name="line.411"></a>
+<FONT color="green">412</FONT>            }<a name="line.412"></a>
+<FONT color="green">413</FONT>    <a name="line.413"></a>
+<FONT color="green">414</FONT>            for (var20 = 0; var20 &lt; 4; ++var20)<a name="line.414"></a>
+<FONT color="green">415</FONT>            {<a name="line.415"></a>
+<FONT color="green">416</FONT>                par1World.editingBlocks = true;<a name="line.416"></a>
+<FONT color="green">417</FONT>    <a name="line.417"></a>
+<FONT color="green">418</FONT>                for (var21 = 0; var21 &lt; 4; ++var21)<a name="line.418"></a>
+<FONT color="green">419</FONT>                {<a name="line.419"></a>
+<FONT color="green">420</FONT>                    for (var22 = -1; var22 &lt; 4; ++var22)<a name="line.420"></a>
+<FONT color="green">421</FONT>                    {<a name="line.421"></a>
+<FONT color="green">422</FONT>                        var23 = var30 + (var21 - 1) * var31;<a name="line.422"></a>
+<FONT color="green">423</FONT>                        var24 = var16 + var22;<a name="line.423"></a>
+<FONT color="green">424</FONT>                        var25 = var17 + (var21 - 1) * var19;<a name="line.424"></a>
+<FONT color="green">425</FONT>                        var33 = var21 == 0 || var21 == 3 || var22 == -1 || var22 == 3;<a name="line.425"></a>
+<FONT color="green">426</FONT>                        par1World.setBlockWithNotify(var23, var24, var25, var33 ? Block.obsidian.blockID : Block.portal.blockID);<a name="line.426"></a>
+<FONT color="green">427</FONT>                    }<a name="line.427"></a>
+<FONT color="green">428</FONT>                }<a name="line.428"></a>
+<FONT color="green">429</FONT>    <a name="line.429"></a>
+<FONT color="green">430</FONT>                par1World.editingBlocks = false;<a name="line.430"></a>
+<FONT color="green">431</FONT>    <a name="line.431"></a>
+<FONT color="green">432</FONT>                for (var21 = 0; var21 &lt; 4; ++var21)<a name="line.432"></a>
+<FONT color="green">433</FONT>                {<a name="line.433"></a>
+<FONT color="green">434</FONT>                    for (var22 = -1; var22 &lt; 4; ++var22)<a name="line.434"></a>
+<FONT color="green">435</FONT>                    {<a name="line.435"></a>
+<FONT color="green">436</FONT>                        var23 = var30 + (var21 - 1) * var31;<a name="line.436"></a>
+<FONT color="green">437</FONT>                        var24 = var16 + var22;<a name="line.437"></a>
+<FONT color="green">438</FONT>                        var25 = var17 + (var21 - 1) * var19;<a name="line.438"></a>
+<FONT color="green">439</FONT>                        par1World.notifyBlocksOfNeighborChange(var23, var24, var25, par1World.getBlockId(var23, var24, var25));<a name="line.439"></a>
+<FONT color="green">440</FONT>                    }<a name="line.440"></a>
+<FONT color="green">441</FONT>                }<a name="line.441"></a>
+<FONT color="green">442</FONT>            }<a name="line.442"></a>
+<FONT color="green">443</FONT>    <a name="line.443"></a>
+<FONT color="green">444</FONT>            return true;<a name="line.444"></a>
+<FONT color="green">445</FONT>        }<a name="line.445"></a>
+<FONT color="green">446</FONT>    }<a name="line.446"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

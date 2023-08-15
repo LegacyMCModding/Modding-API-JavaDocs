@@ -1,0 +1,991 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.List;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.Random;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    public class Item<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        private CreativeTabs tabToDisplayOn = null;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** The RNG used by the Item subclasses. */<a name="line.12"></a>
+<FONT color="green">013</FONT>        protected static Random itemRand = new Random();<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        /** A 32000 elements Item array. */<a name="line.15"></a>
+<FONT color="green">016</FONT>        public static Item[] itemsList = new Item[32000];<a name="line.16"></a>
+<FONT color="green">017</FONT>        public static Item shovelSteel = (new ItemSpade(0, EnumToolMaterial.IRON)).setIconCoord(2, 5).setItemName("shovelIron");<a name="line.17"></a>
+<FONT color="green">018</FONT>        public static Item pickaxeSteel = (new ItemPickaxe(1, EnumToolMaterial.IRON)).setIconCoord(2, 6).setItemName("pickaxeIron");<a name="line.18"></a>
+<FONT color="green">019</FONT>        public static Item axeSteel = (new ItemAxe(2, EnumToolMaterial.IRON)).setIconCoord(2, 7).setItemName("hatchetIron");<a name="line.19"></a>
+<FONT color="green">020</FONT>        public static Item flintAndSteel = (new ItemFlintAndSteel(3)).setIconCoord(5, 0).setItemName("flintAndSteel");<a name="line.20"></a>
+<FONT color="green">021</FONT>        public static Item appleRed = (new ItemFood(4, 4, 0.3F, false)).setIconCoord(10, 0).setItemName("apple");<a name="line.21"></a>
+<FONT color="green">022</FONT>        public static Item bow = (new ItemBow(5)).setIconCoord(5, 1).setItemName("bow");<a name="line.22"></a>
+<FONT color="green">023</FONT>        public static Item arrow = (new Item(6)).setIconCoord(5, 2).setItemName("arrow").setCreativeTab(CreativeTabs.tabCombat);<a name="line.23"></a>
+<FONT color="green">024</FONT>        public static Item coal = (new ItemCoal(7)).setIconCoord(7, 0).setItemName("coal");<a name="line.24"></a>
+<FONT color="green">025</FONT>        public static Item diamond = (new Item(8)).setIconCoord(7, 3).setItemName("diamond").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.25"></a>
+<FONT color="green">026</FONT>        public static Item ingotIron = (new Item(9)).setIconCoord(7, 1).setItemName("ingotIron").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.26"></a>
+<FONT color="green">027</FONT>        public static Item ingotGold = (new Item(10)).setIconCoord(7, 2).setItemName("ingotGold").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.27"></a>
+<FONT color="green">028</FONT>        public static Item swordSteel = (new ItemSword(11, EnumToolMaterial.IRON)).setIconCoord(2, 4).setItemName("swordIron");<a name="line.28"></a>
+<FONT color="green">029</FONT>        public static Item swordWood = (new ItemSword(12, EnumToolMaterial.WOOD)).setIconCoord(0, 4).setItemName("swordWood");<a name="line.29"></a>
+<FONT color="green">030</FONT>        public static Item shovelWood = (new ItemSpade(13, EnumToolMaterial.WOOD)).setIconCoord(0, 5).setItemName("shovelWood");<a name="line.30"></a>
+<FONT color="green">031</FONT>        public static Item pickaxeWood = (new ItemPickaxe(14, EnumToolMaterial.WOOD)).setIconCoord(0, 6).setItemName("pickaxeWood");<a name="line.31"></a>
+<FONT color="green">032</FONT>        public static Item axeWood = (new ItemAxe(15, EnumToolMaterial.WOOD)).setIconCoord(0, 7).setItemName("hatchetWood");<a name="line.32"></a>
+<FONT color="green">033</FONT>        public static Item swordStone = (new ItemSword(16, EnumToolMaterial.STONE)).setIconCoord(1, 4).setItemName("swordStone");<a name="line.33"></a>
+<FONT color="green">034</FONT>        public static Item shovelStone = (new ItemSpade(17, EnumToolMaterial.STONE)).setIconCoord(1, 5).setItemName("shovelStone");<a name="line.34"></a>
+<FONT color="green">035</FONT>        public static Item pickaxeStone = (new ItemPickaxe(18, EnumToolMaterial.STONE)).setIconCoord(1, 6).setItemName("pickaxeStone");<a name="line.35"></a>
+<FONT color="green">036</FONT>        public static Item axeStone = (new ItemAxe(19, EnumToolMaterial.STONE)).setIconCoord(1, 7).setItemName("hatchetStone");<a name="line.36"></a>
+<FONT color="green">037</FONT>        public static Item swordDiamond = (new ItemSword(20, EnumToolMaterial.EMERALD)).setIconCoord(3, 4).setItemName("swordDiamond");<a name="line.37"></a>
+<FONT color="green">038</FONT>        public static Item shovelDiamond = (new ItemSpade(21, EnumToolMaterial.EMERALD)).setIconCoord(3, 5).setItemName("shovelDiamond");<a name="line.38"></a>
+<FONT color="green">039</FONT>        public static Item pickaxeDiamond = (new ItemPickaxe(22, EnumToolMaterial.EMERALD)).setIconCoord(3, 6).setItemName("pickaxeDiamond");<a name="line.39"></a>
+<FONT color="green">040</FONT>        public static Item axeDiamond = (new ItemAxe(23, EnumToolMaterial.EMERALD)).setIconCoord(3, 7).setItemName("hatchetDiamond");<a name="line.40"></a>
+<FONT color="green">041</FONT>        public static Item stick = (new Item(24)).setIconCoord(5, 3).setFull3D().setItemName("stick").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.41"></a>
+<FONT color="green">042</FONT>        public static Item bowlEmpty = (new Item(25)).setIconCoord(7, 4).setItemName("bowl").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.42"></a>
+<FONT color="green">043</FONT>        public static Item bowlSoup = (new ItemSoup(26, 6)).setIconCoord(8, 4).setItemName("mushroomStew");<a name="line.43"></a>
+<FONT color="green">044</FONT>        public static Item swordGold = (new ItemSword(27, EnumToolMaterial.GOLD)).setIconCoord(4, 4).setItemName("swordGold");<a name="line.44"></a>
+<FONT color="green">045</FONT>        public static Item shovelGold = (new ItemSpade(28, EnumToolMaterial.GOLD)).setIconCoord(4, 5).setItemName("shovelGold");<a name="line.45"></a>
+<FONT color="green">046</FONT>        public static Item pickaxeGold = (new ItemPickaxe(29, EnumToolMaterial.GOLD)).setIconCoord(4, 6).setItemName("pickaxeGold");<a name="line.46"></a>
+<FONT color="green">047</FONT>        public static Item axeGold = (new ItemAxe(30, EnumToolMaterial.GOLD)).setIconCoord(4, 7).setItemName("hatchetGold");<a name="line.47"></a>
+<FONT color="green">048</FONT>        public static Item silk = (new ItemReed(31, Block.tripWire)).setIconCoord(8, 0).setItemName("string").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.48"></a>
+<FONT color="green">049</FONT>        public static Item feather = (new Item(32)).setIconCoord(8, 1).setItemName("feather").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.49"></a>
+<FONT color="green">050</FONT>        public static Item gunpowder = (new Item(33)).setIconCoord(8, 2).setItemName("sulphur").setPotionEffect(PotionHelper.gunpowderEffect).setCreativeTab(CreativeTabs.tabMaterials);<a name="line.50"></a>
+<FONT color="green">051</FONT>        public static Item hoeWood = (new ItemHoe(34, EnumToolMaterial.WOOD)).setIconCoord(0, 8).setItemName("hoeWood");<a name="line.51"></a>
+<FONT color="green">052</FONT>        public static Item hoeStone = (new ItemHoe(35, EnumToolMaterial.STONE)).setIconCoord(1, 8).setItemName("hoeStone");<a name="line.52"></a>
+<FONT color="green">053</FONT>        public static Item hoeSteel = (new ItemHoe(36, EnumToolMaterial.IRON)).setIconCoord(2, 8).setItemName("hoeIron");<a name="line.53"></a>
+<FONT color="green">054</FONT>        public static Item hoeDiamond = (new ItemHoe(37, EnumToolMaterial.EMERALD)).setIconCoord(3, 8).setItemName("hoeDiamond");<a name="line.54"></a>
+<FONT color="green">055</FONT>        public static Item hoeGold = (new ItemHoe(38, EnumToolMaterial.GOLD)).setIconCoord(4, 8).setItemName("hoeGold");<a name="line.55"></a>
+<FONT color="green">056</FONT>        public static Item seeds = (new ItemSeeds(39, Block.crops.blockID, Block.tilledField.blockID)).setIconCoord(9, 0).setItemName("seeds");<a name="line.56"></a>
+<FONT color="green">057</FONT>        public static Item wheat = (new Item(40)).setIconCoord(9, 1).setItemName("wheat").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.57"></a>
+<FONT color="green">058</FONT>        public static Item bread = (new ItemFood(41, 5, 0.6F, false)).setIconCoord(9, 2).setItemName("bread");<a name="line.58"></a>
+<FONT color="green">059</FONT>        public static Item helmetLeather = (new ItemArmor(42, EnumArmorMaterial.CLOTH, 0, 0)).setIconCoord(0, 0).setItemName("helmetCloth");<a name="line.59"></a>
+<FONT color="green">060</FONT>        public static Item plateLeather = (new ItemArmor(43, EnumArmorMaterial.CLOTH, 0, 1)).setIconCoord(0, 1).setItemName("chestplateCloth");<a name="line.60"></a>
+<FONT color="green">061</FONT>        public static Item legsLeather = (new ItemArmor(44, EnumArmorMaterial.CLOTH, 0, 2)).setIconCoord(0, 2).setItemName("leggingsCloth");<a name="line.61"></a>
+<FONT color="green">062</FONT>        public static Item bootsLeather = (new ItemArmor(45, EnumArmorMaterial.CLOTH, 0, 3)).setIconCoord(0, 3).setItemName("bootsCloth");<a name="line.62"></a>
+<FONT color="green">063</FONT>        public static Item helmetChain = (new ItemArmor(46, EnumArmorMaterial.CHAIN, 1, 0)).setIconCoord(1, 0).setItemName("helmetChain");<a name="line.63"></a>
+<FONT color="green">064</FONT>        public static Item plateChain = (new ItemArmor(47, EnumArmorMaterial.CHAIN, 1, 1)).setIconCoord(1, 1).setItemName("chestplateChain");<a name="line.64"></a>
+<FONT color="green">065</FONT>        public static Item legsChain = (new ItemArmor(48, EnumArmorMaterial.CHAIN, 1, 2)).setIconCoord(1, 2).setItemName("leggingsChain");<a name="line.65"></a>
+<FONT color="green">066</FONT>        public static Item bootsChain = (new ItemArmor(49, EnumArmorMaterial.CHAIN, 1, 3)).setIconCoord(1, 3).setItemName("bootsChain");<a name="line.66"></a>
+<FONT color="green">067</FONT>        public static Item helmetSteel = (new ItemArmor(50, EnumArmorMaterial.IRON, 2, 0)).setIconCoord(2, 0).setItemName("helmetIron");<a name="line.67"></a>
+<FONT color="green">068</FONT>        public static Item plateSteel = (new ItemArmor(51, EnumArmorMaterial.IRON, 2, 1)).setIconCoord(2, 1).setItemName("chestplateIron");<a name="line.68"></a>
+<FONT color="green">069</FONT>        public static Item legsSteel = (new ItemArmor(52, EnumArmorMaterial.IRON, 2, 2)).setIconCoord(2, 2).setItemName("leggingsIron");<a name="line.69"></a>
+<FONT color="green">070</FONT>        public static Item bootsSteel = (new ItemArmor(53, EnumArmorMaterial.IRON, 2, 3)).setIconCoord(2, 3).setItemName("bootsIron");<a name="line.70"></a>
+<FONT color="green">071</FONT>        public static Item helmetDiamond = (new ItemArmor(54, EnumArmorMaterial.DIAMOND, 3, 0)).setIconCoord(3, 0).setItemName("helmetDiamond");<a name="line.71"></a>
+<FONT color="green">072</FONT>        public static Item plateDiamond = (new ItemArmor(55, EnumArmorMaterial.DIAMOND, 3, 1)).setIconCoord(3, 1).setItemName("chestplateDiamond");<a name="line.72"></a>
+<FONT color="green">073</FONT>        public static Item legsDiamond = (new ItemArmor(56, EnumArmorMaterial.DIAMOND, 3, 2)).setIconCoord(3, 2).setItemName("leggingsDiamond");<a name="line.73"></a>
+<FONT color="green">074</FONT>        public static Item bootsDiamond = (new ItemArmor(57, EnumArmorMaterial.DIAMOND, 3, 3)).setIconCoord(3, 3).setItemName("bootsDiamond");<a name="line.74"></a>
+<FONT color="green">075</FONT>        public static Item helmetGold = (new ItemArmor(58, EnumArmorMaterial.GOLD, 4, 0)).setIconCoord(4, 0).setItemName("helmetGold");<a name="line.75"></a>
+<FONT color="green">076</FONT>        public static Item plateGold = (new ItemArmor(59, EnumArmorMaterial.GOLD, 4, 1)).setIconCoord(4, 1).setItemName("chestplateGold");<a name="line.76"></a>
+<FONT color="green">077</FONT>        public static Item legsGold = (new ItemArmor(60, EnumArmorMaterial.GOLD, 4, 2)).setIconCoord(4, 2).setItemName("leggingsGold");<a name="line.77"></a>
+<FONT color="green">078</FONT>        public static Item bootsGold = (new ItemArmor(61, EnumArmorMaterial.GOLD, 4, 3)).setIconCoord(4, 3).setItemName("bootsGold");<a name="line.78"></a>
+<FONT color="green">079</FONT>        public static Item flint = (new Item(62)).setIconCoord(6, 0).setItemName("flint").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.79"></a>
+<FONT color="green">080</FONT>        public static Item porkRaw = (new ItemFood(63, 3, 0.3F, true)).setIconCoord(7, 5).setItemName("porkchopRaw");<a name="line.80"></a>
+<FONT color="green">081</FONT>        public static Item porkCooked = (new ItemFood(64, 8, 0.8F, true)).setIconCoord(8, 5).setItemName("porkchopCooked");<a name="line.81"></a>
+<FONT color="green">082</FONT>        public static Item painting = (new ItemHangingEntity(65, EntityPainting.class)).setIconCoord(10, 1).setItemName("painting");<a name="line.82"></a>
+<FONT color="green">083</FONT>        public static Item appleGold = (new ItemAppleGold(66, 4, 1.2F, false)).setAlwaysEdible().setPotionEffect(Potion.regeneration.id, 5, 0, 1.0F).setIconCoord(11, 0).setItemName("appleGold");<a name="line.83"></a>
+<FONT color="green">084</FONT>        public static Item sign = (new ItemSign(67)).setIconCoord(10, 2).setItemName("sign");<a name="line.84"></a>
+<FONT color="green">085</FONT>        public static Item doorWood = (new ItemDoor(68, Material.wood)).setIconCoord(11, 2).setItemName("doorWood");<a name="line.85"></a>
+<FONT color="green">086</FONT>        public static Item bucketEmpty = (new ItemBucket(69, 0)).setIconCoord(10, 4).setItemName("bucket").setMaxStackSize(16);<a name="line.86"></a>
+<FONT color="green">087</FONT>        public static Item bucketWater = (new ItemBucket(70, Block.waterMoving.blockID)).setIconCoord(11, 4).setItemName("bucketWater").setContainerItem(bucketEmpty);<a name="line.87"></a>
+<FONT color="green">088</FONT>        public static Item bucketLava = (new ItemBucket(71, Block.lavaMoving.blockID)).setIconCoord(12, 4).setItemName("bucketLava").setContainerItem(bucketEmpty);<a name="line.88"></a>
+<FONT color="green">089</FONT>        public static Item minecartEmpty = (new ItemMinecart(72, 0)).setIconCoord(7, 8).setItemName("minecart");<a name="line.89"></a>
+<FONT color="green">090</FONT>        public static Item saddle = (new ItemSaddle(73)).setIconCoord(8, 6).setItemName("saddle");<a name="line.90"></a>
+<FONT color="green">091</FONT>        public static Item doorSteel = (new ItemDoor(74, Material.iron)).setIconCoord(12, 2).setItemName("doorIron");<a name="line.91"></a>
+<FONT color="green">092</FONT>        public static Item redstone = (new ItemRedstone(75)).setIconCoord(8, 3).setItemName("redstone").setPotionEffect(PotionHelper.redstoneEffect);<a name="line.92"></a>
+<FONT color="green">093</FONT>        public static Item snowball = (new ItemSnowball(76)).setIconCoord(14, 0).setItemName("snowball");<a name="line.93"></a>
+<FONT color="green">094</FONT>        public static Item boat = (new ItemBoat(77)).setIconCoord(8, 8).setItemName("boat");<a name="line.94"></a>
+<FONT color="green">095</FONT>        public static Item leather = (new Item(78)).setIconCoord(7, 6).setItemName("leather").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.95"></a>
+<FONT color="green">096</FONT>        public static Item bucketMilk = (new ItemBucketMilk(79)).setIconCoord(13, 4).setItemName("milk").setContainerItem(bucketEmpty);<a name="line.96"></a>
+<FONT color="green">097</FONT>        public static Item brick = (new Item(80)).setIconCoord(6, 1).setItemName("brick").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.97"></a>
+<FONT color="green">098</FONT>        public static Item clay = (new Item(81)).setIconCoord(9, 3).setItemName("clay").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.98"></a>
+<FONT color="green">099</FONT>        public static Item reed = (new ItemReed(82, Block.reed)).setIconCoord(11, 1).setItemName("reeds").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.99"></a>
+<FONT color="green">100</FONT>        public static Item paper = (new Item(83)).setIconCoord(10, 3).setItemName("paper").setCreativeTab(CreativeTabs.tabMisc);<a name="line.100"></a>
+<FONT color="green">101</FONT>        public static Item book = (new Item(84)).setIconCoord(11, 3).setItemName("book").setCreativeTab(CreativeTabs.tabMisc);<a name="line.101"></a>
+<FONT color="green">102</FONT>        public static Item slimeBall = (new Item(85)).setIconCoord(14, 1).setItemName("slimeball").setCreativeTab(CreativeTabs.tabMisc);<a name="line.102"></a>
+<FONT color="green">103</FONT>        public static Item minecartCrate = (new ItemMinecart(86, 1)).setIconCoord(7, 9).setItemName("minecartChest");<a name="line.103"></a>
+<FONT color="green">104</FONT>        public static Item minecartPowered = (new ItemMinecart(87, 2)).setIconCoord(7, 10).setItemName("minecartFurnace");<a name="line.104"></a>
+<FONT color="green">105</FONT>        public static Item egg = (new ItemEgg(88)).setIconCoord(12, 0).setItemName("egg");<a name="line.105"></a>
+<FONT color="green">106</FONT>        public static Item compass = (new Item(89)).setIconCoord(6, 3).setItemName("compass").setCreativeTab(CreativeTabs.tabTools);<a name="line.106"></a>
+<FONT color="green">107</FONT>        public static Item fishingRod = (new ItemFishingRod(90)).setIconCoord(5, 4).setItemName("fishingRod");<a name="line.107"></a>
+<FONT color="green">108</FONT>        public static Item pocketSundial = (new Item(91)).setIconCoord(6, 4).setItemName("clock").setCreativeTab(CreativeTabs.tabTools);<a name="line.108"></a>
+<FONT color="green">109</FONT>        public static Item lightStoneDust = (new Item(92)).setIconCoord(9, 4).setItemName("yellowDust").setPotionEffect(PotionHelper.glowstoneEffect).setCreativeTab(CreativeTabs.tabMaterials);<a name="line.109"></a>
+<FONT color="green">110</FONT>        public static Item fishRaw = (new ItemFood(93, 2, 0.3F, false)).setIconCoord(9, 5).setItemName("fishRaw");<a name="line.110"></a>
+<FONT color="green">111</FONT>        public static Item fishCooked = (new ItemFood(94, 5, 0.6F, false)).setIconCoord(10, 5).setItemName("fishCooked");<a name="line.111"></a>
+<FONT color="green">112</FONT>        public static Item dyePowder = (new ItemDye(95)).setIconCoord(14, 4).setItemName("dyePowder");<a name="line.112"></a>
+<FONT color="green">113</FONT>        public static Item bone = (new Item(96)).setIconCoord(12, 1).setItemName("bone").setFull3D().setCreativeTab(CreativeTabs.tabMisc);<a name="line.113"></a>
+<FONT color="green">114</FONT>        public static Item sugar = (new Item(97)).setIconCoord(13, 0).setItemName("sugar").setPotionEffect(PotionHelper.sugarEffect).setCreativeTab(CreativeTabs.tabMaterials);<a name="line.114"></a>
+<FONT color="green">115</FONT>        public static Item cake = (new ItemReed(98, Block.cake)).setMaxStackSize(1).setIconCoord(13, 1).setItemName("cake").setCreativeTab(CreativeTabs.tabFood);<a name="line.115"></a>
+<FONT color="green">116</FONT>        public static Item bed = (new ItemBed(99)).setMaxStackSize(1).setIconCoord(13, 2).setItemName("bed");<a name="line.116"></a>
+<FONT color="green">117</FONT>        public static Item redstoneRepeater = (new ItemReed(100, Block.redstoneRepeaterIdle)).setIconCoord(6, 5).setItemName("diode").setCreativeTab(CreativeTabs.tabRedstone);<a name="line.117"></a>
+<FONT color="green">118</FONT>        public static Item cookie = (new ItemFood(101, 2, 0.1F, false)).setIconCoord(12, 5).setItemName("cookie");<a name="line.118"></a>
+<FONT color="green">119</FONT>        public static ItemMap map = (ItemMap)(new ItemMap(102)).setIconCoord(12, 3).setItemName("map");<a name="line.119"></a>
+<FONT color="green">120</FONT>    <a name="line.120"></a>
+<FONT color="green">121</FONT>        /**<a name="line.121"></a>
+<FONT color="green">122</FONT>         * Item introduced on 1.7 version, is a shear to cut leaves (you can keep the block) or get wool from sheeps.<a name="line.122"></a>
+<FONT color="green">123</FONT>         */<a name="line.123"></a>
+<FONT color="green">124</FONT>        public static ItemShears shears = (ItemShears)(new ItemShears(103)).setIconCoord(13, 5).setItemName("shears");<a name="line.124"></a>
+<FONT color="green">125</FONT>        public static Item melon = (new ItemFood(104, 2, 0.3F, false)).setIconCoord(13, 6).setItemName("melon");<a name="line.125"></a>
+<FONT color="green">126</FONT>        public static Item pumpkinSeeds = (new ItemSeeds(105, Block.pumpkinStem.blockID, Block.tilledField.blockID)).setIconCoord(13, 3).setItemName("seeds_pumpkin");<a name="line.126"></a>
+<FONT color="green">127</FONT>        public static Item melonSeeds = (new ItemSeeds(106, Block.melonStem.blockID, Block.tilledField.blockID)).setIconCoord(14, 3).setItemName("seeds_melon");<a name="line.127"></a>
+<FONT color="green">128</FONT>        public static Item beefRaw = (new ItemFood(107, 3, 0.3F, true)).setIconCoord(9, 6).setItemName("beefRaw");<a name="line.128"></a>
+<FONT color="green">129</FONT>        public static Item beefCooked = (new ItemFood(108, 8, 0.8F, true)).setIconCoord(10, 6).setItemName("beefCooked");<a name="line.129"></a>
+<FONT color="green">130</FONT>        public static Item chickenRaw = (new ItemFood(109, 2, 0.3F, true)).setPotionEffect(Potion.hunger.id, 30, 0, 0.3F).setIconCoord(9, 7).setItemName("chickenRaw");<a name="line.130"></a>
+<FONT color="green">131</FONT>        public static Item chickenCooked = (new ItemFood(110, 6, 0.6F, true)).setIconCoord(10, 7).setItemName("chickenCooked");<a name="line.131"></a>
+<FONT color="green">132</FONT>        public static Item rottenFlesh = (new ItemFood(111, 4, 0.1F, true)).setPotionEffect(Potion.hunger.id, 30, 0, 0.8F).setIconCoord(11, 5).setItemName("rottenFlesh");<a name="line.132"></a>
+<FONT color="green">133</FONT>        public static Item enderPearl = (new ItemEnderPearl(112)).setIconCoord(11, 6).setItemName("enderPearl");<a name="line.133"></a>
+<FONT color="green">134</FONT>        public static Item blazeRod = (new Item(113)).setIconCoord(12, 6).setItemName("blazeRod").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.134"></a>
+<FONT color="green">135</FONT>        public static Item ghastTear = (new Item(114)).setIconCoord(11, 7).setItemName("ghastTear").setPotionEffect(PotionHelper.ghastTearEffect).setCreativeTab(CreativeTabs.tabBrewing);<a name="line.135"></a>
+<FONT color="green">136</FONT>        public static Item goldNugget = (new Item(115)).setIconCoord(12, 7).setItemName("goldNugget").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.136"></a>
+<FONT color="green">137</FONT>        public static Item netherStalkSeeds = (new ItemSeeds(116, Block.netherStalk.blockID, Block.slowSand.blockID)).setIconCoord(13, 7).setItemName("netherStalkSeeds").setPotionEffect("+4");<a name="line.137"></a>
+<FONT color="green">138</FONT>        public static ItemPotion potion = (ItemPotion)(new ItemPotion(117)).setIconCoord(13, 8).setItemName("potion");<a name="line.138"></a>
+<FONT color="green">139</FONT>        public static Item glassBottle = (new ItemGlassBottle(118)).setIconCoord(12, 8).setItemName("glassBottle");<a name="line.139"></a>
+<FONT color="green">140</FONT>        public static Item spiderEye = (new ItemFood(119, 2, 0.8F, false)).setPotionEffect(Potion.poison.id, 5, 0, 1.0F).setIconCoord(11, 8).setItemName("spiderEye").setPotionEffect(PotionHelper.spiderEyeEffect);<a name="line.140"></a>
+<FONT color="green">141</FONT>        public static Item fermentedSpiderEye = (new Item(120)).setIconCoord(10, 8).setItemName("fermentedSpiderEye").setPotionEffect(PotionHelper.fermentedSpiderEyeEffect).setCreativeTab(CreativeTabs.tabBrewing);<a name="line.141"></a>
+<FONT color="green">142</FONT>        public static Item blazePowder = (new Item(121)).setIconCoord(13, 9).setItemName("blazePowder").setPotionEffect(PotionHelper.blazePowderEffect).setCreativeTab(CreativeTabs.tabBrewing);<a name="line.142"></a>
+<FONT color="green">143</FONT>        public static Item magmaCream = (new Item(122)).setIconCoord(13, 10).setItemName("magmaCream").setPotionEffect(PotionHelper.magmaCreamEffect).setCreativeTab(CreativeTabs.tabBrewing);<a name="line.143"></a>
+<FONT color="green">144</FONT>        public static Item brewingStand = (new ItemReed(123, Block.brewingStand)).setIconCoord(12, 10).setItemName("brewingStand").setCreativeTab(CreativeTabs.tabBrewing);<a name="line.144"></a>
+<FONT color="green">145</FONT>        public static Item cauldron = (new ItemReed(124, Block.cauldron)).setIconCoord(12, 9).setItemName("cauldron").setCreativeTab(CreativeTabs.tabBrewing);<a name="line.145"></a>
+<FONT color="green">146</FONT>        public static Item eyeOfEnder = (new ItemEnderEye(125)).setIconCoord(11, 9).setItemName("eyeOfEnder");<a name="line.146"></a>
+<FONT color="green">147</FONT>        public static Item speckledMelon = (new Item(126)).setIconCoord(9, 8).setItemName("speckledMelon").setPotionEffect(PotionHelper.speckledMelonEffect).setCreativeTab(CreativeTabs.tabBrewing);<a name="line.147"></a>
+<FONT color="green">148</FONT>        public static Item monsterPlacer = (new ItemMonsterPlacer(127)).setIconCoord(9, 9).setItemName("monsterPlacer");<a name="line.148"></a>
+<FONT color="green">149</FONT>    <a name="line.149"></a>
+<FONT color="green">150</FONT>        /**<a name="line.150"></a>
+<FONT color="green">151</FONT>         * Bottle o' Enchanting. Drops between 1 and 3 experience orbs when thrown.<a name="line.151"></a>
+<FONT color="green">152</FONT>         */<a name="line.152"></a>
+<FONT color="green">153</FONT>        public static Item expBottle = (new ItemExpBottle(128)).setIconCoord(11, 10).setItemName("expBottle");<a name="line.153"></a>
+<FONT color="green">154</FONT>    <a name="line.154"></a>
+<FONT color="green">155</FONT>        /**<a name="line.155"></a>
+<FONT color="green">156</FONT>         * Fire Charge. When used in a dispenser it fires a fireball similiar to a Ghast's.<a name="line.156"></a>
+<FONT color="green">157</FONT>         */<a name="line.157"></a>
+<FONT color="green">158</FONT>        public static Item fireballCharge = (new ItemFireball(129)).setIconCoord(14, 2).setItemName("fireball");<a name="line.158"></a>
+<FONT color="green">159</FONT>        public static Item writableBook = (new ItemWritableBook(130)).setIconCoord(11, 11).setItemName("writingBook").setCreativeTab(CreativeTabs.tabMisc);<a name="line.159"></a>
+<FONT color="green">160</FONT>        public static Item writtenBook = (new ItemEditableBook(131)).setIconCoord(12, 11).setItemName("writtenBook");<a name="line.160"></a>
+<FONT color="green">161</FONT>        public static Item emerald = (new Item(132)).setIconCoord(10, 11).setItemName("emerald").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.161"></a>
+<FONT color="green">162</FONT>        public static Item field_82802_bI = (new ItemHangingEntity(133, EntityItemFrame.class)).setIconCoord(14, 12).setItemName("frame");<a name="line.162"></a>
+<FONT color="green">163</FONT>        public static Item field_82796_bJ = (new ItemReed(134, Block.field_82516_cf)).setIconCoord(13, 11).setItemName("flowerPot").setCreativeTab(CreativeTabs.tabDecorations);<a name="line.163"></a>
+<FONT color="green">164</FONT>        public static Item field_82797_bK = (new ItemSeedFood(135, 4, 0.6F, Block.field_82513_cg.blockID, Block.tilledField.blockID)).setIconCoord(8, 7).setItemName("carrots");<a name="line.164"></a>
+<FONT color="green">165</FONT>        public static Item field_82794_bL = (new ItemSeedFood(136, 1, 0.3F, Block.field_82514_ch.blockID, Block.tilledField.blockID)).setIconCoord(7, 7).setItemName("potato");<a name="line.165"></a>
+<FONT color="green">166</FONT>        public static Item field_82795_bM = (new ItemFood(137, 6, 0.6F, false)).setIconCoord(6, 7).setItemName("potatoBaked");<a name="line.166"></a>
+<FONT color="green">167</FONT>        public static Item field_82800_bN = (new ItemFood(138, 2, 0.3F, false)).setPotionEffect(Potion.poison.id, 5, 0, 0.6F).setIconCoord(6, 8).setItemName("potatoPoisonous");<a name="line.167"></a>
+<FONT color="green">168</FONT>        public static ItemEmptyMap field_82801_bO = (ItemEmptyMap)(new ItemEmptyMap(139)).setIconCoord(13, 12).setItemName("emptyMap");<a name="line.168"></a>
+<FONT color="green">169</FONT>        public static Item field_82798_bP = (new ItemFood(140, 6, 1.2F, false)).setIconCoord(6, 9).setItemName("carrotGolden").setPotionEffect(PotionHelper.field_82818_l);<a name="line.169"></a>
+<FONT color="green">170</FONT>        public static Item field_82799_bQ = (new ItemSkull(141)).setItemName("skull");<a name="line.170"></a>
+<FONT color="green">171</FONT>        public static Item field_82793_bR = (new ItemCarrotOnAStick(142)).setIconCoord(6, 6).setItemName("carrotOnAStick");<a name="line.171"></a>
+<FONT color="green">172</FONT>        public static Item field_82792_bS = (new ItemSimpleFoiled(143)).setIconCoord(9, 11).setItemName("netherStar").setCreativeTab(CreativeTabs.tabMaterials);<a name="line.172"></a>
+<FONT color="green">173</FONT>        public static Item field_82791_bT = (new ItemFood(144, 8, 0.3F, false)).setIconCoord(8, 9).setItemName("pumpkinPie").setCreativeTab(CreativeTabs.tabFood);<a name="line.173"></a>
+<FONT color="green">174</FONT>        public static Item record13 = (new ItemRecord(2000, "13")).setIconCoord(0, 15).setItemName("record");<a name="line.174"></a>
+<FONT color="green">175</FONT>        public static Item recordCat = (new ItemRecord(2001, "cat")).setIconCoord(1, 15).setItemName("record");<a name="line.175"></a>
+<FONT color="green">176</FONT>        public static Item recordBlocks = (new ItemRecord(2002, "blocks")).setIconCoord(2, 15).setItemName("record");<a name="line.176"></a>
+<FONT color="green">177</FONT>        public static Item recordChirp = (new ItemRecord(2003, "chirp")).setIconCoord(3, 15).setItemName("record");<a name="line.177"></a>
+<FONT color="green">178</FONT>        public static Item recordFar = (new ItemRecord(2004, "far")).setIconCoord(4, 15).setItemName("record");<a name="line.178"></a>
+<FONT color="green">179</FONT>        public static Item recordMall = (new ItemRecord(2005, "mall")).setIconCoord(5, 15).setItemName("record");<a name="line.179"></a>
+<FONT color="green">180</FONT>        public static Item recordMellohi = (new ItemRecord(2006, "mellohi")).setIconCoord(6, 15).setItemName("record");<a name="line.180"></a>
+<FONT color="green">181</FONT>        public static Item recordStal = (new ItemRecord(2007, "stal")).setIconCoord(7, 15).setItemName("record");<a name="line.181"></a>
+<FONT color="green">182</FONT>        public static Item recordStrad = (new ItemRecord(2008, "strad")).setIconCoord(8, 15).setItemName("record");<a name="line.182"></a>
+<FONT color="green">183</FONT>        public static Item recordWard = (new ItemRecord(2009, "ward")).setIconCoord(9, 15).setItemName("record");<a name="line.183"></a>
+<FONT color="green">184</FONT>        public static Item record11 = (new ItemRecord(2010, "11")).setIconCoord(10, 15).setItemName("record");<a name="line.184"></a>
+<FONT color="green">185</FONT>    <a name="line.185"></a>
+<FONT color="green">186</FONT>        /** Item index + 256 */<a name="line.186"></a>
+<FONT color="green">187</FONT>        public final int shiftedIndex;<a name="line.187"></a>
+<FONT color="green">188</FONT>    <a name="line.188"></a>
+<FONT color="green">189</FONT>        /** Maximum size of the stack. */<a name="line.189"></a>
+<FONT color="green">190</FONT>        protected int maxStackSize = 64;<a name="line.190"></a>
+<FONT color="green">191</FONT>    <a name="line.191"></a>
+<FONT color="green">192</FONT>        /** Maximum damage an item can handle. */<a name="line.192"></a>
+<FONT color="green">193</FONT>        private int maxDamage = 0;<a name="line.193"></a>
+<FONT color="green">194</FONT>    <a name="line.194"></a>
+<FONT color="green">195</FONT>        /** Icon index in the icons table. */<a name="line.195"></a>
+<FONT color="green">196</FONT>        protected int iconIndex;<a name="line.196"></a>
+<FONT color="green">197</FONT>    <a name="line.197"></a>
+<FONT color="green">198</FONT>        /** If true, render the object in full 3D, like weapons and tools. */<a name="line.198"></a>
+<FONT color="green">199</FONT>        protected boolean bFull3D = false;<a name="line.199"></a>
+<FONT color="green">200</FONT>    <a name="line.200"></a>
+<FONT color="green">201</FONT>        /**<a name="line.201"></a>
+<FONT color="green">202</FONT>         * Some items (like dyes) have multiple subtypes on same item, this is field define this behavior<a name="line.202"></a>
+<FONT color="green">203</FONT>         */<a name="line.203"></a>
+<FONT color="green">204</FONT>        protected boolean hasSubtypes = false;<a name="line.204"></a>
+<FONT color="green">205</FONT>        private Item containerItem = null;<a name="line.205"></a>
+<FONT color="green">206</FONT>        private String potionEffect = null;<a name="line.206"></a>
+<FONT color="green">207</FONT>    <a name="line.207"></a>
+<FONT color="green">208</FONT>        /** full name of item from language file */<a name="line.208"></a>
+<FONT color="green">209</FONT>        private String itemName;<a name="line.209"></a>
+<FONT color="green">210</FONT>    <a name="line.210"></a>
+<FONT color="green">211</FONT>        /** FORGE: To disable repair recipes. */<a name="line.211"></a>
+<FONT color="green">212</FONT>        protected boolean canRepair = true;<a name="line.212"></a>
+<FONT color="green">213</FONT>    <a name="line.213"></a>
+<FONT color="green">214</FONT>        protected Item(int par1)<a name="line.214"></a>
+<FONT color="green">215</FONT>        {<a name="line.215"></a>
+<FONT color="green">216</FONT>            this.shiftedIndex = 256 + par1;<a name="line.216"></a>
+<FONT color="green">217</FONT>    <a name="line.217"></a>
+<FONT color="green">218</FONT>            if (itemsList[256 + par1] != null)<a name="line.218"></a>
+<FONT color="green">219</FONT>            {<a name="line.219"></a>
+<FONT color="green">220</FONT>                System.out.println("CONFLICT @ " + par1 + " item slot already occupied by " + itemsList[256 + par1] + " while adding " + this);<a name="line.220"></a>
+<FONT color="green">221</FONT>            }<a name="line.221"></a>
+<FONT color="green">222</FONT>    <a name="line.222"></a>
+<FONT color="green">223</FONT>            itemsList[256 + par1] = this;<a name="line.223"></a>
+<FONT color="green">224</FONT>    <a name="line.224"></a>
+<FONT color="green">225</FONT>            if (!(this instanceof ItemBlock))<a name="line.225"></a>
+<FONT color="green">226</FONT>            {<a name="line.226"></a>
+<FONT color="green">227</FONT>                isDefaultTexture = "/gui/items.png".equals(getTextureFile());<a name="line.227"></a>
+<FONT color="green">228</FONT>            }<a name="line.228"></a>
+<FONT color="green">229</FONT>        }<a name="line.229"></a>
+<FONT color="green">230</FONT>    <a name="line.230"></a>
+<FONT color="green">231</FONT>        /**<a name="line.231"></a>
+<FONT color="green">232</FONT>         * Sets the icon index for this item. Returns the item.<a name="line.232"></a>
+<FONT color="green">233</FONT>         */<a name="line.233"></a>
+<FONT color="green">234</FONT>        public Item setIconIndex(int par1)<a name="line.234"></a>
+<FONT color="green">235</FONT>        {<a name="line.235"></a>
+<FONT color="green">236</FONT>            this.iconIndex = par1;<a name="line.236"></a>
+<FONT color="green">237</FONT>            return this;<a name="line.237"></a>
+<FONT color="green">238</FONT>        }<a name="line.238"></a>
+<FONT color="green">239</FONT>    <a name="line.239"></a>
+<FONT color="green">240</FONT>        public Item setMaxStackSize(int par1)<a name="line.240"></a>
+<FONT color="green">241</FONT>        {<a name="line.241"></a>
+<FONT color="green">242</FONT>            this.maxStackSize = par1;<a name="line.242"></a>
+<FONT color="green">243</FONT>            return this;<a name="line.243"></a>
+<FONT color="green">244</FONT>        }<a name="line.244"></a>
+<FONT color="green">245</FONT>    <a name="line.245"></a>
+<FONT color="green">246</FONT>        public Item setIconCoord(int par1, int par2)<a name="line.246"></a>
+<FONT color="green">247</FONT>        {<a name="line.247"></a>
+<FONT color="green">248</FONT>            this.iconIndex = par1 + par2 * 16;<a name="line.248"></a>
+<FONT color="green">249</FONT>            return this;<a name="line.249"></a>
+<FONT color="green">250</FONT>        }<a name="line.250"></a>
+<FONT color="green">251</FONT>    <a name="line.251"></a>
+<FONT color="green">252</FONT>        @SideOnly(Side.CLIENT)<a name="line.252"></a>
+<FONT color="green">253</FONT>    <a name="line.253"></a>
+<FONT color="green">254</FONT>        /**<a name="line.254"></a>
+<FONT color="green">255</FONT>         * Gets an icon index based on an item's damage value<a name="line.255"></a>
+<FONT color="green">256</FONT>         */<a name="line.256"></a>
+<FONT color="green">257</FONT>        public int getIconFromDamage(int par1)<a name="line.257"></a>
+<FONT color="green">258</FONT>        {<a name="line.258"></a>
+<FONT color="green">259</FONT>            return this.iconIndex;<a name="line.259"></a>
+<FONT color="green">260</FONT>        }<a name="line.260"></a>
+<FONT color="green">261</FONT>    <a name="line.261"></a>
+<FONT color="green">262</FONT>        @SideOnly(Side.CLIENT)<a name="line.262"></a>
+<FONT color="green">263</FONT>    <a name="line.263"></a>
+<FONT color="green">264</FONT>        /**<a name="line.264"></a>
+<FONT color="green">265</FONT>         * Returns the icon index of the stack given as argument.<a name="line.265"></a>
+<FONT color="green">266</FONT>         */<a name="line.266"></a>
+<FONT color="green">267</FONT>        public final int getIconIndex(ItemStack par1ItemStack)<a name="line.267"></a>
+<FONT color="green">268</FONT>        {<a name="line.268"></a>
+<FONT color="green">269</FONT>            return this.getIconFromDamage(par1ItemStack.getItemDamage());<a name="line.269"></a>
+<FONT color="green">270</FONT>        }<a name="line.270"></a>
+<FONT color="green">271</FONT>    <a name="line.271"></a>
+<FONT color="green">272</FONT>        /**<a name="line.272"></a>
+<FONT color="green">273</FONT>         * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return<a name="line.273"></a>
+<FONT color="green">274</FONT>         * True if something happen and false if it don't. This is for ITEMS, not BLOCKS<a name="line.274"></a>
+<FONT color="green">275</FONT>         */<a name="line.275"></a>
+<FONT color="green">276</FONT>        public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)<a name="line.276"></a>
+<FONT color="green">277</FONT>        {<a name="line.277"></a>
+<FONT color="green">278</FONT>            return false;<a name="line.278"></a>
+<FONT color="green">279</FONT>        }<a name="line.279"></a>
+<FONT color="green">280</FONT>    <a name="line.280"></a>
+<FONT color="green">281</FONT>        /**<a name="line.281"></a>
+<FONT color="green">282</FONT>         * Returns the strength of the stack against a given block. 1.0F base, (Quality+1)*2 if correct blocktype, 1.5F if<a name="line.282"></a>
+<FONT color="green">283</FONT>         * sword<a name="line.283"></a>
+<FONT color="green">284</FONT>         */<a name="line.284"></a>
+<FONT color="green">285</FONT>        public float getStrVsBlock(ItemStack par1ItemStack, Block par2Block)<a name="line.285"></a>
+<FONT color="green">286</FONT>        {<a name="line.286"></a>
+<FONT color="green">287</FONT>            return 1.0F;<a name="line.287"></a>
+<FONT color="green">288</FONT>        }<a name="line.288"></a>
+<FONT color="green">289</FONT>    <a name="line.289"></a>
+<FONT color="green">290</FONT>        /**<a name="line.290"></a>
+<FONT color="green">291</FONT>         * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer<a name="line.291"></a>
+<FONT color="green">292</FONT>         */<a name="line.292"></a>
+<FONT color="green">293</FONT>        public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer)<a name="line.293"></a>
+<FONT color="green">294</FONT>        {<a name="line.294"></a>
+<FONT color="green">295</FONT>            return par1ItemStack;<a name="line.295"></a>
+<FONT color="green">296</FONT>        }<a name="line.296"></a>
+<FONT color="green">297</FONT>    <a name="line.297"></a>
+<FONT color="green">298</FONT>        public ItemStack onFoodEaten(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer)<a name="line.298"></a>
+<FONT color="green">299</FONT>        {<a name="line.299"></a>
+<FONT color="green">300</FONT>            return par1ItemStack;<a name="line.300"></a>
+<FONT color="green">301</FONT>        }<a name="line.301"></a>
+<FONT color="green">302</FONT>    <a name="line.302"></a>
+<FONT color="green">303</FONT>        /**<a name="line.303"></a>
+<FONT color="green">304</FONT>         * Returns the maximum size of the stack for a specific item. *Isn't this more a Set than a Get?*<a name="line.304"></a>
+<FONT color="green">305</FONT>         */<a name="line.305"></a>
+<FONT color="green">306</FONT>        public int getItemStackLimit()<a name="line.306"></a>
+<FONT color="green">307</FONT>        {<a name="line.307"></a>
+<FONT color="green">308</FONT>            return this.maxStackSize;<a name="line.308"></a>
+<FONT color="green">309</FONT>        }<a name="line.309"></a>
+<FONT color="green">310</FONT>    <a name="line.310"></a>
+<FONT color="green">311</FONT>        /**<a name="line.311"></a>
+<FONT color="green">312</FONT>         * Returns the metadata of the block which this Item (ItemBlock) can place<a name="line.312"></a>
+<FONT color="green">313</FONT>         */<a name="line.313"></a>
+<FONT color="green">314</FONT>        public int getMetadata(int par1)<a name="line.314"></a>
+<FONT color="green">315</FONT>        {<a name="line.315"></a>
+<FONT color="green">316</FONT>            return 0;<a name="line.316"></a>
+<FONT color="green">317</FONT>        }<a name="line.317"></a>
+<FONT color="green">318</FONT>    <a name="line.318"></a>
+<FONT color="green">319</FONT>        public boolean getHasSubtypes()<a name="line.319"></a>
+<FONT color="green">320</FONT>        {<a name="line.320"></a>
+<FONT color="green">321</FONT>            return this.hasSubtypes;<a name="line.321"></a>
+<FONT color="green">322</FONT>        }<a name="line.322"></a>
+<FONT color="green">323</FONT>    <a name="line.323"></a>
+<FONT color="green">324</FONT>        protected Item setHasSubtypes(boolean par1)<a name="line.324"></a>
+<FONT color="green">325</FONT>        {<a name="line.325"></a>
+<FONT color="green">326</FONT>            this.hasSubtypes = par1;<a name="line.326"></a>
+<FONT color="green">327</FONT>            return this;<a name="line.327"></a>
+<FONT color="green">328</FONT>        }<a name="line.328"></a>
+<FONT color="green">329</FONT>    <a name="line.329"></a>
+<FONT color="green">330</FONT>        /**<a name="line.330"></a>
+<FONT color="green">331</FONT>         * Returns the maximum damage an item can take.<a name="line.331"></a>
+<FONT color="green">332</FONT>         */<a name="line.332"></a>
+<FONT color="green">333</FONT>        public int getMaxDamage()<a name="line.333"></a>
+<FONT color="green">334</FONT>        {<a name="line.334"></a>
+<FONT color="green">335</FONT>            return this.maxDamage;<a name="line.335"></a>
+<FONT color="green">336</FONT>        }<a name="line.336"></a>
+<FONT color="green">337</FONT>    <a name="line.337"></a>
+<FONT color="green">338</FONT>        /**<a name="line.338"></a>
+<FONT color="green">339</FONT>         * set max damage of an Item<a name="line.339"></a>
+<FONT color="green">340</FONT>         */<a name="line.340"></a>
+<FONT color="green">341</FONT>        public Item setMaxDamage(int par1)<a name="line.341"></a>
+<FONT color="green">342</FONT>        {<a name="line.342"></a>
+<FONT color="green">343</FONT>            this.maxDamage = par1;<a name="line.343"></a>
+<FONT color="green">344</FONT>            return this;<a name="line.344"></a>
+<FONT color="green">345</FONT>        }<a name="line.345"></a>
+<FONT color="green">346</FONT>    <a name="line.346"></a>
+<FONT color="green">347</FONT>        public boolean isDamageable()<a name="line.347"></a>
+<FONT color="green">348</FONT>        {<a name="line.348"></a>
+<FONT color="green">349</FONT>            return this.maxDamage &gt; 0 &amp;&amp; !this.hasSubtypes;<a name="line.349"></a>
+<FONT color="green">350</FONT>        }<a name="line.350"></a>
+<FONT color="green">351</FONT>    <a name="line.351"></a>
+<FONT color="green">352</FONT>        /**<a name="line.352"></a>
+<FONT color="green">353</FONT>         * Current implementations of this method in child classes do not use the entry argument beside ev. They just raise<a name="line.353"></a>
+<FONT color="green">354</FONT>         * the damage on the stack.<a name="line.354"></a>
+<FONT color="green">355</FONT>         */<a name="line.355"></a>
+<FONT color="green">356</FONT>        public boolean hitEntity(ItemStack par1ItemStack, EntityLiving par2EntityLiving, EntityLiving par3EntityLiving)<a name="line.356"></a>
+<FONT color="green">357</FONT>        {<a name="line.357"></a>
+<FONT color="green">358</FONT>            return false;<a name="line.358"></a>
+<FONT color="green">359</FONT>        }<a name="line.359"></a>
+<FONT color="green">360</FONT>    <a name="line.360"></a>
+<FONT color="green">361</FONT>        public boolean onBlockDestroyed(ItemStack par1ItemStack, World par2World, int par3, int par4, int par5, int par6, EntityLiving par7EntityLiving)<a name="line.361"></a>
+<FONT color="green">362</FONT>        {<a name="line.362"></a>
+<FONT color="green">363</FONT>            return false;<a name="line.363"></a>
+<FONT color="green">364</FONT>        }<a name="line.364"></a>
+<FONT color="green">365</FONT>    <a name="line.365"></a>
+<FONT color="green">366</FONT>        /**<a name="line.366"></a>
+<FONT color="green">367</FONT>         * Returns the damage against a given entity.<a name="line.367"></a>
+<FONT color="green">368</FONT>         */<a name="line.368"></a>
+<FONT color="green">369</FONT>        public int getDamageVsEntity(Entity par1Entity)<a name="line.369"></a>
+<FONT color="green">370</FONT>        {<a name="line.370"></a>
+<FONT color="green">371</FONT>            return 1;<a name="line.371"></a>
+<FONT color="green">372</FONT>        }<a name="line.372"></a>
+<FONT color="green">373</FONT>    <a name="line.373"></a>
+<FONT color="green">374</FONT>        /**<a name="line.374"></a>
+<FONT color="green">375</FONT>         * Returns if the item (tool) can harvest results from the block type.<a name="line.375"></a>
+<FONT color="green">376</FONT>         */<a name="line.376"></a>
+<FONT color="green">377</FONT>        public boolean canHarvestBlock(Block par1Block)<a name="line.377"></a>
+<FONT color="green">378</FONT>        {<a name="line.378"></a>
+<FONT color="green">379</FONT>            return false;<a name="line.379"></a>
+<FONT color="green">380</FONT>        }<a name="line.380"></a>
+<FONT color="green">381</FONT>    <a name="line.381"></a>
+<FONT color="green">382</FONT>        /**<a name="line.382"></a>
+<FONT color="green">383</FONT>         * dye sheep, place saddles, etc ...<a name="line.383"></a>
+<FONT color="green">384</FONT>         */<a name="line.384"></a>
+<FONT color="green">385</FONT>        public boolean itemInteractionForEntity(ItemStack par1ItemStack, EntityLiving par2EntityLiving)<a name="line.385"></a>
+<FONT color="green">386</FONT>        {<a name="line.386"></a>
+<FONT color="green">387</FONT>            return false;<a name="line.387"></a>
+<FONT color="green">388</FONT>        }<a name="line.388"></a>
+<FONT color="green">389</FONT>    <a name="line.389"></a>
+<FONT color="green">390</FONT>        /**<a name="line.390"></a>
+<FONT color="green">391</FONT>         * Sets bFull3D to True and return the object.<a name="line.391"></a>
+<FONT color="green">392</FONT>         */<a name="line.392"></a>
+<FONT color="green">393</FONT>        public Item setFull3D()<a name="line.393"></a>
+<FONT color="green">394</FONT>        {<a name="line.394"></a>
+<FONT color="green">395</FONT>            this.bFull3D = true;<a name="line.395"></a>
+<FONT color="green">396</FONT>            return this;<a name="line.396"></a>
+<FONT color="green">397</FONT>        }<a name="line.397"></a>
+<FONT color="green">398</FONT>    <a name="line.398"></a>
+<FONT color="green">399</FONT>        @SideOnly(Side.CLIENT)<a name="line.399"></a>
+<FONT color="green">400</FONT>    <a name="line.400"></a>
+<FONT color="green">401</FONT>        /**<a name="line.401"></a>
+<FONT color="green">402</FONT>         * Returns True is the item is renderer in full 3D when hold.<a name="line.402"></a>
+<FONT color="green">403</FONT>         */<a name="line.403"></a>
+<FONT color="green">404</FONT>        public boolean isFull3D()<a name="line.404"></a>
+<FONT color="green">405</FONT>        {<a name="line.405"></a>
+<FONT color="green">406</FONT>            return this.bFull3D;<a name="line.406"></a>
+<FONT color="green">407</FONT>        }<a name="line.407"></a>
+<FONT color="green">408</FONT>    <a name="line.408"></a>
+<FONT color="green">409</FONT>        @SideOnly(Side.CLIENT)<a name="line.409"></a>
+<FONT color="green">410</FONT>    <a name="line.410"></a>
+<FONT color="green">411</FONT>        /**<a name="line.411"></a>
+<FONT color="green">412</FONT>         * Returns true if this item should be rotated by 180 degrees around the Y axis when being held in an entities<a name="line.412"></a>
+<FONT color="green">413</FONT>         * hands.<a name="line.413"></a>
+<FONT color="green">414</FONT>         */<a name="line.414"></a>
+<FONT color="green">415</FONT>        public boolean shouldRotateAroundWhenRendering()<a name="line.415"></a>
+<FONT color="green">416</FONT>        {<a name="line.416"></a>
+<FONT color="green">417</FONT>            return false;<a name="line.417"></a>
+<FONT color="green">418</FONT>        }<a name="line.418"></a>
+<FONT color="green">419</FONT>    <a name="line.419"></a>
+<FONT color="green">420</FONT>        /**<a name="line.420"></a>
+<FONT color="green">421</FONT>         * set name of item from language file<a name="line.421"></a>
+<FONT color="green">422</FONT>         */<a name="line.422"></a>
+<FONT color="green">423</FONT>        public Item setItemName(String par1Str)<a name="line.423"></a>
+<FONT color="green">424</FONT>        {<a name="line.424"></a>
+<FONT color="green">425</FONT>            this.itemName = "item." + par1Str;<a name="line.425"></a>
+<FONT color="green">426</FONT>            return this;<a name="line.426"></a>
+<FONT color="green">427</FONT>        }<a name="line.427"></a>
+<FONT color="green">428</FONT>    <a name="line.428"></a>
+<FONT color="green">429</FONT>        public String getLocalItemName(ItemStack par1ItemStack)<a name="line.429"></a>
+<FONT color="green">430</FONT>        {<a name="line.430"></a>
+<FONT color="green">431</FONT>            String var2 = this.getItemNameIS(par1ItemStack);<a name="line.431"></a>
+<FONT color="green">432</FONT>            return var2 == null ? "" : StatCollector.translateToLocal(var2);<a name="line.432"></a>
+<FONT color="green">433</FONT>        }<a name="line.433"></a>
+<FONT color="green">434</FONT>    <a name="line.434"></a>
+<FONT color="green">435</FONT>        public String getItemName()<a name="line.435"></a>
+<FONT color="green">436</FONT>        {<a name="line.436"></a>
+<FONT color="green">437</FONT>            return this.itemName;<a name="line.437"></a>
+<FONT color="green">438</FONT>        }<a name="line.438"></a>
+<FONT color="green">439</FONT>    <a name="line.439"></a>
+<FONT color="green">440</FONT>        public String getItemNameIS(ItemStack par1ItemStack)<a name="line.440"></a>
+<FONT color="green">441</FONT>        {<a name="line.441"></a>
+<FONT color="green">442</FONT>            return this.itemName;<a name="line.442"></a>
+<FONT color="green">443</FONT>        }<a name="line.443"></a>
+<FONT color="green">444</FONT>    <a name="line.444"></a>
+<FONT color="green">445</FONT>        public Item setContainerItem(Item par1Item)<a name="line.445"></a>
+<FONT color="green">446</FONT>        {<a name="line.446"></a>
+<FONT color="green">447</FONT>            this.containerItem = par1Item;<a name="line.447"></a>
+<FONT color="green">448</FONT>            return this;<a name="line.448"></a>
+<FONT color="green">449</FONT>        }<a name="line.449"></a>
+<FONT color="green">450</FONT>    <a name="line.450"></a>
+<FONT color="green">451</FONT>        /**<a name="line.451"></a>
+<FONT color="green">452</FONT>         * If this returns true, after a recipe involving this item is crafted the container item will be added to the<a name="line.452"></a>
+<FONT color="green">453</FONT>         * player's inventory instead of remaining in the crafting grid.<a name="line.453"></a>
+<FONT color="green">454</FONT>         */<a name="line.454"></a>
+<FONT color="green">455</FONT>        public boolean doesContainerItemLeaveCraftingGrid(ItemStack par1ItemStack)<a name="line.455"></a>
+<FONT color="green">456</FONT>        {<a name="line.456"></a>
+<FONT color="green">457</FONT>            return true;<a name="line.457"></a>
+<FONT color="green">458</FONT>        }<a name="line.458"></a>
+<FONT color="green">459</FONT>    <a name="line.459"></a>
+<FONT color="green">460</FONT>        /**<a name="line.460"></a>
+<FONT color="green">461</FONT>         * If this function returns true (or the item is damageable), the ItemStack's NBT tag will be sent to the client.<a name="line.461"></a>
+<FONT color="green">462</FONT>         */<a name="line.462"></a>
+<FONT color="green">463</FONT>        public boolean getShareTag()<a name="line.463"></a>
+<FONT color="green">464</FONT>        {<a name="line.464"></a>
+<FONT color="green">465</FONT>            return true;<a name="line.465"></a>
+<FONT color="green">466</FONT>        }<a name="line.466"></a>
+<FONT color="green">467</FONT>    <a name="line.467"></a>
+<FONT color="green">468</FONT>        public Item getContainerItem()<a name="line.468"></a>
+<FONT color="green">469</FONT>        {<a name="line.469"></a>
+<FONT color="green">470</FONT>            return this.containerItem;<a name="line.470"></a>
+<FONT color="green">471</FONT>        }<a name="line.471"></a>
+<FONT color="green">472</FONT>    <a name="line.472"></a>
+<FONT color="green">473</FONT>        /**<a name="line.473"></a>
+<FONT color="green">474</FONT>         * True if this Item has a container item (a.k.a. crafting result)<a name="line.474"></a>
+<FONT color="green">475</FONT>         */<a name="line.475"></a>
+<FONT color="green">476</FONT>        public boolean hasContainerItem()<a name="line.476"></a>
+<FONT color="green">477</FONT>        {<a name="line.477"></a>
+<FONT color="green">478</FONT>            return this.containerItem != null;<a name="line.478"></a>
+<FONT color="green">479</FONT>        }<a name="line.479"></a>
+<FONT color="green">480</FONT>    <a name="line.480"></a>
+<FONT color="green">481</FONT>        public String getStatName()<a name="line.481"></a>
+<FONT color="green">482</FONT>        {<a name="line.482"></a>
+<FONT color="green">483</FONT>            return StatCollector.translateToLocal(this.getItemName() + ".name");<a name="line.483"></a>
+<FONT color="green">484</FONT>        }<a name="line.484"></a>
+<FONT color="green">485</FONT>    <a name="line.485"></a>
+<FONT color="green">486</FONT>        public String func_77653_i(ItemStack par1ItemStack)<a name="line.486"></a>
+<FONT color="green">487</FONT>        {<a name="line.487"></a>
+<FONT color="green">488</FONT>            return StatCollector.translateToLocal(this.getItemNameIS(par1ItemStack) + ".name");<a name="line.488"></a>
+<FONT color="green">489</FONT>        }<a name="line.489"></a>
+<FONT color="green">490</FONT>    <a name="line.490"></a>
+<FONT color="green">491</FONT>        @SideOnly(Side.CLIENT)<a name="line.491"></a>
+<FONT color="green">492</FONT>        public int func_82790_a(ItemStack par1ItemStack, int par2)<a name="line.492"></a>
+<FONT color="green">493</FONT>        {<a name="line.493"></a>
+<FONT color="green">494</FONT>            return 16777215;<a name="line.494"></a>
+<FONT color="green">495</FONT>        }<a name="line.495"></a>
+<FONT color="green">496</FONT>    <a name="line.496"></a>
+<FONT color="green">497</FONT>        /**<a name="line.497"></a>
+<FONT color="green">498</FONT>         * Called each tick as long the item is on a player inventory. Uses by maps to check if is on a player hand and<a name="line.498"></a>
+<FONT color="green">499</FONT>         * update it's contents.<a name="line.499"></a>
+<FONT color="green">500</FONT>         */<a name="line.500"></a>
+<FONT color="green">501</FONT>        public void onUpdate(ItemStack par1ItemStack, World par2World, Entity par3Entity, int par4, boolean par5) {}<a name="line.501"></a>
+<FONT color="green">502</FONT>    <a name="line.502"></a>
+<FONT color="green">503</FONT>        /**<a name="line.503"></a>
+<FONT color="green">504</FONT>         * Called when item is crafted/smelted. Used only by maps so far.<a name="line.504"></a>
+<FONT color="green">505</FONT>         */<a name="line.505"></a>
+<FONT color="green">506</FONT>        public void onCreated(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer) {}<a name="line.506"></a>
+<FONT color="green">507</FONT>    <a name="line.507"></a>
+<FONT color="green">508</FONT>        /**<a name="line.508"></a>
+<FONT color="green">509</FONT>         * false for all Items except sub-classes of ItemMapBase<a name="line.509"></a>
+<FONT color="green">510</FONT>         */<a name="line.510"></a>
+<FONT color="green">511</FONT>        public boolean isMap()<a name="line.511"></a>
+<FONT color="green">512</FONT>        {<a name="line.512"></a>
+<FONT color="green">513</FONT>            return false;<a name="line.513"></a>
+<FONT color="green">514</FONT>        }<a name="line.514"></a>
+<FONT color="green">515</FONT>    <a name="line.515"></a>
+<FONT color="green">516</FONT>        /**<a name="line.516"></a>
+<FONT color="green">517</FONT>         * returns the action that specifies what animation to play when the items is being used<a name="line.517"></a>
+<FONT color="green">518</FONT>         */<a name="line.518"></a>
+<FONT color="green">519</FONT>        public EnumAction getItemUseAction(ItemStack par1ItemStack)<a name="line.519"></a>
+<FONT color="green">520</FONT>        {<a name="line.520"></a>
+<FONT color="green">521</FONT>            return EnumAction.none;<a name="line.521"></a>
+<FONT color="green">522</FONT>        }<a name="line.522"></a>
+<FONT color="green">523</FONT>    <a name="line.523"></a>
+<FONT color="green">524</FONT>        /**<a name="line.524"></a>
+<FONT color="green">525</FONT>         * How long it takes to use or consume an item<a name="line.525"></a>
+<FONT color="green">526</FONT>         */<a name="line.526"></a>
+<FONT color="green">527</FONT>        public int getMaxItemUseDuration(ItemStack par1ItemStack)<a name="line.527"></a>
+<FONT color="green">528</FONT>        {<a name="line.528"></a>
+<FONT color="green">529</FONT>            return 0;<a name="line.529"></a>
+<FONT color="green">530</FONT>        }<a name="line.530"></a>
+<FONT color="green">531</FONT>    <a name="line.531"></a>
+<FONT color="green">532</FONT>        /**<a name="line.532"></a>
+<FONT color="green">533</FONT>         * called when the player releases the use item button. Args: itemstack, world, entityplayer, itemInUseCount<a name="line.533"></a>
+<FONT color="green">534</FONT>         */<a name="line.534"></a>
+<FONT color="green">535</FONT>        public void onPlayerStoppedUsing(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer, int par4) {}<a name="line.535"></a>
+<FONT color="green">536</FONT>    <a name="line.536"></a>
+<FONT color="green">537</FONT>        /**<a name="line.537"></a>
+<FONT color="green">538</FONT>         * Sets the string representing this item's effect on a potion when used as an ingredient.<a name="line.538"></a>
+<FONT color="green">539</FONT>         */<a name="line.539"></a>
+<FONT color="green">540</FONT>        protected Item setPotionEffect(String par1Str)<a name="line.540"></a>
+<FONT color="green">541</FONT>        {<a name="line.541"></a>
+<FONT color="green">542</FONT>            this.potionEffect = par1Str;<a name="line.542"></a>
+<FONT color="green">543</FONT>            return this;<a name="line.543"></a>
+<FONT color="green">544</FONT>        }<a name="line.544"></a>
+<FONT color="green">545</FONT>    <a name="line.545"></a>
+<FONT color="green">546</FONT>        /**<a name="line.546"></a>
+<FONT color="green">547</FONT>         * Returns a string representing what this item does to a potion.<a name="line.547"></a>
+<FONT color="green">548</FONT>         */<a name="line.548"></a>
+<FONT color="green">549</FONT>        public String getPotionEffect()<a name="line.549"></a>
+<FONT color="green">550</FONT>        {<a name="line.550"></a>
+<FONT color="green">551</FONT>            return this.potionEffect;<a name="line.551"></a>
+<FONT color="green">552</FONT>        }<a name="line.552"></a>
+<FONT color="green">553</FONT>    <a name="line.553"></a>
+<FONT color="green">554</FONT>        /**<a name="line.554"></a>
+<FONT color="green">555</FONT>         * Returns true if this item serves as a potion ingredient (its ingredient information is not null).<a name="line.555"></a>
+<FONT color="green">556</FONT>         */<a name="line.556"></a>
+<FONT color="green">557</FONT>        public boolean isPotionIngredient()<a name="line.557"></a>
+<FONT color="green">558</FONT>        {<a name="line.558"></a>
+<FONT color="green">559</FONT>            return this.potionEffect != null;<a name="line.559"></a>
+<FONT color="green">560</FONT>        }<a name="line.560"></a>
+<FONT color="green">561</FONT>    <a name="line.561"></a>
+<FONT color="green">562</FONT>        @SideOnly(Side.CLIENT)<a name="line.562"></a>
+<FONT color="green">563</FONT>    <a name="line.563"></a>
+<FONT color="green">564</FONT>        /**<a name="line.564"></a>
+<FONT color="green">565</FONT>         * allows items to add custom lines of information to the mouseover description<a name="line.565"></a>
+<FONT color="green">566</FONT>         */<a name="line.566"></a>
+<FONT color="green">567</FONT>        public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {}<a name="line.567"></a>
+<FONT color="green">568</FONT>    <a name="line.568"></a>
+<FONT color="green">569</FONT>        public String getItemDisplayName(ItemStack par1ItemStack)<a name="line.569"></a>
+<FONT color="green">570</FONT>        {<a name="line.570"></a>
+<FONT color="green">571</FONT>            return ("" + StringTranslate.getInstance().translateNamedKey(this.getLocalItemName(par1ItemStack))).trim();<a name="line.571"></a>
+<FONT color="green">572</FONT>        }<a name="line.572"></a>
+<FONT color="green">573</FONT>    <a name="line.573"></a>
+<FONT color="green">574</FONT>        @SideOnly(Side.CLIENT)<a name="line.574"></a>
+<FONT color="green">575</FONT>        public boolean hasEffect(ItemStack par1ItemStack)<a name="line.575"></a>
+<FONT color="green">576</FONT>        {<a name="line.576"></a>
+<FONT color="green">577</FONT>            return par1ItemStack.isItemEnchanted();<a name="line.577"></a>
+<FONT color="green">578</FONT>        }<a name="line.578"></a>
+<FONT color="green">579</FONT>    <a name="line.579"></a>
+<FONT color="green">580</FONT>        @SideOnly(Side.CLIENT)<a name="line.580"></a>
+<FONT color="green">581</FONT>    <a name="line.581"></a>
+<FONT color="green">582</FONT>        /**<a name="line.582"></a>
+<FONT color="green">583</FONT>         * Return an item rarity from EnumRarity<a name="line.583"></a>
+<FONT color="green">584</FONT>         */<a name="line.584"></a>
+<FONT color="green">585</FONT>        public EnumRarity getRarity(ItemStack par1ItemStack)<a name="line.585"></a>
+<FONT color="green">586</FONT>        {<a name="line.586"></a>
+<FONT color="green">587</FONT>            return par1ItemStack.isItemEnchanted() ? EnumRarity.rare : EnumRarity.common;<a name="line.587"></a>
+<FONT color="green">588</FONT>        }<a name="line.588"></a>
+<FONT color="green">589</FONT>    <a name="line.589"></a>
+<FONT color="green">590</FONT>        /**<a name="line.590"></a>
+<FONT color="green">591</FONT>         * Checks isDamagable and if it cannot be stacked<a name="line.591"></a>
+<FONT color="green">592</FONT>         */<a name="line.592"></a>
+<FONT color="green">593</FONT>        public boolean isItemTool(ItemStack par1ItemStack)<a name="line.593"></a>
+<FONT color="green">594</FONT>        {<a name="line.594"></a>
+<FONT color="green">595</FONT>            return this.getItemStackLimit() == 1 &amp;&amp; this.isDamageable();<a name="line.595"></a>
+<FONT color="green">596</FONT>        }<a name="line.596"></a>
+<FONT color="green">597</FONT>    <a name="line.597"></a>
+<FONT color="green">598</FONT>        protected MovingObjectPosition getMovingObjectPositionFromPlayer(World par1World, EntityPlayer par2EntityPlayer, boolean par3)<a name="line.598"></a>
+<FONT color="green">599</FONT>        {<a name="line.599"></a>
+<FONT color="green">600</FONT>            float var4 = 1.0F;<a name="line.600"></a>
+<FONT color="green">601</FONT>            float var5 = par2EntityPlayer.prevRotationPitch + (par2EntityPlayer.rotationPitch - par2EntityPlayer.prevRotationPitch) * var4;<a name="line.601"></a>
+<FONT color="green">602</FONT>            float var6 = par2EntityPlayer.prevRotationYaw + (par2EntityPlayer.rotationYaw - par2EntityPlayer.prevRotationYaw) * var4;<a name="line.602"></a>
+<FONT color="green">603</FONT>            double var7 = par2EntityPlayer.prevPosX + (par2EntityPlayer.posX - par2EntityPlayer.prevPosX) * (double)var4;<a name="line.603"></a>
+<FONT color="green">604</FONT>            double var9 = par2EntityPlayer.prevPosY + (par2EntityPlayer.posY - par2EntityPlayer.prevPosY) * (double)var4 + 1.62D - (double)par2EntityPlayer.yOffset;<a name="line.604"></a>
+<FONT color="green">605</FONT>            double var11 = par2EntityPlayer.prevPosZ + (par2EntityPlayer.posZ - par2EntityPlayer.prevPosZ) * (double)var4;<a name="line.605"></a>
+<FONT color="green">606</FONT>            Vec3 var13 = par1World.func_82732_R().getVecFromPool(var7, var9, var11);<a name="line.606"></a>
+<FONT color="green">607</FONT>            float var14 = MathHelper.cos(-var6 * 0.017453292F - (float)Math.PI);<a name="line.607"></a>
+<FONT color="green">608</FONT>            float var15 = MathHelper.sin(-var6 * 0.017453292F - (float)Math.PI);<a name="line.608"></a>
+<FONT color="green">609</FONT>            float var16 = -MathHelper.cos(-var5 * 0.017453292F);<a name="line.609"></a>
+<FONT color="green">610</FONT>            float var17 = MathHelper.sin(-var5 * 0.017453292F);<a name="line.610"></a>
+<FONT color="green">611</FONT>            float var18 = var15 * var16;<a name="line.611"></a>
+<FONT color="green">612</FONT>            float var20 = var14 * var16;<a name="line.612"></a>
+<FONT color="green">613</FONT>            double var21 = 5.0D;<a name="line.613"></a>
+<FONT color="green">614</FONT>            if (par2EntityPlayer instanceof EntityPlayerMP)<a name="line.614"></a>
+<FONT color="green">615</FONT>            {<a name="line.615"></a>
+<FONT color="green">616</FONT>                var21 = ((EntityPlayerMP)par2EntityPlayer).theItemInWorldManager.getBlockReachDistance();<a name="line.616"></a>
+<FONT color="green">617</FONT>            }<a name="line.617"></a>
+<FONT color="green">618</FONT>            Vec3 var23 = var13.addVector((double)var18 * var21, (double)var17 * var21, (double)var20 * var21);<a name="line.618"></a>
+<FONT color="green">619</FONT>            return par1World.rayTraceBlocks_do_do(var13, var23, par3, !par3);<a name="line.619"></a>
+<FONT color="green">620</FONT>        }<a name="line.620"></a>
+<FONT color="green">621</FONT>    <a name="line.621"></a>
+<FONT color="green">622</FONT>        /**<a name="line.622"></a>
+<FONT color="green">623</FONT>         * Return the enchantability factor of the item, most of the time is based on material.<a name="line.623"></a>
+<FONT color="green">624</FONT>         */<a name="line.624"></a>
+<FONT color="green">625</FONT>        public int getItemEnchantability()<a name="line.625"></a>
+<FONT color="green">626</FONT>        {<a name="line.626"></a>
+<FONT color="green">627</FONT>            return 0;<a name="line.627"></a>
+<FONT color="green">628</FONT>        }<a name="line.628"></a>
+<FONT color="green">629</FONT>    <a name="line.629"></a>
+<FONT color="green">630</FONT>        @SideOnly(Side.CLIENT)<a name="line.630"></a>
+<FONT color="green">631</FONT>        public boolean requiresMultipleRenderPasses()<a name="line.631"></a>
+<FONT color="green">632</FONT>        {<a name="line.632"></a>
+<FONT color="green">633</FONT>            return false;<a name="line.633"></a>
+<FONT color="green">634</FONT>        }<a name="line.634"></a>
+<FONT color="green">635</FONT>    <a name="line.635"></a>
+<FONT color="green">636</FONT>        @SideOnly(Side.CLIENT)<a name="line.636"></a>
+<FONT color="green">637</FONT>    <a name="line.637"></a>
+<FONT color="green">638</FONT>        /**<a name="line.638"></a>
+<FONT color="green">639</FONT>         * Gets an icon index based on an item's damage value and the given render pass<a name="line.639"></a>
+<FONT color="green">640</FONT>         */<a name="line.640"></a>
+<FONT color="green">641</FONT>        public int getIconFromDamageForRenderPass(int par1, int par2)<a name="line.641"></a>
+<FONT color="green">642</FONT>        {<a name="line.642"></a>
+<FONT color="green">643</FONT>            return this.getIconFromDamage(par1);<a name="line.643"></a>
+<FONT color="green">644</FONT>        }<a name="line.644"></a>
+<FONT color="green">645</FONT>    <a name="line.645"></a>
+<FONT color="green">646</FONT>        @SideOnly(Side.CLIENT)<a name="line.646"></a>
+<FONT color="green">647</FONT>    <a name="line.647"></a>
+<FONT color="green">648</FONT>        /**<a name="line.648"></a>
+<FONT color="green">649</FONT>         * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)<a name="line.649"></a>
+<FONT color="green">650</FONT>         */<a name="line.650"></a>
+<FONT color="green">651</FONT>        public void getSubItems(int par1, CreativeTabs par2CreativeTabs, List par3List)<a name="line.651"></a>
+<FONT color="green">652</FONT>        {<a name="line.652"></a>
+<FONT color="green">653</FONT>            par3List.add(new ItemStack(par1, 1, 0));<a name="line.653"></a>
+<FONT color="green">654</FONT>        }<a name="line.654"></a>
+<FONT color="green">655</FONT>    <a name="line.655"></a>
+<FONT color="green">656</FONT>        /**<a name="line.656"></a>
+<FONT color="green">657</FONT>         * returns this;<a name="line.657"></a>
+<FONT color="green">658</FONT>         */<a name="line.658"></a>
+<FONT color="green">659</FONT>        public Item setCreativeTab(CreativeTabs par1CreativeTabs)<a name="line.659"></a>
+<FONT color="green">660</FONT>        {<a name="line.660"></a>
+<FONT color="green">661</FONT>            this.tabToDisplayOn = par1CreativeTabs;<a name="line.661"></a>
+<FONT color="green">662</FONT>            return this;<a name="line.662"></a>
+<FONT color="green">663</FONT>        }<a name="line.663"></a>
+<FONT color="green">664</FONT>    <a name="line.664"></a>
+<FONT color="green">665</FONT>        @SideOnly(Side.CLIENT)<a name="line.665"></a>
+<FONT color="green">666</FONT>    <a name="line.666"></a>
+<FONT color="green">667</FONT>        /**<a name="line.667"></a>
+<FONT color="green">668</FONT>         * gets the CreativeTab this item is displayed on<a name="line.668"></a>
+<FONT color="green">669</FONT>         */<a name="line.669"></a>
+<FONT color="green">670</FONT>        public CreativeTabs getCreativeTab()<a name="line.670"></a>
+<FONT color="green">671</FONT>        {<a name="line.671"></a>
+<FONT color="green">672</FONT>            return this.tabToDisplayOn;<a name="line.672"></a>
+<FONT color="green">673</FONT>        }<a name="line.673"></a>
+<FONT color="green">674</FONT>    <a name="line.674"></a>
+<FONT color="green">675</FONT>        public boolean func_82788_x()<a name="line.675"></a>
+<FONT color="green">676</FONT>        {<a name="line.676"></a>
+<FONT color="green">677</FONT>            return true;<a name="line.677"></a>
+<FONT color="green">678</FONT>        }<a name="line.678"></a>
+<FONT color="green">679</FONT>    <a name="line.679"></a>
+<FONT color="green">680</FONT>        public boolean func_82789_a(ItemStack par1ItemStack, ItemStack par2ItemStack)<a name="line.680"></a>
+<FONT color="green">681</FONT>        {<a name="line.681"></a>
+<FONT color="green">682</FONT>            return false;<a name="line.682"></a>
+<FONT color="green">683</FONT>        }<a name="line.683"></a>
+<FONT color="green">684</FONT>    <a name="line.684"></a>
+<FONT color="green">685</FONT>        static<a name="line.685"></a>
+<FONT color="green">686</FONT>        {<a name="line.686"></a>
+<FONT color="green">687</FONT>            StatList.initStats();<a name="line.687"></a>
+<FONT color="green">688</FONT>        }<a name="line.688"></a>
+<FONT color="green">689</FONT>    <a name="line.689"></a>
+<FONT color="green">690</FONT>        /* =========================================================== FORGE START ===============================================================*/<a name="line.690"></a>
+<FONT color="green">691</FONT>        public boolean isDefaultTexture = true;<a name="line.691"></a>
+<FONT color="green">692</FONT>        private String currentTexture = "/gui/items.png";<a name="line.692"></a>
+<FONT color="green">693</FONT>    <a name="line.693"></a>
+<FONT color="green">694</FONT>        /**<a name="line.694"></a>
+<FONT color="green">695</FONT>         * Called when a player drops the item into the world,<a name="line.695"></a>
+<FONT color="green">696</FONT>         * returning false from this will prevent the item from<a name="line.696"></a>
+<FONT color="green">697</FONT>         * being removed from the players inventory and spawning<a name="line.697"></a>
+<FONT color="green">698</FONT>         * in the world<a name="line.698"></a>
+<FONT color="green">699</FONT>         * <a name="line.699"></a>
+<FONT color="green">700</FONT>         * @param player The player that dropped the item<a name="line.700"></a>
+<FONT color="green">701</FONT>         * @param item The item stack, before the item is removed.<a name="line.701"></a>
+<FONT color="green">702</FONT>         */<a name="line.702"></a>
+<FONT color="green">703</FONT>        public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player)<a name="line.703"></a>
+<FONT color="green">704</FONT>        {<a name="line.704"></a>
+<FONT color="green">705</FONT>            return true;<a name="line.705"></a>
+<FONT color="green">706</FONT>        }<a name="line.706"></a>
+<FONT color="green">707</FONT>    <a name="line.707"></a>
+<FONT color="green">708</FONT>        /**<a name="line.708"></a>
+<FONT color="green">709</FONT>         * This is called when the item is used, before the block is activated.<a name="line.709"></a>
+<FONT color="green">710</FONT>         * @param stack The Item Stack<a name="line.710"></a>
+<FONT color="green">711</FONT>         * @param player The Player that used the item<a name="line.711"></a>
+<FONT color="green">712</FONT>         * @param world The Current World<a name="line.712"></a>
+<FONT color="green">713</FONT>         * @param x Target X Position<a name="line.713"></a>
+<FONT color="green">714</FONT>         * @param y Target Y Position<a name="line.714"></a>
+<FONT color="green">715</FONT>         * @param z Target Z Position<a name="line.715"></a>
+<FONT color="green">716</FONT>         * @param side The side of the target hit<a name="line.716"></a>
+<FONT color="green">717</FONT>         * @return Return true to prevent any further processing.<a name="line.717"></a>
+<FONT color="green">718</FONT>         */<a name="line.718"></a>
+<FONT color="green">719</FONT>        public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) <a name="line.719"></a>
+<FONT color="green">720</FONT>        {<a name="line.720"></a>
+<FONT color="green">721</FONT>            return onItemUseFirst(stack, player, world, x, y, z, side);<a name="line.721"></a>
+<FONT color="green">722</FONT>        }<a name="line.722"></a>
+<FONT color="green">723</FONT>        <a name="line.723"></a>
+<FONT color="green">724</FONT>        /**<a name="line.724"></a>
+<FONT color="green">725</FONT>         * See onItemUseFirst above, this is deprecated in favor of the more aware version.<a name="line.725"></a>
+<FONT color="green">726</FONT>         * Only here for compaibility.<a name="line.726"></a>
+<FONT color="green">727</FONT>         */<a name="line.727"></a>
+<FONT color="green">728</FONT>        @Deprecated<a name="line.728"></a>
+<FONT color="green">729</FONT>        public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side) <a name="line.729"></a>
+<FONT color="green">730</FONT>        {<a name="line.730"></a>
+<FONT color="green">731</FONT>            return false;<a name="line.731"></a>
+<FONT color="green">732</FONT>        }<a name="line.732"></a>
+<FONT color="green">733</FONT>    <a name="line.733"></a>
+<FONT color="green">734</FONT>        /**<a name="line.734"></a>
+<FONT color="green">735</FONT>         * Metadata-sensitive version of getStrVsBlock<a name="line.735"></a>
+<FONT color="green">736</FONT>         * @param itemstack The Item Stack<a name="line.736"></a>
+<FONT color="green">737</FONT>         * @param block The block the item is trying to break<a name="line.737"></a>
+<FONT color="green">738</FONT>         * @param metadata The items current metadata<a name="line.738"></a>
+<FONT color="green">739</FONT>         * @return The damage strength<a name="line.739"></a>
+<FONT color="green">740</FONT>         */<a name="line.740"></a>
+<FONT color="green">741</FONT>        public float getStrVsBlock(ItemStack itemstack, Block block, int metadata)<a name="line.741"></a>
+<FONT color="green">742</FONT>        {<a name="line.742"></a>
+<FONT color="green">743</FONT>            return getStrVsBlock(itemstack, block);<a name="line.743"></a>
+<FONT color="green">744</FONT>        }<a name="line.744"></a>
+<FONT color="green">745</FONT>    <a name="line.745"></a>
+<FONT color="green">746</FONT>        /**<a name="line.746"></a>
+<FONT color="green">747</FONT>         * Called by CraftingManager to determine if an item is reparable.<a name="line.747"></a>
+<FONT color="green">748</FONT>         * @return True if reparable<a name="line.748"></a>
+<FONT color="green">749</FONT>         */<a name="line.749"></a>
+<FONT color="green">750</FONT>        public boolean isRepairable() <a name="line.750"></a>
+<FONT color="green">751</FONT>        {<a name="line.751"></a>
+<FONT color="green">752</FONT>            return canRepair &amp;&amp; isDamageable();<a name="line.752"></a>
+<FONT color="green">753</FONT>        }<a name="line.753"></a>
+<FONT color="green">754</FONT>    <a name="line.754"></a>
+<FONT color="green">755</FONT>        /**<a name="line.755"></a>
+<FONT color="green">756</FONT>         * Call to disable repair recipes.<a name="line.756"></a>
+<FONT color="green">757</FONT>         * @return The current Item instance<a name="line.757"></a>
+<FONT color="green">758</FONT>         */<a name="line.758"></a>
+<FONT color="green">759</FONT>        public Item setNoRepair() <a name="line.759"></a>
+<FONT color="green">760</FONT>        {<a name="line.760"></a>
+<FONT color="green">761</FONT>            canRepair = false;<a name="line.761"></a>
+<FONT color="green">762</FONT>            return this;<a name="line.762"></a>
+<FONT color="green">763</FONT>        }<a name="line.763"></a>
+<FONT color="green">764</FONT>    <a name="line.764"></a>
+<FONT color="green">765</FONT>        /**<a name="line.765"></a>
+<FONT color="green">766</FONT>         * Called before a block is broken.  Return true to prevent default block harvesting.<a name="line.766"></a>
+<FONT color="green">767</FONT>         *<a name="line.767"></a>
+<FONT color="green">768</FONT>         * Note: In SMP, this is called on both client and server sides!<a name="line.768"></a>
+<FONT color="green">769</FONT>         * <a name="line.769"></a>
+<FONT color="green">770</FONT>         * @param itemstack The current ItemStack<a name="line.770"></a>
+<FONT color="green">771</FONT>         * @param X The X Position<a name="line.771"></a>
+<FONT color="green">772</FONT>         * @param Y The X Position<a name="line.772"></a>
+<FONT color="green">773</FONT>         * @param Z The X Position<a name="line.773"></a>
+<FONT color="green">774</FONT>         * @param player The Player that is wielding the item<a name="line.774"></a>
+<FONT color="green">775</FONT>         * @return True to prevent harvesting, false to continue as normal<a name="line.775"></a>
+<FONT color="green">776</FONT>         */<a name="line.776"></a>
+<FONT color="green">777</FONT>        public boolean onBlockStartBreak(ItemStack itemstack, int X, int Y, int Z, EntityPlayer player) <a name="line.777"></a>
+<FONT color="green">778</FONT>        {<a name="line.778"></a>
+<FONT color="green">779</FONT>            return false;<a name="line.779"></a>
+<FONT color="green">780</FONT>        }<a name="line.780"></a>
+<FONT color="green">781</FONT>    <a name="line.781"></a>
+<FONT color="green">782</FONT>        /**<a name="line.782"></a>
+<FONT color="green">783</FONT>         * Called each tick while using an item.<a name="line.783"></a>
+<FONT color="green">784</FONT>         * @param stack The Item being used<a name="line.784"></a>
+<FONT color="green">785</FONT>         * @param player The Player using the item<a name="line.785"></a>
+<FONT color="green">786</FONT>         * @param count The amount of time in tick the item has been used for continuously<a name="line.786"></a>
+<FONT color="green">787</FONT>         */<a name="line.787"></a>
+<FONT color="green">788</FONT>        public void onUsingItemTick(ItemStack stack, EntityPlayer player, int count) <a name="line.788"></a>
+<FONT color="green">789</FONT>        {<a name="line.789"></a>
+<FONT color="green">790</FONT>        }<a name="line.790"></a>
+<FONT color="green">791</FONT>    <a name="line.791"></a>
+<FONT color="green">792</FONT>        /**<a name="line.792"></a>
+<FONT color="green">793</FONT>         * Called when the player Left Clicks (attacks) an entity.<a name="line.793"></a>
+<FONT color="green">794</FONT>         * Processed before damage is done, if return value is true further processing is canceled<a name="line.794"></a>
+<FONT color="green">795</FONT>         * and the entity is not attacked.<a name="line.795"></a>
+<FONT color="green">796</FONT>         * <a name="line.796"></a>
+<FONT color="green">797</FONT>         * @param stack The Item being used<a name="line.797"></a>
+<FONT color="green">798</FONT>         * @param player The player that is attacking<a name="line.798"></a>
+<FONT color="green">799</FONT>         * @param entity The entity being attacked<a name="line.799"></a>
+<FONT color="green">800</FONT>         * @return True to cancel the rest of the interaction.<a name="line.800"></a>
+<FONT color="green">801</FONT>         */<a name="line.801"></a>
+<FONT color="green">802</FONT>        public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) <a name="line.802"></a>
+<FONT color="green">803</FONT>        {<a name="line.803"></a>
+<FONT color="green">804</FONT>            return false;<a name="line.804"></a>
+<FONT color="green">805</FONT>        }<a name="line.805"></a>
+<FONT color="green">806</FONT>    <a name="line.806"></a>
+<FONT color="green">807</FONT>        /**<a name="line.807"></a>
+<FONT color="green">808</FONT>         * Player, Render pass, and item usage sensitive version of getIconIndex.<a name="line.808"></a>
+<FONT color="green">809</FONT>         *   <a name="line.809"></a>
+<FONT color="green">810</FONT>         * @param stack The item stack to get the icon for. (Usually this, and usingItem will be the same if usingItem is not null)<a name="line.810"></a>
+<FONT color="green">811</FONT>         * @param renderPass The pass to get the icon for, 0 is default.<a name="line.811"></a>
+<FONT color="green">812</FONT>         * @param player The player holding the item<a name="line.812"></a>
+<FONT color="green">813</FONT>         * @param usingItem The item the player is actively using. Can be null if not using anything.<a name="line.813"></a>
+<FONT color="green">814</FONT>         * @param useRemaining The ticks remaining for the active item.<a name="line.814"></a>
+<FONT color="green">815</FONT>         * @return The icon index<a name="line.815"></a>
+<FONT color="green">816</FONT>         */<a name="line.816"></a>
+<FONT color="green">817</FONT>        public int getIconIndex(ItemStack stack, int renderPass, EntityPlayer player, ItemStack usingItem, int useRemaining)<a name="line.817"></a>
+<FONT color="green">818</FONT>        {<a name="line.818"></a>
+<FONT color="green">819</FONT>            /*<a name="line.819"></a>
+<FONT color="green">820</FONT>             * Here is an example usage for Vanilla bows.<a name="line.820"></a>
+<FONT color="green">821</FONT>            if (usingItem != null &amp;&amp; usingItem.getItem().shiftedIndex == Item.bow.shiftedIndex)<a name="line.821"></a>
+<FONT color="green">822</FONT>            {<a name="line.822"></a>
+<FONT color="green">823</FONT>                int k = usingItem.getMaxItemUseDuration() - useRemaining;<a name="line.823"></a>
+<FONT color="green">824</FONT>                if (k &gt;= 18) return 133;<a name="line.824"></a>
+<FONT color="green">825</FONT>                if (k &gt;  13) return 117;<a name="line.825"></a>
+<FONT color="green">826</FONT>                if (k &gt;   0) return 101;<a name="line.826"></a>
+<FONT color="green">827</FONT>            }<a name="line.827"></a>
+<FONT color="green">828</FONT>             */<a name="line.828"></a>
+<FONT color="green">829</FONT>            return getIconIndex(stack);<a name="line.829"></a>
+<FONT color="green">830</FONT>        }<a name="line.830"></a>
+<FONT color="green">831</FONT>    <a name="line.831"></a>
+<FONT color="green">832</FONT>        /**<a name="line.832"></a>
+<FONT color="green">833</FONT>         * Returns the number of render passes/layers this item has.<a name="line.833"></a>
+<FONT color="green">834</FONT>         * Usually equates to ItemRenderer.renderItem being called for this many passes.<a name="line.834"></a>
+<FONT color="green">835</FONT>         * Does not get called unless requiresMultipleRenderPasses() is true;<a name="line.835"></a>
+<FONT color="green">836</FONT>         * <a name="line.836"></a>
+<FONT color="green">837</FONT>         * @param metadata The item's metadata<a name="line.837"></a>
+<FONT color="green">838</FONT>         * @return The number of passes to run.<a name="line.838"></a>
+<FONT color="green">839</FONT>         */<a name="line.839"></a>
+<FONT color="green">840</FONT>        public int getRenderPasses(int metadata)<a name="line.840"></a>
+<FONT color="green">841</FONT>        {<a name="line.841"></a>
+<FONT color="green">842</FONT>            return requiresMultipleRenderPasses() ? 2 : 1;<a name="line.842"></a>
+<FONT color="green">843</FONT>        }<a name="line.843"></a>
+<FONT color="green">844</FONT>    <a name="line.844"></a>
+<FONT color="green">845</FONT>        /**<a name="line.845"></a>
+<FONT color="green">846</FONT>         * Grabs the current texture file used for this block<a name="line.846"></a>
+<FONT color="green">847</FONT>         */<a name="line.847"></a>
+<FONT color="green">848</FONT>        public String getTextureFile()<a name="line.848"></a>
+<FONT color="green">849</FONT>        {<a name="line.849"></a>
+<FONT color="green">850</FONT>            if (this instanceof ItemBlock)<a name="line.850"></a>
+<FONT color="green">851</FONT>            {<a name="line.851"></a>
+<FONT color="green">852</FONT>                return Block.blocksList[((ItemBlock)this).getBlockID()].getTextureFile();<a name="line.852"></a>
+<FONT color="green">853</FONT>            }<a name="line.853"></a>
+<FONT color="green">854</FONT>            return currentTexture;<a name="line.854"></a>
+<FONT color="green">855</FONT>        }<a name="line.855"></a>
+<FONT color="green">856</FONT>    <a name="line.856"></a>
+<FONT color="green">857</FONT>        /**<a name="line.857"></a>
+<FONT color="green">858</FONT>         * Sets the current texture file for this item, used when rendering.<a name="line.858"></a>
+<FONT color="green">859</FONT>         * Default is "/gui/items.png"<a name="line.859"></a>
+<FONT color="green">860</FONT>         * <a name="line.860"></a>
+<FONT color="green">861</FONT>         * @param texture The texture file<a name="line.861"></a>
+<FONT color="green">862</FONT>         */<a name="line.862"></a>
+<FONT color="green">863</FONT>        public void setTextureFile(String texture)<a name="line.863"></a>
+<FONT color="green">864</FONT>        {<a name="line.864"></a>
+<FONT color="green">865</FONT>            currentTexture = texture;<a name="line.865"></a>
+<FONT color="green">866</FONT>            isDefaultTexture = false;<a name="line.866"></a>
+<FONT color="green">867</FONT>        }<a name="line.867"></a>
+<FONT color="green">868</FONT>    <a name="line.868"></a>
+<FONT color="green">869</FONT>        /**<a name="line.869"></a>
+<FONT color="green">870</FONT>         * ItemStack sensitive version of getContainerItem.<a name="line.870"></a>
+<FONT color="green">871</FONT>         * Returns a full ItemStack instance of the result.<a name="line.871"></a>
+<FONT color="green">872</FONT>         * <a name="line.872"></a>
+<FONT color="green">873</FONT>         * @param itemStack The current ItemStack<a name="line.873"></a>
+<FONT color="green">874</FONT>         * @return The resulting ItemStack<a name="line.874"></a>
+<FONT color="green">875</FONT>         */<a name="line.875"></a>
+<FONT color="green">876</FONT>        public ItemStack getContainerItemStack(ItemStack itemStack)<a name="line.876"></a>
+<FONT color="green">877</FONT>        {<a name="line.877"></a>
+<FONT color="green">878</FONT>            if (!hasContainerItem())<a name="line.878"></a>
+<FONT color="green">879</FONT>            {<a name="line.879"></a>
+<FONT color="green">880</FONT>                return null;<a name="line.880"></a>
+<FONT color="green">881</FONT>            }<a name="line.881"></a>
+<FONT color="green">882</FONT>            return new ItemStack(getContainerItem());<a name="line.882"></a>
+<FONT color="green">883</FONT>        }<a name="line.883"></a>
+<FONT color="green">884</FONT>    <a name="line.884"></a>
+<FONT color="green">885</FONT>        /**<a name="line.885"></a>
+<FONT color="green">886</FONT>         * Retrieves the normal 'lifespan' of this item when it is dropped on the ground as a EntityItem.<a name="line.886"></a>
+<FONT color="green">887</FONT>         * This is in ticks, standard result is 6000, or 5 mins.<a name="line.887"></a>
+<FONT color="green">888</FONT>         * <a name="line.888"></a>
+<FONT color="green">889</FONT>         * @param itemStack The current ItemStack<a name="line.889"></a>
+<FONT color="green">890</FONT>         * @param world The world the entity is in<a name="line.890"></a>
+<FONT color="green">891</FONT>         * @return The normal lifespan in ticks.<a name="line.891"></a>
+<FONT color="green">892</FONT>         */<a name="line.892"></a>
+<FONT color="green">893</FONT>        public int getEntityLifespan(ItemStack itemStack, World world)<a name="line.893"></a>
+<FONT color="green">894</FONT>        {<a name="line.894"></a>
+<FONT color="green">895</FONT>            return 6000;<a name="line.895"></a>
+<FONT color="green">896</FONT>        }<a name="line.896"></a>
+<FONT color="green">897</FONT>    <a name="line.897"></a>
+<FONT color="green">898</FONT>        /**<a name="line.898"></a>
+<FONT color="green">899</FONT>         * Determines if this Item has a special entity for when they are in the world.<a name="line.899"></a>
+<FONT color="green">900</FONT>         * Is called when a EntityItem is spawned in the world, if true and Item#createCustomEntity <a name="line.900"></a>
+<FONT color="green">901</FONT>         * returns non null, the EntityItem will be destroyed and the new Entity will be added to the world.<a name="line.901"></a>
+<FONT color="green">902</FONT>         * <a name="line.902"></a>
+<FONT color="green">903</FONT>         * @param stack The current item stack<a name="line.903"></a>
+<FONT color="green">904</FONT>         * @return True of the item has a custom entity, If true, Item#createCustomEntity will be called<a name="line.904"></a>
+<FONT color="green">905</FONT>         */<a name="line.905"></a>
+<FONT color="green">906</FONT>        public boolean hasCustomEntity(ItemStack stack)<a name="line.906"></a>
+<FONT color="green">907</FONT>        {<a name="line.907"></a>
+<FONT color="green">908</FONT>            return false;<a name="line.908"></a>
+<FONT color="green">909</FONT>        }<a name="line.909"></a>
+<FONT color="green">910</FONT>    <a name="line.910"></a>
+<FONT color="green">911</FONT>        /**<a name="line.911"></a>
+<FONT color="green">912</FONT>         * This function should return a new entity to replace the dropped item.<a name="line.912"></a>
+<FONT color="green">913</FONT>         * Returning null here will not kill the EntityItem and will leave it to function normally.<a name="line.913"></a>
+<FONT color="green">914</FONT>         * Called when the item it placed in a world.<a name="line.914"></a>
+<FONT color="green">915</FONT>         * <a name="line.915"></a>
+<FONT color="green">916</FONT>         * @param world The world object<a name="line.916"></a>
+<FONT color="green">917</FONT>         * @param location The EntityItem object, useful for getting the position of the entity<a name="line.917"></a>
+<FONT color="green">918</FONT>         * @param itemstack The current item stack<a name="line.918"></a>
+<FONT color="green">919</FONT>         * @return A new Entity object to spawn or null<a name="line.919"></a>
+<FONT color="green">920</FONT>         */<a name="line.920"></a>
+<FONT color="green">921</FONT>        public Entity createEntity(World world, Entity location, ItemStack itemstack)<a name="line.921"></a>
+<FONT color="green">922</FONT>        {<a name="line.922"></a>
+<FONT color="green">923</FONT>            return null;<a name="line.923"></a>
+<FONT color="green">924</FONT>        }<a name="line.924"></a>
+<FONT color="green">925</FONT>    }<a name="line.925"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

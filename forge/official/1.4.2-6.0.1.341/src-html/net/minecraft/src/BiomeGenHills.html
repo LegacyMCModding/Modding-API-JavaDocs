@@ -1,0 +1,110 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Random;<a name="line.3"></a>
+<FONT color="green">004</FONT>    <a name="line.4"></a>
+<FONT color="green">005</FONT>    public class BiomeGenHills extends BiomeGenBase<a name="line.5"></a>
+<FONT color="green">006</FONT>    {<a name="line.6"></a>
+<FONT color="green">007</FONT>        private WorldGenerator field_82915_S;<a name="line.7"></a>
+<FONT color="green">008</FONT>    <a name="line.8"></a>
+<FONT color="green">009</FONT>        protected BiomeGenHills(int par1)<a name="line.9"></a>
+<FONT color="green">010</FONT>        {<a name="line.10"></a>
+<FONT color="green">011</FONT>            super(par1);<a name="line.11"></a>
+<FONT color="green">012</FONT>            this.field_82915_S = new WorldGenMinable(Block.silverfish.blockID, 8);<a name="line.12"></a>
+<FONT color="green">013</FONT>        }<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        public void decorate(World par1World, Random par2Random, int par3, int par4)<a name="line.15"></a>
+<FONT color="green">016</FONT>        {<a name="line.16"></a>
+<FONT color="green">017</FONT>            super.decorate(par1World, par2Random, par3, par4);<a name="line.17"></a>
+<FONT color="green">018</FONT>            int var5 = 3 + par2Random.nextInt(6);<a name="line.18"></a>
+<FONT color="green">019</FONT>            int var6;<a name="line.19"></a>
+<FONT color="green">020</FONT>            int var7;<a name="line.20"></a>
+<FONT color="green">021</FONT>            int var8;<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>            for (var6 = 0; var6 &lt; var5; ++var6)<a name="line.23"></a>
+<FONT color="green">024</FONT>            {<a name="line.24"></a>
+<FONT color="green">025</FONT>                var7 = par3 + par2Random.nextInt(16);<a name="line.25"></a>
+<FONT color="green">026</FONT>                var8 = par2Random.nextInt(28) + 4;<a name="line.26"></a>
+<FONT color="green">027</FONT>                int var9 = par4 + par2Random.nextInt(16);<a name="line.27"></a>
+<FONT color="green">028</FONT>                int var10 = par1World.getBlockId(var7, var8, var9);<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>                if (var10 == Block.stone.blockID)<a name="line.30"></a>
+<FONT color="green">031</FONT>                {<a name="line.31"></a>
+<FONT color="green">032</FONT>                    par1World.setBlock(var7, var8, var9, Block.oreEmerald.blockID);<a name="line.32"></a>
+<FONT color="green">033</FONT>                }<a name="line.33"></a>
+<FONT color="green">034</FONT>            }<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>            for (var5 = 0; var5 &lt; 7; ++var5)<a name="line.36"></a>
+<FONT color="green">037</FONT>            {<a name="line.37"></a>
+<FONT color="green">038</FONT>                var6 = par3 + par2Random.nextInt(16);<a name="line.38"></a>
+<FONT color="green">039</FONT>                var7 = par2Random.nextInt(64);<a name="line.39"></a>
+<FONT color="green">040</FONT>                var8 = par4 + par2Random.nextInt(16);<a name="line.40"></a>
+<FONT color="green">041</FONT>                this.field_82915_S.generate(par1World, par2Random, var6, var7, var8);<a name="line.41"></a>
+<FONT color="green">042</FONT>            }<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    }<a name="line.44"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

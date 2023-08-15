@@ -1,0 +1,901 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.io.ByteArrayOutputStream;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.io.DataOutputStream;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.io.IOException;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.ArrayList;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.util.Iterator;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import java.util.LinkedList;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import java.util.List;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.server.MinecraftServer;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraftforge.common.ForgeHooks;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraftforge.common.MinecraftForge;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraftforge.event.entity.player.PlayerDropsEvent;<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>    public class EntityPlayerMP extends EntityPlayer implements ICrafting<a name="line.15"></a>
+<FONT color="green">016</FONT>    {<a name="line.16"></a>
+<FONT color="green">017</FONT>        private StringTranslate translator = new StringTranslate("en_US");<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        /**<a name="line.19"></a>
+<FONT color="green">020</FONT>         * The NetServerHandler assigned to this player by the ServerConfigurationManager.<a name="line.20"></a>
+<FONT color="green">021</FONT>         */<a name="line.21"></a>
+<FONT color="green">022</FONT>        public NetServerHandler playerNetServerHandler;<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        /** Reference to the MinecraftServer object. */<a name="line.24"></a>
+<FONT color="green">025</FONT>        public MinecraftServer mcServer;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>        /** The ItemInWorldManager belonging to this player */<a name="line.27"></a>
+<FONT color="green">028</FONT>        public ItemInWorldManager theItemInWorldManager;<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>        /** player X position as seen by PlayerManager */<a name="line.30"></a>
+<FONT color="green">031</FONT>        public double managedPosX;<a name="line.31"></a>
+<FONT color="green">032</FONT>    <a name="line.32"></a>
+<FONT color="green">033</FONT>        /** player Z position as seen by PlayerManager */<a name="line.33"></a>
+<FONT color="green">034</FONT>        public double managedPosZ;<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>        /** LinkedList that holds the loaded chunks. */<a name="line.36"></a>
+<FONT color="green">037</FONT>        public final List loadedChunks = new LinkedList();<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        /** entities added to this list will  be packet29'd to the player */<a name="line.39"></a>
+<FONT color="green">040</FONT>        public final List destroyedItemsNetCache = new LinkedList();<a name="line.40"></a>
+<FONT color="green">041</FONT>    <a name="line.41"></a>
+<FONT color="green">042</FONT>        /** set to getHealth */<a name="line.42"></a>
+<FONT color="green">043</FONT>        private int lastHealth = -99999999;<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        /** set to foodStats.GetFoodLevel */<a name="line.45"></a>
+<FONT color="green">046</FONT>        private int lastFoodLevel = -99999999;<a name="line.46"></a>
+<FONT color="green">047</FONT>    <a name="line.47"></a>
+<FONT color="green">048</FONT>        /** set to foodStats.getSaturationLevel() == 0.0F each tick */<a name="line.48"></a>
+<FONT color="green">049</FONT>        private boolean wasHungry = true;<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        /** Amount of experience the client was last set to */<a name="line.51"></a>
+<FONT color="green">052</FONT>        private int lastExperience = -99999999;<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        /** de-increments onUpdate, attackEntityFrom is ignored if this &gt;0 */<a name="line.54"></a>
+<FONT color="green">055</FONT>        private int initialInvulnerability = 60;<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>        /** must be between 3&gt;x&gt;15 (strictly between) */<a name="line.57"></a>
+<FONT color="green">058</FONT>        private int renderDistance = 0;<a name="line.58"></a>
+<FONT color="green">059</FONT>        private int chatVisibility = 0;<a name="line.59"></a>
+<FONT color="green">060</FONT>        private boolean chatColours = true;<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>        /**<a name="line.62"></a>
+<FONT color="green">063</FONT>         * The currently in use window ID. Incremented every time a window is opened.<a name="line.63"></a>
+<FONT color="green">064</FONT>         */<a name="line.64"></a>
+<FONT color="green">065</FONT>        public int currentWindowId = 0;<a name="line.65"></a>
+<FONT color="green">066</FONT>    <a name="line.66"></a>
+<FONT color="green">067</FONT>        /**<a name="line.67"></a>
+<FONT color="green">068</FONT>         * poor mans concurency flag, lets hope the jvm doesn't re-order the setting of this flag wrt the inventory change<a name="line.68"></a>
+<FONT color="green">069</FONT>         * on the next line<a name="line.69"></a>
+<FONT color="green">070</FONT>         */<a name="line.70"></a>
+<FONT color="green">071</FONT>        public boolean playerInventoryBeingManipulated;<a name="line.71"></a>
+<FONT color="green">072</FONT>        public int ping;<a name="line.72"></a>
+<FONT color="green">073</FONT>    <a name="line.73"></a>
+<FONT color="green">074</FONT>        /**<a name="line.74"></a>
+<FONT color="green">075</FONT>         * Set when a player beats the ender dragon, used to respawn the player at the spawn point while retaining inventory<a name="line.75"></a>
+<FONT color="green">076</FONT>         * and XP<a name="line.76"></a>
+<FONT color="green">077</FONT>         */<a name="line.77"></a>
+<FONT color="green">078</FONT>        public boolean playerConqueredTheEnd = false;<a name="line.78"></a>
+<FONT color="green">079</FONT>    <a name="line.79"></a>
+<FONT color="green">080</FONT>        public EntityPlayerMP(MinecraftServer par1MinecraftServer, World par2World, String par3Str, ItemInWorldManager par4ItemInWorldManager)<a name="line.80"></a>
+<FONT color="green">081</FONT>        {<a name="line.81"></a>
+<FONT color="green">082</FONT>            super(par2World);<a name="line.82"></a>
+<FONT color="green">083</FONT>            par4ItemInWorldManager.thisPlayerMP = this;<a name="line.83"></a>
+<FONT color="green">084</FONT>            this.theItemInWorldManager = par4ItemInWorldManager;<a name="line.84"></a>
+<FONT color="green">085</FONT>            this.renderDistance = par1MinecraftServer.getConfigurationManager().getViewDistance();<a name="line.85"></a>
+<FONT color="green">086</FONT>            ChunkCoordinates var5 = par2World.provider.getRandomizedSpawnPoint();<a name="line.86"></a>
+<FONT color="green">087</FONT>            int var6 = var5.posX;<a name="line.87"></a>
+<FONT color="green">088</FONT>            int var7 = var5.posZ;<a name="line.88"></a>
+<FONT color="green">089</FONT>            int var8 = var5.posY;<a name="line.89"></a>
+<FONT color="green">090</FONT>    <a name="line.90"></a>
+<FONT color="green">091</FONT>            this.setLocationAndAngles((double)var6 + 0.5D, (double)var8, (double)var7 + 0.5D, 0.0F, 0.0F);<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.mcServer = par1MinecraftServer;<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.stepHeight = 0.0F;<a name="line.93"></a>
+<FONT color="green">094</FONT>            this.username = par3Str;<a name="line.94"></a>
+<FONT color="green">095</FONT>            this.yOffset = 0.0F;<a name="line.95"></a>
+<FONT color="green">096</FONT>        }<a name="line.96"></a>
+<FONT color="green">097</FONT>    <a name="line.97"></a>
+<FONT color="green">098</FONT>        /**<a name="line.98"></a>
+<FONT color="green">099</FONT>         * (abstract) Protected helper method to read subclass entity data from NBT.<a name="line.99"></a>
+<FONT color="green">100</FONT>         */<a name="line.100"></a>
+<FONT color="green">101</FONT>        public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)<a name="line.101"></a>
+<FONT color="green">102</FONT>        {<a name="line.102"></a>
+<FONT color="green">103</FONT>            super.readEntityFromNBT(par1NBTTagCompound);<a name="line.103"></a>
+<FONT color="green">104</FONT>    <a name="line.104"></a>
+<FONT color="green">105</FONT>            if (par1NBTTagCompound.hasKey("playerGameType"))<a name="line.105"></a>
+<FONT color="green">106</FONT>            {<a name="line.106"></a>
+<FONT color="green">107</FONT>                this.theItemInWorldManager.setGameType(EnumGameType.getByID(par1NBTTagCompound.getInteger("playerGameType")));<a name="line.107"></a>
+<FONT color="green">108</FONT>            }<a name="line.108"></a>
+<FONT color="green">109</FONT>        }<a name="line.109"></a>
+<FONT color="green">110</FONT>    <a name="line.110"></a>
+<FONT color="green">111</FONT>        /**<a name="line.111"></a>
+<FONT color="green">112</FONT>         * (abstract) Protected helper method to write subclass entity data to NBT.<a name="line.112"></a>
+<FONT color="green">113</FONT>         */<a name="line.113"></a>
+<FONT color="green">114</FONT>        public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)<a name="line.114"></a>
+<FONT color="green">115</FONT>        {<a name="line.115"></a>
+<FONT color="green">116</FONT>            super.writeEntityToNBT(par1NBTTagCompound);<a name="line.116"></a>
+<FONT color="green">117</FONT>            par1NBTTagCompound.setInteger("playerGameType", this.theItemInWorldManager.getGameType().getID());<a name="line.117"></a>
+<FONT color="green">118</FONT>        }<a name="line.118"></a>
+<FONT color="green">119</FONT>    <a name="line.119"></a>
+<FONT color="green">120</FONT>        public void func_82242_a(int par1)<a name="line.120"></a>
+<FONT color="green">121</FONT>        {<a name="line.121"></a>
+<FONT color="green">122</FONT>            super.func_82242_a(par1);<a name="line.122"></a>
+<FONT color="green">123</FONT>            this.lastExperience = -1;<a name="line.123"></a>
+<FONT color="green">124</FONT>        }<a name="line.124"></a>
+<FONT color="green">125</FONT>    <a name="line.125"></a>
+<FONT color="green">126</FONT>        public void addSelfToInternalCraftingInventory()<a name="line.126"></a>
+<FONT color="green">127</FONT>        {<a name="line.127"></a>
+<FONT color="green">128</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.128"></a>
+<FONT color="green">129</FONT>        }<a name="line.129"></a>
+<FONT color="green">130</FONT>    <a name="line.130"></a>
+<FONT color="green">131</FONT>        /**<a name="line.131"></a>
+<FONT color="green">132</FONT>         * sets the players height back to normal after doing things like sleeping and dieing<a name="line.132"></a>
+<FONT color="green">133</FONT>         */<a name="line.133"></a>
+<FONT color="green">134</FONT>        protected void resetHeight()<a name="line.134"></a>
+<FONT color="green">135</FONT>        {<a name="line.135"></a>
+<FONT color="green">136</FONT>            this.yOffset = 0.0F;<a name="line.136"></a>
+<FONT color="green">137</FONT>        }<a name="line.137"></a>
+<FONT color="green">138</FONT>    <a name="line.138"></a>
+<FONT color="green">139</FONT>        public float getEyeHeight()<a name="line.139"></a>
+<FONT color="green">140</FONT>        {<a name="line.140"></a>
+<FONT color="green">141</FONT>            return 1.62F;<a name="line.141"></a>
+<FONT color="green">142</FONT>        }<a name="line.142"></a>
+<FONT color="green">143</FONT>    <a name="line.143"></a>
+<FONT color="green">144</FONT>        /**<a name="line.144"></a>
+<FONT color="green">145</FONT>         * Called to update the entity's position/logic.<a name="line.145"></a>
+<FONT color="green">146</FONT>         */<a name="line.146"></a>
+<FONT color="green">147</FONT>        public void onUpdate()<a name="line.147"></a>
+<FONT color="green">148</FONT>        {<a name="line.148"></a>
+<FONT color="green">149</FONT>            this.theItemInWorldManager.updateBlockRemoving();<a name="line.149"></a>
+<FONT color="green">150</FONT>            --this.initialInvulnerability;<a name="line.150"></a>
+<FONT color="green">151</FONT>            this.craftingInventory.updateCraftingResults();<a name="line.151"></a>
+<FONT color="green">152</FONT>    <a name="line.152"></a>
+<FONT color="green">153</FONT>            if (!this.loadedChunks.isEmpty())<a name="line.153"></a>
+<FONT color="green">154</FONT>            {<a name="line.154"></a>
+<FONT color="green">155</FONT>                ArrayList var1 = new ArrayList();<a name="line.155"></a>
+<FONT color="green">156</FONT>                Iterator var2 = this.loadedChunks.iterator();<a name="line.156"></a>
+<FONT color="green">157</FONT>                ArrayList var3 = new ArrayList();<a name="line.157"></a>
+<FONT color="green">158</FONT>    <a name="line.158"></a>
+<FONT color="green">159</FONT>                while (var2.hasNext() &amp;&amp; var1.size() &lt; 5)<a name="line.159"></a>
+<FONT color="green">160</FONT>                {<a name="line.160"></a>
+<FONT color="green">161</FONT>                    ChunkCoordIntPair var4 = (ChunkCoordIntPair)var2.next();<a name="line.161"></a>
+<FONT color="green">162</FONT>                    var2.remove();<a name="line.162"></a>
+<FONT color="green">163</FONT>    <a name="line.163"></a>
+<FONT color="green">164</FONT>                    if (var4 != null &amp;&amp; this.worldObj.blockExists(var4.chunkXPos &lt;&lt; 4, 0, var4.chunkZPos &lt;&lt; 4))<a name="line.164"></a>
+<FONT color="green">165</FONT>                    {<a name="line.165"></a>
+<FONT color="green">166</FONT>                        var1.add(this.worldObj.getChunkFromChunkCoords(var4.chunkXPos, var4.chunkZPos));<a name="line.166"></a>
+<FONT color="green">167</FONT>                        //BugFix: 16 makes it load an extra chunk, which isn't associated with a player, which makes it not unload unless a player walks near it.<a name="line.167"></a>
+<FONT color="green">168</FONT>                        //ToDo: Find a way to efficiently clean abandoned chunks.<a name="line.168"></a>
+<FONT color="green">169</FONT>                        //var3.addAll(((WorldServer)this.worldObj).getAllTileEntityInBox(var4.chunkXPos * 16, 0, var4.chunkZPos * 16, var4.chunkXPos * 16 + 16, 256, var4.chunkZPos * 16 + 16));<a name="line.169"></a>
+<FONT color="green">170</FONT>                        var3.addAll(((WorldServer)this.worldObj).getAllTileEntityInBox(var4.chunkXPos * 16, 0, var4.chunkZPos * 16, var4.chunkXPos * 16 + 15, 256, var4.chunkZPos * 16 + 15));<a name="line.170"></a>
+<FONT color="green">171</FONT>     <a name="line.171"></a>
+<FONT color="green">172</FONT>                    }<a name="line.172"></a>
+<FONT color="green">173</FONT>                }<a name="line.173"></a>
+<FONT color="green">174</FONT>    <a name="line.174"></a>
+<FONT color="green">175</FONT>                if (!var1.isEmpty())<a name="line.175"></a>
+<FONT color="green">176</FONT>                {<a name="line.176"></a>
+<FONT color="green">177</FONT>                    this.playerNetServerHandler.sendPacketToPlayer(new Packet56MapChunks(var1));<a name="line.177"></a>
+<FONT color="green">178</FONT>                    Iterator var9 = var3.iterator();<a name="line.178"></a>
+<FONT color="green">179</FONT>    <a name="line.179"></a>
+<FONT color="green">180</FONT>                    while (var9.hasNext())<a name="line.180"></a>
+<FONT color="green">181</FONT>                    {<a name="line.181"></a>
+<FONT color="green">182</FONT>                        TileEntity var5 = (TileEntity)var9.next();<a name="line.182"></a>
+<FONT color="green">183</FONT>                        this.sendTileEntityToPlayer(var5);<a name="line.183"></a>
+<FONT color="green">184</FONT>                    }<a name="line.184"></a>
+<FONT color="green">185</FONT>                }<a name="line.185"></a>
+<FONT color="green">186</FONT>            }<a name="line.186"></a>
+<FONT color="green">187</FONT>    <a name="line.187"></a>
+<FONT color="green">188</FONT>            if (!this.destroyedItemsNetCache.isEmpty())<a name="line.188"></a>
+<FONT color="green">189</FONT>            {<a name="line.189"></a>
+<FONT color="green">190</FONT>                int var6 = Math.min(this.destroyedItemsNetCache.size(), 127);<a name="line.190"></a>
+<FONT color="green">191</FONT>                int[] var7 = new int[var6];<a name="line.191"></a>
+<FONT color="green">192</FONT>                Iterator var8 = this.destroyedItemsNetCache.iterator();<a name="line.192"></a>
+<FONT color="green">193</FONT>                int var10 = 0;<a name="line.193"></a>
+<FONT color="green">194</FONT>    <a name="line.194"></a>
+<FONT color="green">195</FONT>                while (var8.hasNext() &amp;&amp; var10 &lt; var6)<a name="line.195"></a>
+<FONT color="green">196</FONT>                {<a name="line.196"></a>
+<FONT color="green">197</FONT>                    var7[var10++] = ((Integer)var8.next()).intValue();<a name="line.197"></a>
+<FONT color="green">198</FONT>                    var8.remove();<a name="line.198"></a>
+<FONT color="green">199</FONT>                }<a name="line.199"></a>
+<FONT color="green">200</FONT>    <a name="line.200"></a>
+<FONT color="green">201</FONT>                this.playerNetServerHandler.sendPacketToPlayer(new Packet29DestroyEntity(var7));<a name="line.201"></a>
+<FONT color="green">202</FONT>            }<a name="line.202"></a>
+<FONT color="green">203</FONT>        }<a name="line.203"></a>
+<FONT color="green">204</FONT>    <a name="line.204"></a>
+<FONT color="green">205</FONT>        public void onUpdateEntity()<a name="line.205"></a>
+<FONT color="green">206</FONT>        {<a name="line.206"></a>
+<FONT color="green">207</FONT>            super.onUpdate();<a name="line.207"></a>
+<FONT color="green">208</FONT>    <a name="line.208"></a>
+<FONT color="green">209</FONT>            for (int var1 = 0; var1 &lt; this.inventory.getSizeInventory(); ++var1)<a name="line.209"></a>
+<FONT color="green">210</FONT>            {<a name="line.210"></a>
+<FONT color="green">211</FONT>                ItemStack var2 = this.inventory.getStackInSlot(var1);<a name="line.211"></a>
+<FONT color="green">212</FONT>    <a name="line.212"></a>
+<FONT color="green">213</FONT>                if (var2 != null &amp;&amp; Item.itemsList[var2.itemID].isMap() &amp;&amp; this.playerNetServerHandler.packetSize() &lt;= 5)<a name="line.213"></a>
+<FONT color="green">214</FONT>                {<a name="line.214"></a>
+<FONT color="green">215</FONT>                    Packet var3 = ((ItemMapBase)Item.itemsList[var2.itemID]).createMapDataPacket(var2, this.worldObj, this);<a name="line.215"></a>
+<FONT color="green">216</FONT>    <a name="line.216"></a>
+<FONT color="green">217</FONT>                    if (var3 != null)<a name="line.217"></a>
+<FONT color="green">218</FONT>                    {<a name="line.218"></a>
+<FONT color="green">219</FONT>                        this.playerNetServerHandler.sendPacketToPlayer(var3);<a name="line.219"></a>
+<FONT color="green">220</FONT>                    }<a name="line.220"></a>
+<FONT color="green">221</FONT>                }<a name="line.221"></a>
+<FONT color="green">222</FONT>            }<a name="line.222"></a>
+<FONT color="green">223</FONT>    <a name="line.223"></a>
+<FONT color="green">224</FONT>            if (this.getHealth() != this.lastHealth || this.lastFoodLevel != this.foodStats.getFoodLevel() || this.foodStats.getSaturationLevel() == 0.0F != this.wasHungry)<a name="line.224"></a>
+<FONT color="green">225</FONT>            {<a name="line.225"></a>
+<FONT color="green">226</FONT>                this.playerNetServerHandler.sendPacketToPlayer(new Packet8UpdateHealth(this.getHealth(), this.foodStats.getFoodLevel(), this.foodStats.getSaturationLevel()));<a name="line.226"></a>
+<FONT color="green">227</FONT>                this.lastHealth = this.getHealth();<a name="line.227"></a>
+<FONT color="green">228</FONT>                this.lastFoodLevel = this.foodStats.getFoodLevel();<a name="line.228"></a>
+<FONT color="green">229</FONT>                this.wasHungry = this.foodStats.getSaturationLevel() == 0.0F;<a name="line.229"></a>
+<FONT color="green">230</FONT>            }<a name="line.230"></a>
+<FONT color="green">231</FONT>    <a name="line.231"></a>
+<FONT color="green">232</FONT>            if (this.experienceTotal != this.lastExperience)<a name="line.232"></a>
+<FONT color="green">233</FONT>            {<a name="line.233"></a>
+<FONT color="green">234</FONT>                this.lastExperience = this.experienceTotal;<a name="line.234"></a>
+<FONT color="green">235</FONT>                this.playerNetServerHandler.sendPacketToPlayer(new Packet43Experience(this.experience, this.experienceTotal, this.experienceLevel));<a name="line.235"></a>
+<FONT color="green">236</FONT>            }<a name="line.236"></a>
+<FONT color="green">237</FONT>        }<a name="line.237"></a>
+<FONT color="green">238</FONT>    <a name="line.238"></a>
+<FONT color="green">239</FONT>        /**<a name="line.239"></a>
+<FONT color="green">240</FONT>         * Called when the mob's health reaches 0.<a name="line.240"></a>
+<FONT color="green">241</FONT>         */<a name="line.241"></a>
+<FONT color="green">242</FONT>        public void onDeath(DamageSource par1DamageSource)<a name="line.242"></a>
+<FONT color="green">243</FONT>        {<a name="line.243"></a>
+<FONT color="green">244</FONT>            if (ForgeHooks.onLivingDeath(this, par1DamageSource))<a name="line.244"></a>
+<FONT color="green">245</FONT>            {<a name="line.245"></a>
+<FONT color="green">246</FONT>                return;<a name="line.246"></a>
+<FONT color="green">247</FONT>            }<a name="line.247"></a>
+<FONT color="green">248</FONT>    <a name="line.248"></a>
+<FONT color="green">249</FONT>            this.mcServer.getConfigurationManager().sendPacketToAllPlayers(new Packet3Chat(par1DamageSource.getDeathMessage(this)));<a name="line.249"></a>
+<FONT color="green">250</FONT>    <a name="line.250"></a>
+<FONT color="green">251</FONT>            if (!this.worldObj.func_82736_K().func_82766_b("keepInventory"))<a name="line.251"></a>
+<FONT color="green">252</FONT>            {<a name="line.252"></a>
+<FONT color="green">253</FONT>                captureDrops = true;<a name="line.253"></a>
+<FONT color="green">254</FONT>                capturedDrops.clear();<a name="line.254"></a>
+<FONT color="green">255</FONT>    <a name="line.255"></a>
+<FONT color="green">256</FONT>                this.inventory.dropAllItems();<a name="line.256"></a>
+<FONT color="green">257</FONT>    <a name="line.257"></a>
+<FONT color="green">258</FONT>                captureDrops = false;<a name="line.258"></a>
+<FONT color="green">259</FONT>                PlayerDropsEvent event = new PlayerDropsEvent(this, par1DamageSource, capturedDrops, recentlyHit &gt; 0);<a name="line.259"></a>
+<FONT color="green">260</FONT>                if (!MinecraftForge.EVENT_BUS.post(event))<a name="line.260"></a>
+<FONT color="green">261</FONT>                {<a name="line.261"></a>
+<FONT color="green">262</FONT>                    for (EntityItem item : capturedDrops)<a name="line.262"></a>
+<FONT color="green">263</FONT>                    {<a name="line.263"></a>
+<FONT color="green">264</FONT>                        joinEntityItemWithWorld(item);<a name="line.264"></a>
+<FONT color="green">265</FONT>                    }<a name="line.265"></a>
+<FONT color="green">266</FONT>                }<a name="line.266"></a>
+<FONT color="green">267</FONT>            }<a name="line.267"></a>
+<FONT color="green">268</FONT>        }<a name="line.268"></a>
+<FONT color="green">269</FONT>    <a name="line.269"></a>
+<FONT color="green">270</FONT>        /**<a name="line.270"></a>
+<FONT color="green">271</FONT>         * Called when the entity is attacked.<a name="line.271"></a>
+<FONT color="green">272</FONT>         */<a name="line.272"></a>
+<FONT color="green">273</FONT>        public boolean attackEntityFrom(DamageSource par1DamageSource, int par2)<a name="line.273"></a>
+<FONT color="green">274</FONT>        {<a name="line.274"></a>
+<FONT color="green">275</FONT>            if (this.initialInvulnerability &gt; 0)<a name="line.275"></a>
+<FONT color="green">276</FONT>            {<a name="line.276"></a>
+<FONT color="green">277</FONT>                return false;<a name="line.277"></a>
+<FONT color="green">278</FONT>            }<a name="line.278"></a>
+<FONT color="green">279</FONT>            else<a name="line.279"></a>
+<FONT color="green">280</FONT>            {<a name="line.280"></a>
+<FONT color="green">281</FONT>                if (!this.mcServer.isPVPEnabled() &amp;&amp; par1DamageSource instanceof EntityDamageSource)<a name="line.281"></a>
+<FONT color="green">282</FONT>                {<a name="line.282"></a>
+<FONT color="green">283</FONT>                    Entity var3 = par1DamageSource.getEntity();<a name="line.283"></a>
+<FONT color="green">284</FONT>    <a name="line.284"></a>
+<FONT color="green">285</FONT>                    if (var3 instanceof EntityPlayer)<a name="line.285"></a>
+<FONT color="green">286</FONT>                    {<a name="line.286"></a>
+<FONT color="green">287</FONT>                        return false;<a name="line.287"></a>
+<FONT color="green">288</FONT>                    }<a name="line.288"></a>
+<FONT color="green">289</FONT>    <a name="line.289"></a>
+<FONT color="green">290</FONT>                    if (var3 instanceof EntityArrow)<a name="line.290"></a>
+<FONT color="green">291</FONT>                    {<a name="line.291"></a>
+<FONT color="green">292</FONT>                        EntityArrow var4 = (EntityArrow)var3;<a name="line.292"></a>
+<FONT color="green">293</FONT>    <a name="line.293"></a>
+<FONT color="green">294</FONT>                        if (var4.shootingEntity instanceof EntityPlayer)<a name="line.294"></a>
+<FONT color="green">295</FONT>                        {<a name="line.295"></a>
+<FONT color="green">296</FONT>                            return false;<a name="line.296"></a>
+<FONT color="green">297</FONT>                        }<a name="line.297"></a>
+<FONT color="green">298</FONT>                    }<a name="line.298"></a>
+<FONT color="green">299</FONT>                }<a name="line.299"></a>
+<FONT color="green">300</FONT>    <a name="line.300"></a>
+<FONT color="green">301</FONT>                return super.attackEntityFrom(par1DamageSource, par2);<a name="line.301"></a>
+<FONT color="green">302</FONT>            }<a name="line.302"></a>
+<FONT color="green">303</FONT>        }<a name="line.303"></a>
+<FONT color="green">304</FONT>    <a name="line.304"></a>
+<FONT color="green">305</FONT>        /**<a name="line.305"></a>
+<FONT color="green">306</FONT>         * returns if pvp is enabled or not<a name="line.306"></a>
+<FONT color="green">307</FONT>         */<a name="line.307"></a>
+<FONT color="green">308</FONT>        protected boolean isPVPEnabled()<a name="line.308"></a>
+<FONT color="green">309</FONT>        {<a name="line.309"></a>
+<FONT color="green">310</FONT>            return this.mcServer.isPVPEnabled();<a name="line.310"></a>
+<FONT color="green">311</FONT>        }<a name="line.311"></a>
+<FONT color="green">312</FONT>    <a name="line.312"></a>
+<FONT color="green">313</FONT>        public void travelToTheEnd(int par1)<a name="line.313"></a>
+<FONT color="green">314</FONT>        {<a name="line.314"></a>
+<FONT color="green">315</FONT>            if (this.dimension == 1 &amp;&amp; par1 == 1)<a name="line.315"></a>
+<FONT color="green">316</FONT>            {<a name="line.316"></a>
+<FONT color="green">317</FONT>                this.triggerAchievement(AchievementList.theEnd2);<a name="line.317"></a>
+<FONT color="green">318</FONT>                this.worldObj.setEntityDead(this);<a name="line.318"></a>
+<FONT color="green">319</FONT>                this.playerConqueredTheEnd = true;<a name="line.319"></a>
+<FONT color="green">320</FONT>                this.playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(4, 0));<a name="line.320"></a>
+<FONT color="green">321</FONT>            }<a name="line.321"></a>
+<FONT color="green">322</FONT>            else<a name="line.322"></a>
+<FONT color="green">323</FONT>            {<a name="line.323"></a>
+<FONT color="green">324</FONT>                if (this.dimension == 1 &amp;&amp; par1 == 0)<a name="line.324"></a>
+<FONT color="green">325</FONT>                {<a name="line.325"></a>
+<FONT color="green">326</FONT>                    this.triggerAchievement(AchievementList.theEnd);<a name="line.326"></a>
+<FONT color="green">327</FONT>                    ChunkCoordinates var2 = this.mcServer.worldServerForDimension(par1).getEntrancePortalLocation();<a name="line.327"></a>
+<FONT color="green">328</FONT>    <a name="line.328"></a>
+<FONT color="green">329</FONT>                    if (var2 != null)<a name="line.329"></a>
+<FONT color="green">330</FONT>                    {<a name="line.330"></a>
+<FONT color="green">331</FONT>                        this.playerNetServerHandler.setPlayerLocation((double)var2.posX, (double)var2.posY, (double)var2.posZ, 0.0F, 0.0F);<a name="line.331"></a>
+<FONT color="green">332</FONT>                    }<a name="line.332"></a>
+<FONT color="green">333</FONT>    <a name="line.333"></a>
+<FONT color="green">334</FONT>                    par1 = 1;<a name="line.334"></a>
+<FONT color="green">335</FONT>                }<a name="line.335"></a>
+<FONT color="green">336</FONT>                else<a name="line.336"></a>
+<FONT color="green">337</FONT>                {<a name="line.337"></a>
+<FONT color="green">338</FONT>                    this.triggerAchievement(AchievementList.portal);<a name="line.338"></a>
+<FONT color="green">339</FONT>                }<a name="line.339"></a>
+<FONT color="green">340</FONT>    <a name="line.340"></a>
+<FONT color="green">341</FONT>                this.mcServer.getConfigurationManager().transferPlayerToDimension(this, par1);<a name="line.341"></a>
+<FONT color="green">342</FONT>                this.lastExperience = -1;<a name="line.342"></a>
+<FONT color="green">343</FONT>                this.lastHealth = -1;<a name="line.343"></a>
+<FONT color="green">344</FONT>                this.lastFoodLevel = -1;<a name="line.344"></a>
+<FONT color="green">345</FONT>            }<a name="line.345"></a>
+<FONT color="green">346</FONT>        }<a name="line.346"></a>
+<FONT color="green">347</FONT>    <a name="line.347"></a>
+<FONT color="green">348</FONT>        /**<a name="line.348"></a>
+<FONT color="green">349</FONT>         * called from onUpdate for all tileEntity in specific chunks<a name="line.349"></a>
+<FONT color="green">350</FONT>         */<a name="line.350"></a>
+<FONT color="green">351</FONT>        private void sendTileEntityToPlayer(TileEntity par1TileEntity)<a name="line.351"></a>
+<FONT color="green">352</FONT>        {<a name="line.352"></a>
+<FONT color="green">353</FONT>            if (par1TileEntity != null)<a name="line.353"></a>
+<FONT color="green">354</FONT>            {<a name="line.354"></a>
+<FONT color="green">355</FONT>                Packet var2 = par1TileEntity.getDescriptionPacket();<a name="line.355"></a>
+<FONT color="green">356</FONT>    <a name="line.356"></a>
+<FONT color="green">357</FONT>                if (var2 != null)<a name="line.357"></a>
+<FONT color="green">358</FONT>                {<a name="line.358"></a>
+<FONT color="green">359</FONT>                    this.playerNetServerHandler.sendPacketToPlayer(var2);<a name="line.359"></a>
+<FONT color="green">360</FONT>                }<a name="line.360"></a>
+<FONT color="green">361</FONT>            }<a name="line.361"></a>
+<FONT color="green">362</FONT>        }<a name="line.362"></a>
+<FONT color="green">363</FONT>    <a name="line.363"></a>
+<FONT color="green">364</FONT>        /**<a name="line.364"></a>
+<FONT color="green">365</FONT>         * Called whenever an item is picked up from walking over it. Args: pickedUpEntity, stackSize<a name="line.365"></a>
+<FONT color="green">366</FONT>         */<a name="line.366"></a>
+<FONT color="green">367</FONT>        public void onItemPickup(Entity par1Entity, int par2)<a name="line.367"></a>
+<FONT color="green">368</FONT>        {<a name="line.368"></a>
+<FONT color="green">369</FONT>            super.onItemPickup(par1Entity, par2);<a name="line.369"></a>
+<FONT color="green">370</FONT>            this.craftingInventory.updateCraftingResults();<a name="line.370"></a>
+<FONT color="green">371</FONT>        }<a name="line.371"></a>
+<FONT color="green">372</FONT>    <a name="line.372"></a>
+<FONT color="green">373</FONT>        /**<a name="line.373"></a>
+<FONT color="green">374</FONT>         * Attempts to have the player sleep in a bed at the specified location.<a name="line.374"></a>
+<FONT color="green">375</FONT>         */<a name="line.375"></a>
+<FONT color="green">376</FONT>        public EnumStatus sleepInBedAt(int par1, int par2, int par3)<a name="line.376"></a>
+<FONT color="green">377</FONT>        {<a name="line.377"></a>
+<FONT color="green">378</FONT>            EnumStatus var4 = super.sleepInBedAt(par1, par2, par3);<a name="line.378"></a>
+<FONT color="green">379</FONT>    <a name="line.379"></a>
+<FONT color="green">380</FONT>            if (var4 == EnumStatus.OK)<a name="line.380"></a>
+<FONT color="green">381</FONT>            {<a name="line.381"></a>
+<FONT color="green">382</FONT>                Packet17Sleep var5 = new Packet17Sleep(this, 0, par1, par2, par3);<a name="line.382"></a>
+<FONT color="green">383</FONT>                this.getServerForPlayer().getEntityTracker().sendPacketToAllPlayersTrackingEntity(this, var5);<a name="line.383"></a>
+<FONT color="green">384</FONT>                this.playerNetServerHandler.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);<a name="line.384"></a>
+<FONT color="green">385</FONT>                this.playerNetServerHandler.sendPacketToPlayer(var5);<a name="line.385"></a>
+<FONT color="green">386</FONT>            }<a name="line.386"></a>
+<FONT color="green">387</FONT>    <a name="line.387"></a>
+<FONT color="green">388</FONT>            return var4;<a name="line.388"></a>
+<FONT color="green">389</FONT>        }<a name="line.389"></a>
+<FONT color="green">390</FONT>    <a name="line.390"></a>
+<FONT color="green">391</FONT>        /**<a name="line.391"></a>
+<FONT color="green">392</FONT>         * Wake up the player if they're sleeping.<a name="line.392"></a>
+<FONT color="green">393</FONT>         */<a name="line.393"></a>
+<FONT color="green">394</FONT>        public void wakeUpPlayer(boolean par1, boolean par2, boolean par3)<a name="line.394"></a>
+<FONT color="green">395</FONT>        {<a name="line.395"></a>
+<FONT color="green">396</FONT>            if (this.isPlayerSleeping())<a name="line.396"></a>
+<FONT color="green">397</FONT>            {<a name="line.397"></a>
+<FONT color="green">398</FONT>                this.getServerForPlayer().getEntityTracker().sendPacketToAllAssociatedPlayers(this, new Packet18Animation(this, 3));<a name="line.398"></a>
+<FONT color="green">399</FONT>            }<a name="line.399"></a>
+<FONT color="green">400</FONT>    <a name="line.400"></a>
+<FONT color="green">401</FONT>            super.wakeUpPlayer(par1, par2, par3);<a name="line.401"></a>
+<FONT color="green">402</FONT>    <a name="line.402"></a>
+<FONT color="green">403</FONT>            if (this.playerNetServerHandler != null)<a name="line.403"></a>
+<FONT color="green">404</FONT>            {<a name="line.404"></a>
+<FONT color="green">405</FONT>                this.playerNetServerHandler.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);<a name="line.405"></a>
+<FONT color="green">406</FONT>            }<a name="line.406"></a>
+<FONT color="green">407</FONT>        }<a name="line.407"></a>
+<FONT color="green">408</FONT>    <a name="line.408"></a>
+<FONT color="green">409</FONT>        /**<a name="line.409"></a>
+<FONT color="green">410</FONT>         * Called when a player mounts an entity. e.g. mounts a pig, mounts a boat.<a name="line.410"></a>
+<FONT color="green">411</FONT>         */<a name="line.411"></a>
+<FONT color="green">412</FONT>        public void mountEntity(Entity par1Entity)<a name="line.412"></a>
+<FONT color="green">413</FONT>        {<a name="line.413"></a>
+<FONT color="green">414</FONT>            super.mountEntity(par1Entity);<a name="line.414"></a>
+<FONT color="green">415</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet39AttachEntity(this, this.ridingEntity));<a name="line.415"></a>
+<FONT color="green">416</FONT>            this.playerNetServerHandler.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);<a name="line.416"></a>
+<FONT color="green">417</FONT>        }<a name="line.417"></a>
+<FONT color="green">418</FONT>    <a name="line.418"></a>
+<FONT color="green">419</FONT>        /**<a name="line.419"></a>
+<FONT color="green">420</FONT>         * Takes in the distance the entity has fallen this tick and whether its on the ground to update the fall distance<a name="line.420"></a>
+<FONT color="green">421</FONT>         * and deal fall damage if landing on the ground.  Args: distanceFallenThisTick, onGround<a name="line.421"></a>
+<FONT color="green">422</FONT>         */<a name="line.422"></a>
+<FONT color="green">423</FONT>        protected void updateFallState(double par1, boolean par3) {}<a name="line.423"></a>
+<FONT color="green">424</FONT>    <a name="line.424"></a>
+<FONT color="green">425</FONT>        /**<a name="line.425"></a>
+<FONT color="green">426</FONT>         * likeUpdateFallState, but called from updateFlyingState, rather than moveEntity<a name="line.426"></a>
+<FONT color="green">427</FONT>         */<a name="line.427"></a>
+<FONT color="green">428</FONT>        public void updateFlyingState(double par1, boolean par3)<a name="line.428"></a>
+<FONT color="green">429</FONT>        {<a name="line.429"></a>
+<FONT color="green">430</FONT>            super.updateFallState(par1, par3);<a name="line.430"></a>
+<FONT color="green">431</FONT>        }<a name="line.431"></a>
+<FONT color="green">432</FONT>    <a name="line.432"></a>
+<FONT color="green">433</FONT>        public void incrementWindowID()<a name="line.433"></a>
+<FONT color="green">434</FONT>        {<a name="line.434"></a>
+<FONT color="green">435</FONT>            this.currentWindowId = this.currentWindowId % 100 + 1;<a name="line.435"></a>
+<FONT color="green">436</FONT>        }<a name="line.436"></a>
+<FONT color="green">437</FONT>    <a name="line.437"></a>
+<FONT color="green">438</FONT>        /**<a name="line.438"></a>
+<FONT color="green">439</FONT>         * Displays the crafting GUI for a workbench.<a name="line.439"></a>
+<FONT color="green">440</FONT>         */<a name="line.440"></a>
+<FONT color="green">441</FONT>        public void displayGUIWorkbench(int par1, int par2, int par3)<a name="line.441"></a>
+<FONT color="green">442</FONT>        {<a name="line.442"></a>
+<FONT color="green">443</FONT>            this.incrementWindowID();<a name="line.443"></a>
+<FONT color="green">444</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 1, "Crafting", 9));<a name="line.444"></a>
+<FONT color="green">445</FONT>            this.craftingInventory = new ContainerWorkbench(this.inventory, this.worldObj, par1, par2, par3);<a name="line.445"></a>
+<FONT color="green">446</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.446"></a>
+<FONT color="green">447</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.447"></a>
+<FONT color="green">448</FONT>        }<a name="line.448"></a>
+<FONT color="green">449</FONT>    <a name="line.449"></a>
+<FONT color="green">450</FONT>        public void displayGUIEnchantment(int par1, int par2, int par3)<a name="line.450"></a>
+<FONT color="green">451</FONT>        {<a name="line.451"></a>
+<FONT color="green">452</FONT>            this.incrementWindowID();<a name="line.452"></a>
+<FONT color="green">453</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 4, "Enchanting", 9));<a name="line.453"></a>
+<FONT color="green">454</FONT>            this.craftingInventory = new ContainerEnchantment(this.inventory, this.worldObj, par1, par2, par3);<a name="line.454"></a>
+<FONT color="green">455</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.455"></a>
+<FONT color="green">456</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.456"></a>
+<FONT color="green">457</FONT>        }<a name="line.457"></a>
+<FONT color="green">458</FONT>    <a name="line.458"></a>
+<FONT color="green">459</FONT>        public void func_82244_d(int par1, int par2, int par3)<a name="line.459"></a>
+<FONT color="green">460</FONT>        {<a name="line.460"></a>
+<FONT color="green">461</FONT>            this.incrementWindowID();<a name="line.461"></a>
+<FONT color="green">462</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 8, "Repairing", 9));<a name="line.462"></a>
+<FONT color="green">463</FONT>            this.craftingInventory = new ContainerRepair(this.inventory, this.worldObj, par1, par2, par3, this);<a name="line.463"></a>
+<FONT color="green">464</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.464"></a>
+<FONT color="green">465</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.465"></a>
+<FONT color="green">466</FONT>        }<a name="line.466"></a>
+<FONT color="green">467</FONT>    <a name="line.467"></a>
+<FONT color="green">468</FONT>        /**<a name="line.468"></a>
+<FONT color="green">469</FONT>         * Displays the GUI for interacting with a chest inventory. Args: chestInventory<a name="line.469"></a>
+<FONT color="green">470</FONT>         */<a name="line.470"></a>
+<FONT color="green">471</FONT>        public void displayGUIChest(IInventory par1IInventory)<a name="line.471"></a>
+<FONT color="green">472</FONT>        {<a name="line.472"></a>
+<FONT color="green">473</FONT>            if (this.craftingInventory != this.inventorySlots)<a name="line.473"></a>
+<FONT color="green">474</FONT>            {<a name="line.474"></a>
+<FONT color="green">475</FONT>                this.closeScreen();<a name="line.475"></a>
+<FONT color="green">476</FONT>            }<a name="line.476"></a>
+<FONT color="green">477</FONT>    <a name="line.477"></a>
+<FONT color="green">478</FONT>            this.incrementWindowID();<a name="line.478"></a>
+<FONT color="green">479</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 0, par1IInventory.getInvName(), par1IInventory.getSizeInventory()));<a name="line.479"></a>
+<FONT color="green">480</FONT>            this.craftingInventory = new ContainerChest(this.inventory, par1IInventory);<a name="line.480"></a>
+<FONT color="green">481</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.481"></a>
+<FONT color="green">482</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.482"></a>
+<FONT color="green">483</FONT>        }<a name="line.483"></a>
+<FONT color="green">484</FONT>    <a name="line.484"></a>
+<FONT color="green">485</FONT>        /**<a name="line.485"></a>
+<FONT color="green">486</FONT>         * Displays the furnace GUI for the passed in furnace entity. Args: tileEntityFurnace<a name="line.486"></a>
+<FONT color="green">487</FONT>         */<a name="line.487"></a>
+<FONT color="green">488</FONT>        public void displayGUIFurnace(TileEntityFurnace par1TileEntityFurnace)<a name="line.488"></a>
+<FONT color="green">489</FONT>        {<a name="line.489"></a>
+<FONT color="green">490</FONT>            this.incrementWindowID();<a name="line.490"></a>
+<FONT color="green">491</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 2, par1TileEntityFurnace.getInvName(), par1TileEntityFurnace.getSizeInventory()));<a name="line.491"></a>
+<FONT color="green">492</FONT>            this.craftingInventory = new ContainerFurnace(this.inventory, par1TileEntityFurnace);<a name="line.492"></a>
+<FONT color="green">493</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.493"></a>
+<FONT color="green">494</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.494"></a>
+<FONT color="green">495</FONT>        }<a name="line.495"></a>
+<FONT color="green">496</FONT>    <a name="line.496"></a>
+<FONT color="green">497</FONT>        /**<a name="line.497"></a>
+<FONT color="green">498</FONT>         * Displays the dipsenser GUI for the passed in dispenser entity. Args: TileEntityDispenser<a name="line.498"></a>
+<FONT color="green">499</FONT>         */<a name="line.499"></a>
+<FONT color="green">500</FONT>        public void displayGUIDispenser(TileEntityDispenser par1TileEntityDispenser)<a name="line.500"></a>
+<FONT color="green">501</FONT>        {<a name="line.501"></a>
+<FONT color="green">502</FONT>            this.incrementWindowID();<a name="line.502"></a>
+<FONT color="green">503</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 3, par1TileEntityDispenser.getInvName(), par1TileEntityDispenser.getSizeInventory()));<a name="line.503"></a>
+<FONT color="green">504</FONT>            this.craftingInventory = new ContainerDispenser(this.inventory, par1TileEntityDispenser);<a name="line.504"></a>
+<FONT color="green">505</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.505"></a>
+<FONT color="green">506</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.506"></a>
+<FONT color="green">507</FONT>        }<a name="line.507"></a>
+<FONT color="green">508</FONT>    <a name="line.508"></a>
+<FONT color="green">509</FONT>        /**<a name="line.509"></a>
+<FONT color="green">510</FONT>         * Displays the GUI for interacting with a brewing stand.<a name="line.510"></a>
+<FONT color="green">511</FONT>         */<a name="line.511"></a>
+<FONT color="green">512</FONT>        public void displayGUIBrewingStand(TileEntityBrewingStand par1TileEntityBrewingStand)<a name="line.512"></a>
+<FONT color="green">513</FONT>        {<a name="line.513"></a>
+<FONT color="green">514</FONT>            this.incrementWindowID();<a name="line.514"></a>
+<FONT color="green">515</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 5, par1TileEntityBrewingStand.getInvName(), par1TileEntityBrewingStand.getSizeInventory()));<a name="line.515"></a>
+<FONT color="green">516</FONT>            this.craftingInventory = new ContainerBrewingStand(this.inventory, par1TileEntityBrewingStand);<a name="line.516"></a>
+<FONT color="green">517</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.517"></a>
+<FONT color="green">518</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.518"></a>
+<FONT color="green">519</FONT>        }<a name="line.519"></a>
+<FONT color="green">520</FONT>    <a name="line.520"></a>
+<FONT color="green">521</FONT>        public void func_82240_a(TileEntityBeacon par1TileEntityBeacon)<a name="line.521"></a>
+<FONT color="green">522</FONT>        {<a name="line.522"></a>
+<FONT color="green">523</FONT>            this.incrementWindowID();<a name="line.523"></a>
+<FONT color="green">524</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 7, par1TileEntityBeacon.getInvName(), par1TileEntityBeacon.getSizeInventory()));<a name="line.524"></a>
+<FONT color="green">525</FONT>            this.craftingInventory = new ContainerBeacon(this.inventory, par1TileEntityBeacon);<a name="line.525"></a>
+<FONT color="green">526</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.526"></a>
+<FONT color="green">527</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.527"></a>
+<FONT color="green">528</FONT>        }<a name="line.528"></a>
+<FONT color="green">529</FONT>    <a name="line.529"></a>
+<FONT color="green">530</FONT>        public void displayGUIMerchant(IMerchant par1IMerchant)<a name="line.530"></a>
+<FONT color="green">531</FONT>        {<a name="line.531"></a>
+<FONT color="green">532</FONT>            this.incrementWindowID();<a name="line.532"></a>
+<FONT color="green">533</FONT>            this.craftingInventory = new ContainerMerchant(this.inventory, par1IMerchant, this.worldObj);<a name="line.533"></a>
+<FONT color="green">534</FONT>            this.craftingInventory.windowId = this.currentWindowId;<a name="line.534"></a>
+<FONT color="green">535</FONT>            this.craftingInventory.addCraftingToCrafters(this);<a name="line.535"></a>
+<FONT color="green">536</FONT>            InventoryMerchant var2 = ((ContainerMerchant)this.craftingInventory).getMerchantInventory();<a name="line.536"></a>
+<FONT color="green">537</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet100OpenWindow(this.currentWindowId, 6, var2.getInvName(), var2.getSizeInventory()));<a name="line.537"></a>
+<FONT color="green">538</FONT>            MerchantRecipeList var3 = par1IMerchant.getRecipes(this);<a name="line.538"></a>
+<FONT color="green">539</FONT>    <a name="line.539"></a>
+<FONT color="green">540</FONT>            if (var3 != null)<a name="line.540"></a>
+<FONT color="green">541</FONT>            {<a name="line.541"></a>
+<FONT color="green">542</FONT>                try<a name="line.542"></a>
+<FONT color="green">543</FONT>                {<a name="line.543"></a>
+<FONT color="green">544</FONT>                    ByteArrayOutputStream var4 = new ByteArrayOutputStream();<a name="line.544"></a>
+<FONT color="green">545</FONT>                    DataOutputStream var5 = new DataOutputStream(var4);<a name="line.545"></a>
+<FONT color="green">546</FONT>                    var5.writeInt(this.currentWindowId);<a name="line.546"></a>
+<FONT color="green">547</FONT>                    var3.writeRecipiesToStream(var5);<a name="line.547"></a>
+<FONT color="green">548</FONT>                    this.playerNetServerHandler.sendPacketToPlayer(new Packet250CustomPayload("MC|TrList", var4.toByteArray()));<a name="line.548"></a>
+<FONT color="green">549</FONT>                }<a name="line.549"></a>
+<FONT color="green">550</FONT>                catch (IOException var6)<a name="line.550"></a>
+<FONT color="green">551</FONT>                {<a name="line.551"></a>
+<FONT color="green">552</FONT>                    var6.printStackTrace();<a name="line.552"></a>
+<FONT color="green">553</FONT>                }<a name="line.553"></a>
+<FONT color="green">554</FONT>            }<a name="line.554"></a>
+<FONT color="green">555</FONT>        }<a name="line.555"></a>
+<FONT color="green">556</FONT>    <a name="line.556"></a>
+<FONT color="green">557</FONT>        /**<a name="line.557"></a>
+<FONT color="green">558</FONT>         * inform the player of a change in a single slot<a name="line.558"></a>
+<FONT color="green">559</FONT>         */<a name="line.559"></a>
+<FONT color="green">560</FONT>        public void updateCraftingInventorySlot(Container par1Container, int par2, ItemStack par3ItemStack)<a name="line.560"></a>
+<FONT color="green">561</FONT>        {<a name="line.561"></a>
+<FONT color="green">562</FONT>            if (!(par1Container.getSlot(par2) instanceof SlotCrafting))<a name="line.562"></a>
+<FONT color="green">563</FONT>            {<a name="line.563"></a>
+<FONT color="green">564</FONT>                if (!this.playerInventoryBeingManipulated)<a name="line.564"></a>
+<FONT color="green">565</FONT>                {<a name="line.565"></a>
+<FONT color="green">566</FONT>                    this.playerNetServerHandler.sendPacketToPlayer(new Packet103SetSlot(par1Container.windowId, par2, par3ItemStack));<a name="line.566"></a>
+<FONT color="green">567</FONT>                }<a name="line.567"></a>
+<FONT color="green">568</FONT>            }<a name="line.568"></a>
+<FONT color="green">569</FONT>        }<a name="line.569"></a>
+<FONT color="green">570</FONT>    <a name="line.570"></a>
+<FONT color="green">571</FONT>        public void sendContainerToPlayer(Container par1Container)<a name="line.571"></a>
+<FONT color="green">572</FONT>        {<a name="line.572"></a>
+<FONT color="green">573</FONT>            this.sendContainerAndContentsToPlayer(par1Container, par1Container.getInventory());<a name="line.573"></a>
+<FONT color="green">574</FONT>        }<a name="line.574"></a>
+<FONT color="green">575</FONT>    <a name="line.575"></a>
+<FONT color="green">576</FONT>        public void sendContainerAndContentsToPlayer(Container par1Container, List par2List)<a name="line.576"></a>
+<FONT color="green">577</FONT>        {<a name="line.577"></a>
+<FONT color="green">578</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet104WindowItems(par1Container.windowId, par2List));<a name="line.578"></a>
+<FONT color="green">579</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet103SetSlot(-1, -1, this.inventory.getItemStack()));<a name="line.579"></a>
+<FONT color="green">580</FONT>        }<a name="line.580"></a>
+<FONT color="green">581</FONT>    <a name="line.581"></a>
+<FONT color="green">582</FONT>        /**<a name="line.582"></a>
+<FONT color="green">583</FONT>         * send information about the crafting inventory to the client(currently only for furnace times)<a name="line.583"></a>
+<FONT color="green">584</FONT>         */<a name="line.584"></a>
+<FONT color="green">585</FONT>        public void updateCraftingInventoryInfo(Container par1Container, int par2, int par3)<a name="line.585"></a>
+<FONT color="green">586</FONT>        {<a name="line.586"></a>
+<FONT color="green">587</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet105UpdateProgressbar(par1Container.windowId, par2, par3));<a name="line.587"></a>
+<FONT color="green">588</FONT>        }<a name="line.588"></a>
+<FONT color="green">589</FONT>    <a name="line.589"></a>
+<FONT color="green">590</FONT>        /**<a name="line.590"></a>
+<FONT color="green">591</FONT>         * sets current screen to null (used on escape buttons of GUIs)<a name="line.591"></a>
+<FONT color="green">592</FONT>         */<a name="line.592"></a>
+<FONT color="green">593</FONT>        public void closeScreen()<a name="line.593"></a>
+<FONT color="green">594</FONT>        {<a name="line.594"></a>
+<FONT color="green">595</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet101CloseWindow(this.craftingInventory.windowId));<a name="line.595"></a>
+<FONT color="green">596</FONT>            this.closeInventory();<a name="line.596"></a>
+<FONT color="green">597</FONT>        }<a name="line.597"></a>
+<FONT color="green">598</FONT>    <a name="line.598"></a>
+<FONT color="green">599</FONT>        public void sendInventoryToPlayer()<a name="line.599"></a>
+<FONT color="green">600</FONT>        {<a name="line.600"></a>
+<FONT color="green">601</FONT>            if (!this.playerInventoryBeingManipulated)<a name="line.601"></a>
+<FONT color="green">602</FONT>            {<a name="line.602"></a>
+<FONT color="green">603</FONT>                this.playerNetServerHandler.sendPacketToPlayer(new Packet103SetSlot(-1, -1, this.inventory.getItemStack()));<a name="line.603"></a>
+<FONT color="green">604</FONT>            }<a name="line.604"></a>
+<FONT color="green">605</FONT>        }<a name="line.605"></a>
+<FONT color="green">606</FONT>    <a name="line.606"></a>
+<FONT color="green">607</FONT>        public void closeInventory()<a name="line.607"></a>
+<FONT color="green">608</FONT>        {<a name="line.608"></a>
+<FONT color="green">609</FONT>            this.craftingInventory.onCraftGuiClosed(this);<a name="line.609"></a>
+<FONT color="green">610</FONT>            this.craftingInventory = this.inventorySlots;<a name="line.610"></a>
+<FONT color="green">611</FONT>        }<a name="line.611"></a>
+<FONT color="green">612</FONT>    <a name="line.612"></a>
+<FONT color="green">613</FONT>        /**<a name="line.613"></a>
+<FONT color="green">614</FONT>         * Adds a value to a statistic field.<a name="line.614"></a>
+<FONT color="green">615</FONT>         */<a name="line.615"></a>
+<FONT color="green">616</FONT>        public void addStat(StatBase par1StatBase, int par2)<a name="line.616"></a>
+<FONT color="green">617</FONT>        {<a name="line.617"></a>
+<FONT color="green">618</FONT>            if (par1StatBase != null)<a name="line.618"></a>
+<FONT color="green">619</FONT>            {<a name="line.619"></a>
+<FONT color="green">620</FONT>                if (!par1StatBase.isIndependent)<a name="line.620"></a>
+<FONT color="green">621</FONT>                {<a name="line.621"></a>
+<FONT color="green">622</FONT>                    while (par2 &gt; 100)<a name="line.622"></a>
+<FONT color="green">623</FONT>                    {<a name="line.623"></a>
+<FONT color="green">624</FONT>                        this.playerNetServerHandler.sendPacketToPlayer(new Packet200Statistic(par1StatBase.statId, 100));<a name="line.624"></a>
+<FONT color="green">625</FONT>                        par2 -= 100;<a name="line.625"></a>
+<FONT color="green">626</FONT>                    }<a name="line.626"></a>
+<FONT color="green">627</FONT>    <a name="line.627"></a>
+<FONT color="green">628</FONT>                    this.playerNetServerHandler.sendPacketToPlayer(new Packet200Statistic(par1StatBase.statId, par2));<a name="line.628"></a>
+<FONT color="green">629</FONT>                }<a name="line.629"></a>
+<FONT color="green">630</FONT>            }<a name="line.630"></a>
+<FONT color="green">631</FONT>        }<a name="line.631"></a>
+<FONT color="green">632</FONT>    <a name="line.632"></a>
+<FONT color="green">633</FONT>        public void mountEntityAndWakeUp()<a name="line.633"></a>
+<FONT color="green">634</FONT>        {<a name="line.634"></a>
+<FONT color="green">635</FONT>            if (this.ridingEntity != null)<a name="line.635"></a>
+<FONT color="green">636</FONT>            {<a name="line.636"></a>
+<FONT color="green">637</FONT>                this.mountEntity(this.ridingEntity);<a name="line.637"></a>
+<FONT color="green">638</FONT>            }<a name="line.638"></a>
+<FONT color="green">639</FONT>    <a name="line.639"></a>
+<FONT color="green">640</FONT>            if (this.riddenByEntity != null)<a name="line.640"></a>
+<FONT color="green">641</FONT>            {<a name="line.641"></a>
+<FONT color="green">642</FONT>                this.riddenByEntity.mountEntity(this);<a name="line.642"></a>
+<FONT color="green">643</FONT>            }<a name="line.643"></a>
+<FONT color="green">644</FONT>    <a name="line.644"></a>
+<FONT color="green">645</FONT>            if (this.sleeping)<a name="line.645"></a>
+<FONT color="green">646</FONT>            {<a name="line.646"></a>
+<FONT color="green">647</FONT>                this.wakeUpPlayer(true, false, false);<a name="line.647"></a>
+<FONT color="green">648</FONT>            }<a name="line.648"></a>
+<FONT color="green">649</FONT>        }<a name="line.649"></a>
+<FONT color="green">650</FONT>    <a name="line.650"></a>
+<FONT color="green">651</FONT>        /**<a name="line.651"></a>
+<FONT color="green">652</FONT>         * this function is called when a players inventory is sent to him, lastHealth is updated on any dimension<a name="line.652"></a>
+<FONT color="green">653</FONT>         * transitions, then reset.<a name="line.653"></a>
+<FONT color="green">654</FONT>         */<a name="line.654"></a>
+<FONT color="green">655</FONT>        public void setPlayerHealthUpdated()<a name="line.655"></a>
+<FONT color="green">656</FONT>        {<a name="line.656"></a>
+<FONT color="green">657</FONT>            this.lastHealth = -99999999;<a name="line.657"></a>
+<FONT color="green">658</FONT>        }<a name="line.658"></a>
+<FONT color="green">659</FONT>    <a name="line.659"></a>
+<FONT color="green">660</FONT>        /**<a name="line.660"></a>
+<FONT color="green">661</FONT>         * Add a chat message to the player<a name="line.661"></a>
+<FONT color="green">662</FONT>         */<a name="line.662"></a>
+<FONT color="green">663</FONT>        public void addChatMessage(String par1Str)<a name="line.663"></a>
+<FONT color="green">664</FONT>        {<a name="line.664"></a>
+<FONT color="green">665</FONT>            StringTranslate var2 = StringTranslate.getInstance();<a name="line.665"></a>
+<FONT color="green">666</FONT>            String var3 = var2.translateKey(par1Str);<a name="line.666"></a>
+<FONT color="green">667</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet3Chat(var3));<a name="line.667"></a>
+<FONT color="green">668</FONT>        }<a name="line.668"></a>
+<FONT color="green">669</FONT>    <a name="line.669"></a>
+<FONT color="green">670</FONT>        /**<a name="line.670"></a>
+<FONT color="green">671</FONT>         * Used for when item use count runs out, ie: eating completed<a name="line.671"></a>
+<FONT color="green">672</FONT>         */<a name="line.672"></a>
+<FONT color="green">673</FONT>        protected void onItemUseFinish()<a name="line.673"></a>
+<FONT color="green">674</FONT>        {<a name="line.674"></a>
+<FONT color="green">675</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet38EntityStatus(this.entityId, (byte)9));<a name="line.675"></a>
+<FONT color="green">676</FONT>            super.onItemUseFinish();<a name="line.676"></a>
+<FONT color="green">677</FONT>        }<a name="line.677"></a>
+<FONT color="green">678</FONT>    <a name="line.678"></a>
+<FONT color="green">679</FONT>        /**<a name="line.679"></a>
+<FONT color="green">680</FONT>         * sets the itemInUse when the use item button is clicked. Args: itemstack, int maxItemUseDuration<a name="line.680"></a>
+<FONT color="green">681</FONT>         */<a name="line.681"></a>
+<FONT color="green">682</FONT>        public void setItemInUse(ItemStack par1ItemStack, int par2)<a name="line.682"></a>
+<FONT color="green">683</FONT>        {<a name="line.683"></a>
+<FONT color="green">684</FONT>            super.setItemInUse(par1ItemStack, par2);<a name="line.684"></a>
+<FONT color="green">685</FONT>    <a name="line.685"></a>
+<FONT color="green">686</FONT>            if (par1ItemStack != null &amp;&amp; par1ItemStack.getItem() != null &amp;&amp; par1ItemStack.getItem().getItemUseAction(par1ItemStack) == EnumAction.eat)<a name="line.686"></a>
+<FONT color="green">687</FONT>            {<a name="line.687"></a>
+<FONT color="green">688</FONT>                this.getServerForPlayer().getEntityTracker().sendPacketToAllAssociatedPlayers(this, new Packet18Animation(this, 5));<a name="line.688"></a>
+<FONT color="green">689</FONT>            }<a name="line.689"></a>
+<FONT color="green">690</FONT>        }<a name="line.690"></a>
+<FONT color="green">691</FONT>    <a name="line.691"></a>
+<FONT color="green">692</FONT>        /**<a name="line.692"></a>
+<FONT color="green">693</FONT>         * Copies the values from the given player into this player if boolean par2 is true. Always clones Ender Chest<a name="line.693"></a>
+<FONT color="green">694</FONT>         * Inventory.<a name="line.694"></a>
+<FONT color="green">695</FONT>         */<a name="line.695"></a>
+<FONT color="green">696</FONT>        public void clonePlayer(EntityPlayer par1EntityPlayer, boolean par2)<a name="line.696"></a>
+<FONT color="green">697</FONT>        {<a name="line.697"></a>
+<FONT color="green">698</FONT>            super.clonePlayer(par1EntityPlayer, par2);<a name="line.698"></a>
+<FONT color="green">699</FONT>            this.lastExperience = -1;<a name="line.699"></a>
+<FONT color="green">700</FONT>            this.lastHealth = -1;<a name="line.700"></a>
+<FONT color="green">701</FONT>            this.lastFoodLevel = -1;<a name="line.701"></a>
+<FONT color="green">702</FONT>            this.destroyedItemsNetCache.addAll(((EntityPlayerMP)par1EntityPlayer).destroyedItemsNetCache);<a name="line.702"></a>
+<FONT color="green">703</FONT>        }<a name="line.703"></a>
+<FONT color="green">704</FONT>    <a name="line.704"></a>
+<FONT color="green">705</FONT>        protected void onNewPotionEffect(PotionEffect par1PotionEffect)<a name="line.705"></a>
+<FONT color="green">706</FONT>        {<a name="line.706"></a>
+<FONT color="green">707</FONT>            super.onNewPotionEffect(par1PotionEffect);<a name="line.707"></a>
+<FONT color="green">708</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet41EntityEffect(this.entityId, par1PotionEffect));<a name="line.708"></a>
+<FONT color="green">709</FONT>        }<a name="line.709"></a>
+<FONT color="green">710</FONT>    <a name="line.710"></a>
+<FONT color="green">711</FONT>        protected void onChangedPotionEffect(PotionEffect par1PotionEffect)<a name="line.711"></a>
+<FONT color="green">712</FONT>        {<a name="line.712"></a>
+<FONT color="green">713</FONT>            super.onChangedPotionEffect(par1PotionEffect);<a name="line.713"></a>
+<FONT color="green">714</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet41EntityEffect(this.entityId, par1PotionEffect));<a name="line.714"></a>
+<FONT color="green">715</FONT>        }<a name="line.715"></a>
+<FONT color="green">716</FONT>    <a name="line.716"></a>
+<FONT color="green">717</FONT>        protected void onFinishedPotionEffect(PotionEffect par1PotionEffect)<a name="line.717"></a>
+<FONT color="green">718</FONT>        {<a name="line.718"></a>
+<FONT color="green">719</FONT>            super.onFinishedPotionEffect(par1PotionEffect);<a name="line.719"></a>
+<FONT color="green">720</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet42RemoveEntityEffect(this.entityId, par1PotionEffect));<a name="line.720"></a>
+<FONT color="green">721</FONT>        }<a name="line.721"></a>
+<FONT color="green">722</FONT>    <a name="line.722"></a>
+<FONT color="green">723</FONT>        /**<a name="line.723"></a>
+<FONT color="green">724</FONT>         * Move the entity to the coordinates informed, but keep yaw/pitch values.<a name="line.724"></a>
+<FONT color="green">725</FONT>         */<a name="line.725"></a>
+<FONT color="green">726</FONT>        public void setPositionAndUpdate(double par1, double par3, double par5)<a name="line.726"></a>
+<FONT color="green">727</FONT>        {<a name="line.727"></a>
+<FONT color="green">728</FONT>            this.playerNetServerHandler.setPlayerLocation(par1, par3, par5, this.rotationYaw, this.rotationPitch);<a name="line.728"></a>
+<FONT color="green">729</FONT>        }<a name="line.729"></a>
+<FONT color="green">730</FONT>    <a name="line.730"></a>
+<FONT color="green">731</FONT>        /**<a name="line.731"></a>
+<FONT color="green">732</FONT>         * Called when the player performs a critical hit on the Entity. Args: entity that was hit critically<a name="line.732"></a>
+<FONT color="green">733</FONT>         */<a name="line.733"></a>
+<FONT color="green">734</FONT>        public void onCriticalHit(Entity par1Entity)<a name="line.734"></a>
+<FONT color="green">735</FONT>        {<a name="line.735"></a>
+<FONT color="green">736</FONT>            this.getServerForPlayer().getEntityTracker().sendPacketToAllAssociatedPlayers(this, new Packet18Animation(par1Entity, 6));<a name="line.736"></a>
+<FONT color="green">737</FONT>        }<a name="line.737"></a>
+<FONT color="green">738</FONT>    <a name="line.738"></a>
+<FONT color="green">739</FONT>        public void onEnchantmentCritical(Entity par1Entity)<a name="line.739"></a>
+<FONT color="green">740</FONT>        {<a name="line.740"></a>
+<FONT color="green">741</FONT>            this.getServerForPlayer().getEntityTracker().sendPacketToAllAssociatedPlayers(this, new Packet18Animation(par1Entity, 7));<a name="line.741"></a>
+<FONT color="green">742</FONT>        }<a name="line.742"></a>
+<FONT color="green">743</FONT>    <a name="line.743"></a>
+<FONT color="green">744</FONT>        /**<a name="line.744"></a>
+<FONT color="green">745</FONT>         * Sends the player's abilities to the server (if there is one).<a name="line.745"></a>
+<FONT color="green">746</FONT>         */<a name="line.746"></a>
+<FONT color="green">747</FONT>        public void sendPlayerAbilities()<a name="line.747"></a>
+<FONT color="green">748</FONT>        {<a name="line.748"></a>
+<FONT color="green">749</FONT>            if (this.playerNetServerHandler != null)<a name="line.749"></a>
+<FONT color="green">750</FONT>            {<a name="line.750"></a>
+<FONT color="green">751</FONT>                this.playerNetServerHandler.sendPacketToPlayer(new Packet202PlayerAbilities(this.capabilities));<a name="line.751"></a>
+<FONT color="green">752</FONT>            }<a name="line.752"></a>
+<FONT color="green">753</FONT>        }<a name="line.753"></a>
+<FONT color="green">754</FONT>    <a name="line.754"></a>
+<FONT color="green">755</FONT>        public WorldServer getServerForPlayer()<a name="line.755"></a>
+<FONT color="green">756</FONT>        {<a name="line.756"></a>
+<FONT color="green">757</FONT>            return (WorldServer)this.worldObj;<a name="line.757"></a>
+<FONT color="green">758</FONT>        }<a name="line.758"></a>
+<FONT color="green">759</FONT>    <a name="line.759"></a>
+<FONT color="green">760</FONT>        public void sendGameTypeToPlayer(EnumGameType par1EnumGameType)<a name="line.760"></a>
+<FONT color="green">761</FONT>        {<a name="line.761"></a>
+<FONT color="green">762</FONT>            this.theItemInWorldManager.setGameType(par1EnumGameType);<a name="line.762"></a>
+<FONT color="green">763</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(3, par1EnumGameType.getID()));<a name="line.763"></a>
+<FONT color="green">764</FONT>        }<a name="line.764"></a>
+<FONT color="green">765</FONT>    <a name="line.765"></a>
+<FONT color="green">766</FONT>        public void sendChatToPlayer(String par1Str)<a name="line.766"></a>
+<FONT color="green">767</FONT>        {<a name="line.767"></a>
+<FONT color="green">768</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet3Chat(par1Str));<a name="line.768"></a>
+<FONT color="green">769</FONT>        }<a name="line.769"></a>
+<FONT color="green">770</FONT>    <a name="line.770"></a>
+<FONT color="green">771</FONT>        /**<a name="line.771"></a>
+<FONT color="green">772</FONT>         * Returns true if the command sender is allowed to use the given command.<a name="line.772"></a>
+<FONT color="green">773</FONT>         */<a name="line.773"></a>
+<FONT color="green">774</FONT>        public boolean canCommandSenderUseCommand(int par1, String par2Str)<a name="line.774"></a>
+<FONT color="green">775</FONT>        {<a name="line.775"></a>
+<FONT color="green">776</FONT>            return "seed".equals(par2Str) &amp;&amp; !this.mcServer.isDedicatedServer() ? true : (!"tell".equals(par2Str) &amp;&amp; !"help".equals(par2Str) &amp;&amp; !"me".equals(par2Str) ? this.mcServer.getConfigurationManager().areCommandsAllowed(this.username) : true);<a name="line.776"></a>
+<FONT color="green">777</FONT>        }<a name="line.777"></a>
+<FONT color="green">778</FONT>    <a name="line.778"></a>
+<FONT color="green">779</FONT>        public String func_71114_r()<a name="line.779"></a>
+<FONT color="green">780</FONT>        {<a name="line.780"></a>
+<FONT color="green">781</FONT>            String var1 = this.playerNetServerHandler.netManager.getSocketAddress().toString();<a name="line.781"></a>
+<FONT color="green">782</FONT>            var1 = var1.substring(var1.indexOf("/") + 1);<a name="line.782"></a>
+<FONT color="green">783</FONT>            var1 = var1.substring(0, var1.indexOf(":"));<a name="line.783"></a>
+<FONT color="green">784</FONT>            return var1;<a name="line.784"></a>
+<FONT color="green">785</FONT>        }<a name="line.785"></a>
+<FONT color="green">786</FONT>    <a name="line.786"></a>
+<FONT color="green">787</FONT>        public void updateClientInfo(Packet204ClientInfo par1Packet204ClientInfo)<a name="line.787"></a>
+<FONT color="green">788</FONT>        {<a name="line.788"></a>
+<FONT color="green">789</FONT>            if (this.translator.getLanguageList().containsKey(par1Packet204ClientInfo.getLanguage()))<a name="line.789"></a>
+<FONT color="green">790</FONT>            {<a name="line.790"></a>
+<FONT color="green">791</FONT>                this.translator.setLanguage(par1Packet204ClientInfo.getLanguage());<a name="line.791"></a>
+<FONT color="green">792</FONT>            }<a name="line.792"></a>
+<FONT color="green">793</FONT>    <a name="line.793"></a>
+<FONT color="green">794</FONT>            int var2 = 256 &gt;&gt; par1Packet204ClientInfo.getRenderDistance();<a name="line.794"></a>
+<FONT color="green">795</FONT>    <a name="line.795"></a>
+<FONT color="green">796</FONT>            if (var2 &gt; 3 &amp;&amp; var2 &lt; 15)<a name="line.796"></a>
+<FONT color="green">797</FONT>            {<a name="line.797"></a>
+<FONT color="green">798</FONT>                this.renderDistance = var2;<a name="line.798"></a>
+<FONT color="green">799</FONT>            }<a name="line.799"></a>
+<FONT color="green">800</FONT>    <a name="line.800"></a>
+<FONT color="green">801</FONT>            this.chatVisibility = par1Packet204ClientInfo.getChatVisibility();<a name="line.801"></a>
+<FONT color="green">802</FONT>            this.chatColours = par1Packet204ClientInfo.getChatColours();<a name="line.802"></a>
+<FONT color="green">803</FONT>    <a name="line.803"></a>
+<FONT color="green">804</FONT>            if (this.mcServer.isSinglePlayer() &amp;&amp; this.mcServer.getServerOwner().equals(this.username))<a name="line.804"></a>
+<FONT color="green">805</FONT>            {<a name="line.805"></a>
+<FONT color="green">806</FONT>                this.mcServer.setDifficultyForAllWorlds(par1Packet204ClientInfo.getDifficulty());<a name="line.806"></a>
+<FONT color="green">807</FONT>            }<a name="line.807"></a>
+<FONT color="green">808</FONT>    <a name="line.808"></a>
+<FONT color="green">809</FONT>            this.func_82239_b(1, !par1Packet204ClientInfo.func_82563_j());<a name="line.809"></a>
+<FONT color="green">810</FONT>        }<a name="line.810"></a>
+<FONT color="green">811</FONT>    <a name="line.811"></a>
+<FONT color="green">812</FONT>        public StringTranslate getTranslator()<a name="line.812"></a>
+<FONT color="green">813</FONT>        {<a name="line.813"></a>
+<FONT color="green">814</FONT>            return this.translator;<a name="line.814"></a>
+<FONT color="green">815</FONT>        }<a name="line.815"></a>
+<FONT color="green">816</FONT>    <a name="line.816"></a>
+<FONT color="green">817</FONT>        public int getChatVisibility()<a name="line.817"></a>
+<FONT color="green">818</FONT>        {<a name="line.818"></a>
+<FONT color="green">819</FONT>            return this.chatVisibility;<a name="line.819"></a>
+<FONT color="green">820</FONT>        }<a name="line.820"></a>
+<FONT color="green">821</FONT>    <a name="line.821"></a>
+<FONT color="green">822</FONT>        /**<a name="line.822"></a>
+<FONT color="green">823</FONT>         * on recieving this message the client (if permission is given) will download the requested textures<a name="line.823"></a>
+<FONT color="green">824</FONT>         */<a name="line.824"></a>
+<FONT color="green">825</FONT>        public void requestTexturePackLoad(String par1Str, int par2)<a name="line.825"></a>
+<FONT color="green">826</FONT>        {<a name="line.826"></a>
+<FONT color="green">827</FONT>            String var3 = par1Str + "\u0000" + par2;<a name="line.827"></a>
+<FONT color="green">828</FONT>            this.playerNetServerHandler.sendPacketToPlayer(new Packet250CustomPayload("MC|TPack", var3.getBytes()));<a name="line.828"></a>
+<FONT color="green">829</FONT>        }<a name="line.829"></a>
+<FONT color="green">830</FONT>    <a name="line.830"></a>
+<FONT color="green">831</FONT>        public ChunkCoordinates func_82114_b()<a name="line.831"></a>
+<FONT color="green">832</FONT>        {<a name="line.832"></a>
+<FONT color="green">833</FONT>            return new ChunkCoordinates(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY + 0.5D), MathHelper.floor_double(this.posZ));<a name="line.833"></a>
+<FONT color="green">834</FONT>        }<a name="line.834"></a>
+<FONT color="green">835</FONT>    }<a name="line.835"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

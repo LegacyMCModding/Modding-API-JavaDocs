@@ -1,0 +1,102 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Random;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.server.MinecraftServer;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public class BehaviorDispenseFireball extends BehaviorDefaultDispenseItem<a name="line.6"></a>
+<FONT color="green">007</FONT>    {<a name="line.7"></a>
+<FONT color="green">008</FONT>        final MinecraftServer field_82504_b;<a name="line.8"></a>
+<FONT color="green">009</FONT>    <a name="line.9"></a>
+<FONT color="green">010</FONT>        public BehaviorDispenseFireball(MinecraftServer par1MinecraftServer)<a name="line.10"></a>
+<FONT color="green">011</FONT>        {<a name="line.11"></a>
+<FONT color="green">012</FONT>            this.field_82504_b = par1MinecraftServer;<a name="line.12"></a>
+<FONT color="green">013</FONT>        }<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        public ItemStack func_82487_b(IBlockSource par1IBlockSource, ItemStack par2ItemStack)<a name="line.15"></a>
+<FONT color="green">016</FONT>        {<a name="line.16"></a>
+<FONT color="green">017</FONT>            EnumFacing var3 = EnumFacing.func_82600_a(par1IBlockSource.func_82620_h());<a name="line.17"></a>
+<FONT color="green">018</FONT>            IPosition var4 = BlockDispenser.func_82525_a(par1IBlockSource);<a name="line.18"></a>
+<FONT color="green">019</FONT>            double var5 = var4.func_82615_a() + (double)((float)var3.func_82601_c() * 0.3F);<a name="line.19"></a>
+<FONT color="green">020</FONT>            double var7 = var4.func_82617_b();<a name="line.20"></a>
+<FONT color="green">021</FONT>            double var9 = var4.func_82616_c() + (double)((float)var3.func_82599_e() * 0.3F);<a name="line.21"></a>
+<FONT color="green">022</FONT>            World var11 = par1IBlockSource.func_82618_k();<a name="line.22"></a>
+<FONT color="green">023</FONT>            Random var12 = var11.rand;<a name="line.23"></a>
+<FONT color="green">024</FONT>            double var13 = var12.nextGaussian() * 0.05D + (double)var3.func_82601_c();<a name="line.24"></a>
+<FONT color="green">025</FONT>            double var15 = var12.nextGaussian() * 0.05D;<a name="line.25"></a>
+<FONT color="green">026</FONT>            double var17 = var12.nextGaussian() * 0.05D + (double)var3.func_82599_e();<a name="line.26"></a>
+<FONT color="green">027</FONT>            var11.spawnEntityInWorld(new EntitySmallFireball(var11, var5, var7, var9, var13, var15, var17));<a name="line.27"></a>
+<FONT color="green">028</FONT>            par2ItemStack.splitStack(1);<a name="line.28"></a>
+<FONT color="green">029</FONT>            return par2ItemStack;<a name="line.29"></a>
+<FONT color="green">030</FONT>        }<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        protected void func_82485_a(IBlockSource par1IBlockSource)<a name="line.32"></a>
+<FONT color="green">033</FONT>        {<a name="line.33"></a>
+<FONT color="green">034</FONT>            par1IBlockSource.func_82618_k().playAuxSFX(1009, par1IBlockSource.func_82623_d(), par1IBlockSource.func_82622_e(), par1IBlockSource.func_82621_f(), 0);<a name="line.34"></a>
+<FONT color="green">035</FONT>        }<a name="line.35"></a>
+<FONT color="green">036</FONT>    }<a name="line.36"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

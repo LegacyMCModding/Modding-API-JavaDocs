@@ -1,0 +1,96 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelSign extends ModelBase<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** The board on a sign that has the writing on it. */<a name="line.9"></a>
+<FONT color="green">010</FONT>        public ModelRenderer signBoard = new ModelRenderer(this, 0, 0);<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** The stick a sign stands on. */<a name="line.12"></a>
+<FONT color="green">013</FONT>        public ModelRenderer signStick;<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        public ModelSign()<a name="line.15"></a>
+<FONT color="green">016</FONT>        {<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.signBoard.addBox(-12.0F, -14.0F, -1.0F, 24, 12, 2, 0.0F);<a name="line.17"></a>
+<FONT color="green">018</FONT>            this.signStick = new ModelRenderer(this, 0, 14);<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.signStick.addBox(-1.0F, -2.0F, -1.0F, 2, 14, 2, 0.0F);<a name="line.19"></a>
+<FONT color="green">020</FONT>        }<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /**<a name="line.22"></a>
+<FONT color="green">023</FONT>         * Renders the sign model through TileEntitySignRenderer<a name="line.23"></a>
+<FONT color="green">024</FONT>         */<a name="line.24"></a>
+<FONT color="green">025</FONT>        public void renderSign()<a name="line.25"></a>
+<FONT color="green">026</FONT>        {<a name="line.26"></a>
+<FONT color="green">027</FONT>            this.signBoard.render(0.0625F);<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.signStick.render(0.0625F);<a name="line.28"></a>
+<FONT color="green">029</FONT>        }<a name="line.29"></a>
+<FONT color="green">030</FONT>    }<a name="line.30"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

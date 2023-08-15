@@ -1,0 +1,231 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.io.IOException;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.net.InetSocketAddress;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.net.SocketAddress;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import java.util.ArrayList;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import java.util.Collections;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import java.util.List;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>    import cpw.mods.fml.common.network.FMLNetworkHandler;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>    @SideOnly(Side.CLIENT)<a name="line.14"></a>
+<FONT color="green">015</FONT>    public class MemoryConnection implements INetworkManager<a name="line.15"></a>
+<FONT color="green">016</FONT>    {<a name="line.16"></a>
+<FONT color="green">017</FONT>        private static final SocketAddress mySocketAddress = new InetSocketAddress("127.0.0.1", 0);<a name="line.17"></a>
+<FONT color="green">018</FONT>        private final List readPacketCache = Collections.synchronizedList(new ArrayList());<a name="line.18"></a>
+<FONT color="green">019</FONT>        private MemoryConnection pairedConnection;<a name="line.19"></a>
+<FONT color="green">020</FONT>        private NetHandler myNetHandler;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /** set to true by {server,network}Shutdown */<a name="line.22"></a>
+<FONT color="green">023</FONT>        private boolean shuttingDown = false;<a name="line.23"></a>
+<FONT color="green">024</FONT>        private String shutdownReason = "";<a name="line.24"></a>
+<FONT color="green">025</FONT>        private Object[] field_74439_g;<a name="line.25"></a>
+<FONT color="green">026</FONT>        private boolean gamePaused = false;<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        public MemoryConnection(NetHandler par1NetHandler) throws IOException<a name="line.28"></a>
+<FONT color="green">029</FONT>        {<a name="line.29"></a>
+<FONT color="green">030</FONT>            this.myNetHandler = par1NetHandler;<a name="line.30"></a>
+<FONT color="green">031</FONT>        }<a name="line.31"></a>
+<FONT color="green">032</FONT>    <a name="line.32"></a>
+<FONT color="green">033</FONT>        /**<a name="line.33"></a>
+<FONT color="green">034</FONT>         * Sets the NetHandler for this NetworkManager. Server-only.<a name="line.34"></a>
+<FONT color="green">035</FONT>         */<a name="line.35"></a>
+<FONT color="green">036</FONT>        public void setNetHandler(NetHandler par1NetHandler)<a name="line.36"></a>
+<FONT color="green">037</FONT>        {<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.myNetHandler = par1NetHandler;<a name="line.38"></a>
+<FONT color="green">039</FONT>        }<a name="line.39"></a>
+<FONT color="green">040</FONT>    <a name="line.40"></a>
+<FONT color="green">041</FONT>        /**<a name="line.41"></a>
+<FONT color="green">042</FONT>         * Adds the packet to the correct send queue (chunk data packets go to a separate queue).<a name="line.42"></a>
+<FONT color="green">043</FONT>         */<a name="line.43"></a>
+<FONT color="green">044</FONT>        public void addToSendQueue(Packet par1Packet)<a name="line.44"></a>
+<FONT color="green">045</FONT>        {<a name="line.45"></a>
+<FONT color="green">046</FONT>            if (!this.shuttingDown)<a name="line.46"></a>
+<FONT color="green">047</FONT>            {<a name="line.47"></a>
+<FONT color="green">048</FONT>                this.pairedConnection.processOrCachePacket(par1Packet);<a name="line.48"></a>
+<FONT color="green">049</FONT>            }<a name="line.49"></a>
+<FONT color="green">050</FONT>        }<a name="line.50"></a>
+<FONT color="green">051</FONT>    <a name="line.51"></a>
+<FONT color="green">052</FONT>        public void closeConnections()<a name="line.52"></a>
+<FONT color="green">053</FONT>        {<a name="line.53"></a>
+<FONT color="green">054</FONT>            this.pairedConnection = null;<a name="line.54"></a>
+<FONT color="green">055</FONT>            this.myNetHandler = null;<a name="line.55"></a>
+<FONT color="green">056</FONT>        }<a name="line.56"></a>
+<FONT color="green">057</FONT>    <a name="line.57"></a>
+<FONT color="green">058</FONT>        public boolean isConnectionActive()<a name="line.58"></a>
+<FONT color="green">059</FONT>        {<a name="line.59"></a>
+<FONT color="green">060</FONT>            return !this.shuttingDown &amp;&amp; this.pairedConnection != null;<a name="line.60"></a>
+<FONT color="green">061</FONT>        }<a name="line.61"></a>
+<FONT color="green">062</FONT>    <a name="line.62"></a>
+<FONT color="green">063</FONT>        /**<a name="line.63"></a>
+<FONT color="green">064</FONT>         * Wakes reader and writer threads<a name="line.64"></a>
+<FONT color="green">065</FONT>         */<a name="line.65"></a>
+<FONT color="green">066</FONT>        public void wakeThreads() {}<a name="line.66"></a>
+<FONT color="green">067</FONT>    <a name="line.67"></a>
+<FONT color="green">068</FONT>        /**<a name="line.68"></a>
+<FONT color="green">069</FONT>         * Checks timeouts and processes all pending read packets.<a name="line.69"></a>
+<FONT color="green">070</FONT>         */<a name="line.70"></a>
+<FONT color="green">071</FONT>        public void processReadPackets()<a name="line.71"></a>
+<FONT color="green">072</FONT>        {<a name="line.72"></a>
+<FONT color="green">073</FONT>            int var1 = 2500;<a name="line.73"></a>
+<FONT color="green">074</FONT>    <a name="line.74"></a>
+<FONT color="green">075</FONT>            while (var1-- &gt;= 0 &amp;&amp; !this.readPacketCache.isEmpty())<a name="line.75"></a>
+<FONT color="green">076</FONT>            {<a name="line.76"></a>
+<FONT color="green">077</FONT>                Packet var2 = (Packet)this.readPacketCache.remove(0);<a name="line.77"></a>
+<FONT color="green">078</FONT>                var2.processPacket(this.myNetHandler);<a name="line.78"></a>
+<FONT color="green">079</FONT>            }<a name="line.79"></a>
+<FONT color="green">080</FONT>    <a name="line.80"></a>
+<FONT color="green">081</FONT>            if (this.readPacketCache.size() &gt; var1)<a name="line.81"></a>
+<FONT color="green">082</FONT>            {<a name="line.82"></a>
+<FONT color="green">083</FONT>                System.out.println("Memory connection overburdened; after processing 2500 packets, we still have " + this.readPacketCache.size() + " to go!");<a name="line.83"></a>
+<FONT color="green">084</FONT>            }<a name="line.84"></a>
+<FONT color="green">085</FONT>    <a name="line.85"></a>
+<FONT color="green">086</FONT>            if (this.shuttingDown &amp;&amp; this.readPacketCache.isEmpty())<a name="line.86"></a>
+<FONT color="green">087</FONT>            {<a name="line.87"></a>
+<FONT color="green">088</FONT>                this.myNetHandler.handleErrorMessage(this.shutdownReason, this.field_74439_g);<a name="line.88"></a>
+<FONT color="green">089</FONT>                FMLNetworkHandler.onConnectionClosed(this, this.myNetHandler.getPlayer());<a name="line.89"></a>
+<FONT color="green">090</FONT>            }<a name="line.90"></a>
+<FONT color="green">091</FONT>        }<a name="line.91"></a>
+<FONT color="green">092</FONT>    <a name="line.92"></a>
+<FONT color="green">093</FONT>        /**<a name="line.93"></a>
+<FONT color="green">094</FONT>         * Return the InetSocketAddress of the remote endpoint<a name="line.94"></a>
+<FONT color="green">095</FONT>         */<a name="line.95"></a>
+<FONT color="green">096</FONT>        public SocketAddress getSocketAddress()<a name="line.96"></a>
+<FONT color="green">097</FONT>        {<a name="line.97"></a>
+<FONT color="green">098</FONT>            return mySocketAddress;<a name="line.98"></a>
+<FONT color="green">099</FONT>        }<a name="line.99"></a>
+<FONT color="green">100</FONT>    <a name="line.100"></a>
+<FONT color="green">101</FONT>        /**<a name="line.101"></a>
+<FONT color="green">102</FONT>         * Shuts down the server. (Only actually used on the server)<a name="line.102"></a>
+<FONT color="green">103</FONT>         */<a name="line.103"></a>
+<FONT color="green">104</FONT>        public void serverShutdown()<a name="line.104"></a>
+<FONT color="green">105</FONT>        {<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.shuttingDown = true;<a name="line.106"></a>
+<FONT color="green">107</FONT>        }<a name="line.107"></a>
+<FONT color="green">108</FONT>    <a name="line.108"></a>
+<FONT color="green">109</FONT>        /**<a name="line.109"></a>
+<FONT color="green">110</FONT>         * Shuts down the network with the specified reason. Closes all streams and sockets, spawns NetworkMasterThread to<a name="line.110"></a>
+<FONT color="green">111</FONT>         * stop reading and writing threads.<a name="line.111"></a>
+<FONT color="green">112</FONT>         */<a name="line.112"></a>
+<FONT color="green">113</FONT>        public void networkShutdown(String par1Str, Object ... par2ArrayOfObj)<a name="line.113"></a>
+<FONT color="green">114</FONT>        {<a name="line.114"></a>
+<FONT color="green">115</FONT>            this.shuttingDown = true;<a name="line.115"></a>
+<FONT color="green">116</FONT>            this.shutdownReason = par1Str;<a name="line.116"></a>
+<FONT color="green">117</FONT>            this.field_74439_g = par2ArrayOfObj;<a name="line.117"></a>
+<FONT color="green">118</FONT>        }<a name="line.118"></a>
+<FONT color="green">119</FONT>    <a name="line.119"></a>
+<FONT color="green">120</FONT>        /**<a name="line.120"></a>
+<FONT color="green">121</FONT>         * returns 0 for memoryConnections<a name="line.121"></a>
+<FONT color="green">122</FONT>         */<a name="line.122"></a>
+<FONT color="green">123</FONT>        public int packetSize()<a name="line.123"></a>
+<FONT color="green">124</FONT>        {<a name="line.124"></a>
+<FONT color="green">125</FONT>            return 0;<a name="line.125"></a>
+<FONT color="green">126</FONT>        }<a name="line.126"></a>
+<FONT color="green">127</FONT>    <a name="line.127"></a>
+<FONT color="green">128</FONT>        public void pairWith(MemoryConnection par1MemoryConnection)<a name="line.128"></a>
+<FONT color="green">129</FONT>        {<a name="line.129"></a>
+<FONT color="green">130</FONT>            this.pairedConnection = par1MemoryConnection;<a name="line.130"></a>
+<FONT color="green">131</FONT>            par1MemoryConnection.pairedConnection = this;<a name="line.131"></a>
+<FONT color="green">132</FONT>        }<a name="line.132"></a>
+<FONT color="green">133</FONT>    <a name="line.133"></a>
+<FONT color="green">134</FONT>        public boolean isGamePaused()<a name="line.134"></a>
+<FONT color="green">135</FONT>        {<a name="line.135"></a>
+<FONT color="green">136</FONT>            return this.gamePaused;<a name="line.136"></a>
+<FONT color="green">137</FONT>        }<a name="line.137"></a>
+<FONT color="green">138</FONT>    <a name="line.138"></a>
+<FONT color="green">139</FONT>        public void setGamePaused(boolean par1)<a name="line.139"></a>
+<FONT color="green">140</FONT>        {<a name="line.140"></a>
+<FONT color="green">141</FONT>            this.gamePaused = par1;<a name="line.141"></a>
+<FONT color="green">142</FONT>        }<a name="line.142"></a>
+<FONT color="green">143</FONT>    <a name="line.143"></a>
+<FONT color="green">144</FONT>        public MemoryConnection getPairedConnection()<a name="line.144"></a>
+<FONT color="green">145</FONT>        {<a name="line.145"></a>
+<FONT color="green">146</FONT>            return this.pairedConnection;<a name="line.146"></a>
+<FONT color="green">147</FONT>        }<a name="line.147"></a>
+<FONT color="green">148</FONT>    <a name="line.148"></a>
+<FONT color="green">149</FONT>        /**<a name="line.149"></a>
+<FONT color="green">150</FONT>         * acts immiditally if isWritePacket, otherwise adds it to the readCache to be processed next tick<a name="line.150"></a>
+<FONT color="green">151</FONT>         */<a name="line.151"></a>
+<FONT color="green">152</FONT>        public void processOrCachePacket(Packet par1Packet)<a name="line.152"></a>
+<FONT color="green">153</FONT>        {<a name="line.153"></a>
+<FONT color="green">154</FONT>            String var2 = this.myNetHandler.isServerHandler() ? "&gt;" : "&lt;";<a name="line.154"></a>
+<FONT color="green">155</FONT>    <a name="line.155"></a>
+<FONT color="green">156</FONT>            if (par1Packet.isWritePacket() &amp;&amp; this.myNetHandler.canProcessPackets())<a name="line.156"></a>
+<FONT color="green">157</FONT>            {<a name="line.157"></a>
+<FONT color="green">158</FONT>                par1Packet.processPacket(this.myNetHandler);<a name="line.158"></a>
+<FONT color="green">159</FONT>            }<a name="line.159"></a>
+<FONT color="green">160</FONT>            else<a name="line.160"></a>
+<FONT color="green">161</FONT>            {<a name="line.161"></a>
+<FONT color="green">162</FONT>                this.readPacketCache.add(par1Packet);<a name="line.162"></a>
+<FONT color="green">163</FONT>            }<a name="line.163"></a>
+<FONT color="green">164</FONT>        }<a name="line.164"></a>
+<FONT color="green">165</FONT>    }<a name="line.165"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

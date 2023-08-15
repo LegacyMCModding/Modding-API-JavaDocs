@@ -1,0 +1,318 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class ModelBiped extends ModelBase<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        public ModelRenderer bipedHead;<a name="line.10"></a>
+<FONT color="green">011</FONT>        public ModelRenderer bipedHeadwear;<a name="line.11"></a>
+<FONT color="green">012</FONT>        public ModelRenderer bipedBody;<a name="line.12"></a>
+<FONT color="green">013</FONT>        public ModelRenderer bipedRightArm;<a name="line.13"></a>
+<FONT color="green">014</FONT>        public ModelRenderer bipedLeftArm;<a name="line.14"></a>
+<FONT color="green">015</FONT>        public ModelRenderer bipedRightLeg;<a name="line.15"></a>
+<FONT color="green">016</FONT>        public ModelRenderer bipedLeftLeg;<a name="line.16"></a>
+<FONT color="green">017</FONT>        public ModelRenderer bipedEars;<a name="line.17"></a>
+<FONT color="green">018</FONT>        public ModelRenderer bipedCloak;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        /**<a name="line.20"></a>
+<FONT color="green">021</FONT>         * Records whether the model should be rendered holding an item in the left hand, and if that item is a block.<a name="line.21"></a>
+<FONT color="green">022</FONT>         */<a name="line.22"></a>
+<FONT color="green">023</FONT>        public int heldItemLeft;<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>        /**<a name="line.25"></a>
+<FONT color="green">026</FONT>         * Records whether the model should be rendered holding an item in the right hand, and if that item is a block.<a name="line.26"></a>
+<FONT color="green">027</FONT>         */<a name="line.27"></a>
+<FONT color="green">028</FONT>        public int heldItemRight;<a name="line.28"></a>
+<FONT color="green">029</FONT>        public boolean isSneak;<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>        /** Records whether the model should be rendered aiming a bow. */<a name="line.31"></a>
+<FONT color="green">032</FONT>        public boolean aimedBow;<a name="line.32"></a>
+<FONT color="green">033</FONT>    <a name="line.33"></a>
+<FONT color="green">034</FONT>        public ModelBiped()<a name="line.34"></a>
+<FONT color="green">035</FONT>        {<a name="line.35"></a>
+<FONT color="green">036</FONT>            this(0.0F);<a name="line.36"></a>
+<FONT color="green">037</FONT>        }<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        public ModelBiped(float par1)<a name="line.39"></a>
+<FONT color="green">040</FONT>        {<a name="line.40"></a>
+<FONT color="green">041</FONT>            this(par1, 0.0F, 64, 32);<a name="line.41"></a>
+<FONT color="green">042</FONT>        }<a name="line.42"></a>
+<FONT color="green">043</FONT>    <a name="line.43"></a>
+<FONT color="green">044</FONT>        public ModelBiped(float par1, float par2, int par3, int par4)<a name="line.44"></a>
+<FONT color="green">045</FONT>        {<a name="line.45"></a>
+<FONT color="green">046</FONT>            this.heldItemLeft = 0;<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.heldItemRight = 0;<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.isSneak = false;<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.aimedBow = false;<a name="line.49"></a>
+<FONT color="green">050</FONT>            this.textureWidth = par3;<a name="line.50"></a>
+<FONT color="green">051</FONT>            this.textureHeight = par4;<a name="line.51"></a>
+<FONT color="green">052</FONT>            this.bipedCloak = new ModelRenderer(this, 0, 0);<a name="line.52"></a>
+<FONT color="green">053</FONT>            this.bipedCloak.addBox(-5.0F, 0.0F, -1.0F, 10, 16, 1, par1);<a name="line.53"></a>
+<FONT color="green">054</FONT>            this.bipedEars = new ModelRenderer(this, 24, 0);<a name="line.54"></a>
+<FONT color="green">055</FONT>            this.bipedEars.addBox(-3.0F, -6.0F, -1.0F, 6, 6, 1, par1);<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.bipedHead = new ModelRenderer(this, 0, 0);<a name="line.56"></a>
+<FONT color="green">057</FONT>            this.bipedHead.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, par1);<a name="line.57"></a>
+<FONT color="green">058</FONT>            this.bipedHead.setRotationPoint(0.0F, 0.0F + par2, 0.0F);<a name="line.58"></a>
+<FONT color="green">059</FONT>            this.bipedHeadwear = new ModelRenderer(this, 32, 0);<a name="line.59"></a>
+<FONT color="green">060</FONT>            this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, par1 + 0.5F);<a name="line.60"></a>
+<FONT color="green">061</FONT>            this.bipedHeadwear.setRotationPoint(0.0F, 0.0F + par2, 0.0F);<a name="line.61"></a>
+<FONT color="green">062</FONT>            this.bipedBody = new ModelRenderer(this, 16, 16);<a name="line.62"></a>
+<FONT color="green">063</FONT>            this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, par1);<a name="line.63"></a>
+<FONT color="green">064</FONT>            this.bipedBody.setRotationPoint(0.0F, 0.0F + par2, 0.0F);<a name="line.64"></a>
+<FONT color="green">065</FONT>            this.bipedRightArm = new ModelRenderer(this, 40, 16);<a name="line.65"></a>
+<FONT color="green">066</FONT>            this.bipedRightArm.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, par1);<a name="line.66"></a>
+<FONT color="green">067</FONT>            this.bipedRightArm.setRotationPoint(-5.0F, 2.0F + par2, 0.0F);<a name="line.67"></a>
+<FONT color="green">068</FONT>            this.bipedLeftArm = new ModelRenderer(this, 40, 16);<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.bipedLeftArm.mirror = true;<a name="line.69"></a>
+<FONT color="green">070</FONT>            this.bipedLeftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, par1);<a name="line.70"></a>
+<FONT color="green">071</FONT>            this.bipedLeftArm.setRotationPoint(5.0F, 2.0F + par2, 0.0F);<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.bipedRightLeg = new ModelRenderer(this, 0, 16);<a name="line.72"></a>
+<FONT color="green">073</FONT>            this.bipedRightLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, par1);<a name="line.73"></a>
+<FONT color="green">074</FONT>            this.bipedRightLeg.setRotationPoint(-1.9F, 12.0F + par2, 0.0F);<a name="line.74"></a>
+<FONT color="green">075</FONT>            this.bipedLeftLeg = new ModelRenderer(this, 0, 16);<a name="line.75"></a>
+<FONT color="green">076</FONT>            this.bipedLeftLeg.mirror = true;<a name="line.76"></a>
+<FONT color="green">077</FONT>            this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, par1);<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F + par2, 0.0F);<a name="line.78"></a>
+<FONT color="green">079</FONT>        }<a name="line.79"></a>
+<FONT color="green">080</FONT>    <a name="line.80"></a>
+<FONT color="green">081</FONT>        /**<a name="line.81"></a>
+<FONT color="green">082</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.82"></a>
+<FONT color="green">083</FONT>         */<a name="line.83"></a>
+<FONT color="green">084</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.84"></a>
+<FONT color="green">085</FONT>        {<a name="line.85"></a>
+<FONT color="green">086</FONT>            this.setRotationAngles(par2, par3, par4, par5, par6, par7, par1Entity);<a name="line.86"></a>
+<FONT color="green">087</FONT>    <a name="line.87"></a>
+<FONT color="green">088</FONT>            if (this.isChild)<a name="line.88"></a>
+<FONT color="green">089</FONT>            {<a name="line.89"></a>
+<FONT color="green">090</FONT>                float var8 = 2.0F;<a name="line.90"></a>
+<FONT color="green">091</FONT>                GL11.glPushMatrix();<a name="line.91"></a>
+<FONT color="green">092</FONT>                GL11.glScalef(1.5F / var8, 1.5F / var8, 1.5F / var8);<a name="line.92"></a>
+<FONT color="green">093</FONT>                GL11.glTranslatef(0.0F, 16.0F * par7, 0.0F);<a name="line.93"></a>
+<FONT color="green">094</FONT>                this.bipedHead.render(par7);<a name="line.94"></a>
+<FONT color="green">095</FONT>                GL11.glPopMatrix();<a name="line.95"></a>
+<FONT color="green">096</FONT>                GL11.glPushMatrix();<a name="line.96"></a>
+<FONT color="green">097</FONT>                GL11.glScalef(1.0F / var8, 1.0F / var8, 1.0F / var8);<a name="line.97"></a>
+<FONT color="green">098</FONT>                GL11.glTranslatef(0.0F, 24.0F * par7, 0.0F);<a name="line.98"></a>
+<FONT color="green">099</FONT>                this.bipedBody.render(par7);<a name="line.99"></a>
+<FONT color="green">100</FONT>                this.bipedRightArm.render(par7);<a name="line.100"></a>
+<FONT color="green">101</FONT>                this.bipedLeftArm.render(par7);<a name="line.101"></a>
+<FONT color="green">102</FONT>                this.bipedRightLeg.render(par7);<a name="line.102"></a>
+<FONT color="green">103</FONT>                this.bipedLeftLeg.render(par7);<a name="line.103"></a>
+<FONT color="green">104</FONT>                this.bipedHeadwear.render(par7);<a name="line.104"></a>
+<FONT color="green">105</FONT>                GL11.glPopMatrix();<a name="line.105"></a>
+<FONT color="green">106</FONT>            }<a name="line.106"></a>
+<FONT color="green">107</FONT>            else<a name="line.107"></a>
+<FONT color="green">108</FONT>            {<a name="line.108"></a>
+<FONT color="green">109</FONT>                this.bipedHead.render(par7);<a name="line.109"></a>
+<FONT color="green">110</FONT>                this.bipedBody.render(par7);<a name="line.110"></a>
+<FONT color="green">111</FONT>                this.bipedRightArm.render(par7);<a name="line.111"></a>
+<FONT color="green">112</FONT>                this.bipedLeftArm.render(par7);<a name="line.112"></a>
+<FONT color="green">113</FONT>                this.bipedRightLeg.render(par7);<a name="line.113"></a>
+<FONT color="green">114</FONT>                this.bipedLeftLeg.render(par7);<a name="line.114"></a>
+<FONT color="green">115</FONT>                this.bipedHeadwear.render(par7);<a name="line.115"></a>
+<FONT color="green">116</FONT>            }<a name="line.116"></a>
+<FONT color="green">117</FONT>        }<a name="line.117"></a>
+<FONT color="green">118</FONT>    <a name="line.118"></a>
+<FONT color="green">119</FONT>        /**<a name="line.119"></a>
+<FONT color="green">120</FONT>         * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.120"></a>
+<FONT color="green">121</FONT>         * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.121"></a>
+<FONT color="green">122</FONT>         * "far" arms and legs can swing at most.<a name="line.122"></a>
+<FONT color="green">123</FONT>         */<a name="line.123"></a>
+<FONT color="green">124</FONT>        public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6, Entity par7Entity)<a name="line.124"></a>
+<FONT color="green">125</FONT>        {<a name="line.125"></a>
+<FONT color="green">126</FONT>            this.bipedHead.rotateAngleY = par4 / (180F / (float)Math.PI);<a name="line.126"></a>
+<FONT color="green">127</FONT>            this.bipedHead.rotateAngleX = par5 / (180F / (float)Math.PI);<a name="line.127"></a>
+<FONT color="green">128</FONT>            this.bipedHeadwear.rotateAngleY = this.bipedHead.rotateAngleY;<a name="line.128"></a>
+<FONT color="green">129</FONT>            this.bipedHeadwear.rotateAngleX = this.bipedHead.rotateAngleX;<a name="line.129"></a>
+<FONT color="green">130</FONT>            this.bipedRightArm.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 2.0F * par2 * 0.5F;<a name="line.130"></a>
+<FONT color="green">131</FONT>            this.bipedLeftArm.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 2.0F * par2 * 0.5F;<a name="line.131"></a>
+<FONT color="green">132</FONT>            this.bipedRightArm.rotateAngleZ = 0.0F;<a name="line.132"></a>
+<FONT color="green">133</FONT>            this.bipedLeftArm.rotateAngleZ = 0.0F;<a name="line.133"></a>
+<FONT color="green">134</FONT>            this.bipedRightLeg.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.4F * par2;<a name="line.134"></a>
+<FONT color="green">135</FONT>            this.bipedLeftLeg.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.4F * par2;<a name="line.135"></a>
+<FONT color="green">136</FONT>            this.bipedRightLeg.rotateAngleY = 0.0F;<a name="line.136"></a>
+<FONT color="green">137</FONT>            this.bipedLeftLeg.rotateAngleY = 0.0F;<a name="line.137"></a>
+<FONT color="green">138</FONT>    <a name="line.138"></a>
+<FONT color="green">139</FONT>            if (this.isRiding)<a name="line.139"></a>
+<FONT color="green">140</FONT>            {<a name="line.140"></a>
+<FONT color="green">141</FONT>                this.bipedRightArm.rotateAngleX += -((float)Math.PI / 5F);<a name="line.141"></a>
+<FONT color="green">142</FONT>                this.bipedLeftArm.rotateAngleX += -((float)Math.PI / 5F);<a name="line.142"></a>
+<FONT color="green">143</FONT>                this.bipedRightLeg.rotateAngleX = -((float)Math.PI * 2F / 5F);<a name="line.143"></a>
+<FONT color="green">144</FONT>                this.bipedLeftLeg.rotateAngleX = -((float)Math.PI * 2F / 5F);<a name="line.144"></a>
+<FONT color="green">145</FONT>                this.bipedRightLeg.rotateAngleY = ((float)Math.PI / 10F);<a name="line.145"></a>
+<FONT color="green">146</FONT>                this.bipedLeftLeg.rotateAngleY = -((float)Math.PI / 10F);<a name="line.146"></a>
+<FONT color="green">147</FONT>            }<a name="line.147"></a>
+<FONT color="green">148</FONT>    <a name="line.148"></a>
+<FONT color="green">149</FONT>            if (this.heldItemLeft != 0)<a name="line.149"></a>
+<FONT color="green">150</FONT>            {<a name="line.150"></a>
+<FONT color="green">151</FONT>                this.bipedLeftArm.rotateAngleX = this.bipedLeftArm.rotateAngleX * 0.5F - ((float)Math.PI / 10F) * (float)this.heldItemLeft;<a name="line.151"></a>
+<FONT color="green">152</FONT>            }<a name="line.152"></a>
+<FONT color="green">153</FONT>    <a name="line.153"></a>
+<FONT color="green">154</FONT>            if (this.heldItemRight != 0)<a name="line.154"></a>
+<FONT color="green">155</FONT>            {<a name="line.155"></a>
+<FONT color="green">156</FONT>                this.bipedRightArm.rotateAngleX = this.bipedRightArm.rotateAngleX * 0.5F - ((float)Math.PI / 10F) * (float)this.heldItemRight;<a name="line.156"></a>
+<FONT color="green">157</FONT>            }<a name="line.157"></a>
+<FONT color="green">158</FONT>    <a name="line.158"></a>
+<FONT color="green">159</FONT>            this.bipedRightArm.rotateAngleY = 0.0F;<a name="line.159"></a>
+<FONT color="green">160</FONT>            this.bipedLeftArm.rotateAngleY = 0.0F;<a name="line.160"></a>
+<FONT color="green">161</FONT>            float var8;<a name="line.161"></a>
+<FONT color="green">162</FONT>            float var9;<a name="line.162"></a>
+<FONT color="green">163</FONT>    <a name="line.163"></a>
+<FONT color="green">164</FONT>            if (this.onGround &gt; -9990.0F)<a name="line.164"></a>
+<FONT color="green">165</FONT>            {<a name="line.165"></a>
+<FONT color="green">166</FONT>                var8 = this.onGround;<a name="line.166"></a>
+<FONT color="green">167</FONT>                this.bipedBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(var8) * (float)Math.PI * 2.0F) * 0.2F;<a name="line.167"></a>
+<FONT color="green">168</FONT>                this.bipedRightArm.rotationPointZ = MathHelper.sin(this.bipedBody.rotateAngleY) * 5.0F;<a name="line.168"></a>
+<FONT color="green">169</FONT>                this.bipedRightArm.rotationPointX = -MathHelper.cos(this.bipedBody.rotateAngleY) * 5.0F;<a name="line.169"></a>
+<FONT color="green">170</FONT>                this.bipedLeftArm.rotationPointZ = -MathHelper.sin(this.bipedBody.rotateAngleY) * 5.0F;<a name="line.170"></a>
+<FONT color="green">171</FONT>                this.bipedLeftArm.rotationPointX = MathHelper.cos(this.bipedBody.rotateAngleY) * 5.0F;<a name="line.171"></a>
+<FONT color="green">172</FONT>                this.bipedRightArm.rotateAngleY += this.bipedBody.rotateAngleY;<a name="line.172"></a>
+<FONT color="green">173</FONT>                this.bipedLeftArm.rotateAngleY += this.bipedBody.rotateAngleY;<a name="line.173"></a>
+<FONT color="green">174</FONT>                this.bipedLeftArm.rotateAngleX += this.bipedBody.rotateAngleY;<a name="line.174"></a>
+<FONT color="green">175</FONT>                var8 = 1.0F - this.onGround;<a name="line.175"></a>
+<FONT color="green">176</FONT>                var8 *= var8;<a name="line.176"></a>
+<FONT color="green">177</FONT>                var8 *= var8;<a name="line.177"></a>
+<FONT color="green">178</FONT>                var8 = 1.0F - var8;<a name="line.178"></a>
+<FONT color="green">179</FONT>                var9 = MathHelper.sin(var8 * (float)Math.PI);<a name="line.179"></a>
+<FONT color="green">180</FONT>                float var10 = MathHelper.sin(this.onGround * (float)Math.PI) * -(this.bipedHead.rotateAngleX - 0.7F) * 0.75F;<a name="line.180"></a>
+<FONT color="green">181</FONT>                this.bipedRightArm.rotateAngleX = (float)((double)this.bipedRightArm.rotateAngleX - ((double)var9 * 1.2D + (double)var10));<a name="line.181"></a>
+<FONT color="green">182</FONT>                this.bipedRightArm.rotateAngleY += this.bipedBody.rotateAngleY * 2.0F;<a name="line.182"></a>
+<FONT color="green">183</FONT>                this.bipedRightArm.rotateAngleZ = MathHelper.sin(this.onGround * (float)Math.PI) * -0.4F;<a name="line.183"></a>
+<FONT color="green">184</FONT>            }<a name="line.184"></a>
+<FONT color="green">185</FONT>    <a name="line.185"></a>
+<FONT color="green">186</FONT>            if (this.isSneak)<a name="line.186"></a>
+<FONT color="green">187</FONT>            {<a name="line.187"></a>
+<FONT color="green">188</FONT>                this.bipedBody.rotateAngleX = 0.5F;<a name="line.188"></a>
+<FONT color="green">189</FONT>                this.bipedRightArm.rotateAngleX += 0.4F;<a name="line.189"></a>
+<FONT color="green">190</FONT>                this.bipedLeftArm.rotateAngleX += 0.4F;<a name="line.190"></a>
+<FONT color="green">191</FONT>                this.bipedRightLeg.rotationPointZ = 4.0F;<a name="line.191"></a>
+<FONT color="green">192</FONT>                this.bipedLeftLeg.rotationPointZ = 4.0F;<a name="line.192"></a>
+<FONT color="green">193</FONT>                this.bipedRightLeg.rotationPointY = 9.0F;<a name="line.193"></a>
+<FONT color="green">194</FONT>                this.bipedLeftLeg.rotationPointY = 9.0F;<a name="line.194"></a>
+<FONT color="green">195</FONT>                this.bipedHead.rotationPointY = 1.0F;<a name="line.195"></a>
+<FONT color="green">196</FONT>                this.bipedHeadwear.rotationPointY = 1.0F;<a name="line.196"></a>
+<FONT color="green">197</FONT>            }<a name="line.197"></a>
+<FONT color="green">198</FONT>            else<a name="line.198"></a>
+<FONT color="green">199</FONT>            {<a name="line.199"></a>
+<FONT color="green">200</FONT>                this.bipedBody.rotateAngleX = 0.0F;<a name="line.200"></a>
+<FONT color="green">201</FONT>                this.bipedRightLeg.rotationPointZ = 0.1F;<a name="line.201"></a>
+<FONT color="green">202</FONT>                this.bipedLeftLeg.rotationPointZ = 0.1F;<a name="line.202"></a>
+<FONT color="green">203</FONT>                this.bipedRightLeg.rotationPointY = 12.0F;<a name="line.203"></a>
+<FONT color="green">204</FONT>                this.bipedLeftLeg.rotationPointY = 12.0F;<a name="line.204"></a>
+<FONT color="green">205</FONT>                this.bipedHead.rotationPointY = 0.0F;<a name="line.205"></a>
+<FONT color="green">206</FONT>                this.bipedHeadwear.rotationPointY = 0.0F;<a name="line.206"></a>
+<FONT color="green">207</FONT>            }<a name="line.207"></a>
+<FONT color="green">208</FONT>    <a name="line.208"></a>
+<FONT color="green">209</FONT>            this.bipedRightArm.rotateAngleZ += MathHelper.cos(par3 * 0.09F) * 0.05F + 0.05F;<a name="line.209"></a>
+<FONT color="green">210</FONT>            this.bipedLeftArm.rotateAngleZ -= MathHelper.cos(par3 * 0.09F) * 0.05F + 0.05F;<a name="line.210"></a>
+<FONT color="green">211</FONT>            this.bipedRightArm.rotateAngleX += MathHelper.sin(par3 * 0.067F) * 0.05F;<a name="line.211"></a>
+<FONT color="green">212</FONT>            this.bipedLeftArm.rotateAngleX -= MathHelper.sin(par3 * 0.067F) * 0.05F;<a name="line.212"></a>
+<FONT color="green">213</FONT>    <a name="line.213"></a>
+<FONT color="green">214</FONT>            if (this.aimedBow)<a name="line.214"></a>
+<FONT color="green">215</FONT>            {<a name="line.215"></a>
+<FONT color="green">216</FONT>                var8 = 0.0F;<a name="line.216"></a>
+<FONT color="green">217</FONT>                var9 = 0.0F;<a name="line.217"></a>
+<FONT color="green">218</FONT>                this.bipedRightArm.rotateAngleZ = 0.0F;<a name="line.218"></a>
+<FONT color="green">219</FONT>                this.bipedLeftArm.rotateAngleZ = 0.0F;<a name="line.219"></a>
+<FONT color="green">220</FONT>                this.bipedRightArm.rotateAngleY = -(0.1F - var8 * 0.6F) + this.bipedHead.rotateAngleY;<a name="line.220"></a>
+<FONT color="green">221</FONT>                this.bipedLeftArm.rotateAngleY = 0.1F - var8 * 0.6F + this.bipedHead.rotateAngleY + 0.4F;<a name="line.221"></a>
+<FONT color="green">222</FONT>                this.bipedRightArm.rotateAngleX = -((float)Math.PI / 2F) + this.bipedHead.rotateAngleX;<a name="line.222"></a>
+<FONT color="green">223</FONT>                this.bipedLeftArm.rotateAngleX = -((float)Math.PI / 2F) + this.bipedHead.rotateAngleX;<a name="line.223"></a>
+<FONT color="green">224</FONT>                this.bipedRightArm.rotateAngleX -= var8 * 1.2F - var9 * 0.4F;<a name="line.224"></a>
+<FONT color="green">225</FONT>                this.bipedLeftArm.rotateAngleX -= var8 * 1.2F - var9 * 0.4F;<a name="line.225"></a>
+<FONT color="green">226</FONT>                this.bipedRightArm.rotateAngleZ += MathHelper.cos(par3 * 0.09F) * 0.05F + 0.05F;<a name="line.226"></a>
+<FONT color="green">227</FONT>                this.bipedLeftArm.rotateAngleZ -= MathHelper.cos(par3 * 0.09F) * 0.05F + 0.05F;<a name="line.227"></a>
+<FONT color="green">228</FONT>                this.bipedRightArm.rotateAngleX += MathHelper.sin(par3 * 0.067F) * 0.05F;<a name="line.228"></a>
+<FONT color="green">229</FONT>                this.bipedLeftArm.rotateAngleX -= MathHelper.sin(par3 * 0.067F) * 0.05F;<a name="line.229"></a>
+<FONT color="green">230</FONT>            }<a name="line.230"></a>
+<FONT color="green">231</FONT>        }<a name="line.231"></a>
+<FONT color="green">232</FONT>    <a name="line.232"></a>
+<FONT color="green">233</FONT>        /**<a name="line.233"></a>
+<FONT color="green">234</FONT>         * renders the ears (specifically, deadmau5's)<a name="line.234"></a>
+<FONT color="green">235</FONT>         */<a name="line.235"></a>
+<FONT color="green">236</FONT>        public void renderEars(float par1)<a name="line.236"></a>
+<FONT color="green">237</FONT>        {<a name="line.237"></a>
+<FONT color="green">238</FONT>            this.bipedEars.rotateAngleY = this.bipedHead.rotateAngleY;<a name="line.238"></a>
+<FONT color="green">239</FONT>            this.bipedEars.rotateAngleX = this.bipedHead.rotateAngleX;<a name="line.239"></a>
+<FONT color="green">240</FONT>            this.bipedEars.rotationPointX = 0.0F;<a name="line.240"></a>
+<FONT color="green">241</FONT>            this.bipedEars.rotationPointY = 0.0F;<a name="line.241"></a>
+<FONT color="green">242</FONT>            this.bipedEars.render(par1);<a name="line.242"></a>
+<FONT color="green">243</FONT>        }<a name="line.243"></a>
+<FONT color="green">244</FONT>    <a name="line.244"></a>
+<FONT color="green">245</FONT>        /**<a name="line.245"></a>
+<FONT color="green">246</FONT>         * Renders the cloak of the current biped (in most cases, it's a player)<a name="line.246"></a>
+<FONT color="green">247</FONT>         */<a name="line.247"></a>
+<FONT color="green">248</FONT>        public void renderCloak(float par1)<a name="line.248"></a>
+<FONT color="green">249</FONT>        {<a name="line.249"></a>
+<FONT color="green">250</FONT>            this.bipedCloak.render(par1);<a name="line.250"></a>
+<FONT color="green">251</FONT>        }<a name="line.251"></a>
+<FONT color="green">252</FONT>    }<a name="line.252"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

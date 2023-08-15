@@ -1,0 +1,150 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class RenderSpider extends RenderLiving<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        public RenderSpider()<a name="line.10"></a>
+<FONT color="green">011</FONT>        {<a name="line.11"></a>
+<FONT color="green">012</FONT>            super(new ModelSpider(), 1.0F);<a name="line.12"></a>
+<FONT color="green">013</FONT>            this.setRenderPassModel(new ModelSpider());<a name="line.13"></a>
+<FONT color="green">014</FONT>        }<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        protected float setSpiderDeathMaxRotation(EntitySpider par1EntitySpider)<a name="line.16"></a>
+<FONT color="green">017</FONT>        {<a name="line.17"></a>
+<FONT color="green">018</FONT>            return 180.0F;<a name="line.18"></a>
+<FONT color="green">019</FONT>        }<a name="line.19"></a>
+<FONT color="green">020</FONT>    <a name="line.20"></a>
+<FONT color="green">021</FONT>        /**<a name="line.21"></a>
+<FONT color="green">022</FONT>         * Sets the spider's glowing eyes<a name="line.22"></a>
+<FONT color="green">023</FONT>         */<a name="line.23"></a>
+<FONT color="green">024</FONT>        protected int setSpiderEyeBrightness(EntitySpider par1EntitySpider, int par2, float par3)<a name="line.24"></a>
+<FONT color="green">025</FONT>        {<a name="line.25"></a>
+<FONT color="green">026</FONT>            if (par2 != 0)<a name="line.26"></a>
+<FONT color="green">027</FONT>            {<a name="line.27"></a>
+<FONT color="green">028</FONT>                return -1;<a name="line.28"></a>
+<FONT color="green">029</FONT>            }<a name="line.29"></a>
+<FONT color="green">030</FONT>            else<a name="line.30"></a>
+<FONT color="green">031</FONT>            {<a name="line.31"></a>
+<FONT color="green">032</FONT>                this.loadTexture("/mob/spider_eyes.png");<a name="line.32"></a>
+<FONT color="green">033</FONT>                float var4 = 1.0F;<a name="line.33"></a>
+<FONT color="green">034</FONT>                GL11.glEnable(GL11.GL_BLEND);<a name="line.34"></a>
+<FONT color="green">035</FONT>                GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.35"></a>
+<FONT color="green">036</FONT>                GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>                if (par1EntitySpider.func_82150_aj())<a name="line.38"></a>
+<FONT color="green">039</FONT>                {<a name="line.39"></a>
+<FONT color="green">040</FONT>                    GL11.glDepthMask(false);<a name="line.40"></a>
+<FONT color="green">041</FONT>                }<a name="line.41"></a>
+<FONT color="green">042</FONT>                else<a name="line.42"></a>
+<FONT color="green">043</FONT>                {<a name="line.43"></a>
+<FONT color="green">044</FONT>                    GL11.glDepthMask(true);<a name="line.44"></a>
+<FONT color="green">045</FONT>                }<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>                char var5 = 61680;<a name="line.47"></a>
+<FONT color="green">048</FONT>                int var6 = var5 % 65536;<a name="line.48"></a>
+<FONT color="green">049</FONT>                int var7 = var5 / 65536;<a name="line.49"></a>
+<FONT color="green">050</FONT>                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)var6 / 1.0F, (float)var7 / 1.0F);<a name="line.50"></a>
+<FONT color="green">051</FONT>                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.51"></a>
+<FONT color="green">052</FONT>                GL11.glColor4f(1.0F, 1.0F, 1.0F, var4);<a name="line.52"></a>
+<FONT color="green">053</FONT>                return 1;<a name="line.53"></a>
+<FONT color="green">054</FONT>            }<a name="line.54"></a>
+<FONT color="green">055</FONT>        }<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>        protected void scaleSpider(EntitySpider par1EntitySpider, float par2)<a name="line.57"></a>
+<FONT color="green">058</FONT>        {<a name="line.58"></a>
+<FONT color="green">059</FONT>            float var3 = par1EntitySpider.spiderScaleAmount();<a name="line.59"></a>
+<FONT color="green">060</FONT>            GL11.glScalef(var3, var3, var3);<a name="line.60"></a>
+<FONT color="green">061</FONT>        }<a name="line.61"></a>
+<FONT color="green">062</FONT>    <a name="line.62"></a>
+<FONT color="green">063</FONT>        /**<a name="line.63"></a>
+<FONT color="green">064</FONT>         * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:<a name="line.64"></a>
+<FONT color="green">065</FONT>         * entityLiving, partialTickTime<a name="line.65"></a>
+<FONT color="green">066</FONT>         */<a name="line.66"></a>
+<FONT color="green">067</FONT>        protected void preRenderCallback(EntityLiving par1EntityLiving, float par2)<a name="line.67"></a>
+<FONT color="green">068</FONT>        {<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.scaleSpider((EntitySpider)par1EntityLiving, par2);<a name="line.69"></a>
+<FONT color="green">070</FONT>        }<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>        protected float getDeathMaxRotation(EntityLiving par1EntityLiving)<a name="line.72"></a>
+<FONT color="green">073</FONT>        {<a name="line.73"></a>
+<FONT color="green">074</FONT>            return this.setSpiderDeathMaxRotation((EntitySpider)par1EntityLiving);<a name="line.74"></a>
+<FONT color="green">075</FONT>        }<a name="line.75"></a>
+<FONT color="green">076</FONT>    <a name="line.76"></a>
+<FONT color="green">077</FONT>        /**<a name="line.77"></a>
+<FONT color="green">078</FONT>         * Queries whether should render the specified pass or not.<a name="line.78"></a>
+<FONT color="green">079</FONT>         */<a name="line.79"></a>
+<FONT color="green">080</FONT>        protected int shouldRenderPass(EntityLiving par1EntityLiving, int par2, float par3)<a name="line.80"></a>
+<FONT color="green">081</FONT>        {<a name="line.81"></a>
+<FONT color="green">082</FONT>            return this.setSpiderEyeBrightness((EntitySpider)par1EntityLiving, par2, par3);<a name="line.82"></a>
+<FONT color="green">083</FONT>        }<a name="line.83"></a>
+<FONT color="green">084</FONT>    }<a name="line.84"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

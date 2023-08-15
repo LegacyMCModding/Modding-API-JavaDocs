@@ -1,0 +1,259 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.io.DataInputStream;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.io.DataOutputStream;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.io.IOException;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import java.util.List;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import java.util.zip.DataFormatException;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import java.util.zip.Deflater;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import java.util.zip.Inflater;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>    public class Packet56MapChunks extends Packet<a name="line.13"></a>
+<FONT color="green">014</FONT>    {<a name="line.14"></a>
+<FONT color="green">015</FONT>        private int[] field_73589_c;<a name="line.15"></a>
+<FONT color="green">016</FONT>        private int[] field_73586_d;<a name="line.16"></a>
+<FONT color="green">017</FONT>        public int[] field_73590_a;<a name="line.17"></a>
+<FONT color="green">018</FONT>        public int[] field_73588_b;<a name="line.18"></a>
+<FONT color="green">019</FONT>        private byte[] field_73587_e;<a name="line.19"></a>
+<FONT color="green">020</FONT>        private byte[][] field_73584_f;<a name="line.20"></a>
+<FONT color="green">021</FONT>        private int field_73585_g;<a name="line.21"></a>
+<FONT color="green">022</FONT>        private static byte[] field_73591_h = new byte[0];<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        public Packet56MapChunks() {}<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        public Packet56MapChunks(List par1List)<a name="line.26"></a>
+<FONT color="green">027</FONT>        {<a name="line.27"></a>
+<FONT color="green">028</FONT>            int var2 = par1List.size();<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.field_73589_c = new int[var2];<a name="line.29"></a>
+<FONT color="green">030</FONT>            this.field_73586_d = new int[var2];<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.field_73590_a = new int[var2];<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.field_73588_b = new int[var2];<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.field_73584_f = new byte[var2][];<a name="line.33"></a>
+<FONT color="green">034</FONT>            int var3 = 0;<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>            for (int var4 = 0; var4 &lt; var2; ++var4)<a name="line.36"></a>
+<FONT color="green">037</FONT>            {<a name="line.37"></a>
+<FONT color="green">038</FONT>                Chunk var5 = (Chunk)par1List.get(var4);<a name="line.38"></a>
+<FONT color="green">039</FONT>                Packet51MapChunkData var6 = Packet51MapChunk.getMapChunkData(var5, true, 65535);<a name="line.39"></a>
+<FONT color="green">040</FONT>    <a name="line.40"></a>
+<FONT color="green">041</FONT>                if (field_73591_h.length &lt; var3 + var6.field_74582_a.length)<a name="line.41"></a>
+<FONT color="green">042</FONT>                {<a name="line.42"></a>
+<FONT color="green">043</FONT>                    byte[] var7 = new byte[var3 + var6.field_74582_a.length];<a name="line.43"></a>
+<FONT color="green">044</FONT>                    System.arraycopy(field_73591_h, 0, var7, 0, field_73591_h.length);<a name="line.44"></a>
+<FONT color="green">045</FONT>                    field_73591_h = var7;<a name="line.45"></a>
+<FONT color="green">046</FONT>                }<a name="line.46"></a>
+<FONT color="green">047</FONT>    <a name="line.47"></a>
+<FONT color="green">048</FONT>                System.arraycopy(var6.field_74582_a, 0, field_73591_h, var3, var6.field_74582_a.length);<a name="line.48"></a>
+<FONT color="green">049</FONT>                var3 += var6.field_74582_a.length;<a name="line.49"></a>
+<FONT color="green">050</FONT>                this.field_73589_c[var4] = var5.xPosition;<a name="line.50"></a>
+<FONT color="green">051</FONT>                this.field_73586_d[var4] = var5.zPosition;<a name="line.51"></a>
+<FONT color="green">052</FONT>                this.field_73590_a[var4] = var6.field_74580_b;<a name="line.52"></a>
+<FONT color="green">053</FONT>                this.field_73588_b[var4] = var6.field_74581_c;<a name="line.53"></a>
+<FONT color="green">054</FONT>                this.field_73584_f[var4] = var6.field_74582_a;<a name="line.54"></a>
+<FONT color="green">055</FONT>            }<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>            Deflater var11 = new Deflater(-1);<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>            try<a name="line.59"></a>
+<FONT color="green">060</FONT>            {<a name="line.60"></a>
+<FONT color="green">061</FONT>                var11.setInput(field_73591_h, 0, var3);<a name="line.61"></a>
+<FONT color="green">062</FONT>                var11.finish();<a name="line.62"></a>
+<FONT color="green">063</FONT>                this.field_73587_e = new byte[var3];<a name="line.63"></a>
+<FONT color="green">064</FONT>                this.field_73585_g = var11.deflate(this.field_73587_e);<a name="line.64"></a>
+<FONT color="green">065</FONT>            }<a name="line.65"></a>
+<FONT color="green">066</FONT>            finally<a name="line.66"></a>
+<FONT color="green">067</FONT>            {<a name="line.67"></a>
+<FONT color="green">068</FONT>                var11.end();<a name="line.68"></a>
+<FONT color="green">069</FONT>            }<a name="line.69"></a>
+<FONT color="green">070</FONT>        }<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>        /**<a name="line.72"></a>
+<FONT color="green">073</FONT>         * Abstract. Reads the raw packet data from the data stream.<a name="line.73"></a>
+<FONT color="green">074</FONT>         */<a name="line.74"></a>
+<FONT color="green">075</FONT>        public void readPacketData(DataInputStream par1DataInputStream) throws IOException<a name="line.75"></a>
+<FONT color="green">076</FONT>        {<a name="line.76"></a>
+<FONT color="green">077</FONT>            short var2 = par1DataInputStream.readShort();<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.field_73585_g = par1DataInputStream.readInt();<a name="line.78"></a>
+<FONT color="green">079</FONT>            this.field_73589_c = new int[var2];<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.field_73586_d = new int[var2];<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.field_73590_a = new int[var2];<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.field_73588_b = new int[var2];<a name="line.82"></a>
+<FONT color="green">083</FONT>            this.field_73584_f = new byte[var2][];<a name="line.83"></a>
+<FONT color="green">084</FONT>    <a name="line.84"></a>
+<FONT color="green">085</FONT>            if (field_73591_h.length &lt; this.field_73585_g)<a name="line.85"></a>
+<FONT color="green">086</FONT>            {<a name="line.86"></a>
+<FONT color="green">087</FONT>                field_73591_h = new byte[this.field_73585_g];<a name="line.87"></a>
+<FONT color="green">088</FONT>            }<a name="line.88"></a>
+<FONT color="green">089</FONT>    <a name="line.89"></a>
+<FONT color="green">090</FONT>            par1DataInputStream.readFully(field_73591_h, 0, this.field_73585_g);<a name="line.90"></a>
+<FONT color="green">091</FONT>            byte[] var3 = new byte[196864 * var2];<a name="line.91"></a>
+<FONT color="green">092</FONT>            Inflater var4 = new Inflater();<a name="line.92"></a>
+<FONT color="green">093</FONT>            var4.setInput(field_73591_h, 0, this.field_73585_g);<a name="line.93"></a>
+<FONT color="green">094</FONT>    <a name="line.94"></a>
+<FONT color="green">095</FONT>            try<a name="line.95"></a>
+<FONT color="green">096</FONT>            {<a name="line.96"></a>
+<FONT color="green">097</FONT>                var4.inflate(var3);<a name="line.97"></a>
+<FONT color="green">098</FONT>            }<a name="line.98"></a>
+<FONT color="green">099</FONT>            catch (DataFormatException var11)<a name="line.99"></a>
+<FONT color="green">100</FONT>            {<a name="line.100"></a>
+<FONT color="green">101</FONT>                throw new IOException("Bad compressed data format");<a name="line.101"></a>
+<FONT color="green">102</FONT>            }<a name="line.102"></a>
+<FONT color="green">103</FONT>            finally<a name="line.103"></a>
+<FONT color="green">104</FONT>            {<a name="line.104"></a>
+<FONT color="green">105</FONT>                var4.end();<a name="line.105"></a>
+<FONT color="green">106</FONT>            }<a name="line.106"></a>
+<FONT color="green">107</FONT>    <a name="line.107"></a>
+<FONT color="green">108</FONT>            int var5 = 0;<a name="line.108"></a>
+<FONT color="green">109</FONT>    <a name="line.109"></a>
+<FONT color="green">110</FONT>            for (int var6 = 0; var6 &lt; var2; ++var6)<a name="line.110"></a>
+<FONT color="green">111</FONT>            {<a name="line.111"></a>
+<FONT color="green">112</FONT>                this.field_73589_c[var6] = par1DataInputStream.readInt();<a name="line.112"></a>
+<FONT color="green">113</FONT>                this.field_73586_d[var6] = par1DataInputStream.readInt();<a name="line.113"></a>
+<FONT color="green">114</FONT>                this.field_73590_a[var6] = par1DataInputStream.readShort();<a name="line.114"></a>
+<FONT color="green">115</FONT>                this.field_73588_b[var6] = par1DataInputStream.readShort();<a name="line.115"></a>
+<FONT color="green">116</FONT>                int var7 = 0;<a name="line.116"></a>
+<FONT color="green">117</FONT>                int var8;<a name="line.117"></a>
+<FONT color="green">118</FONT>    <a name="line.118"></a>
+<FONT color="green">119</FONT>                for (var8 = 0; var8 &lt; 16; ++var8)<a name="line.119"></a>
+<FONT color="green">120</FONT>                {<a name="line.120"></a>
+<FONT color="green">121</FONT>                    var7 += this.field_73590_a[var6] &gt;&gt; var8 &amp; 1;<a name="line.121"></a>
+<FONT color="green">122</FONT>                }<a name="line.122"></a>
+<FONT color="green">123</FONT>    <a name="line.123"></a>
+<FONT color="green">124</FONT>                int msb = 0; //BugFix: MC does not read the MSB array from the packet properly, causing issues for servers that use blocks &gt; 256<a name="line.124"></a>
+<FONT color="green">125</FONT>                for (int x = 0; x &lt; 16; x++)<a name="line.125"></a>
+<FONT color="green">126</FONT>                {<a name="line.126"></a>
+<FONT color="green">127</FONT>                    msb += (field_73588_b[var6] &gt;&gt; x) &amp; 1;<a name="line.127"></a>
+<FONT color="green">128</FONT>                }<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>                var8 = 2048 * 5 * var7 + (2048 * msb) + 256;<a name="line.130"></a>
+<FONT color="green">131</FONT>                this.field_73584_f[var6] = new byte[var8];<a name="line.131"></a>
+<FONT color="green">132</FONT>                System.arraycopy(var3, var5, this.field_73584_f[var6], 0, var8);<a name="line.132"></a>
+<FONT color="green">133</FONT>                var5 += var8;<a name="line.133"></a>
+<FONT color="green">134</FONT>            }<a name="line.134"></a>
+<FONT color="green">135</FONT>        }<a name="line.135"></a>
+<FONT color="green">136</FONT>    <a name="line.136"></a>
+<FONT color="green">137</FONT>        /**<a name="line.137"></a>
+<FONT color="green">138</FONT>         * Abstract. Writes the raw packet data to the data stream.<a name="line.138"></a>
+<FONT color="green">139</FONT>         */<a name="line.139"></a>
+<FONT color="green">140</FONT>        public void writePacketData(DataOutputStream par1DataOutputStream) throws IOException<a name="line.140"></a>
+<FONT color="green">141</FONT>        {<a name="line.141"></a>
+<FONT color="green">142</FONT>            par1DataOutputStream.writeShort(this.field_73589_c.length);<a name="line.142"></a>
+<FONT color="green">143</FONT>            par1DataOutputStream.writeInt(this.field_73585_g);<a name="line.143"></a>
+<FONT color="green">144</FONT>            par1DataOutputStream.write(this.field_73587_e, 0, this.field_73585_g);<a name="line.144"></a>
+<FONT color="green">145</FONT>    <a name="line.145"></a>
+<FONT color="green">146</FONT>            for (int var2 = 0; var2 &lt; this.field_73589_c.length; ++var2)<a name="line.146"></a>
+<FONT color="green">147</FONT>            {<a name="line.147"></a>
+<FONT color="green">148</FONT>                par1DataOutputStream.writeInt(this.field_73589_c[var2]);<a name="line.148"></a>
+<FONT color="green">149</FONT>                par1DataOutputStream.writeInt(this.field_73586_d[var2]);<a name="line.149"></a>
+<FONT color="green">150</FONT>                par1DataOutputStream.writeShort((short)(this.field_73590_a[var2] &amp; 65535));<a name="line.150"></a>
+<FONT color="green">151</FONT>                par1DataOutputStream.writeShort((short)(this.field_73588_b[var2] &amp; 65535));<a name="line.151"></a>
+<FONT color="green">152</FONT>            }<a name="line.152"></a>
+<FONT color="green">153</FONT>        }<a name="line.153"></a>
+<FONT color="green">154</FONT>    <a name="line.154"></a>
+<FONT color="green">155</FONT>        /**<a name="line.155"></a>
+<FONT color="green">156</FONT>         * Passes this Packet on to the NetHandler for processing.<a name="line.156"></a>
+<FONT color="green">157</FONT>         */<a name="line.157"></a>
+<FONT color="green">158</FONT>        public void processPacket(NetHandler par1NetHandler)<a name="line.158"></a>
+<FONT color="green">159</FONT>        {<a name="line.159"></a>
+<FONT color="green">160</FONT>            par1NetHandler.handleMapChunks(this);<a name="line.160"></a>
+<FONT color="green">161</FONT>        }<a name="line.161"></a>
+<FONT color="green">162</FONT>    <a name="line.162"></a>
+<FONT color="green">163</FONT>        /**<a name="line.163"></a>
+<FONT color="green">164</FONT>         * Abstract. Return the size of the packet (not counting the header).<a name="line.164"></a>
+<FONT color="green">165</FONT>         */<a name="line.165"></a>
+<FONT color="green">166</FONT>        public int getPacketSize()<a name="line.166"></a>
+<FONT color="green">167</FONT>        {<a name="line.167"></a>
+<FONT color="green">168</FONT>            return 6 + this.field_73585_g + 12 * this.func_73581_d();<a name="line.168"></a>
+<FONT color="green">169</FONT>        }<a name="line.169"></a>
+<FONT color="green">170</FONT>    <a name="line.170"></a>
+<FONT color="green">171</FONT>        @SideOnly(Side.CLIENT)<a name="line.171"></a>
+<FONT color="green">172</FONT>        public int func_73582_a(int par1)<a name="line.172"></a>
+<FONT color="green">173</FONT>        {<a name="line.173"></a>
+<FONT color="green">174</FONT>            return this.field_73589_c[par1];<a name="line.174"></a>
+<FONT color="green">175</FONT>        }<a name="line.175"></a>
+<FONT color="green">176</FONT>    <a name="line.176"></a>
+<FONT color="green">177</FONT>        @SideOnly(Side.CLIENT)<a name="line.177"></a>
+<FONT color="green">178</FONT>        public int func_73580_b(int par1)<a name="line.178"></a>
+<FONT color="green">179</FONT>        {<a name="line.179"></a>
+<FONT color="green">180</FONT>            return this.field_73586_d[par1];<a name="line.180"></a>
+<FONT color="green">181</FONT>        }<a name="line.181"></a>
+<FONT color="green">182</FONT>    <a name="line.182"></a>
+<FONT color="green">183</FONT>        public int func_73581_d()<a name="line.183"></a>
+<FONT color="green">184</FONT>        {<a name="line.184"></a>
+<FONT color="green">185</FONT>            return this.field_73589_c.length;<a name="line.185"></a>
+<FONT color="green">186</FONT>        }<a name="line.186"></a>
+<FONT color="green">187</FONT>    <a name="line.187"></a>
+<FONT color="green">188</FONT>        @SideOnly(Side.CLIENT)<a name="line.188"></a>
+<FONT color="green">189</FONT>        public byte[] func_73583_c(int par1)<a name="line.189"></a>
+<FONT color="green">190</FONT>        {<a name="line.190"></a>
+<FONT color="green">191</FONT>            return this.field_73584_f[par1];<a name="line.191"></a>
+<FONT color="green">192</FONT>        }<a name="line.192"></a>
+<FONT color="green">193</FONT>    }<a name="line.193"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

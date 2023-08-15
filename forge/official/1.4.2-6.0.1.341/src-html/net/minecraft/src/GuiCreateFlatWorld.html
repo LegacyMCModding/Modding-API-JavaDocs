@@ -1,0 +1,190 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class GuiCreateFlatWorld extends GuiScreen<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        private static RenderItem field_82282_a = new RenderItem();<a name="line.9"></a>
+<FONT color="green">010</FONT>        private final GuiCreateWorld field_82277_b;<a name="line.10"></a>
+<FONT color="green">011</FONT>        private FlatGeneratorInfo field_82279_c = FlatGeneratorInfo.func_82649_e();<a name="line.11"></a>
+<FONT color="green">012</FONT>        private String field_82276_d;<a name="line.12"></a>
+<FONT color="green">013</FONT>        private String field_82285_m;<a name="line.13"></a>
+<FONT color="green">014</FONT>        private String field_82283_n;<a name="line.14"></a>
+<FONT color="green">015</FONT>        private GuiCreateFlatWorldListSlot field_82284_o;<a name="line.15"></a>
+<FONT color="green">016</FONT>        private GuiButton field_82281_p;<a name="line.16"></a>
+<FONT color="green">017</FONT>        private GuiButton field_82280_q;<a name="line.17"></a>
+<FONT color="green">018</FONT>        private GuiButton field_82278_r;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        public GuiCreateFlatWorld(GuiCreateWorld par1, String par2Str)<a name="line.20"></a>
+<FONT color="green">021</FONT>        {<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.field_82277_b = par1;<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.func_82273_a(par2Str);<a name="line.23"></a>
+<FONT color="green">024</FONT>        }<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        public String func_82275_e()<a name="line.26"></a>
+<FONT color="green">027</FONT>        {<a name="line.27"></a>
+<FONT color="green">028</FONT>            return this.field_82279_c.toString();<a name="line.28"></a>
+<FONT color="green">029</FONT>        }<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>        public void func_82273_a(String par1Str)<a name="line.31"></a>
+<FONT color="green">032</FONT>        {<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.field_82279_c = FlatGeneratorInfo.func_82651_a(par1Str);<a name="line.33"></a>
+<FONT color="green">034</FONT>        }<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>        /**<a name="line.36"></a>
+<FONT color="green">037</FONT>         * Adds the buttons (and other controls) to the screen in question.<a name="line.37"></a>
+<FONT color="green">038</FONT>         */<a name="line.38"></a>
+<FONT color="green">039</FONT>        public void initGui()<a name="line.39"></a>
+<FONT color="green">040</FONT>        {<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.controlList.clear();<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.field_82276_d = StatCollector.translateToLocal("createWorld.customize.flat.title");<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.field_82285_m = StatCollector.translateToLocal("createWorld.customize.flat.tile");<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.field_82283_n = StatCollector.translateToLocal("createWorld.customize.flat.height");<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.field_82284_o = new GuiCreateFlatWorldListSlot(this);<a name="line.45"></a>
+<FONT color="green">046</FONT>            this.controlList.add(this.field_82281_p = new GuiButton(2, this.width / 2 - 154, this.height - 52, 100, 20, StatCollector.translateToLocal("createWorld.customize.flat.addLayer") + " (NYI)"));<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.controlList.add(this.field_82280_q = new GuiButton(3, this.width / 2 - 50, this.height - 52, 100, 20, StatCollector.translateToLocal("createWorld.customize.flat.editLayer") + " (NYI)"));<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.controlList.add(this.field_82278_r = new GuiButton(4, this.width / 2 - 155, this.height - 52, 150, 20, StatCollector.translateToLocal("createWorld.customize.flat.removeLayer")));<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.controlList.add(new GuiButton(0, this.width / 2 - 155, this.height - 28, 150, 20, StatCollector.translateToLocal("gui.done")));<a name="line.49"></a>
+<FONT color="green">050</FONT>            this.controlList.add(new GuiButton(5, this.width / 2 + 5, this.height - 52, 150, 20, StatCollector.translateToLocal("createWorld.customize.presets")));<a name="line.50"></a>
+<FONT color="green">051</FONT>            this.controlList.add(new GuiButton(1, this.width / 2 + 5, this.height - 28, 150, 20, StatCollector.translateToLocal("gui.cancel")));<a name="line.51"></a>
+<FONT color="green">052</FONT>            this.field_82281_p.drawButton = this.field_82280_q.drawButton = false;<a name="line.52"></a>
+<FONT color="green">053</FONT>            this.field_82279_c.func_82645_d();<a name="line.53"></a>
+<FONT color="green">054</FONT>            this.func_82270_g();<a name="line.54"></a>
+<FONT color="green">055</FONT>        }<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>        /**<a name="line.57"></a>
+<FONT color="green">058</FONT>         * Fired when a control is clicked. This is the equivalent of ActionListener.actionPerformed(ActionEvent e).<a name="line.58"></a>
+<FONT color="green">059</FONT>         */<a name="line.59"></a>
+<FONT color="green">060</FONT>        protected void actionPerformed(GuiButton par1GuiButton)<a name="line.60"></a>
+<FONT color="green">061</FONT>        {<a name="line.61"></a>
+<FONT color="green">062</FONT>            int var2 = this.field_82279_c.func_82650_c().size() - this.field_82284_o.field_82454_a - 1;<a name="line.62"></a>
+<FONT color="green">063</FONT>    <a name="line.63"></a>
+<FONT color="green">064</FONT>            if (par1GuiButton.id == 1)<a name="line.64"></a>
+<FONT color="green">065</FONT>            {<a name="line.65"></a>
+<FONT color="green">066</FONT>                this.mc.displayGuiScreen(this.field_82277_b);<a name="line.66"></a>
+<FONT color="green">067</FONT>            }<a name="line.67"></a>
+<FONT color="green">068</FONT>            else if (par1GuiButton.id == 0)<a name="line.68"></a>
+<FONT color="green">069</FONT>            {<a name="line.69"></a>
+<FONT color="green">070</FONT>                this.field_82277_b.field_82290_a = this.func_82275_e();<a name="line.70"></a>
+<FONT color="green">071</FONT>                this.mc.displayGuiScreen(this.field_82277_b);<a name="line.71"></a>
+<FONT color="green">072</FONT>            }<a name="line.72"></a>
+<FONT color="green">073</FONT>            else if (par1GuiButton.id == 5)<a name="line.73"></a>
+<FONT color="green">074</FONT>            {<a name="line.74"></a>
+<FONT color="green">075</FONT>                this.mc.displayGuiScreen(new GuiFlatPresets(this));<a name="line.75"></a>
+<FONT color="green">076</FONT>            }<a name="line.76"></a>
+<FONT color="green">077</FONT>            else if (par1GuiButton.id == 4 &amp;&amp; this.func_82272_i())<a name="line.77"></a>
+<FONT color="green">078</FONT>            {<a name="line.78"></a>
+<FONT color="green">079</FONT>                this.field_82279_c.func_82650_c().remove(var2);<a name="line.79"></a>
+<FONT color="green">080</FONT>                this.field_82284_o.field_82454_a = Math.min(this.field_82284_o.field_82454_a, this.field_82279_c.func_82650_c().size() - 1);<a name="line.80"></a>
+<FONT color="green">081</FONT>            }<a name="line.81"></a>
+<FONT color="green">082</FONT>    <a name="line.82"></a>
+<FONT color="green">083</FONT>            this.field_82279_c.func_82645_d();<a name="line.83"></a>
+<FONT color="green">084</FONT>            this.func_82270_g();<a name="line.84"></a>
+<FONT color="green">085</FONT>        }<a name="line.85"></a>
+<FONT color="green">086</FONT>    <a name="line.86"></a>
+<FONT color="green">087</FONT>        public void func_82270_g()<a name="line.87"></a>
+<FONT color="green">088</FONT>        {<a name="line.88"></a>
+<FONT color="green">089</FONT>            boolean var1 = this.func_82272_i();<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.field_82278_r.enabled = var1;<a name="line.90"></a>
+<FONT color="green">091</FONT>            this.field_82280_q.enabled = var1;<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.field_82280_q.enabled = false;<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.field_82281_p.enabled = false;<a name="line.93"></a>
+<FONT color="green">094</FONT>        }<a name="line.94"></a>
+<FONT color="green">095</FONT>    <a name="line.95"></a>
+<FONT color="green">096</FONT>        private boolean func_82272_i()<a name="line.96"></a>
+<FONT color="green">097</FONT>        {<a name="line.97"></a>
+<FONT color="green">098</FONT>            return this.field_82284_o.field_82454_a &gt; -1 &amp;&amp; this.field_82284_o.field_82454_a &lt; this.field_82279_c.func_82650_c().size();<a name="line.98"></a>
+<FONT color="green">099</FONT>        }<a name="line.99"></a>
+<FONT color="green">100</FONT>    <a name="line.100"></a>
+<FONT color="green">101</FONT>        /**<a name="line.101"></a>
+<FONT color="green">102</FONT>         * Draws the screen and all the components in it.<a name="line.102"></a>
+<FONT color="green">103</FONT>         */<a name="line.103"></a>
+<FONT color="green">104</FONT>        public void drawScreen(int par1, int par2, float par3)<a name="line.104"></a>
+<FONT color="green">105</FONT>        {<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.drawDefaultBackground();<a name="line.106"></a>
+<FONT color="green">107</FONT>            this.field_82284_o.drawScreen(par1, par2, par3);<a name="line.107"></a>
+<FONT color="green">108</FONT>            this.drawCenteredString(this.fontRenderer, this.field_82276_d, this.width / 2, 8, 16777215);<a name="line.108"></a>
+<FONT color="green">109</FONT>            int var4 = this.width / 2 - 92 - 16;<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.drawString(this.fontRenderer, this.field_82285_m, var4, 32, 16777215);<a name="line.110"></a>
+<FONT color="green">111</FONT>            this.drawString(this.fontRenderer, this.field_82283_n, var4 + 2 + 213 - this.fontRenderer.getStringWidth(this.field_82283_n), 32, 16777215);<a name="line.111"></a>
+<FONT color="green">112</FONT>            super.drawScreen(par1, par2, par3);<a name="line.112"></a>
+<FONT color="green">113</FONT>        }<a name="line.113"></a>
+<FONT color="green">114</FONT>    <a name="line.114"></a>
+<FONT color="green">115</FONT>        static RenderItem func_82274_h()<a name="line.115"></a>
+<FONT color="green">116</FONT>        {<a name="line.116"></a>
+<FONT color="green">117</FONT>            return field_82282_a;<a name="line.117"></a>
+<FONT color="green">118</FONT>        }<a name="line.118"></a>
+<FONT color="green">119</FONT>    <a name="line.119"></a>
+<FONT color="green">120</FONT>        static FlatGeneratorInfo func_82271_a(GuiCreateFlatWorld par0GuiCreateFlatWorld)<a name="line.120"></a>
+<FONT color="green">121</FONT>        {<a name="line.121"></a>
+<FONT color="green">122</FONT>            return par0GuiCreateFlatWorld.field_82279_c;<a name="line.122"></a>
+<FONT color="green">123</FONT>        }<a name="line.123"></a>
+<FONT color="green">124</FONT>    }<a name="line.124"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

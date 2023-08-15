@@ -1,0 +1,205 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package org.bouncycastle.crypto.modes;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import org.bouncycastle.crypto.BlockCipher;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import org.bouncycastle.crypto.CipherParameters;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.bouncycastle.crypto.DataLengthException;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import org.bouncycastle.crypto.params.ParametersWithIV;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    public class CFBBlockCipher implements BlockCipher<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        private byte[] field_71814_a;<a name="line.10"></a>
+<FONT color="green">011</FONT>        private byte[] field_71812_b;<a name="line.11"></a>
+<FONT color="green">012</FONT>        private byte[] field_71813_c;<a name="line.12"></a>
+<FONT color="green">013</FONT>        private int field_71810_d;<a name="line.13"></a>
+<FONT color="green">014</FONT>        private BlockCipher field_71811_e = null;<a name="line.14"></a>
+<FONT color="green">015</FONT>        private boolean field_71809_f;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        public CFBBlockCipher(BlockCipher par1BlockCipher, int par2)<a name="line.17"></a>
+<FONT color="green">018</FONT>        {<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.field_71811_e = par1BlockCipher;<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.field_71810_d = par2 / 8;<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.field_71814_a = new byte[par1BlockCipher.getBlockSize()];<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.field_71812_b = new byte[par1BlockCipher.getBlockSize()];<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.field_71813_c = new byte[par1BlockCipher.getBlockSize()];<a name="line.23"></a>
+<FONT color="green">024</FONT>        }<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        public void func_71805_a(boolean par1, CipherParameters par2CipherParameters) throws IllegalArgumentException<a name="line.26"></a>
+<FONT color="green">027</FONT>        {<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.field_71809_f = par1;<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>            if (par2CipherParameters instanceof ParametersWithIV)<a name="line.30"></a>
+<FONT color="green">031</FONT>            {<a name="line.31"></a>
+<FONT color="green">032</FONT>                ParametersWithIV var3 = (ParametersWithIV)par2CipherParameters;<a name="line.32"></a>
+<FONT color="green">033</FONT>                byte[] var4 = var3.getIV();<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>                if (var4.length &lt; this.field_71814_a.length)<a name="line.35"></a>
+<FONT color="green">036</FONT>                {<a name="line.36"></a>
+<FONT color="green">037</FONT>                    System.arraycopy(var4, 0, this.field_71814_a, this.field_71814_a.length - var4.length, var4.length);<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>                    for (int var5 = 0; var5 &lt; this.field_71814_a.length - var4.length; ++var5)<a name="line.39"></a>
+<FONT color="green">040</FONT>                    {<a name="line.40"></a>
+<FONT color="green">041</FONT>                        this.field_71814_a[var5] = 0;<a name="line.41"></a>
+<FONT color="green">042</FONT>                    }<a name="line.42"></a>
+<FONT color="green">043</FONT>                }<a name="line.43"></a>
+<FONT color="green">044</FONT>                else<a name="line.44"></a>
+<FONT color="green">045</FONT>                {<a name="line.45"></a>
+<FONT color="green">046</FONT>                    System.arraycopy(var4, 0, this.field_71814_a, 0, this.field_71814_a.length);<a name="line.46"></a>
+<FONT color="green">047</FONT>                }<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>                this.func_71803_c();<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>                if (var3.getParameters() != null)<a name="line.51"></a>
+<FONT color="green">052</FONT>                {<a name="line.52"></a>
+<FONT color="green">053</FONT>                    this.field_71811_e.func_71805_a(true, var3.getParameters());<a name="line.53"></a>
+<FONT color="green">054</FONT>                }<a name="line.54"></a>
+<FONT color="green">055</FONT>            }<a name="line.55"></a>
+<FONT color="green">056</FONT>            else<a name="line.56"></a>
+<FONT color="green">057</FONT>            {<a name="line.57"></a>
+<FONT color="green">058</FONT>                this.func_71803_c();<a name="line.58"></a>
+<FONT color="green">059</FONT>                this.field_71811_e.func_71805_a(true, par2CipherParameters);<a name="line.59"></a>
+<FONT color="green">060</FONT>            }<a name="line.60"></a>
+<FONT color="green">061</FONT>        }<a name="line.61"></a>
+<FONT color="green">062</FONT>    <a name="line.62"></a>
+<FONT color="green">063</FONT>        /**<a name="line.63"></a>
+<FONT color="green">064</FONT>         * Return the name of the algorithm the cipher implements.<a name="line.64"></a>
+<FONT color="green">065</FONT>         */<a name="line.65"></a>
+<FONT color="green">066</FONT>        public String getAlgorithmName()<a name="line.66"></a>
+<FONT color="green">067</FONT>        {<a name="line.67"></a>
+<FONT color="green">068</FONT>            return this.field_71811_e.getAlgorithmName() + "/CFB" + this.field_71810_d * 8;<a name="line.68"></a>
+<FONT color="green">069</FONT>        }<a name="line.69"></a>
+<FONT color="green">070</FONT>    <a name="line.70"></a>
+<FONT color="green">071</FONT>        /**<a name="line.71"></a>
+<FONT color="green">072</FONT>         * Return the block size for this cipher (in bytes).<a name="line.72"></a>
+<FONT color="green">073</FONT>         */<a name="line.73"></a>
+<FONT color="green">074</FONT>        public int getBlockSize()<a name="line.74"></a>
+<FONT color="green">075</FONT>        {<a name="line.75"></a>
+<FONT color="green">076</FONT>            return this.field_71810_d;<a name="line.76"></a>
+<FONT color="green">077</FONT>        }<a name="line.77"></a>
+<FONT color="green">078</FONT>    <a name="line.78"></a>
+<FONT color="green">079</FONT>        public int func_71806_a(byte[] par1ArrayOfByte, int par2, byte[] par3ArrayOfByte, int par4) throws DataLengthException, IllegalStateException<a name="line.79"></a>
+<FONT color="green">080</FONT>        {<a name="line.80"></a>
+<FONT color="green">081</FONT>            return this.field_71809_f ? this.func_71807_b(par1ArrayOfByte, par2, par3ArrayOfByte, par4) : this.func_71808_c(par1ArrayOfByte, par2, par3ArrayOfByte, par4);<a name="line.81"></a>
+<FONT color="green">082</FONT>        }<a name="line.82"></a>
+<FONT color="green">083</FONT>    <a name="line.83"></a>
+<FONT color="green">084</FONT>        public int func_71807_b(byte[] par1ArrayOfByte, int par2, byte[] par3ArrayOfByte, int par4) throws DataLengthException, IllegalStateException<a name="line.84"></a>
+<FONT color="green">085</FONT>        {<a name="line.85"></a>
+<FONT color="green">086</FONT>            if (par2 + this.field_71810_d &gt; par1ArrayOfByte.length)<a name="line.86"></a>
+<FONT color="green">087</FONT>            {<a name="line.87"></a>
+<FONT color="green">088</FONT>                throw new DataLengthException("input buffer too short");<a name="line.88"></a>
+<FONT color="green">089</FONT>            }<a name="line.89"></a>
+<FONT color="green">090</FONT>            else if (par4 + this.field_71810_d &gt; par3ArrayOfByte.length)<a name="line.90"></a>
+<FONT color="green">091</FONT>            {<a name="line.91"></a>
+<FONT color="green">092</FONT>                throw new DataLengthException("output buffer too short");<a name="line.92"></a>
+<FONT color="green">093</FONT>            }<a name="line.93"></a>
+<FONT color="green">094</FONT>            else<a name="line.94"></a>
+<FONT color="green">095</FONT>            {<a name="line.95"></a>
+<FONT color="green">096</FONT>                this.field_71811_e.func_71806_a(this.field_71812_b, 0, this.field_71813_c, 0);<a name="line.96"></a>
+<FONT color="green">097</FONT>    <a name="line.97"></a>
+<FONT color="green">098</FONT>                for (int var5 = 0; var5 &lt; this.field_71810_d; ++var5)<a name="line.98"></a>
+<FONT color="green">099</FONT>                {<a name="line.99"></a>
+<FONT color="green">100</FONT>                    par3ArrayOfByte[par4 + var5] = (byte)(this.field_71813_c[var5] ^ par1ArrayOfByte[par2 + var5]);<a name="line.100"></a>
+<FONT color="green">101</FONT>                }<a name="line.101"></a>
+<FONT color="green">102</FONT>    <a name="line.102"></a>
+<FONT color="green">103</FONT>                System.arraycopy(this.field_71812_b, this.field_71810_d, this.field_71812_b, 0, this.field_71812_b.length - this.field_71810_d);<a name="line.103"></a>
+<FONT color="green">104</FONT>                System.arraycopy(par3ArrayOfByte, par4, this.field_71812_b, this.field_71812_b.length - this.field_71810_d, this.field_71810_d);<a name="line.104"></a>
+<FONT color="green">105</FONT>                return this.field_71810_d;<a name="line.105"></a>
+<FONT color="green">106</FONT>            }<a name="line.106"></a>
+<FONT color="green">107</FONT>        }<a name="line.107"></a>
+<FONT color="green">108</FONT>    <a name="line.108"></a>
+<FONT color="green">109</FONT>        public int func_71808_c(byte[] par1ArrayOfByte, int par2, byte[] par3ArrayOfByte, int par4) throws DataLengthException, IllegalStateException<a name="line.109"></a>
+<FONT color="green">110</FONT>        {<a name="line.110"></a>
+<FONT color="green">111</FONT>            if (par2 + this.field_71810_d &gt; par1ArrayOfByte.length)<a name="line.111"></a>
+<FONT color="green">112</FONT>            {<a name="line.112"></a>
+<FONT color="green">113</FONT>                throw new DataLengthException("input buffer too short");<a name="line.113"></a>
+<FONT color="green">114</FONT>            }<a name="line.114"></a>
+<FONT color="green">115</FONT>            else if (par4 + this.field_71810_d &gt; par3ArrayOfByte.length)<a name="line.115"></a>
+<FONT color="green">116</FONT>            {<a name="line.116"></a>
+<FONT color="green">117</FONT>                throw new DataLengthException("output buffer too short");<a name="line.117"></a>
+<FONT color="green">118</FONT>            }<a name="line.118"></a>
+<FONT color="green">119</FONT>            else<a name="line.119"></a>
+<FONT color="green">120</FONT>            {<a name="line.120"></a>
+<FONT color="green">121</FONT>                this.field_71811_e.func_71806_a(this.field_71812_b, 0, this.field_71813_c, 0);<a name="line.121"></a>
+<FONT color="green">122</FONT>                System.arraycopy(this.field_71812_b, this.field_71810_d, this.field_71812_b, 0, this.field_71812_b.length - this.field_71810_d);<a name="line.122"></a>
+<FONT color="green">123</FONT>                System.arraycopy(par1ArrayOfByte, par2, this.field_71812_b, this.field_71812_b.length - this.field_71810_d, this.field_71810_d);<a name="line.123"></a>
+<FONT color="green">124</FONT>    <a name="line.124"></a>
+<FONT color="green">125</FONT>                for (int var5 = 0; var5 &lt; this.field_71810_d; ++var5)<a name="line.125"></a>
+<FONT color="green">126</FONT>                {<a name="line.126"></a>
+<FONT color="green">127</FONT>                    par3ArrayOfByte[par4 + var5] = (byte)(this.field_71813_c[var5] ^ par1ArrayOfByte[par2 + var5]);<a name="line.127"></a>
+<FONT color="green">128</FONT>                }<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>                return this.field_71810_d;<a name="line.130"></a>
+<FONT color="green">131</FONT>            }<a name="line.131"></a>
+<FONT color="green">132</FONT>        }<a name="line.132"></a>
+<FONT color="green">133</FONT>    <a name="line.133"></a>
+<FONT color="green">134</FONT>        public void func_71803_c()<a name="line.134"></a>
+<FONT color="green">135</FONT>        {<a name="line.135"></a>
+<FONT color="green">136</FONT>            System.arraycopy(this.field_71814_a, 0, this.field_71812_b, 0, this.field_71814_a.length);<a name="line.136"></a>
+<FONT color="green">137</FONT>            this.field_71811_e.func_71803_c();<a name="line.137"></a>
+<FONT color="green">138</FONT>        }<a name="line.138"></a>
+<FONT color="green">139</FONT>    }<a name="line.139"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
