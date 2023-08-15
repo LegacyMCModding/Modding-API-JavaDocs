@@ -1,0 +1,108 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.gen;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Random;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.world.World;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.world.chunk.IChunkProvider;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    public class MapGenBase<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** The number of Chunks to gen-check in any given direction. */<a name="line.9"></a>
+<FONT color="green">010</FONT>        protected int range = 8;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** The RNG used by the MapGen classes. */<a name="line.12"></a>
+<FONT color="green">013</FONT>        protected Random rand = new Random();<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        /** This world object. */<a name="line.15"></a>
+<FONT color="green">016</FONT>        protected World worldObj;<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        public void generate(IChunkProvider par1IChunkProvider, World par2World, int par3, int par4, byte[] par5ArrayOfByte)<a name="line.18"></a>
+<FONT color="green">019</FONT>        {<a name="line.19"></a>
+<FONT color="green">020</FONT>            int var6 = this.range;<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.worldObj = par2World;<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.rand.setSeed(par2World.getSeed());<a name="line.22"></a>
+<FONT color="green">023</FONT>            long var7 = this.rand.nextLong();<a name="line.23"></a>
+<FONT color="green">024</FONT>            long var9 = this.rand.nextLong();<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>            for (int var11 = par3 - var6; var11 &lt;= par3 + var6; ++var11)<a name="line.26"></a>
+<FONT color="green">027</FONT>            {<a name="line.27"></a>
+<FONT color="green">028</FONT>                for (int var12 = par4 - var6; var12 &lt;= par4 + var6; ++var12)<a name="line.28"></a>
+<FONT color="green">029</FONT>                {<a name="line.29"></a>
+<FONT color="green">030</FONT>                    long var13 = (long)var11 * var7;<a name="line.30"></a>
+<FONT color="green">031</FONT>                    long var15 = (long)var12 * var9;<a name="line.31"></a>
+<FONT color="green">032</FONT>                    this.rand.setSeed(var13 ^ var15 ^ par2World.getSeed());<a name="line.32"></a>
+<FONT color="green">033</FONT>                    this.recursiveGenerate(par2World, var11, var12, par3, par4, par5ArrayOfByte);<a name="line.33"></a>
+<FONT color="green">034</FONT>                }<a name="line.34"></a>
+<FONT color="green">035</FONT>            }<a name="line.35"></a>
+<FONT color="green">036</FONT>        }<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>        /**<a name="line.38"></a>
+<FONT color="green">039</FONT>         * Recursively called by generate() (generate) and optionally by itself.<a name="line.39"></a>
+<FONT color="green">040</FONT>         */<a name="line.40"></a>
+<FONT color="green">041</FONT>        protected void recursiveGenerate(World par1World, int par2, int par3, int par4, int par5, byte[] par6ArrayOfByte) {}<a name="line.41"></a>
+<FONT color="green">042</FONT>    }<a name="line.42"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

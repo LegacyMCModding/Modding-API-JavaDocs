@@ -1,0 +1,678 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.block;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.ArrayList;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.HashSet;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.util.Random;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import java.util.Set;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.block.material.Material;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.item.Item;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.util.AxisAlignedBB;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraft.util.Direction;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraft.world.ChunkPosition;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import net.minecraft.world.IBlockAccess;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import net.minecraft.world.World;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>    public class BlockRedstoneWire extends Block<a name="line.17"></a>
+<FONT color="green">018</FONT>    {<a name="line.18"></a>
+<FONT color="green">019</FONT>        /**<a name="line.19"></a>
+<FONT color="green">020</FONT>         * When false, power transmission methods do not look at other redstone wires. Used internally during<a name="line.20"></a>
+<FONT color="green">021</FONT>         * updateCurrentStrength.<a name="line.21"></a>
+<FONT color="green">022</FONT>         */<a name="line.22"></a>
+<FONT color="green">023</FONT>        private boolean wiresProvidePower = true;<a name="line.23"></a>
+<FONT color="green">024</FONT>        private Set blocksNeedingUpdate = new HashSet();<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        public BlockRedstoneWire(int par1, int par2)<a name="line.26"></a>
+<FONT color="green">027</FONT>        {<a name="line.27"></a>
+<FONT color="green">028</FONT>            super(par1, par2, Material.circuits);<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.0625F, 1.0F);<a name="line.29"></a>
+<FONT color="green">030</FONT>        }<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * From the specified side and block metadata retrieves the blocks texture. Args: side, metadata<a name="line.33"></a>
+<FONT color="green">034</FONT>         */<a name="line.34"></a>
+<FONT color="green">035</FONT>        public int getBlockTextureFromSideAndMetadata(int par1, int par2)<a name="line.35"></a>
+<FONT color="green">036</FONT>        {<a name="line.36"></a>
+<FONT color="green">037</FONT>            return this.blockIndexInTexture;<a name="line.37"></a>
+<FONT color="green">038</FONT>        }<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        /**<a name="line.40"></a>
+<FONT color="green">041</FONT>         * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been<a name="line.41"></a>
+<FONT color="green">042</FONT>         * cleared to be reused)<a name="line.42"></a>
+<FONT color="green">043</FONT>         */<a name="line.43"></a>
+<FONT color="green">044</FONT>        public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4)<a name="line.44"></a>
+<FONT color="green">045</FONT>        {<a name="line.45"></a>
+<FONT color="green">046</FONT>            return null;<a name="line.46"></a>
+<FONT color="green">047</FONT>        }<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>        /**<a name="line.49"></a>
+<FONT color="green">050</FONT>         * Is this block (a) opaque and (b) a full 1m cube?  This determines whether or not to render the shared face of two<a name="line.50"></a>
+<FONT color="green">051</FONT>         * adjacent blocks and also whether the player can attach torches, redstone wire, etc to this block.<a name="line.51"></a>
+<FONT color="green">052</FONT>         */<a name="line.52"></a>
+<FONT color="green">053</FONT>        public boolean isOpaqueCube()<a name="line.53"></a>
+<FONT color="green">054</FONT>        {<a name="line.54"></a>
+<FONT color="green">055</FONT>            return false;<a name="line.55"></a>
+<FONT color="green">056</FONT>        }<a name="line.56"></a>
+<FONT color="green">057</FONT>    <a name="line.57"></a>
+<FONT color="green">058</FONT>        /**<a name="line.58"></a>
+<FONT color="green">059</FONT>         * If this block doesn't render as an ordinary block it will return False (examples: signs, buttons, stairs, etc)<a name="line.59"></a>
+<FONT color="green">060</FONT>         */<a name="line.60"></a>
+<FONT color="green">061</FONT>        public boolean renderAsNormalBlock()<a name="line.61"></a>
+<FONT color="green">062</FONT>        {<a name="line.62"></a>
+<FONT color="green">063</FONT>            return false;<a name="line.63"></a>
+<FONT color="green">064</FONT>        }<a name="line.64"></a>
+<FONT color="green">065</FONT>    <a name="line.65"></a>
+<FONT color="green">066</FONT>        /**<a name="line.66"></a>
+<FONT color="green">067</FONT>         * The type of render function that is called for this block<a name="line.67"></a>
+<FONT color="green">068</FONT>         */<a name="line.68"></a>
+<FONT color="green">069</FONT>        public int getRenderType()<a name="line.69"></a>
+<FONT color="green">070</FONT>        {<a name="line.70"></a>
+<FONT color="green">071</FONT>            return 5;<a name="line.71"></a>
+<FONT color="green">072</FONT>        }<a name="line.72"></a>
+<FONT color="green">073</FONT>    <a name="line.73"></a>
+<FONT color="green">074</FONT>        @SideOnly(Side.CLIENT)<a name="line.74"></a>
+<FONT color="green">075</FONT>    <a name="line.75"></a>
+<FONT color="green">076</FONT>        /**<a name="line.76"></a>
+<FONT color="green">077</FONT>         * Returns a integer with hex for 0xrrggbb with this color multiplied against the blocks color. Note only called<a name="line.77"></a>
+<FONT color="green">078</FONT>         * when first determining what to render.<a name="line.78"></a>
+<FONT color="green">079</FONT>         */<a name="line.79"></a>
+<FONT color="green">080</FONT>        public int colorMultiplier(IBlockAccess par1IBlockAccess, int par2, int par3, int par4)<a name="line.80"></a>
+<FONT color="green">081</FONT>        {<a name="line.81"></a>
+<FONT color="green">082</FONT>            return 8388608;<a name="line.82"></a>
+<FONT color="green">083</FONT>        }<a name="line.83"></a>
+<FONT color="green">084</FONT>    <a name="line.84"></a>
+<FONT color="green">085</FONT>        /**<a name="line.85"></a>
+<FONT color="green">086</FONT>         * Checks to see if its valid to put this block at the specified coordinates. Args: world, x, y, z<a name="line.86"></a>
+<FONT color="green">087</FONT>         */<a name="line.87"></a>
+<FONT color="green">088</FONT>        public boolean canPlaceBlockAt(World par1World, int par2, int par3, int par4)<a name="line.88"></a>
+<FONT color="green">089</FONT>        {<a name="line.89"></a>
+<FONT color="green">090</FONT>            return par1World.doesBlockHaveSolidTopSurface(par2, par3 - 1, par4) || par1World.getBlockId(par2, par3 - 1, par4) == Block.glowStone.blockID;<a name="line.90"></a>
+<FONT color="green">091</FONT>        }<a name="line.91"></a>
+<FONT color="green">092</FONT>    <a name="line.92"></a>
+<FONT color="green">093</FONT>        /**<a name="line.93"></a>
+<FONT color="green">094</FONT>         * Sets the strength of the wire current (0-15) for this block based on neighboring blocks and propagates to<a name="line.94"></a>
+<FONT color="green">095</FONT>         * neighboring redstone wires<a name="line.95"></a>
+<FONT color="green">096</FONT>         */<a name="line.96"></a>
+<FONT color="green">097</FONT>        private void updateAndPropagateCurrentStrength(World par1World, int par2, int par3, int par4)<a name="line.97"></a>
+<FONT color="green">098</FONT>        {<a name="line.98"></a>
+<FONT color="green">099</FONT>            this.calculateCurrentChanges(par1World, par2, par3, par4, par2, par3, par4);<a name="line.99"></a>
+<FONT color="green">100</FONT>            ArrayList var5 = new ArrayList(this.blocksNeedingUpdate);<a name="line.100"></a>
+<FONT color="green">101</FONT>            this.blocksNeedingUpdate.clear();<a name="line.101"></a>
+<FONT color="green">102</FONT>    <a name="line.102"></a>
+<FONT color="green">103</FONT>            for (int var6 = 0; var6 &lt; var5.size(); ++var6)<a name="line.103"></a>
+<FONT color="green">104</FONT>            {<a name="line.104"></a>
+<FONT color="green">105</FONT>                ChunkPosition var7 = (ChunkPosition)var5.get(var6);<a name="line.105"></a>
+<FONT color="green">106</FONT>                par1World.notifyBlocksOfNeighborChange(var7.x, var7.y, var7.z, this.blockID);<a name="line.106"></a>
+<FONT color="green">107</FONT>            }<a name="line.107"></a>
+<FONT color="green">108</FONT>        }<a name="line.108"></a>
+<FONT color="green">109</FONT>    <a name="line.109"></a>
+<FONT color="green">110</FONT>        private void calculateCurrentChanges(World par1World, int par2, int par3, int par4, int par5, int par6, int par7)<a name="line.110"></a>
+<FONT color="green">111</FONT>        {<a name="line.111"></a>
+<FONT color="green">112</FONT>            int var8 = par1World.getBlockMetadata(par2, par3, par4);<a name="line.112"></a>
+<FONT color="green">113</FONT>            int var9 = 0;<a name="line.113"></a>
+<FONT color="green">114</FONT>            this.wiresProvidePower = false;<a name="line.114"></a>
+<FONT color="green">115</FONT>            boolean var10 = par1World.isBlockIndirectlyGettingPowered(par2, par3, par4);<a name="line.115"></a>
+<FONT color="green">116</FONT>            this.wiresProvidePower = true;<a name="line.116"></a>
+<FONT color="green">117</FONT>            int var11;<a name="line.117"></a>
+<FONT color="green">118</FONT>            int var12;<a name="line.118"></a>
+<FONT color="green">119</FONT>            int var13;<a name="line.119"></a>
+<FONT color="green">120</FONT>    <a name="line.120"></a>
+<FONT color="green">121</FONT>            if (var10)<a name="line.121"></a>
+<FONT color="green">122</FONT>            {<a name="line.122"></a>
+<FONT color="green">123</FONT>                var9 = 15;<a name="line.123"></a>
+<FONT color="green">124</FONT>            }<a name="line.124"></a>
+<FONT color="green">125</FONT>            else<a name="line.125"></a>
+<FONT color="green">126</FONT>            {<a name="line.126"></a>
+<FONT color="green">127</FONT>                for (var11 = 0; var11 &lt; 4; ++var11)<a name="line.127"></a>
+<FONT color="green">128</FONT>                {<a name="line.128"></a>
+<FONT color="green">129</FONT>                    var12 = par2;<a name="line.129"></a>
+<FONT color="green">130</FONT>                    var13 = par4;<a name="line.130"></a>
+<FONT color="green">131</FONT>    <a name="line.131"></a>
+<FONT color="green">132</FONT>                    if (var11 == 0)<a name="line.132"></a>
+<FONT color="green">133</FONT>                    {<a name="line.133"></a>
+<FONT color="green">134</FONT>                        var12 = par2 - 1;<a name="line.134"></a>
+<FONT color="green">135</FONT>                    }<a name="line.135"></a>
+<FONT color="green">136</FONT>    <a name="line.136"></a>
+<FONT color="green">137</FONT>                    if (var11 == 1)<a name="line.137"></a>
+<FONT color="green">138</FONT>                    {<a name="line.138"></a>
+<FONT color="green">139</FONT>                        ++var12;<a name="line.139"></a>
+<FONT color="green">140</FONT>                    }<a name="line.140"></a>
+<FONT color="green">141</FONT>    <a name="line.141"></a>
+<FONT color="green">142</FONT>                    if (var11 == 2)<a name="line.142"></a>
+<FONT color="green">143</FONT>                    {<a name="line.143"></a>
+<FONT color="green">144</FONT>                        var13 = par4 - 1;<a name="line.144"></a>
+<FONT color="green">145</FONT>                    }<a name="line.145"></a>
+<FONT color="green">146</FONT>    <a name="line.146"></a>
+<FONT color="green">147</FONT>                    if (var11 == 3)<a name="line.147"></a>
+<FONT color="green">148</FONT>                    {<a name="line.148"></a>
+<FONT color="green">149</FONT>                        ++var13;<a name="line.149"></a>
+<FONT color="green">150</FONT>                    }<a name="line.150"></a>
+<FONT color="green">151</FONT>    <a name="line.151"></a>
+<FONT color="green">152</FONT>                    if (var12 != par5 || par3 != par6 || var13 != par7)<a name="line.152"></a>
+<FONT color="green">153</FONT>                    {<a name="line.153"></a>
+<FONT color="green">154</FONT>                        var9 = this.getMaxCurrentStrength(par1World, var12, par3, var13, var9);<a name="line.154"></a>
+<FONT color="green">155</FONT>                    }<a name="line.155"></a>
+<FONT color="green">156</FONT>    <a name="line.156"></a>
+<FONT color="green">157</FONT>                    if (par1World.isBlockNormalCube(var12, par3, var13) &amp;&amp; !par1World.isBlockNormalCube(par2, par3 + 1, par4))<a name="line.157"></a>
+<FONT color="green">158</FONT>                    {<a name="line.158"></a>
+<FONT color="green">159</FONT>                        if (var12 != par5 || par3 + 1 != par6 || var13 != par7)<a name="line.159"></a>
+<FONT color="green">160</FONT>                        {<a name="line.160"></a>
+<FONT color="green">161</FONT>                            var9 = this.getMaxCurrentStrength(par1World, var12, par3 + 1, var13, var9);<a name="line.161"></a>
+<FONT color="green">162</FONT>                        }<a name="line.162"></a>
+<FONT color="green">163</FONT>                    }<a name="line.163"></a>
+<FONT color="green">164</FONT>                    else if (!par1World.isBlockNormalCube(var12, par3, var13) &amp;&amp; (var12 != par5 || par3 - 1 != par6 || var13 != par7))<a name="line.164"></a>
+<FONT color="green">165</FONT>                    {<a name="line.165"></a>
+<FONT color="green">166</FONT>                        var9 = this.getMaxCurrentStrength(par1World, var12, par3 - 1, var13, var9);<a name="line.166"></a>
+<FONT color="green">167</FONT>                    }<a name="line.167"></a>
+<FONT color="green">168</FONT>                }<a name="line.168"></a>
+<FONT color="green">169</FONT>    <a name="line.169"></a>
+<FONT color="green">170</FONT>                if (var9 &gt; 0)<a name="line.170"></a>
+<FONT color="green">171</FONT>                {<a name="line.171"></a>
+<FONT color="green">172</FONT>                    --var9;<a name="line.172"></a>
+<FONT color="green">173</FONT>                }<a name="line.173"></a>
+<FONT color="green">174</FONT>                else<a name="line.174"></a>
+<FONT color="green">175</FONT>                {<a name="line.175"></a>
+<FONT color="green">176</FONT>                    var9 = 0;<a name="line.176"></a>
+<FONT color="green">177</FONT>                }<a name="line.177"></a>
+<FONT color="green">178</FONT>            }<a name="line.178"></a>
+<FONT color="green">179</FONT>    <a name="line.179"></a>
+<FONT color="green">180</FONT>            if (var8 != var9)<a name="line.180"></a>
+<FONT color="green">181</FONT>            {<a name="line.181"></a>
+<FONT color="green">182</FONT>                par1World.editingBlocks = true;<a name="line.182"></a>
+<FONT color="green">183</FONT>                par1World.setBlockMetadataWithNotify(par2, par3, par4, var9);<a name="line.183"></a>
+<FONT color="green">184</FONT>                par1World.markBlockRangeForRenderUpdate(par2, par3, par4, par2, par3, par4);<a name="line.184"></a>
+<FONT color="green">185</FONT>                par1World.editingBlocks = false;<a name="line.185"></a>
+<FONT color="green">186</FONT>    <a name="line.186"></a>
+<FONT color="green">187</FONT>                for (var11 = 0; var11 &lt; 4; ++var11)<a name="line.187"></a>
+<FONT color="green">188</FONT>                {<a name="line.188"></a>
+<FONT color="green">189</FONT>                    var12 = par2;<a name="line.189"></a>
+<FONT color="green">190</FONT>                    var13 = par4;<a name="line.190"></a>
+<FONT color="green">191</FONT>                    int var14 = par3 - 1;<a name="line.191"></a>
+<FONT color="green">192</FONT>    <a name="line.192"></a>
+<FONT color="green">193</FONT>                    if (var11 == 0)<a name="line.193"></a>
+<FONT color="green">194</FONT>                    {<a name="line.194"></a>
+<FONT color="green">195</FONT>                        var12 = par2 - 1;<a name="line.195"></a>
+<FONT color="green">196</FONT>                    }<a name="line.196"></a>
+<FONT color="green">197</FONT>    <a name="line.197"></a>
+<FONT color="green">198</FONT>                    if (var11 == 1)<a name="line.198"></a>
+<FONT color="green">199</FONT>                    {<a name="line.199"></a>
+<FONT color="green">200</FONT>                        ++var12;<a name="line.200"></a>
+<FONT color="green">201</FONT>                    }<a name="line.201"></a>
+<FONT color="green">202</FONT>    <a name="line.202"></a>
+<FONT color="green">203</FONT>                    if (var11 == 2)<a name="line.203"></a>
+<FONT color="green">204</FONT>                    {<a name="line.204"></a>
+<FONT color="green">205</FONT>                        var13 = par4 - 1;<a name="line.205"></a>
+<FONT color="green">206</FONT>                    }<a name="line.206"></a>
+<FONT color="green">207</FONT>    <a name="line.207"></a>
+<FONT color="green">208</FONT>                    if (var11 == 3)<a name="line.208"></a>
+<FONT color="green">209</FONT>                    {<a name="line.209"></a>
+<FONT color="green">210</FONT>                        ++var13;<a name="line.210"></a>
+<FONT color="green">211</FONT>                    }<a name="line.211"></a>
+<FONT color="green">212</FONT>    <a name="line.212"></a>
+<FONT color="green">213</FONT>                    if (par1World.isBlockNormalCube(var12, par3, var13))<a name="line.213"></a>
+<FONT color="green">214</FONT>                    {<a name="line.214"></a>
+<FONT color="green">215</FONT>                        var14 += 2;<a name="line.215"></a>
+<FONT color="green">216</FONT>                    }<a name="line.216"></a>
+<FONT color="green">217</FONT>    <a name="line.217"></a>
+<FONT color="green">218</FONT>                    boolean var15 = false;<a name="line.218"></a>
+<FONT color="green">219</FONT>                    int var16 = this.getMaxCurrentStrength(par1World, var12, par3, var13, -1);<a name="line.219"></a>
+<FONT color="green">220</FONT>                    var9 = par1World.getBlockMetadata(par2, par3, par4);<a name="line.220"></a>
+<FONT color="green">221</FONT>    <a name="line.221"></a>
+<FONT color="green">222</FONT>                    if (var9 &gt; 0)<a name="line.222"></a>
+<FONT color="green">223</FONT>                    {<a name="line.223"></a>
+<FONT color="green">224</FONT>                        --var9;<a name="line.224"></a>
+<FONT color="green">225</FONT>                    }<a name="line.225"></a>
+<FONT color="green">226</FONT>    <a name="line.226"></a>
+<FONT color="green">227</FONT>                    if (var16 &gt;= 0 &amp;&amp; var16 != var9)<a name="line.227"></a>
+<FONT color="green">228</FONT>                    {<a name="line.228"></a>
+<FONT color="green">229</FONT>                        this.calculateCurrentChanges(par1World, var12, par3, var13, par2, par3, par4);<a name="line.229"></a>
+<FONT color="green">230</FONT>                    }<a name="line.230"></a>
+<FONT color="green">231</FONT>    <a name="line.231"></a>
+<FONT color="green">232</FONT>                    var16 = this.getMaxCurrentStrength(par1World, var12, var14, var13, -1);<a name="line.232"></a>
+<FONT color="green">233</FONT>                    var9 = par1World.getBlockMetadata(par2, par3, par4);<a name="line.233"></a>
+<FONT color="green">234</FONT>    <a name="line.234"></a>
+<FONT color="green">235</FONT>                    if (var9 &gt; 0)<a name="line.235"></a>
+<FONT color="green">236</FONT>                    {<a name="line.236"></a>
+<FONT color="green">237</FONT>                        --var9;<a name="line.237"></a>
+<FONT color="green">238</FONT>                    }<a name="line.238"></a>
+<FONT color="green">239</FONT>    <a name="line.239"></a>
+<FONT color="green">240</FONT>                    if (var16 &gt;= 0 &amp;&amp; var16 != var9)<a name="line.240"></a>
+<FONT color="green">241</FONT>                    {<a name="line.241"></a>
+<FONT color="green">242</FONT>                        this.calculateCurrentChanges(par1World, var12, var14, var13, par2, par3, par4);<a name="line.242"></a>
+<FONT color="green">243</FONT>                    }<a name="line.243"></a>
+<FONT color="green">244</FONT>                }<a name="line.244"></a>
+<FONT color="green">245</FONT>    <a name="line.245"></a>
+<FONT color="green">246</FONT>                if (var8 &lt; var9 || var9 == 0)<a name="line.246"></a>
+<FONT color="green">247</FONT>                {<a name="line.247"></a>
+<FONT color="green">248</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2, par3, par4));<a name="line.248"></a>
+<FONT color="green">249</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2 - 1, par3, par4));<a name="line.249"></a>
+<FONT color="green">250</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2 + 1, par3, par4));<a name="line.250"></a>
+<FONT color="green">251</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2, par3 - 1, par4));<a name="line.251"></a>
+<FONT color="green">252</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2, par3 + 1, par4));<a name="line.252"></a>
+<FONT color="green">253</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2, par3, par4 - 1));<a name="line.253"></a>
+<FONT color="green">254</FONT>                    this.blocksNeedingUpdate.add(new ChunkPosition(par2, par3, par4 + 1));<a name="line.254"></a>
+<FONT color="green">255</FONT>                }<a name="line.255"></a>
+<FONT color="green">256</FONT>            }<a name="line.256"></a>
+<FONT color="green">257</FONT>        }<a name="line.257"></a>
+<FONT color="green">258</FONT>    <a name="line.258"></a>
+<FONT color="green">259</FONT>        /**<a name="line.259"></a>
+<FONT color="green">260</FONT>         * Calls World.notifyBlocksOfNeighborChange() for all neighboring blocks, but only if the given block is a redstone<a name="line.260"></a>
+<FONT color="green">261</FONT>         * wire.<a name="line.261"></a>
+<FONT color="green">262</FONT>         */<a name="line.262"></a>
+<FONT color="green">263</FONT>        private void notifyWireNeighborsOfNeighborChange(World par1World, int par2, int par3, int par4)<a name="line.263"></a>
+<FONT color="green">264</FONT>        {<a name="line.264"></a>
+<FONT color="green">265</FONT>            if (par1World.getBlockId(par2, par3, par4) == this.blockID)<a name="line.265"></a>
+<FONT color="green">266</FONT>            {<a name="line.266"></a>
+<FONT color="green">267</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3, par4, this.blockID);<a name="line.267"></a>
+<FONT color="green">268</FONT>                par1World.notifyBlocksOfNeighborChange(par2 - 1, par3, par4, this.blockID);<a name="line.268"></a>
+<FONT color="green">269</FONT>                par1World.notifyBlocksOfNeighborChange(par2 + 1, par3, par4, this.blockID);<a name="line.269"></a>
+<FONT color="green">270</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3, par4 - 1, this.blockID);<a name="line.270"></a>
+<FONT color="green">271</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3, par4 + 1, this.blockID);<a name="line.271"></a>
+<FONT color="green">272</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3 - 1, par4, this.blockID);<a name="line.272"></a>
+<FONT color="green">273</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3 + 1, par4, this.blockID);<a name="line.273"></a>
+<FONT color="green">274</FONT>            }<a name="line.274"></a>
+<FONT color="green">275</FONT>        }<a name="line.275"></a>
+<FONT color="green">276</FONT>    <a name="line.276"></a>
+<FONT color="green">277</FONT>        /**<a name="line.277"></a>
+<FONT color="green">278</FONT>         * Called whenever the block is added into the world. Args: world, x, y, z<a name="line.278"></a>
+<FONT color="green">279</FONT>         */<a name="line.279"></a>
+<FONT color="green">280</FONT>        public void onBlockAdded(World par1World, int par2, int par3, int par4)<a name="line.280"></a>
+<FONT color="green">281</FONT>        {<a name="line.281"></a>
+<FONT color="green">282</FONT>            super.onBlockAdded(par1World, par2, par3, par4);<a name="line.282"></a>
+<FONT color="green">283</FONT>    <a name="line.283"></a>
+<FONT color="green">284</FONT>            if (!par1World.isRemote)<a name="line.284"></a>
+<FONT color="green">285</FONT>            {<a name="line.285"></a>
+<FONT color="green">286</FONT>                this.updateAndPropagateCurrentStrength(par1World, par2, par3, par4);<a name="line.286"></a>
+<FONT color="green">287</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3 + 1, par4, this.blockID);<a name="line.287"></a>
+<FONT color="green">288</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3 - 1, par4, this.blockID);<a name="line.288"></a>
+<FONT color="green">289</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2 - 1, par3, par4);<a name="line.289"></a>
+<FONT color="green">290</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2 + 1, par3, par4);<a name="line.290"></a>
+<FONT color="green">291</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3, par4 - 1);<a name="line.291"></a>
+<FONT color="green">292</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3, par4 + 1);<a name="line.292"></a>
+<FONT color="green">293</FONT>    <a name="line.293"></a>
+<FONT color="green">294</FONT>                if (par1World.isBlockNormalCube(par2 - 1, par3, par4))<a name="line.294"></a>
+<FONT color="green">295</FONT>                {<a name="line.295"></a>
+<FONT color="green">296</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 - 1, par3 + 1, par4);<a name="line.296"></a>
+<FONT color="green">297</FONT>                }<a name="line.297"></a>
+<FONT color="green">298</FONT>                else<a name="line.298"></a>
+<FONT color="green">299</FONT>                {<a name="line.299"></a>
+<FONT color="green">300</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 - 1, par3 - 1, par4);<a name="line.300"></a>
+<FONT color="green">301</FONT>                }<a name="line.301"></a>
+<FONT color="green">302</FONT>    <a name="line.302"></a>
+<FONT color="green">303</FONT>                if (par1World.isBlockNormalCube(par2 + 1, par3, par4))<a name="line.303"></a>
+<FONT color="green">304</FONT>                {<a name="line.304"></a>
+<FONT color="green">305</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 + 1, par3 + 1, par4);<a name="line.305"></a>
+<FONT color="green">306</FONT>                }<a name="line.306"></a>
+<FONT color="green">307</FONT>                else<a name="line.307"></a>
+<FONT color="green">308</FONT>                {<a name="line.308"></a>
+<FONT color="green">309</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 + 1, par3 - 1, par4);<a name="line.309"></a>
+<FONT color="green">310</FONT>                }<a name="line.310"></a>
+<FONT color="green">311</FONT>    <a name="line.311"></a>
+<FONT color="green">312</FONT>                if (par1World.isBlockNormalCube(par2, par3, par4 - 1))<a name="line.312"></a>
+<FONT color="green">313</FONT>                {<a name="line.313"></a>
+<FONT color="green">314</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 + 1, par4 - 1);<a name="line.314"></a>
+<FONT color="green">315</FONT>                }<a name="line.315"></a>
+<FONT color="green">316</FONT>                else<a name="line.316"></a>
+<FONT color="green">317</FONT>                {<a name="line.317"></a>
+<FONT color="green">318</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 - 1, par4 - 1);<a name="line.318"></a>
+<FONT color="green">319</FONT>                }<a name="line.319"></a>
+<FONT color="green">320</FONT>    <a name="line.320"></a>
+<FONT color="green">321</FONT>                if (par1World.isBlockNormalCube(par2, par3, par4 + 1))<a name="line.321"></a>
+<FONT color="green">322</FONT>                {<a name="line.322"></a>
+<FONT color="green">323</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 + 1, par4 + 1);<a name="line.323"></a>
+<FONT color="green">324</FONT>                }<a name="line.324"></a>
+<FONT color="green">325</FONT>                else<a name="line.325"></a>
+<FONT color="green">326</FONT>                {<a name="line.326"></a>
+<FONT color="green">327</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 - 1, par4 + 1);<a name="line.327"></a>
+<FONT color="green">328</FONT>                }<a name="line.328"></a>
+<FONT color="green">329</FONT>            }<a name="line.329"></a>
+<FONT color="green">330</FONT>        }<a name="line.330"></a>
+<FONT color="green">331</FONT>    <a name="line.331"></a>
+<FONT color="green">332</FONT>        /**<a name="line.332"></a>
+<FONT color="green">333</FONT>         * ejects contained items into the world, and notifies neighbours of an update, as appropriate<a name="line.333"></a>
+<FONT color="green">334</FONT>         */<a name="line.334"></a>
+<FONT color="green">335</FONT>        public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)<a name="line.335"></a>
+<FONT color="green">336</FONT>        {<a name="line.336"></a>
+<FONT color="green">337</FONT>            super.breakBlock(par1World, par2, par3, par4, par5, par6);<a name="line.337"></a>
+<FONT color="green">338</FONT>    <a name="line.338"></a>
+<FONT color="green">339</FONT>            if (!par1World.isRemote)<a name="line.339"></a>
+<FONT color="green">340</FONT>            {<a name="line.340"></a>
+<FONT color="green">341</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3 + 1, par4, this.blockID);<a name="line.341"></a>
+<FONT color="green">342</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3 - 1, par4, this.blockID);<a name="line.342"></a>
+<FONT color="green">343</FONT>                par1World.notifyBlocksOfNeighborChange(par2 + 1, par3, par4, this.blockID);<a name="line.343"></a>
+<FONT color="green">344</FONT>                par1World.notifyBlocksOfNeighborChange(par2 - 1, par3, par4, this.blockID);<a name="line.344"></a>
+<FONT color="green">345</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3, par4 + 1, this.blockID);<a name="line.345"></a>
+<FONT color="green">346</FONT>                par1World.notifyBlocksOfNeighborChange(par2, par3, par4 - 1, this.blockID);<a name="line.346"></a>
+<FONT color="green">347</FONT>                this.updateAndPropagateCurrentStrength(par1World, par2, par3, par4);<a name="line.347"></a>
+<FONT color="green">348</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2 - 1, par3, par4);<a name="line.348"></a>
+<FONT color="green">349</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2 + 1, par3, par4);<a name="line.349"></a>
+<FONT color="green">350</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3, par4 - 1);<a name="line.350"></a>
+<FONT color="green">351</FONT>                this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3, par4 + 1);<a name="line.351"></a>
+<FONT color="green">352</FONT>    <a name="line.352"></a>
+<FONT color="green">353</FONT>                if (par1World.isBlockNormalCube(par2 - 1, par3, par4))<a name="line.353"></a>
+<FONT color="green">354</FONT>                {<a name="line.354"></a>
+<FONT color="green">355</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 - 1, par3 + 1, par4);<a name="line.355"></a>
+<FONT color="green">356</FONT>                }<a name="line.356"></a>
+<FONT color="green">357</FONT>                else<a name="line.357"></a>
+<FONT color="green">358</FONT>                {<a name="line.358"></a>
+<FONT color="green">359</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 - 1, par3 - 1, par4);<a name="line.359"></a>
+<FONT color="green">360</FONT>                }<a name="line.360"></a>
+<FONT color="green">361</FONT>    <a name="line.361"></a>
+<FONT color="green">362</FONT>                if (par1World.isBlockNormalCube(par2 + 1, par3, par4))<a name="line.362"></a>
+<FONT color="green">363</FONT>                {<a name="line.363"></a>
+<FONT color="green">364</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 + 1, par3 + 1, par4);<a name="line.364"></a>
+<FONT color="green">365</FONT>                }<a name="line.365"></a>
+<FONT color="green">366</FONT>                else<a name="line.366"></a>
+<FONT color="green">367</FONT>                {<a name="line.367"></a>
+<FONT color="green">368</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2 + 1, par3 - 1, par4);<a name="line.368"></a>
+<FONT color="green">369</FONT>                }<a name="line.369"></a>
+<FONT color="green">370</FONT>    <a name="line.370"></a>
+<FONT color="green">371</FONT>                if (par1World.isBlockNormalCube(par2, par3, par4 - 1))<a name="line.371"></a>
+<FONT color="green">372</FONT>                {<a name="line.372"></a>
+<FONT color="green">373</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 + 1, par4 - 1);<a name="line.373"></a>
+<FONT color="green">374</FONT>                }<a name="line.374"></a>
+<FONT color="green">375</FONT>                else<a name="line.375"></a>
+<FONT color="green">376</FONT>                {<a name="line.376"></a>
+<FONT color="green">377</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 - 1, par4 - 1);<a name="line.377"></a>
+<FONT color="green">378</FONT>                }<a name="line.378"></a>
+<FONT color="green">379</FONT>    <a name="line.379"></a>
+<FONT color="green">380</FONT>                if (par1World.isBlockNormalCube(par2, par3, par4 + 1))<a name="line.380"></a>
+<FONT color="green">381</FONT>                {<a name="line.381"></a>
+<FONT color="green">382</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 + 1, par4 + 1);<a name="line.382"></a>
+<FONT color="green">383</FONT>                }<a name="line.383"></a>
+<FONT color="green">384</FONT>                else<a name="line.384"></a>
+<FONT color="green">385</FONT>                {<a name="line.385"></a>
+<FONT color="green">386</FONT>                    this.notifyWireNeighborsOfNeighborChange(par1World, par2, par3 - 1, par4 + 1);<a name="line.386"></a>
+<FONT color="green">387</FONT>                }<a name="line.387"></a>
+<FONT color="green">388</FONT>            }<a name="line.388"></a>
+<FONT color="green">389</FONT>        }<a name="line.389"></a>
+<FONT color="green">390</FONT>    <a name="line.390"></a>
+<FONT color="green">391</FONT>        /**<a name="line.391"></a>
+<FONT color="green">392</FONT>         * Returns the current strength at the specified block if it is greater than the passed value, or the passed value<a name="line.392"></a>
+<FONT color="green">393</FONT>         * otherwise. Signature: (world, x, y, z, strength)<a name="line.393"></a>
+<FONT color="green">394</FONT>         */<a name="line.394"></a>
+<FONT color="green">395</FONT>        private int getMaxCurrentStrength(World par1World, int par2, int par3, int par4, int par5)<a name="line.395"></a>
+<FONT color="green">396</FONT>        {<a name="line.396"></a>
+<FONT color="green">397</FONT>            if (par1World.getBlockId(par2, par3, par4) != this.blockID)<a name="line.397"></a>
+<FONT color="green">398</FONT>            {<a name="line.398"></a>
+<FONT color="green">399</FONT>                return par5;<a name="line.399"></a>
+<FONT color="green">400</FONT>            }<a name="line.400"></a>
+<FONT color="green">401</FONT>            else<a name="line.401"></a>
+<FONT color="green">402</FONT>            {<a name="line.402"></a>
+<FONT color="green">403</FONT>                int var6 = par1World.getBlockMetadata(par2, par3, par4);<a name="line.403"></a>
+<FONT color="green">404</FONT>                return var6 &gt; par5 ? var6 : par5;<a name="line.404"></a>
+<FONT color="green">405</FONT>            }<a name="line.405"></a>
+<FONT color="green">406</FONT>        }<a name="line.406"></a>
+<FONT color="green">407</FONT>    <a name="line.407"></a>
+<FONT color="green">408</FONT>        /**<a name="line.408"></a>
+<FONT color="green">409</FONT>         * Lets the block know when one of its neighbor changes. Doesn't know which neighbor changed (coordinates passed are<a name="line.409"></a>
+<FONT color="green">410</FONT>         * their own) Args: x, y, z, neighbor blockID<a name="line.410"></a>
+<FONT color="green">411</FONT>         */<a name="line.411"></a>
+<FONT color="green">412</FONT>        public void onNeighborBlockChange(World par1World, int par2, int par3, int par4, int par5)<a name="line.412"></a>
+<FONT color="green">413</FONT>        {<a name="line.413"></a>
+<FONT color="green">414</FONT>            if (!par1World.isRemote)<a name="line.414"></a>
+<FONT color="green">415</FONT>            {<a name="line.415"></a>
+<FONT color="green">416</FONT>                int var6 = par1World.getBlockMetadata(par2, par3, par4);<a name="line.416"></a>
+<FONT color="green">417</FONT>                boolean var7 = this.canPlaceBlockAt(par1World, par2, par3, par4);<a name="line.417"></a>
+<FONT color="green">418</FONT>    <a name="line.418"></a>
+<FONT color="green">419</FONT>                if (var7)<a name="line.419"></a>
+<FONT color="green">420</FONT>                {<a name="line.420"></a>
+<FONT color="green">421</FONT>                    this.updateAndPropagateCurrentStrength(par1World, par2, par3, par4);<a name="line.421"></a>
+<FONT color="green">422</FONT>                }<a name="line.422"></a>
+<FONT color="green">423</FONT>                else<a name="line.423"></a>
+<FONT color="green">424</FONT>                {<a name="line.424"></a>
+<FONT color="green">425</FONT>                    this.dropBlockAsItem(par1World, par2, par3, par4, var6, 0);<a name="line.425"></a>
+<FONT color="green">426</FONT>                    par1World.setBlockWithNotify(par2, par3, par4, 0);<a name="line.426"></a>
+<FONT color="green">427</FONT>                }<a name="line.427"></a>
+<FONT color="green">428</FONT>    <a name="line.428"></a>
+<FONT color="green">429</FONT>                super.onNeighborBlockChange(par1World, par2, par3, par4, par5);<a name="line.429"></a>
+<FONT color="green">430</FONT>            }<a name="line.430"></a>
+<FONT color="green">431</FONT>        }<a name="line.431"></a>
+<FONT color="green">432</FONT>    <a name="line.432"></a>
+<FONT color="green">433</FONT>        /**<a name="line.433"></a>
+<FONT color="green">434</FONT>         * Returns the ID of the items to drop on destruction.<a name="line.434"></a>
+<FONT color="green">435</FONT>         */<a name="line.435"></a>
+<FONT color="green">436</FONT>        public int idDropped(int par1, Random par2Random, int par3)<a name="line.436"></a>
+<FONT color="green">437</FONT>        {<a name="line.437"></a>
+<FONT color="green">438</FONT>            return Item.redstone.itemID;<a name="line.438"></a>
+<FONT color="green">439</FONT>        }<a name="line.439"></a>
+<FONT color="green">440</FONT>    <a name="line.440"></a>
+<FONT color="green">441</FONT>        /**<a name="line.441"></a>
+<FONT color="green">442</FONT>         * Returns true if the block is emitting direct/strong redstone power on the specified side. Args: World, X, Y, Z,<a name="line.442"></a>
+<FONT color="green">443</FONT>         * side. Note that the side is reversed - eg it is 1 (up) when checking the bottom of the block.<a name="line.443"></a>
+<FONT color="green">444</FONT>         */<a name="line.444"></a>
+<FONT color="green">445</FONT>        public boolean isProvidingStrongPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5)<a name="line.445"></a>
+<FONT color="green">446</FONT>        {<a name="line.446"></a>
+<FONT color="green">447</FONT>            return !this.wiresProvidePower ? false : this.isProvidingWeakPower(par1IBlockAccess, par2, par3, par4, par5);<a name="line.447"></a>
+<FONT color="green">448</FONT>        }<a name="line.448"></a>
+<FONT color="green">449</FONT>    <a name="line.449"></a>
+<FONT color="green">450</FONT>        /**<a name="line.450"></a>
+<FONT color="green">451</FONT>         * Returns true if the block is emitting indirect/weak redstone power on the specified side. If isBlockNormalCube<a name="line.451"></a>
+<FONT color="green">452</FONT>         * returns true, standard redstone propagation rules will apply instead and this will not be called. Args: World, X,<a name="line.452"></a>
+<FONT color="green">453</FONT>         * Y, Z, side. Note that the side is reversed - eg it is 1 (up) when checking the bottom of the block.<a name="line.453"></a>
+<FONT color="green">454</FONT>         */<a name="line.454"></a>
+<FONT color="green">455</FONT>        public boolean isProvidingWeakPower(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5)<a name="line.455"></a>
+<FONT color="green">456</FONT>        {<a name="line.456"></a>
+<FONT color="green">457</FONT>            if (!this.wiresProvidePower)<a name="line.457"></a>
+<FONT color="green">458</FONT>            {<a name="line.458"></a>
+<FONT color="green">459</FONT>                return false;<a name="line.459"></a>
+<FONT color="green">460</FONT>            }<a name="line.460"></a>
+<FONT color="green">461</FONT>            else if (par1IBlockAccess.getBlockMetadata(par2, par3, par4) == 0)<a name="line.461"></a>
+<FONT color="green">462</FONT>            {<a name="line.462"></a>
+<FONT color="green">463</FONT>                return false;<a name="line.463"></a>
+<FONT color="green">464</FONT>            }<a name="line.464"></a>
+<FONT color="green">465</FONT>            else if (par5 == 1)<a name="line.465"></a>
+<FONT color="green">466</FONT>            {<a name="line.466"></a>
+<FONT color="green">467</FONT>                return true;<a name="line.467"></a>
+<FONT color="green">468</FONT>            }<a name="line.468"></a>
+<FONT color="green">469</FONT>            else<a name="line.469"></a>
+<FONT color="green">470</FONT>            {<a name="line.470"></a>
+<FONT color="green">471</FONT>                boolean var6 = isPoweredOrRepeater(par1IBlockAccess, par2 - 1, par3, par4, 1) || !par1IBlockAccess.isBlockNormalCube(par2 - 1, par3, par4) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2 - 1, par3 - 1, par4, -1);<a name="line.471"></a>
+<FONT color="green">472</FONT>                boolean var7 = isPoweredOrRepeater(par1IBlockAccess, par2 + 1, par3, par4, 3) || !par1IBlockAccess.isBlockNormalCube(par2 + 1, par3, par4) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2 + 1, par3 - 1, par4, -1);<a name="line.472"></a>
+<FONT color="green">473</FONT>                boolean var8 = isPoweredOrRepeater(par1IBlockAccess, par2, par3, par4 - 1, 2) || !par1IBlockAccess.isBlockNormalCube(par2, par3, par4 - 1) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2, par3 - 1, par4 - 1, -1);<a name="line.473"></a>
+<FONT color="green">474</FONT>                boolean var9 = isPoweredOrRepeater(par1IBlockAccess, par2, par3, par4 + 1, 0) || !par1IBlockAccess.isBlockNormalCube(par2, par3, par4 + 1) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2, par3 - 1, par4 + 1, -1);<a name="line.474"></a>
+<FONT color="green">475</FONT>    <a name="line.475"></a>
+<FONT color="green">476</FONT>                if (!par1IBlockAccess.isBlockNormalCube(par2, par3 + 1, par4))<a name="line.476"></a>
+<FONT color="green">477</FONT>                {<a name="line.477"></a>
+<FONT color="green">478</FONT>                    if (par1IBlockAccess.isBlockNormalCube(par2 - 1, par3, par4) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2 - 1, par3 + 1, par4, -1))<a name="line.478"></a>
+<FONT color="green">479</FONT>                    {<a name="line.479"></a>
+<FONT color="green">480</FONT>                        var6 = true;<a name="line.480"></a>
+<FONT color="green">481</FONT>                    }<a name="line.481"></a>
+<FONT color="green">482</FONT>    <a name="line.482"></a>
+<FONT color="green">483</FONT>                    if (par1IBlockAccess.isBlockNormalCube(par2 + 1, par3, par4) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2 + 1, par3 + 1, par4, -1))<a name="line.483"></a>
+<FONT color="green">484</FONT>                    {<a name="line.484"></a>
+<FONT color="green">485</FONT>                        var7 = true;<a name="line.485"></a>
+<FONT color="green">486</FONT>                    }<a name="line.486"></a>
+<FONT color="green">487</FONT>    <a name="line.487"></a>
+<FONT color="green">488</FONT>                    if (par1IBlockAccess.isBlockNormalCube(par2, par3, par4 - 1) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2, par3 + 1, par4 - 1, -1))<a name="line.488"></a>
+<FONT color="green">489</FONT>                    {<a name="line.489"></a>
+<FONT color="green">490</FONT>                        var8 = true;<a name="line.490"></a>
+<FONT color="green">491</FONT>                    }<a name="line.491"></a>
+<FONT color="green">492</FONT>    <a name="line.492"></a>
+<FONT color="green">493</FONT>                    if (par1IBlockAccess.isBlockNormalCube(par2, par3, par4 + 1) &amp;&amp; isPoweredOrRepeater(par1IBlockAccess, par2, par3 + 1, par4 + 1, -1))<a name="line.493"></a>
+<FONT color="green">494</FONT>                    {<a name="line.494"></a>
+<FONT color="green">495</FONT>                        var9 = true;<a name="line.495"></a>
+<FONT color="green">496</FONT>                    }<a name="line.496"></a>
+<FONT color="green">497</FONT>                }<a name="line.497"></a>
+<FONT color="green">498</FONT>    <a name="line.498"></a>
+<FONT color="green">499</FONT>                return !var8 &amp;&amp; !var7 &amp;&amp; !var6 &amp;&amp; !var9 &amp;&amp; par5 &gt;= 2 &amp;&amp; par5 &lt;= 5 ? true : (par5 == 2 &amp;&amp; var8 &amp;&amp; !var6 &amp;&amp; !var7 ? true : (par5 == 3 &amp;&amp; var9 &amp;&amp; !var6 &amp;&amp; !var7 ? true : (par5 == 4 &amp;&amp; var6 &amp;&amp; !var8 &amp;&amp; !var9 ? true : par5 == 5 &amp;&amp; var7 &amp;&amp; !var8 &amp;&amp; !var9)));<a name="line.499"></a>
+<FONT color="green">500</FONT>            }<a name="line.500"></a>
+<FONT color="green">501</FONT>        }<a name="line.501"></a>
+<FONT color="green">502</FONT>    <a name="line.502"></a>
+<FONT color="green">503</FONT>        /**<a name="line.503"></a>
+<FONT color="green">504</FONT>         * Can this block provide power. Only wire currently seems to have this change based on its state.<a name="line.504"></a>
+<FONT color="green">505</FONT>         */<a name="line.505"></a>
+<FONT color="green">506</FONT>        public boolean canProvidePower()<a name="line.506"></a>
+<FONT color="green">507</FONT>        {<a name="line.507"></a>
+<FONT color="green">508</FONT>            return this.wiresProvidePower;<a name="line.508"></a>
+<FONT color="green">509</FONT>        }<a name="line.509"></a>
+<FONT color="green">510</FONT>    <a name="line.510"></a>
+<FONT color="green">511</FONT>        @SideOnly(Side.CLIENT)<a name="line.511"></a>
+<FONT color="green">512</FONT>    <a name="line.512"></a>
+<FONT color="green">513</FONT>        /**<a name="line.513"></a>
+<FONT color="green">514</FONT>         * A randomly called display update to be able to add particles or other items for display<a name="line.514"></a>
+<FONT color="green">515</FONT>         */<a name="line.515"></a>
+<FONT color="green">516</FONT>        public void randomDisplayTick(World par1World, int par2, int par3, int par4, Random par5Random)<a name="line.516"></a>
+<FONT color="green">517</FONT>        {<a name="line.517"></a>
+<FONT color="green">518</FONT>            int var6 = par1World.getBlockMetadata(par2, par3, par4);<a name="line.518"></a>
+<FONT color="green">519</FONT>    <a name="line.519"></a>
+<FONT color="green">520</FONT>            if (var6 &gt; 0)<a name="line.520"></a>
+<FONT color="green">521</FONT>            {<a name="line.521"></a>
+<FONT color="green">522</FONT>                double var7 = (double)par2 + 0.5D + ((double)par5Random.nextFloat() - 0.5D) * 0.2D;<a name="line.522"></a>
+<FONT color="green">523</FONT>                double var9 = (double)((float)par3 + 0.0625F);<a name="line.523"></a>
+<FONT color="green">524</FONT>                double var11 = (double)par4 + 0.5D + ((double)par5Random.nextFloat() - 0.5D) * 0.2D;<a name="line.524"></a>
+<FONT color="green">525</FONT>                float var13 = (float)var6 / 15.0F;<a name="line.525"></a>
+<FONT color="green">526</FONT>                float var14 = var13 * 0.6F + 0.4F;<a name="line.526"></a>
+<FONT color="green">527</FONT>    <a name="line.527"></a>
+<FONT color="green">528</FONT>                if (var6 == 0)<a name="line.528"></a>
+<FONT color="green">529</FONT>                {<a name="line.529"></a>
+<FONT color="green">530</FONT>                    var14 = 0.0F;<a name="line.530"></a>
+<FONT color="green">531</FONT>                }<a name="line.531"></a>
+<FONT color="green">532</FONT>    <a name="line.532"></a>
+<FONT color="green">533</FONT>                float var15 = var13 * var13 * 0.7F - 0.5F;<a name="line.533"></a>
+<FONT color="green">534</FONT>                float var16 = var13 * var13 * 0.6F - 0.7F;<a name="line.534"></a>
+<FONT color="green">535</FONT>    <a name="line.535"></a>
+<FONT color="green">536</FONT>                if (var15 &lt; 0.0F)<a name="line.536"></a>
+<FONT color="green">537</FONT>                {<a name="line.537"></a>
+<FONT color="green">538</FONT>                    var15 = 0.0F;<a name="line.538"></a>
+<FONT color="green">539</FONT>                }<a name="line.539"></a>
+<FONT color="green">540</FONT>    <a name="line.540"></a>
+<FONT color="green">541</FONT>                if (var16 &lt; 0.0F)<a name="line.541"></a>
+<FONT color="green">542</FONT>                {<a name="line.542"></a>
+<FONT color="green">543</FONT>                    var16 = 0.0F;<a name="line.543"></a>
+<FONT color="green">544</FONT>                }<a name="line.544"></a>
+<FONT color="green">545</FONT>    <a name="line.545"></a>
+<FONT color="green">546</FONT>                par1World.spawnParticle("reddust", var7, var9, var11, (double)var14, (double)var15, (double)var16);<a name="line.546"></a>
+<FONT color="green">547</FONT>            }<a name="line.547"></a>
+<FONT color="green">548</FONT>        }<a name="line.548"></a>
+<FONT color="green">549</FONT>    <a name="line.549"></a>
+<FONT color="green">550</FONT>        /**<a name="line.550"></a>
+<FONT color="green">551</FONT>         * Returns true if redstone wire can connect to the specified block. Params: World, X, Y, Z, side (not a normal<a name="line.551"></a>
+<FONT color="green">552</FONT>         * notch-side, this can be 0, 1, 2, 3 or -1)<a name="line.552"></a>
+<FONT color="green">553</FONT>         */<a name="line.553"></a>
+<FONT color="green">554</FONT>        public static boolean isPowerProviderOrWire(IBlockAccess par0IBlockAccess, int par1, int par2, int par3, int par4)<a name="line.554"></a>
+<FONT color="green">555</FONT>        {<a name="line.555"></a>
+<FONT color="green">556</FONT>            int var5 = par0IBlockAccess.getBlockId(par1, par2, par3);<a name="line.556"></a>
+<FONT color="green">557</FONT>    <a name="line.557"></a>
+<FONT color="green">558</FONT>            if (var5 == Block.redstoneWire.blockID)<a name="line.558"></a>
+<FONT color="green">559</FONT>            {<a name="line.559"></a>
+<FONT color="green">560</FONT>                return true;<a name="line.560"></a>
+<FONT color="green">561</FONT>            }<a name="line.561"></a>
+<FONT color="green">562</FONT>            else if (var5 == 0)<a name="line.562"></a>
+<FONT color="green">563</FONT>            {<a name="line.563"></a>
+<FONT color="green">564</FONT>                return false;<a name="line.564"></a>
+<FONT color="green">565</FONT>            }<a name="line.565"></a>
+<FONT color="green">566</FONT>            else if (var5 != Block.redstoneRepeaterIdle.blockID &amp;&amp; var5 != Block.redstoneRepeaterActive.blockID)<a name="line.566"></a>
+<FONT color="green">567</FONT>            {<a name="line.567"></a>
+<FONT color="green">568</FONT>                return (Block.blocksList[var5] != null &amp;&amp; Block.blocksList[var5].canConnectRedstone(par0IBlockAccess, par1, par2, par3, par4));<a name="line.568"></a>
+<FONT color="green">569</FONT>            }<a name="line.569"></a>
+<FONT color="green">570</FONT>            else<a name="line.570"></a>
+<FONT color="green">571</FONT>            {<a name="line.571"></a>
+<FONT color="green">572</FONT>                int var6 = par0IBlockAccess.getBlockMetadata(par1, par2, par3);<a name="line.572"></a>
+<FONT color="green">573</FONT>                return par4 == (var6 &amp; 3) || par4 == Direction.footInvisibleFaceRemap[var6 &amp; 3];<a name="line.573"></a>
+<FONT color="green">574</FONT>            }<a name="line.574"></a>
+<FONT color="green">575</FONT>        }<a name="line.575"></a>
+<FONT color="green">576</FONT>    <a name="line.576"></a>
+<FONT color="green">577</FONT>        /**<a name="line.577"></a>
+<FONT color="green">578</FONT>         * Returns true if the block coordinate passed can provide power, or is a redstone wire, or if its a repeater that<a name="line.578"></a>
+<FONT color="green">579</FONT>         * is powered.<a name="line.579"></a>
+<FONT color="green">580</FONT>         */<a name="line.580"></a>
+<FONT color="green">581</FONT>        public static boolean isPoweredOrRepeater(IBlockAccess par0IBlockAccess, int par1, int par2, int par3, int par4)<a name="line.581"></a>
+<FONT color="green">582</FONT>        {<a name="line.582"></a>
+<FONT color="green">583</FONT>            if (isPowerProviderOrWire(par0IBlockAccess, par1, par2, par3, par4))<a name="line.583"></a>
+<FONT color="green">584</FONT>            {<a name="line.584"></a>
+<FONT color="green">585</FONT>                return true;<a name="line.585"></a>
+<FONT color="green">586</FONT>            }<a name="line.586"></a>
+<FONT color="green">587</FONT>            else<a name="line.587"></a>
+<FONT color="green">588</FONT>            {<a name="line.588"></a>
+<FONT color="green">589</FONT>                int var5 = par0IBlockAccess.getBlockId(par1, par2, par3);<a name="line.589"></a>
+<FONT color="green">590</FONT>    <a name="line.590"></a>
+<FONT color="green">591</FONT>                if (var5 == Block.redstoneRepeaterActive.blockID)<a name="line.591"></a>
+<FONT color="green">592</FONT>                {<a name="line.592"></a>
+<FONT color="green">593</FONT>                    int var6 = par0IBlockAccess.getBlockMetadata(par1, par2, par3);<a name="line.593"></a>
+<FONT color="green">594</FONT>                    return par4 == (var6 &amp; 3);<a name="line.594"></a>
+<FONT color="green">595</FONT>                }<a name="line.595"></a>
+<FONT color="green">596</FONT>                else<a name="line.596"></a>
+<FONT color="green">597</FONT>                {<a name="line.597"></a>
+<FONT color="green">598</FONT>                    return false;<a name="line.598"></a>
+<FONT color="green">599</FONT>                }<a name="line.599"></a>
+<FONT color="green">600</FONT>            }<a name="line.600"></a>
+<FONT color="green">601</FONT>        }<a name="line.601"></a>
+<FONT color="green">602</FONT>    <a name="line.602"></a>
+<FONT color="green">603</FONT>        @SideOnly(Side.CLIENT)<a name="line.603"></a>
+<FONT color="green">604</FONT>    <a name="line.604"></a>
+<FONT color="green">605</FONT>        /**<a name="line.605"></a>
+<FONT color="green">606</FONT>         * only called by clickMiddleMouseButton , and passed to inventory.setCurrentItem (along with isCreative)<a name="line.606"></a>
+<FONT color="green">607</FONT>         */<a name="line.607"></a>
+<FONT color="green">608</FONT>        public int idPicked(World par1World, int par2, int par3, int par4)<a name="line.608"></a>
+<FONT color="green">609</FONT>        {<a name="line.609"></a>
+<FONT color="green">610</FONT>            return Item.redstone.itemID;<a name="line.610"></a>
+<FONT color="green">611</FONT>        }<a name="line.611"></a>
+<FONT color="green">612</FONT>    }<a name="line.612"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

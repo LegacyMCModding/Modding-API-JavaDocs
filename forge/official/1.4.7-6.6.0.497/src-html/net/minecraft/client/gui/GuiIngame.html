@@ -1,0 +1,886 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.gui;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.awt.Color;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.List;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.util.Random;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.block.Block;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.block.material.Material;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.client.Minecraft;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.client.multiplayer.NetClientHandler;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraft.client.renderer.RenderHelper;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraft.client.renderer.Tessellator;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import net.minecraft.client.renderer.entity.RenderItem;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import net.minecraft.entity.boss.BossStatus;<a name="line.15"></a>
+<FONT color="green">016</FONT>    import net.minecraft.entity.player.InventoryPlayer;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import net.minecraft.item.ItemStack;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import net.minecraft.potion.Potion;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import net.minecraft.util.Direction;<a name="line.19"></a>
+<FONT color="green">020</FONT>    import net.minecraft.util.FoodStats;<a name="line.20"></a>
+<FONT color="green">021</FONT>    import net.minecraft.util.MathHelper;<a name="line.21"></a>
+<FONT color="green">022</FONT>    import net.minecraft.util.StatCollector;<a name="line.22"></a>
+<FONT color="green">023</FONT>    import net.minecraft.util.StringUtils;<a name="line.23"></a>
+<FONT color="green">024</FONT>    import net.minecraft.world.EnumSkyBlock;<a name="line.24"></a>
+<FONT color="green">025</FONT>    import net.minecraft.world.chunk.Chunk;<a name="line.25"></a>
+<FONT color="green">026</FONT>    import org.lwjgl.opengl.GL11;<a name="line.26"></a>
+<FONT color="green">027</FONT>    import org.lwjgl.opengl.GL12;<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>    import net.minecraftforge.common.ForgeHooks;<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>    @SideOnly(Side.CLIENT)<a name="line.31"></a>
+<FONT color="green">032</FONT>    public class GuiIngame extends Gui<a name="line.32"></a>
+<FONT color="green">033</FONT>    {<a name="line.33"></a>
+<FONT color="green">034</FONT>        private static final RenderItem itemRenderer = new RenderItem();<a name="line.34"></a>
+<FONT color="green">035</FONT>        private final Random rand = new Random();<a name="line.35"></a>
+<FONT color="green">036</FONT>        private final Minecraft mc;<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>        /** ChatGUI instance that retains all previous chat data */<a name="line.38"></a>
+<FONT color="green">039</FONT>        private final GuiNewChat persistantChatGUI;<a name="line.39"></a>
+<FONT color="green">040</FONT>        private int updateCounter = 0;<a name="line.40"></a>
+<FONT color="green">041</FONT>    <a name="line.41"></a>
+<FONT color="green">042</FONT>        /** The string specifying which record music is playing */<a name="line.42"></a>
+<FONT color="green">043</FONT>        private String recordPlaying = "";<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        /** How many ticks the record playing message will be displayed */<a name="line.45"></a>
+<FONT color="green">046</FONT>        private int recordPlayingUpFor = 0;<a name="line.46"></a>
+<FONT color="green">047</FONT>        private boolean recordIsPlaying = false;<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>        /** Previous frame vignette brightness (slowly changes by 1% each frame) */<a name="line.49"></a>
+<FONT color="green">050</FONT>        public float prevVignetteBrightness = 1.0F;<a name="line.50"></a>
+<FONT color="green">051</FONT>        private int field_92017_k;<a name="line.51"></a>
+<FONT color="green">052</FONT>        private ItemStack field_92016_l;<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        public GuiIngame(Minecraft par1Minecraft)<a name="line.54"></a>
+<FONT color="green">055</FONT>        {<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.mc = par1Minecraft;<a name="line.56"></a>
+<FONT color="green">057</FONT>            this.persistantChatGUI = new GuiNewChat(par1Minecraft);<a name="line.57"></a>
+<FONT color="green">058</FONT>        }<a name="line.58"></a>
+<FONT color="green">059</FONT>    <a name="line.59"></a>
+<FONT color="green">060</FONT>        /**<a name="line.60"></a>
+<FONT color="green">061</FONT>         * Render the ingame overlay with quick icon bar, ...<a name="line.61"></a>
+<FONT color="green">062</FONT>         */<a name="line.62"></a>
+<FONT color="green">063</FONT>        public void renderGameOverlay(float par1, boolean par2, int par3, int par4)<a name="line.63"></a>
+<FONT color="green">064</FONT>        {<a name="line.64"></a>
+<FONT color="green">065</FONT>            ScaledResolution var5 = new ScaledResolution(this.mc.gameSettings, this.mc.displayWidth, this.mc.displayHeight);<a name="line.65"></a>
+<FONT color="green">066</FONT>            int var6 = var5.getScaledWidth();<a name="line.66"></a>
+<FONT color="green">067</FONT>            int var7 = var5.getScaledHeight();<a name="line.67"></a>
+<FONT color="green">068</FONT>            FontRenderer var8 = this.mc.fontRenderer;<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.mc.entityRenderer.setupOverlayRendering();<a name="line.69"></a>
+<FONT color="green">070</FONT>            GL11.glEnable(GL11.GL_BLEND);<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>            if (Minecraft.isFancyGraphicsEnabled())<a name="line.72"></a>
+<FONT color="green">073</FONT>            {<a name="line.73"></a>
+<FONT color="green">074</FONT>                this.renderVignette(this.mc.thePlayer.getBrightness(par1), var6, var7);<a name="line.74"></a>
+<FONT color="green">075</FONT>            }<a name="line.75"></a>
+<FONT color="green">076</FONT>            else<a name="line.76"></a>
+<FONT color="green">077</FONT>            {<a name="line.77"></a>
+<FONT color="green">078</FONT>                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.78"></a>
+<FONT color="green">079</FONT>            }<a name="line.79"></a>
+<FONT color="green">080</FONT>    <a name="line.80"></a>
+<FONT color="green">081</FONT>            ItemStack var9 = this.mc.thePlayer.inventory.armorItemInSlot(3);<a name="line.81"></a>
+<FONT color="green">082</FONT>    <a name="line.82"></a>
+<FONT color="green">083</FONT>            if (this.mc.gameSettings.thirdPersonView == 0 &amp;&amp; var9 != null &amp;&amp; var9.itemID == Block.pumpkin.blockID)<a name="line.83"></a>
+<FONT color="green">084</FONT>            {<a name="line.84"></a>
+<FONT color="green">085</FONT>                this.renderPumpkinBlur(var6, var7);<a name="line.85"></a>
+<FONT color="green">086</FONT>            }<a name="line.86"></a>
+<FONT color="green">087</FONT>    <a name="line.87"></a>
+<FONT color="green">088</FONT>            if (!this.mc.thePlayer.isPotionActive(Potion.confusion))<a name="line.88"></a>
+<FONT color="green">089</FONT>            {<a name="line.89"></a>
+<FONT color="green">090</FONT>                float var10 = this.mc.thePlayer.prevTimeInPortal + (this.mc.thePlayer.timeInPortal - this.mc.thePlayer.prevTimeInPortal) * par1;<a name="line.90"></a>
+<FONT color="green">091</FONT>    <a name="line.91"></a>
+<FONT color="green">092</FONT>                if (var10 &gt; 0.0F)<a name="line.92"></a>
+<FONT color="green">093</FONT>                {<a name="line.93"></a>
+<FONT color="green">094</FONT>                    this.renderPortalOverlay(var10, var6, var7);<a name="line.94"></a>
+<FONT color="green">095</FONT>                }<a name="line.95"></a>
+<FONT color="green">096</FONT>            }<a name="line.96"></a>
+<FONT color="green">097</FONT>    <a name="line.97"></a>
+<FONT color="green">098</FONT>            boolean var11;<a name="line.98"></a>
+<FONT color="green">099</FONT>            int var12;<a name="line.99"></a>
+<FONT color="green">100</FONT>            int var13;<a name="line.100"></a>
+<FONT color="green">101</FONT>            int var17;<a name="line.101"></a>
+<FONT color="green">102</FONT>            int var16;<a name="line.102"></a>
+<FONT color="green">103</FONT>            int var19;<a name="line.103"></a>
+<FONT color="green">104</FONT>            int var20;<a name="line.104"></a>
+<FONT color="green">105</FONT>            int var23;<a name="line.105"></a>
+<FONT color="green">106</FONT>            int var22;<a name="line.106"></a>
+<FONT color="green">107</FONT>            int var24;<a name="line.107"></a>
+<FONT color="green">108</FONT>            int var47;<a name="line.108"></a>
+<FONT color="green">109</FONT>    <a name="line.109"></a>
+<FONT color="green">110</FONT>            if (!this.mc.playerController.func_78747_a())<a name="line.110"></a>
+<FONT color="green">111</FONT>            {<a name="line.111"></a>
+<FONT color="green">112</FONT>                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.112"></a>
+<FONT color="green">113</FONT>                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/gui/gui.png"));<a name="line.113"></a>
+<FONT color="green">114</FONT>                InventoryPlayer var31 = this.mc.thePlayer.inventory;<a name="line.114"></a>
+<FONT color="green">115</FONT>                this.zLevel = -90.0F;<a name="line.115"></a>
+<FONT color="green">116</FONT>                this.drawTexturedModalRect(var6 / 2 - 91, var7 - 22, 0, 0, 182, 22);<a name="line.116"></a>
+<FONT color="green">117</FONT>                this.drawTexturedModalRect(var6 / 2 - 91 - 1 + var31.currentItem * 20, var7 - 22 - 1, 0, 22, 24, 22);<a name="line.117"></a>
+<FONT color="green">118</FONT>                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/gui/icons.png"));<a name="line.118"></a>
+<FONT color="green">119</FONT>                GL11.glEnable(GL11.GL_BLEND);<a name="line.119"></a>
+<FONT color="green">120</FONT>                GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);<a name="line.120"></a>
+<FONT color="green">121</FONT>                this.drawTexturedModalRect(var6 / 2 - 7, var7 / 2 - 7, 0, 0, 16, 16);<a name="line.121"></a>
+<FONT color="green">122</FONT>                GL11.glDisable(GL11.GL_BLEND);<a name="line.122"></a>
+<FONT color="green">123</FONT>                var11 = this.mc.thePlayer.hurtResistantTime / 3 % 2 == 1;<a name="line.123"></a>
+<FONT color="green">124</FONT>    <a name="line.124"></a>
+<FONT color="green">125</FONT>                if (this.mc.thePlayer.hurtResistantTime &lt; 10)<a name="line.125"></a>
+<FONT color="green">126</FONT>                {<a name="line.126"></a>
+<FONT color="green">127</FONT>                    var11 = false;<a name="line.127"></a>
+<FONT color="green">128</FONT>                }<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>                var12 = this.mc.thePlayer.getHealth();<a name="line.130"></a>
+<FONT color="green">131</FONT>                var13 = this.mc.thePlayer.prevHealth;<a name="line.131"></a>
+<FONT color="green">132</FONT>                this.rand.setSeed((long)(this.updateCounter * 312871));<a name="line.132"></a>
+<FONT color="green">133</FONT>                boolean var14 = false;<a name="line.133"></a>
+<FONT color="green">134</FONT>                FoodStats var15 = this.mc.thePlayer.getFoodStats();<a name="line.134"></a>
+<FONT color="green">135</FONT>                var16 = var15.getFoodLevel();<a name="line.135"></a>
+<FONT color="green">136</FONT>                var17 = var15.getPrevFoodLevel();<a name="line.136"></a>
+<FONT color="green">137</FONT>                this.mc.mcProfiler.startSection("bossHealth");<a name="line.137"></a>
+<FONT color="green">138</FONT>                this.renderBossHealth();<a name="line.138"></a>
+<FONT color="green">139</FONT>                this.mc.mcProfiler.endSection();<a name="line.139"></a>
+<FONT color="green">140</FONT>                int var18;<a name="line.140"></a>
+<FONT color="green">141</FONT>    <a name="line.141"></a>
+<FONT color="green">142</FONT>                if (this.mc.playerController.shouldDrawHUD())<a name="line.142"></a>
+<FONT color="green">143</FONT>                {<a name="line.143"></a>
+<FONT color="green">144</FONT>                    var18 = var6 / 2 - 91;<a name="line.144"></a>
+<FONT color="green">145</FONT>                    var19 = var6 / 2 + 91;<a name="line.145"></a>
+<FONT color="green">146</FONT>                    this.mc.mcProfiler.startSection("expBar");<a name="line.146"></a>
+<FONT color="green">147</FONT>                    var20 = this.mc.thePlayer.xpBarCap();<a name="line.147"></a>
+<FONT color="green">148</FONT>    <a name="line.148"></a>
+<FONT color="green">149</FONT>                    if (var20 &gt; 0)<a name="line.149"></a>
+<FONT color="green">150</FONT>                    {<a name="line.150"></a>
+<FONT color="green">151</FONT>                        short var21 = 182;<a name="line.151"></a>
+<FONT color="green">152</FONT>                        var22 = (int)(this.mc.thePlayer.experience * (float)(var21 + 1));<a name="line.152"></a>
+<FONT color="green">153</FONT>                        var23 = var7 - 32 + 3;<a name="line.153"></a>
+<FONT color="green">154</FONT>                        this.drawTexturedModalRect(var18, var23, 0, 64, var21, 5);<a name="line.154"></a>
+<FONT color="green">155</FONT>    <a name="line.155"></a>
+<FONT color="green">156</FONT>                        if (var22 &gt; 0)<a name="line.156"></a>
+<FONT color="green">157</FONT>                        {<a name="line.157"></a>
+<FONT color="green">158</FONT>                            this.drawTexturedModalRect(var18, var23, 0, 69, var22, 5);<a name="line.158"></a>
+<FONT color="green">159</FONT>                        }<a name="line.159"></a>
+<FONT color="green">160</FONT>                    }<a name="line.160"></a>
+<FONT color="green">161</FONT>    <a name="line.161"></a>
+<FONT color="green">162</FONT>                    var47 = var7 - 39;<a name="line.162"></a>
+<FONT color="green">163</FONT>                    var22 = var47 - 10;<a name="line.163"></a>
+<FONT color="green">164</FONT>                    var23 = ForgeHooks.getTotalArmorValue(mc.thePlayer);<a name="line.164"></a>
+<FONT color="green">165</FONT>                    var24 = -1;<a name="line.165"></a>
+<FONT color="green">166</FONT>    <a name="line.166"></a>
+<FONT color="green">167</FONT>                    if (this.mc.thePlayer.isPotionActive(Potion.regeneration))<a name="line.167"></a>
+<FONT color="green">168</FONT>                    {<a name="line.168"></a>
+<FONT color="green">169</FONT>                        var24 = this.updateCounter % 25;<a name="line.169"></a>
+<FONT color="green">170</FONT>                    }<a name="line.170"></a>
+<FONT color="green">171</FONT>    <a name="line.171"></a>
+<FONT color="green">172</FONT>                    this.mc.mcProfiler.endStartSection("healthArmor");<a name="line.172"></a>
+<FONT color="green">173</FONT>                    int var25;<a name="line.173"></a>
+<FONT color="green">174</FONT>                    int var26;<a name="line.174"></a>
+<FONT color="green">175</FONT>                    int var29;<a name="line.175"></a>
+<FONT color="green">176</FONT>                    int var28;<a name="line.176"></a>
+<FONT color="green">177</FONT>    <a name="line.177"></a>
+<FONT color="green">178</FONT>                    for (var25 = 0; var25 &lt; 10; ++var25)<a name="line.178"></a>
+<FONT color="green">179</FONT>                    {<a name="line.179"></a>
+<FONT color="green">180</FONT>                        if (var23 &gt; 0)<a name="line.180"></a>
+<FONT color="green">181</FONT>                        {<a name="line.181"></a>
+<FONT color="green">182</FONT>                            var26 = var18 + var25 * 8;<a name="line.182"></a>
+<FONT color="green">183</FONT>    <a name="line.183"></a>
+<FONT color="green">184</FONT>                            if (var25 * 2 + 1 &lt; var23)<a name="line.184"></a>
+<FONT color="green">185</FONT>                            {<a name="line.185"></a>
+<FONT color="green">186</FONT>                                this.drawTexturedModalRect(var26, var22, 34, 9, 9, 9);<a name="line.186"></a>
+<FONT color="green">187</FONT>                            }<a name="line.187"></a>
+<FONT color="green">188</FONT>    <a name="line.188"></a>
+<FONT color="green">189</FONT>                            if (var25 * 2 + 1 == var23)<a name="line.189"></a>
+<FONT color="green">190</FONT>                            {<a name="line.190"></a>
+<FONT color="green">191</FONT>                                this.drawTexturedModalRect(var26, var22, 25, 9, 9, 9);<a name="line.191"></a>
+<FONT color="green">192</FONT>                            }<a name="line.192"></a>
+<FONT color="green">193</FONT>    <a name="line.193"></a>
+<FONT color="green">194</FONT>                            if (var25 * 2 + 1 &gt; var23)<a name="line.194"></a>
+<FONT color="green">195</FONT>                            {<a name="line.195"></a>
+<FONT color="green">196</FONT>                                this.drawTexturedModalRect(var26, var22, 16, 9, 9, 9);<a name="line.196"></a>
+<FONT color="green">197</FONT>                            }<a name="line.197"></a>
+<FONT color="green">198</FONT>                        }<a name="line.198"></a>
+<FONT color="green">199</FONT>    <a name="line.199"></a>
+<FONT color="green">200</FONT>                        var26 = 16;<a name="line.200"></a>
+<FONT color="green">201</FONT>    <a name="line.201"></a>
+<FONT color="green">202</FONT>                        if (this.mc.thePlayer.isPotionActive(Potion.poison))<a name="line.202"></a>
+<FONT color="green">203</FONT>                        {<a name="line.203"></a>
+<FONT color="green">204</FONT>                            var26 += 36;<a name="line.204"></a>
+<FONT color="green">205</FONT>                        }<a name="line.205"></a>
+<FONT color="green">206</FONT>                        else if (this.mc.thePlayer.isPotionActive(Potion.wither))<a name="line.206"></a>
+<FONT color="green">207</FONT>                        {<a name="line.207"></a>
+<FONT color="green">208</FONT>                            var26 += 72;<a name="line.208"></a>
+<FONT color="green">209</FONT>                        }<a name="line.209"></a>
+<FONT color="green">210</FONT>    <a name="line.210"></a>
+<FONT color="green">211</FONT>                        byte var27 = 0;<a name="line.211"></a>
+<FONT color="green">212</FONT>    <a name="line.212"></a>
+<FONT color="green">213</FONT>                        if (var11)<a name="line.213"></a>
+<FONT color="green">214</FONT>                        {<a name="line.214"></a>
+<FONT color="green">215</FONT>                            var27 = 1;<a name="line.215"></a>
+<FONT color="green">216</FONT>                        }<a name="line.216"></a>
+<FONT color="green">217</FONT>    <a name="line.217"></a>
+<FONT color="green">218</FONT>                        var28 = var18 + var25 * 8;<a name="line.218"></a>
+<FONT color="green">219</FONT>                        var29 = var47;<a name="line.219"></a>
+<FONT color="green">220</FONT>    <a name="line.220"></a>
+<FONT color="green">221</FONT>                        if (var12 &lt;= 4)<a name="line.221"></a>
+<FONT color="green">222</FONT>                        {<a name="line.222"></a>
+<FONT color="green">223</FONT>                            var29 = var47 + this.rand.nextInt(2);<a name="line.223"></a>
+<FONT color="green">224</FONT>                        }<a name="line.224"></a>
+<FONT color="green">225</FONT>    <a name="line.225"></a>
+<FONT color="green">226</FONT>                        if (var25 == var24)<a name="line.226"></a>
+<FONT color="green">227</FONT>                        {<a name="line.227"></a>
+<FONT color="green">228</FONT>                            var29 -= 2;<a name="line.228"></a>
+<FONT color="green">229</FONT>                        }<a name="line.229"></a>
+<FONT color="green">230</FONT>    <a name="line.230"></a>
+<FONT color="green">231</FONT>                        byte var30 = 0;<a name="line.231"></a>
+<FONT color="green">232</FONT>    <a name="line.232"></a>
+<FONT color="green">233</FONT>                        if (this.mc.theWorld.getWorldInfo().isHardcoreModeEnabled())<a name="line.233"></a>
+<FONT color="green">234</FONT>                        {<a name="line.234"></a>
+<FONT color="green">235</FONT>                            var30 = 5;<a name="line.235"></a>
+<FONT color="green">236</FONT>                        }<a name="line.236"></a>
+<FONT color="green">237</FONT>    <a name="line.237"></a>
+<FONT color="green">238</FONT>                        this.drawTexturedModalRect(var28, var29, 16 + var27 * 9, 9 * var30, 9, 9);<a name="line.238"></a>
+<FONT color="green">239</FONT>    <a name="line.239"></a>
+<FONT color="green">240</FONT>                        if (var11)<a name="line.240"></a>
+<FONT color="green">241</FONT>                        {<a name="line.241"></a>
+<FONT color="green">242</FONT>                            if (var25 * 2 + 1 &lt; var13)<a name="line.242"></a>
+<FONT color="green">243</FONT>                            {<a name="line.243"></a>
+<FONT color="green">244</FONT>                                this.drawTexturedModalRect(var28, var29, var26 + 54, 9 * var30, 9, 9);<a name="line.244"></a>
+<FONT color="green">245</FONT>                            }<a name="line.245"></a>
+<FONT color="green">246</FONT>    <a name="line.246"></a>
+<FONT color="green">247</FONT>                            if (var25 * 2 + 1 == var13)<a name="line.247"></a>
+<FONT color="green">248</FONT>                            {<a name="line.248"></a>
+<FONT color="green">249</FONT>                                this.drawTexturedModalRect(var28, var29, var26 + 63, 9 * var30, 9, 9);<a name="line.249"></a>
+<FONT color="green">250</FONT>                            }<a name="line.250"></a>
+<FONT color="green">251</FONT>                        }<a name="line.251"></a>
+<FONT color="green">252</FONT>    <a name="line.252"></a>
+<FONT color="green">253</FONT>                        if (var25 * 2 + 1 &lt; var12)<a name="line.253"></a>
+<FONT color="green">254</FONT>                        {<a name="line.254"></a>
+<FONT color="green">255</FONT>                            this.drawTexturedModalRect(var28, var29, var26 + 36, 9 * var30, 9, 9);<a name="line.255"></a>
+<FONT color="green">256</FONT>                        }<a name="line.256"></a>
+<FONT color="green">257</FONT>    <a name="line.257"></a>
+<FONT color="green">258</FONT>                        if (var25 * 2 + 1 == var12)<a name="line.258"></a>
+<FONT color="green">259</FONT>                        {<a name="line.259"></a>
+<FONT color="green">260</FONT>                            this.drawTexturedModalRect(var28, var29, var26 + 45, 9 * var30, 9, 9);<a name="line.260"></a>
+<FONT color="green">261</FONT>                        }<a name="line.261"></a>
+<FONT color="green">262</FONT>                    }<a name="line.262"></a>
+<FONT color="green">263</FONT>    <a name="line.263"></a>
+<FONT color="green">264</FONT>                    this.mc.mcProfiler.endStartSection("food");<a name="line.264"></a>
+<FONT color="green">265</FONT>                    int var51;<a name="line.265"></a>
+<FONT color="green">266</FONT>    <a name="line.266"></a>
+<FONT color="green">267</FONT>                    for (var25 = 0; var25 &lt; 10; ++var25)<a name="line.267"></a>
+<FONT color="green">268</FONT>                    {<a name="line.268"></a>
+<FONT color="green">269</FONT>                        var26 = var47;<a name="line.269"></a>
+<FONT color="green">270</FONT>                        var51 = 16;<a name="line.270"></a>
+<FONT color="green">271</FONT>                        byte var52 = 0;<a name="line.271"></a>
+<FONT color="green">272</FONT>    <a name="line.272"></a>
+<FONT color="green">273</FONT>                        if (this.mc.thePlayer.isPotionActive(Potion.hunger))<a name="line.273"></a>
+<FONT color="green">274</FONT>                        {<a name="line.274"></a>
+<FONT color="green">275</FONT>                            var51 += 36;<a name="line.275"></a>
+<FONT color="green">276</FONT>                            var52 = 13;<a name="line.276"></a>
+<FONT color="green">277</FONT>                        }<a name="line.277"></a>
+<FONT color="green">278</FONT>    <a name="line.278"></a>
+<FONT color="green">279</FONT>                        if (this.mc.thePlayer.getFoodStats().getSaturationLevel() &lt;= 0.0F &amp;&amp; this.updateCounter % (var16 * 3 + 1) == 0)<a name="line.279"></a>
+<FONT color="green">280</FONT>                        {<a name="line.280"></a>
+<FONT color="green">281</FONT>                            var26 = var47 + (this.rand.nextInt(3) - 1);<a name="line.281"></a>
+<FONT color="green">282</FONT>                        }<a name="line.282"></a>
+<FONT color="green">283</FONT>    <a name="line.283"></a>
+<FONT color="green">284</FONT>                        if (var14)<a name="line.284"></a>
+<FONT color="green">285</FONT>                        {<a name="line.285"></a>
+<FONT color="green">286</FONT>                            var52 = 1;<a name="line.286"></a>
+<FONT color="green">287</FONT>                        }<a name="line.287"></a>
+<FONT color="green">288</FONT>    <a name="line.288"></a>
+<FONT color="green">289</FONT>                        var29 = var19 - var25 * 8 - 9;<a name="line.289"></a>
+<FONT color="green">290</FONT>                        this.drawTexturedModalRect(var29, var26, 16 + var52 * 9, 27, 9, 9);<a name="line.290"></a>
+<FONT color="green">291</FONT>    <a name="line.291"></a>
+<FONT color="green">292</FONT>                        if (var14)<a name="line.292"></a>
+<FONT color="green">293</FONT>                        {<a name="line.293"></a>
+<FONT color="green">294</FONT>                            if (var25 * 2 + 1 &lt; var17)<a name="line.294"></a>
+<FONT color="green">295</FONT>                            {<a name="line.295"></a>
+<FONT color="green">296</FONT>                                this.drawTexturedModalRect(var29, var26, var51 + 54, 27, 9, 9);<a name="line.296"></a>
+<FONT color="green">297</FONT>                            }<a name="line.297"></a>
+<FONT color="green">298</FONT>    <a name="line.298"></a>
+<FONT color="green">299</FONT>                            if (var25 * 2 + 1 == var17)<a name="line.299"></a>
+<FONT color="green">300</FONT>                            {<a name="line.300"></a>
+<FONT color="green">301</FONT>                                this.drawTexturedModalRect(var29, var26, var51 + 63, 27, 9, 9);<a name="line.301"></a>
+<FONT color="green">302</FONT>                            }<a name="line.302"></a>
+<FONT color="green">303</FONT>                        }<a name="line.303"></a>
+<FONT color="green">304</FONT>    <a name="line.304"></a>
+<FONT color="green">305</FONT>                        if (var25 * 2 + 1 &lt; var16)<a name="line.305"></a>
+<FONT color="green">306</FONT>                        {<a name="line.306"></a>
+<FONT color="green">307</FONT>                            this.drawTexturedModalRect(var29, var26, var51 + 36, 27, 9, 9);<a name="line.307"></a>
+<FONT color="green">308</FONT>                        }<a name="line.308"></a>
+<FONT color="green">309</FONT>    <a name="line.309"></a>
+<FONT color="green">310</FONT>                        if (var25 * 2 + 1 == var16)<a name="line.310"></a>
+<FONT color="green">311</FONT>                        {<a name="line.311"></a>
+<FONT color="green">312</FONT>                            this.drawTexturedModalRect(var29, var26, var51 + 45, 27, 9, 9);<a name="line.312"></a>
+<FONT color="green">313</FONT>                        }<a name="line.313"></a>
+<FONT color="green">314</FONT>                    }<a name="line.314"></a>
+<FONT color="green">315</FONT>    <a name="line.315"></a>
+<FONT color="green">316</FONT>                    this.mc.mcProfiler.endStartSection("air");<a name="line.316"></a>
+<FONT color="green">317</FONT>    <a name="line.317"></a>
+<FONT color="green">318</FONT>                    if (this.mc.thePlayer.isInsideOfMaterial(Material.water))<a name="line.318"></a>
+<FONT color="green">319</FONT>                    {<a name="line.319"></a>
+<FONT color="green">320</FONT>                        var25 = this.mc.thePlayer.getAir();<a name="line.320"></a>
+<FONT color="green">321</FONT>                        var26 = MathHelper.ceiling_double_int((double)(var25 - 2) * 10.0D / 300.0D);<a name="line.321"></a>
+<FONT color="green">322</FONT>                        var51 = MathHelper.ceiling_double_int((double)var25 * 10.0D / 300.0D) - var26;<a name="line.322"></a>
+<FONT color="green">323</FONT>    <a name="line.323"></a>
+<FONT color="green">324</FONT>                        for (var28 = 0; var28 &lt; var26 + var51; ++var28)<a name="line.324"></a>
+<FONT color="green">325</FONT>                        {<a name="line.325"></a>
+<FONT color="green">326</FONT>                            if (var28 &lt; var26)<a name="line.326"></a>
+<FONT color="green">327</FONT>                            {<a name="line.327"></a>
+<FONT color="green">328</FONT>                                this.drawTexturedModalRect(var19 - var28 * 8 - 9, var22, 16, 18, 9, 9);<a name="line.328"></a>
+<FONT color="green">329</FONT>                            }<a name="line.329"></a>
+<FONT color="green">330</FONT>                            else<a name="line.330"></a>
+<FONT color="green">331</FONT>                            {<a name="line.331"></a>
+<FONT color="green">332</FONT>                                this.drawTexturedModalRect(var19 - var28 * 8 - 9, var22, 25, 18, 9, 9);<a name="line.332"></a>
+<FONT color="green">333</FONT>                            }<a name="line.333"></a>
+<FONT color="green">334</FONT>                        }<a name="line.334"></a>
+<FONT color="green">335</FONT>                    }<a name="line.335"></a>
+<FONT color="green">336</FONT>    <a name="line.336"></a>
+<FONT color="green">337</FONT>                    this.mc.mcProfiler.endSection();<a name="line.337"></a>
+<FONT color="green">338</FONT>                }<a name="line.338"></a>
+<FONT color="green">339</FONT>    <a name="line.339"></a>
+<FONT color="green">340</FONT>                GL11.glDisable(GL11.GL_BLEND);<a name="line.340"></a>
+<FONT color="green">341</FONT>                this.mc.mcProfiler.startSection("actionBar");<a name="line.341"></a>
+<FONT color="green">342</FONT>                GL11.glEnable(GL12.GL_RESCALE_NORMAL);<a name="line.342"></a>
+<FONT color="green">343</FONT>                RenderHelper.enableGUIStandardItemLighting();<a name="line.343"></a>
+<FONT color="green">344</FONT>    <a name="line.344"></a>
+<FONT color="green">345</FONT>                for (var18 = 0; var18 &lt; 9; ++var18)<a name="line.345"></a>
+<FONT color="green">346</FONT>                {<a name="line.346"></a>
+<FONT color="green">347</FONT>                    var19 = var6 / 2 - 90 + var18 * 20 + 2;<a name="line.347"></a>
+<FONT color="green">348</FONT>                    var20 = var7 - 16 - 3;<a name="line.348"></a>
+<FONT color="green">349</FONT>                    this.renderInventorySlot(var18, var19, var20, par1);<a name="line.349"></a>
+<FONT color="green">350</FONT>                }<a name="line.350"></a>
+<FONT color="green">351</FONT>    <a name="line.351"></a>
+<FONT color="green">352</FONT>                RenderHelper.disableStandardItemLighting();<a name="line.352"></a>
+<FONT color="green">353</FONT>                GL11.glDisable(GL12.GL_RESCALE_NORMAL);<a name="line.353"></a>
+<FONT color="green">354</FONT>                this.mc.mcProfiler.endSection();<a name="line.354"></a>
+<FONT color="green">355</FONT>            }<a name="line.355"></a>
+<FONT color="green">356</FONT>    <a name="line.356"></a>
+<FONT color="green">357</FONT>            float var33;<a name="line.357"></a>
+<FONT color="green">358</FONT>    <a name="line.358"></a>
+<FONT color="green">359</FONT>            if (this.mc.thePlayer.getSleepTimer() &gt; 0)<a name="line.359"></a>
+<FONT color="green">360</FONT>            {<a name="line.360"></a>
+<FONT color="green">361</FONT>                this.mc.mcProfiler.startSection("sleep");<a name="line.361"></a>
+<FONT color="green">362</FONT>                GL11.glDisable(GL11.GL_DEPTH_TEST);<a name="line.362"></a>
+<FONT color="green">363</FONT>                GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.363"></a>
+<FONT color="green">364</FONT>                int var32 = this.mc.thePlayer.getSleepTimer();<a name="line.364"></a>
+<FONT color="green">365</FONT>                var33 = (float)var32 / 100.0F;<a name="line.365"></a>
+<FONT color="green">366</FONT>    <a name="line.366"></a>
+<FONT color="green">367</FONT>                if (var33 &gt; 1.0F)<a name="line.367"></a>
+<FONT color="green">368</FONT>                {<a name="line.368"></a>
+<FONT color="green">369</FONT>                    var33 = 1.0F - (float)(var32 - 100) / 10.0F;<a name="line.369"></a>
+<FONT color="green">370</FONT>                }<a name="line.370"></a>
+<FONT color="green">371</FONT>    <a name="line.371"></a>
+<FONT color="green">372</FONT>                var12 = (int)(220.0F * var33) &lt;&lt; 24 | 1052704;<a name="line.372"></a>
+<FONT color="green">373</FONT>                drawRect(0, 0, var6, var7, var12);<a name="line.373"></a>
+<FONT color="green">374</FONT>                GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.374"></a>
+<FONT color="green">375</FONT>                GL11.glEnable(GL11.GL_DEPTH_TEST);<a name="line.375"></a>
+<FONT color="green">376</FONT>                this.mc.mcProfiler.endSection();<a name="line.376"></a>
+<FONT color="green">377</FONT>            }<a name="line.377"></a>
+<FONT color="green">378</FONT>    <a name="line.378"></a>
+<FONT color="green">379</FONT>            int var38;<a name="line.379"></a>
+<FONT color="green">380</FONT>            int var37;<a name="line.380"></a>
+<FONT color="green">381</FONT>    <a name="line.381"></a>
+<FONT color="green">382</FONT>            if (this.mc.playerController.func_78763_f() &amp;&amp; this.mc.thePlayer.experienceLevel &gt; 0)<a name="line.382"></a>
+<FONT color="green">383</FONT>            {<a name="line.383"></a>
+<FONT color="green">384</FONT>                this.mc.mcProfiler.startSection("expLevel");<a name="line.384"></a>
+<FONT color="green">385</FONT>                var11 = false;<a name="line.385"></a>
+<FONT color="green">386</FONT>                var12 = var11 ? 16777215 : 8453920;<a name="line.386"></a>
+<FONT color="green">387</FONT>                String var34 = "" + this.mc.thePlayer.experienceLevel;<a name="line.387"></a>
+<FONT color="green">388</FONT>                var38 = (var6 - var8.getStringWidth(var34)) / 2;<a name="line.388"></a>
+<FONT color="green">389</FONT>                var37 = var7 - 31 - 4;<a name="line.389"></a>
+<FONT color="green">390</FONT>                var8.drawString(var34, var38 + 1, var37, 0);<a name="line.390"></a>
+<FONT color="green">391</FONT>                var8.drawString(var34, var38 - 1, var37, 0);<a name="line.391"></a>
+<FONT color="green">392</FONT>                var8.drawString(var34, var38, var37 + 1, 0);<a name="line.392"></a>
+<FONT color="green">393</FONT>                var8.drawString(var34, var38, var37 - 1, 0);<a name="line.393"></a>
+<FONT color="green">394</FONT>                var8.drawString(var34, var38, var37, var12);<a name="line.394"></a>
+<FONT color="green">395</FONT>                this.mc.mcProfiler.endSection();<a name="line.395"></a>
+<FONT color="green">396</FONT>            }<a name="line.396"></a>
+<FONT color="green">397</FONT>    <a name="line.397"></a>
+<FONT color="green">398</FONT>            String var35;<a name="line.398"></a>
+<FONT color="green">399</FONT>    <a name="line.399"></a>
+<FONT color="green">400</FONT>            if (this.mc.gameSettings.field_92117_D)<a name="line.400"></a>
+<FONT color="green">401</FONT>            {<a name="line.401"></a>
+<FONT color="green">402</FONT>                this.mc.mcProfiler.startSection("toolHighlight");<a name="line.402"></a>
+<FONT color="green">403</FONT>    <a name="line.403"></a>
+<FONT color="green">404</FONT>                if (this.field_92017_k &gt; 0 &amp;&amp; this.field_92016_l != null)<a name="line.404"></a>
+<FONT color="green">405</FONT>                {<a name="line.405"></a>
+<FONT color="green">406</FONT>                    var35 = this.field_92016_l.getDisplayName();<a name="line.406"></a>
+<FONT color="green">407</FONT>                    var12 = (var6 - var8.getStringWidth(var35)) / 2;<a name="line.407"></a>
+<FONT color="green">408</FONT>                    var13 = var7 - 59;<a name="line.408"></a>
+<FONT color="green">409</FONT>    <a name="line.409"></a>
+<FONT color="green">410</FONT>                    if (!this.mc.playerController.shouldDrawHUD())<a name="line.410"></a>
+<FONT color="green">411</FONT>                    {<a name="line.411"></a>
+<FONT color="green">412</FONT>                        var13 += 14;<a name="line.412"></a>
+<FONT color="green">413</FONT>                    }<a name="line.413"></a>
+<FONT color="green">414</FONT>    <a name="line.414"></a>
+<FONT color="green">415</FONT>                    var38 = (int)((float)this.field_92017_k * 256.0F / 10.0F);<a name="line.415"></a>
+<FONT color="green">416</FONT>    <a name="line.416"></a>
+<FONT color="green">417</FONT>                    if (var38 &gt; 255)<a name="line.417"></a>
+<FONT color="green">418</FONT>                    {<a name="line.418"></a>
+<FONT color="green">419</FONT>                        var38 = 255;<a name="line.419"></a>
+<FONT color="green">420</FONT>                    }<a name="line.420"></a>
+<FONT color="green">421</FONT>    <a name="line.421"></a>
+<FONT color="green">422</FONT>                    if (var38 &gt; 0)<a name="line.422"></a>
+<FONT color="green">423</FONT>                    {<a name="line.423"></a>
+<FONT color="green">424</FONT>                        GL11.glPushMatrix();<a name="line.424"></a>
+<FONT color="green">425</FONT>                        GL11.glEnable(GL11.GL_BLEND);<a name="line.425"></a>
+<FONT color="green">426</FONT>                        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.426"></a>
+<FONT color="green">427</FONT>                        var8.drawStringWithShadow(var35, var12, var13, 16777215 + (var38 &lt;&lt; 24));<a name="line.427"></a>
+<FONT color="green">428</FONT>                        GL11.glDisable(GL11.GL_BLEND);<a name="line.428"></a>
+<FONT color="green">429</FONT>                        GL11.glPopMatrix();<a name="line.429"></a>
+<FONT color="green">430</FONT>                    }<a name="line.430"></a>
+<FONT color="green">431</FONT>                }<a name="line.431"></a>
+<FONT color="green">432</FONT>    <a name="line.432"></a>
+<FONT color="green">433</FONT>                this.mc.mcProfiler.endSection();<a name="line.433"></a>
+<FONT color="green">434</FONT>            }<a name="line.434"></a>
+<FONT color="green">435</FONT>    <a name="line.435"></a>
+<FONT color="green">436</FONT>            if (this.mc.isDemo())<a name="line.436"></a>
+<FONT color="green">437</FONT>            {<a name="line.437"></a>
+<FONT color="green">438</FONT>                this.mc.mcProfiler.startSection("demo");<a name="line.438"></a>
+<FONT color="green">439</FONT>                var35 = "";<a name="line.439"></a>
+<FONT color="green">440</FONT>    <a name="line.440"></a>
+<FONT color="green">441</FONT>                if (this.mc.theWorld.getTotalWorldTime() &gt;= 120500L)<a name="line.441"></a>
+<FONT color="green">442</FONT>                {<a name="line.442"></a>
+<FONT color="green">443</FONT>                    var35 = StatCollector.translateToLocal("demo.demoExpired");<a name="line.443"></a>
+<FONT color="green">444</FONT>                }<a name="line.444"></a>
+<FONT color="green">445</FONT>                else<a name="line.445"></a>
+<FONT color="green">446</FONT>                {<a name="line.446"></a>
+<FONT color="green">447</FONT>                    var35 = String.format(StatCollector.translateToLocal("demo.remainingTime"), new Object[] {StringUtils.ticksToElapsedTime((int)(120500L - this.mc.theWorld.getTotalWorldTime()))});<a name="line.447"></a>
+<FONT color="green">448</FONT>                }<a name="line.448"></a>
+<FONT color="green">449</FONT>    <a name="line.449"></a>
+<FONT color="green">450</FONT>                var12 = var8.getStringWidth(var35);<a name="line.450"></a>
+<FONT color="green">451</FONT>                var8.drawStringWithShadow(var35, var6 - var12 - 10, 5, 16777215);<a name="line.451"></a>
+<FONT color="green">452</FONT>                this.mc.mcProfiler.endSection();<a name="line.452"></a>
+<FONT color="green">453</FONT>            }<a name="line.453"></a>
+<FONT color="green">454</FONT>    <a name="line.454"></a>
+<FONT color="green">455</FONT>            if (this.mc.gameSettings.showDebugInfo)<a name="line.455"></a>
+<FONT color="green">456</FONT>            {<a name="line.456"></a>
+<FONT color="green">457</FONT>                this.mc.mcProfiler.startSection("debug");<a name="line.457"></a>
+<FONT color="green">458</FONT>                GL11.glPushMatrix();<a name="line.458"></a>
+<FONT color="green">459</FONT>                var8.drawStringWithShadow("Minecraft 1.4.7 (" + this.mc.debug + ")", 2, 2, 16777215);<a name="line.459"></a>
+<FONT color="green">460</FONT>                var8.drawStringWithShadow(this.mc.debugInfoRenders(), 2, 12, 16777215);<a name="line.460"></a>
+<FONT color="green">461</FONT>                var8.drawStringWithShadow(this.mc.getEntityDebug(), 2, 22, 16777215);<a name="line.461"></a>
+<FONT color="green">462</FONT>                var8.drawStringWithShadow(this.mc.debugInfoEntities(), 2, 32, 16777215);<a name="line.462"></a>
+<FONT color="green">463</FONT>                var8.drawStringWithShadow(this.mc.getWorldProviderName(), 2, 42, 16777215);<a name="line.463"></a>
+<FONT color="green">464</FONT>                long var36 = Runtime.getRuntime().maxMemory();<a name="line.464"></a>
+<FONT color="green">465</FONT>                long var40 = Runtime.getRuntime().totalMemory();<a name="line.465"></a>
+<FONT color="green">466</FONT>                long var42 = Runtime.getRuntime().freeMemory();<a name="line.466"></a>
+<FONT color="green">467</FONT>                long var43 = var40 - var42;<a name="line.467"></a>
+<FONT color="green">468</FONT>                String var45 = "Used memory: " + var43 * 100L / var36 + "% (" + var43 / 1024L / 1024L + "MB) of " + var36 / 1024L / 1024L + "MB";<a name="line.468"></a>
+<FONT color="green">469</FONT>                this.drawString(var8, var45, var6 - var8.getStringWidth(var45) - 2, 2, 14737632);<a name="line.469"></a>
+<FONT color="green">470</FONT>                var45 = "Allocated memory: " + var40 * 100L / var36 + "% (" + var40 / 1024L / 1024L + "MB)";<a name="line.470"></a>
+<FONT color="green">471</FONT>                this.drawString(var8, var45, var6 - var8.getStringWidth(var45) - 2, 12, 14737632);<a name="line.471"></a>
+<FONT color="green">472</FONT>                var47 = MathHelper.floor_double(this.mc.thePlayer.posX);<a name="line.472"></a>
+<FONT color="green">473</FONT>                var22 = MathHelper.floor_double(this.mc.thePlayer.posY);<a name="line.473"></a>
+<FONT color="green">474</FONT>                var23 = MathHelper.floor_double(this.mc.thePlayer.posZ);<a name="line.474"></a>
+<FONT color="green">475</FONT>                this.drawString(var8, String.format("x: %.5f (%d) // c: %d (%d)", new Object[] {Double.valueOf(this.mc.thePlayer.posX), Integer.valueOf(var47), Integer.valueOf(var47 &gt;&gt; 4), Integer.valueOf(var47 &amp; 15)}), 2, 64, 14737632);<a name="line.475"></a>
+<FONT color="green">476</FONT>                this.drawString(var8, String.format("y: %.3f (feet pos, %.3f eyes pos)", new Object[] {Double.valueOf(this.mc.thePlayer.boundingBox.minY), Double.valueOf(this.mc.thePlayer.posY)}), 2, 72, 14737632);<a name="line.476"></a>
+<FONT color="green">477</FONT>                this.drawString(var8, String.format("z: %.5f (%d) // c: %d (%d)", new Object[] {Double.valueOf(this.mc.thePlayer.posZ), Integer.valueOf(var23), Integer.valueOf(var23 &gt;&gt; 4), Integer.valueOf(var23 &amp; 15)}), 2, 80, 14737632);<a name="line.477"></a>
+<FONT color="green">478</FONT>                var24 = MathHelper.floor_double((double)(this.mc.thePlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) &amp; 3;<a name="line.478"></a>
+<FONT color="green">479</FONT>                this.drawString(var8, "f: " + var24 + " (" + Direction.directions[var24] + ") / " + MathHelper.wrapAngleTo180_float(this.mc.thePlayer.rotationYaw), 2, 88, 14737632);<a name="line.479"></a>
+<FONT color="green">480</FONT>    <a name="line.480"></a>
+<FONT color="green">481</FONT>                if (this.mc.theWorld != null &amp;&amp; this.mc.theWorld.blockExists(var47, var22, var23))<a name="line.481"></a>
+<FONT color="green">482</FONT>                {<a name="line.482"></a>
+<FONT color="green">483</FONT>                    Chunk var53 = this.mc.theWorld.getChunkFromBlockCoords(var47, var23);<a name="line.483"></a>
+<FONT color="green">484</FONT>                    this.drawString(var8, "lc: " + (var53.getTopFilledSegment() + 15) + " b: " + var53.getBiomeGenForWorldCoords(var47 &amp; 15, var23 &amp; 15, this.mc.theWorld.getWorldChunkManager()).biomeName + " bl: " + var53.getSavedLightValue(EnumSkyBlock.Block, var47 &amp; 15, var22, var23 &amp; 15) + " sl: " + var53.getSavedLightValue(EnumSkyBlock.Sky, var47 &amp; 15, var22, var23 &amp; 15) + " rl: " + var53.getBlockLightValue(var47 &amp; 15, var22, var23 &amp; 15, 0), 2, 96, 14737632);<a name="line.484"></a>
+<FONT color="green">485</FONT>                }<a name="line.485"></a>
+<FONT color="green">486</FONT>    <a name="line.486"></a>
+<FONT color="green">487</FONT>                this.drawString(var8, String.format("ws: %.3f, fs: %.3f, g: %b, fl: %d", new Object[] {Float.valueOf(this.mc.thePlayer.capabilities.getWalkSpeed()), Float.valueOf(this.mc.thePlayer.capabilities.getFlySpeed()), Boolean.valueOf(this.mc.thePlayer.onGround), Integer.valueOf(this.mc.theWorld.getHeightValue(var47, var23))}), 2, 104, 14737632);<a name="line.487"></a>
+<FONT color="green">488</FONT>                GL11.glPopMatrix();<a name="line.488"></a>
+<FONT color="green">489</FONT>                this.mc.mcProfiler.endSection();<a name="line.489"></a>
+<FONT color="green">490</FONT>            }<a name="line.490"></a>
+<FONT color="green">491</FONT>    <a name="line.491"></a>
+<FONT color="green">492</FONT>            if (this.recordPlayingUpFor &gt; 0)<a name="line.492"></a>
+<FONT color="green">493</FONT>            {<a name="line.493"></a>
+<FONT color="green">494</FONT>                this.mc.mcProfiler.startSection("overlayMessage");<a name="line.494"></a>
+<FONT color="green">495</FONT>                var33 = (float)this.recordPlayingUpFor - par1;<a name="line.495"></a>
+<FONT color="green">496</FONT>                var12 = (int)(var33 * 256.0F / 20.0F);<a name="line.496"></a>
+<FONT color="green">497</FONT>    <a name="line.497"></a>
+<FONT color="green">498</FONT>                if (var12 &gt; 255)<a name="line.498"></a>
+<FONT color="green">499</FONT>                {<a name="line.499"></a>
+<FONT color="green">500</FONT>                    var12 = 255;<a name="line.500"></a>
+<FONT color="green">501</FONT>                }<a name="line.501"></a>
+<FONT color="green">502</FONT>    <a name="line.502"></a>
+<FONT color="green">503</FONT>                if (var12 &gt; 0)<a name="line.503"></a>
+<FONT color="green">504</FONT>                {<a name="line.504"></a>
+<FONT color="green">505</FONT>                    GL11.glPushMatrix();<a name="line.505"></a>
+<FONT color="green">506</FONT>                    GL11.glTranslatef((float)(var6 / 2), (float)(var7 - 48), 0.0F);<a name="line.506"></a>
+<FONT color="green">507</FONT>                    GL11.glEnable(GL11.GL_BLEND);<a name="line.507"></a>
+<FONT color="green">508</FONT>                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.508"></a>
+<FONT color="green">509</FONT>                    var13 = 16777215;<a name="line.509"></a>
+<FONT color="green">510</FONT>    <a name="line.510"></a>
+<FONT color="green">511</FONT>                    if (this.recordIsPlaying)<a name="line.511"></a>
+<FONT color="green">512</FONT>                    {<a name="line.512"></a>
+<FONT color="green">513</FONT>                        var13 = Color.HSBtoRGB(var33 / 50.0F, 0.7F, 0.6F) &amp; 16777215;<a name="line.513"></a>
+<FONT color="green">514</FONT>                    }<a name="line.514"></a>
+<FONT color="green">515</FONT>    <a name="line.515"></a>
+<FONT color="green">516</FONT>                    var8.drawString(this.recordPlaying, -var8.getStringWidth(this.recordPlaying) / 2, -4, var13 + (var12 &lt;&lt; 24));<a name="line.516"></a>
+<FONT color="green">517</FONT>                    GL11.glDisable(GL11.GL_BLEND);<a name="line.517"></a>
+<FONT color="green">518</FONT>                    GL11.glPopMatrix();<a name="line.518"></a>
+<FONT color="green">519</FONT>                }<a name="line.519"></a>
+<FONT color="green">520</FONT>    <a name="line.520"></a>
+<FONT color="green">521</FONT>                this.mc.mcProfiler.endSection();<a name="line.521"></a>
+<FONT color="green">522</FONT>            }<a name="line.522"></a>
+<FONT color="green">523</FONT>    <a name="line.523"></a>
+<FONT color="green">524</FONT>            GL11.glEnable(GL11.GL_BLEND);<a name="line.524"></a>
+<FONT color="green">525</FONT>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.525"></a>
+<FONT color="green">526</FONT>            GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.526"></a>
+<FONT color="green">527</FONT>            GL11.glPushMatrix();<a name="line.527"></a>
+<FONT color="green">528</FONT>            GL11.glTranslatef(0.0F, (float)(var7 - 48), 0.0F);<a name="line.528"></a>
+<FONT color="green">529</FONT>            this.mc.mcProfiler.startSection("chat");<a name="line.529"></a>
+<FONT color="green">530</FONT>            this.persistantChatGUI.drawChat(this.updateCounter);<a name="line.530"></a>
+<FONT color="green">531</FONT>            this.mc.mcProfiler.endSection();<a name="line.531"></a>
+<FONT color="green">532</FONT>            GL11.glPopMatrix();<a name="line.532"></a>
+<FONT color="green">533</FONT>    <a name="line.533"></a>
+<FONT color="green">534</FONT>            if (this.mc.gameSettings.keyBindPlayerList.pressed &amp;&amp; (!this.mc.isIntegratedServerRunning() || this.mc.thePlayer.sendQueue.playerInfoList.size() &gt; 1))<a name="line.534"></a>
+<FONT color="green">535</FONT>            {<a name="line.535"></a>
+<FONT color="green">536</FONT>                this.mc.mcProfiler.startSection("playerList");<a name="line.536"></a>
+<FONT color="green">537</FONT>                NetClientHandler var41 = this.mc.thePlayer.sendQueue;<a name="line.537"></a>
+<FONT color="green">538</FONT>                List var39 = var41.playerInfoList;<a name="line.538"></a>
+<FONT color="green">539</FONT>                var13 = var41.currentServerMaxPlayers;<a name="line.539"></a>
+<FONT color="green">540</FONT>                var38 = var13;<a name="line.540"></a>
+<FONT color="green">541</FONT>    <a name="line.541"></a>
+<FONT color="green">542</FONT>                for (var37 = 1; var38 &gt; 20; var38 = (var13 + var37 - 1) / var37)<a name="line.542"></a>
+<FONT color="green">543</FONT>                {<a name="line.543"></a>
+<FONT color="green">544</FONT>                    ++var37;<a name="line.544"></a>
+<FONT color="green">545</FONT>                }<a name="line.545"></a>
+<FONT color="green">546</FONT>    <a name="line.546"></a>
+<FONT color="green">547</FONT>                var16 = 300 / var37;<a name="line.547"></a>
+<FONT color="green">548</FONT>    <a name="line.548"></a>
+<FONT color="green">549</FONT>                if (var16 &gt; 150)<a name="line.549"></a>
+<FONT color="green">550</FONT>                {<a name="line.550"></a>
+<FONT color="green">551</FONT>                    var16 = 150;<a name="line.551"></a>
+<FONT color="green">552</FONT>                }<a name="line.552"></a>
+<FONT color="green">553</FONT>    <a name="line.553"></a>
+<FONT color="green">554</FONT>                var17 = (var6 - var37 * var16) / 2;<a name="line.554"></a>
+<FONT color="green">555</FONT>                byte var44 = 10;<a name="line.555"></a>
+<FONT color="green">556</FONT>                drawRect(var17 - 1, var44 - 1, var17 + var16 * var37, var44 + 9 * var38, Integer.MIN_VALUE);<a name="line.556"></a>
+<FONT color="green">557</FONT>    <a name="line.557"></a>
+<FONT color="green">558</FONT>                for (var19 = 0; var19 &lt; var13; ++var19)<a name="line.558"></a>
+<FONT color="green">559</FONT>                {<a name="line.559"></a>
+<FONT color="green">560</FONT>                    var20 = var17 + var19 % var37 * var16;<a name="line.560"></a>
+<FONT color="green">561</FONT>                    var47 = var44 + var19 / var37 * 9;<a name="line.561"></a>
+<FONT color="green">562</FONT>                    drawRect(var20, var47, var20 + var16 - 1, var47 + 8, 553648127);<a name="line.562"></a>
+<FONT color="green">563</FONT>                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.563"></a>
+<FONT color="green">564</FONT>                    GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.564"></a>
+<FONT color="green">565</FONT>    <a name="line.565"></a>
+<FONT color="green">566</FONT>                    if (var19 &lt; var39.size())<a name="line.566"></a>
+<FONT color="green">567</FONT>                    {<a name="line.567"></a>
+<FONT color="green">568</FONT>                        GuiPlayerInfo var46 = (GuiPlayerInfo)var39.get(var19);<a name="line.568"></a>
+<FONT color="green">569</FONT>                        var8.drawStringWithShadow(var46.name, var20, var47, 16777215);<a name="line.569"></a>
+<FONT color="green">570</FONT>                        this.mc.renderEngine.bindTexture(this.mc.renderEngine.getTexture("/gui/icons.png"));<a name="line.570"></a>
+<FONT color="green">571</FONT>                        byte var50 = 0;<a name="line.571"></a>
+<FONT color="green">572</FONT>                        boolean var48 = false;<a name="line.572"></a>
+<FONT color="green">573</FONT>                        byte var49;<a name="line.573"></a>
+<FONT color="green">574</FONT>    <a name="line.574"></a>
+<FONT color="green">575</FONT>                        if (var46.responseTime &lt; 0)<a name="line.575"></a>
+<FONT color="green">576</FONT>                        {<a name="line.576"></a>
+<FONT color="green">577</FONT>                            var49 = 5;<a name="line.577"></a>
+<FONT color="green">578</FONT>                        }<a name="line.578"></a>
+<FONT color="green">579</FONT>                        else if (var46.responseTime &lt; 150)<a name="line.579"></a>
+<FONT color="green">580</FONT>                        {<a name="line.580"></a>
+<FONT color="green">581</FONT>                            var49 = 0;<a name="line.581"></a>
+<FONT color="green">582</FONT>                        }<a name="line.582"></a>
+<FONT color="green">583</FONT>                        else if (var46.responseTime &lt; 300)<a name="line.583"></a>
+<FONT color="green">584</FONT>                        {<a name="line.584"></a>
+<FONT color="green">585</FONT>                            var49 = 1;<a name="line.585"></a>
+<FONT color="green">586</FONT>                        }<a name="line.586"></a>
+<FONT color="green">587</FONT>                        else if (var46.responseTime &lt; 600)<a name="line.587"></a>
+<FONT color="green">588</FONT>                        {<a name="line.588"></a>
+<FONT color="green">589</FONT>                            var49 = 2;<a name="line.589"></a>
+<FONT color="green">590</FONT>                        }<a name="line.590"></a>
+<FONT color="green">591</FONT>                        else if (var46.responseTime &lt; 1000)<a name="line.591"></a>
+<FONT color="green">592</FONT>                        {<a name="line.592"></a>
+<FONT color="green">593</FONT>                            var49 = 3;<a name="line.593"></a>
+<FONT color="green">594</FONT>                        }<a name="line.594"></a>
+<FONT color="green">595</FONT>                        else<a name="line.595"></a>
+<FONT color="green">596</FONT>                        {<a name="line.596"></a>
+<FONT color="green">597</FONT>                            var49 = 4;<a name="line.597"></a>
+<FONT color="green">598</FONT>                        }<a name="line.598"></a>
+<FONT color="green">599</FONT>    <a name="line.599"></a>
+<FONT color="green">600</FONT>                        this.zLevel += 100.0F;<a name="line.600"></a>
+<FONT color="green">601</FONT>                        this.drawTexturedModalRect(var20 + var16 - 12, var47, 0 + var50 * 10, 176 + var49 * 8, 10, 8);<a name="line.601"></a>
+<FONT color="green">602</FONT>                        this.zLevel -= 100.0F;<a name="line.602"></a>
+<FONT color="green">603</FONT>                    }<a name="line.603"></a>
+<FONT color="green">604</FONT>                }<a name="line.604"></a>
+<FONT color="green">605</FONT>            }<a name="line.605"></a>
+<FONT color="green">606</FONT>    <a name="line.606"></a>
+<FONT color="green">607</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.607"></a>
+<FONT color="green">608</FONT>            GL11.glDisable(GL11.GL_LIGHTING);<a name="line.608"></a>
+<FONT color="green">609</FONT>            GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.609"></a>
+<FONT color="green">610</FONT>        }<a name="line.610"></a>
+<FONT color="green">611</FONT>    <a name="line.611"></a>
+<FONT color="green">612</FONT>        /**<a name="line.612"></a>
+<FONT color="green">613</FONT>         * Renders dragon's (boss) health on the HUD<a name="line.613"></a>
+<FONT color="green">614</FONT>         */<a name="line.614"></a>
+<FONT color="green">615</FONT>        private void renderBossHealth()<a name="line.615"></a>
+<FONT color="green">616</FONT>        {<a name="line.616"></a>
+<FONT color="green">617</FONT>            if (BossStatus.bossName != null &amp;&amp; BossStatus.statusBarLength &gt; 0)<a name="line.617"></a>
+<FONT color="green">618</FONT>            {<a name="line.618"></a>
+<FONT color="green">619</FONT>                --BossStatus.statusBarLength;<a name="line.619"></a>
+<FONT color="green">620</FONT>                FontRenderer var1 = this.mc.fontRenderer;<a name="line.620"></a>
+<FONT color="green">621</FONT>                ScaledResolution var2 = new ScaledResolution(this.mc.gameSettings, this.mc.displayWidth, this.mc.displayHeight);<a name="line.621"></a>
+<FONT color="green">622</FONT>                int var3 = var2.getScaledWidth();<a name="line.622"></a>
+<FONT color="green">623</FONT>                short var4 = 182;<a name="line.623"></a>
+<FONT color="green">624</FONT>                int var5 = var3 / 2 - var4 / 2;<a name="line.624"></a>
+<FONT color="green">625</FONT>                int var6 = (int)(BossStatus.healthScale * (float)(var4 + 1));<a name="line.625"></a>
+<FONT color="green">626</FONT>                byte var7 = 12;<a name="line.626"></a>
+<FONT color="green">627</FONT>                this.drawTexturedModalRect(var5, var7, 0, 74, var4, 5);<a name="line.627"></a>
+<FONT color="green">628</FONT>                this.drawTexturedModalRect(var5, var7, 0, 74, var4, 5);<a name="line.628"></a>
+<FONT color="green">629</FONT>    <a name="line.629"></a>
+<FONT color="green">630</FONT>                if (var6 &gt; 0)<a name="line.630"></a>
+<FONT color="green">631</FONT>                {<a name="line.631"></a>
+<FONT color="green">632</FONT>                    this.drawTexturedModalRect(var5, var7, 0, 79, var6, 5);<a name="line.632"></a>
+<FONT color="green">633</FONT>                }<a name="line.633"></a>
+<FONT color="green">634</FONT>    <a name="line.634"></a>
+<FONT color="green">635</FONT>                String var8 = BossStatus.bossName;<a name="line.635"></a>
+<FONT color="green">636</FONT>                var1.drawStringWithShadow(var8, var3 / 2 - var1.getStringWidth(var8) / 2, var7 - 10, 16777215);<a name="line.636"></a>
+<FONT color="green">637</FONT>                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.637"></a>
+<FONT color="green">638</FONT>                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/gui/icons.png"));<a name="line.638"></a>
+<FONT color="green">639</FONT>            }<a name="line.639"></a>
+<FONT color="green">640</FONT>        }<a name="line.640"></a>
+<FONT color="green">641</FONT>    <a name="line.641"></a>
+<FONT color="green">642</FONT>        private void renderPumpkinBlur(int par1, int par2)<a name="line.642"></a>
+<FONT color="green">643</FONT>        {<a name="line.643"></a>
+<FONT color="green">644</FONT>            GL11.glDisable(GL11.GL_DEPTH_TEST);<a name="line.644"></a>
+<FONT color="green">645</FONT>            GL11.glDepthMask(false);<a name="line.645"></a>
+<FONT color="green">646</FONT>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.646"></a>
+<FONT color="green">647</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.647"></a>
+<FONT color="green">648</FONT>            GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.648"></a>
+<FONT color="green">649</FONT>            GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("%blur%/misc/pumpkinblur.png"));<a name="line.649"></a>
+<FONT color="green">650</FONT>            Tessellator var3 = Tessellator.instance;<a name="line.650"></a>
+<FONT color="green">651</FONT>            var3.startDrawingQuads();<a name="line.651"></a>
+<FONT color="green">652</FONT>            var3.addVertexWithUV(0.0D, (double)par2, -90.0D, 0.0D, 1.0D);<a name="line.652"></a>
+<FONT color="green">653</FONT>            var3.addVertexWithUV((double)par1, (double)par2, -90.0D, 1.0D, 1.0D);<a name="line.653"></a>
+<FONT color="green">654</FONT>            var3.addVertexWithUV((double)par1, 0.0D, -90.0D, 1.0D, 0.0D);<a name="line.654"></a>
+<FONT color="green">655</FONT>            var3.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);<a name="line.655"></a>
+<FONT color="green">656</FONT>            var3.draw();<a name="line.656"></a>
+<FONT color="green">657</FONT>            GL11.glDepthMask(true);<a name="line.657"></a>
+<FONT color="green">658</FONT>            GL11.glEnable(GL11.GL_DEPTH_TEST);<a name="line.658"></a>
+<FONT color="green">659</FONT>            GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.659"></a>
+<FONT color="green">660</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.660"></a>
+<FONT color="green">661</FONT>        }<a name="line.661"></a>
+<FONT color="green">662</FONT>    <a name="line.662"></a>
+<FONT color="green">663</FONT>        /**<a name="line.663"></a>
+<FONT color="green">664</FONT>         * Renders the vignette. Args: vignetteBrightness, width, height<a name="line.664"></a>
+<FONT color="green">665</FONT>         */<a name="line.665"></a>
+<FONT color="green">666</FONT>        private void renderVignette(float par1, int par2, int par3)<a name="line.666"></a>
+<FONT color="green">667</FONT>        {<a name="line.667"></a>
+<FONT color="green">668</FONT>            par1 = 1.0F - par1;<a name="line.668"></a>
+<FONT color="green">669</FONT>    <a name="line.669"></a>
+<FONT color="green">670</FONT>            if (par1 &lt; 0.0F)<a name="line.670"></a>
+<FONT color="green">671</FONT>            {<a name="line.671"></a>
+<FONT color="green">672</FONT>                par1 = 0.0F;<a name="line.672"></a>
+<FONT color="green">673</FONT>            }<a name="line.673"></a>
+<FONT color="green">674</FONT>    <a name="line.674"></a>
+<FONT color="green">675</FONT>            if (par1 &gt; 1.0F)<a name="line.675"></a>
+<FONT color="green">676</FONT>            {<a name="line.676"></a>
+<FONT color="green">677</FONT>                par1 = 1.0F;<a name="line.677"></a>
+<FONT color="green">678</FONT>            }<a name="line.678"></a>
+<FONT color="green">679</FONT>    <a name="line.679"></a>
+<FONT color="green">680</FONT>            this.prevVignetteBrightness = (float)((double)this.prevVignetteBrightness + (double)(par1 - this.prevVignetteBrightness) * 0.01D);<a name="line.680"></a>
+<FONT color="green">681</FONT>            GL11.glDisable(GL11.GL_DEPTH_TEST);<a name="line.681"></a>
+<FONT color="green">682</FONT>            GL11.glDepthMask(false);<a name="line.682"></a>
+<FONT color="green">683</FONT>            GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_COLOR);<a name="line.683"></a>
+<FONT color="green">684</FONT>            GL11.glColor4f(this.prevVignetteBrightness, this.prevVignetteBrightness, this.prevVignetteBrightness, 1.0F);<a name="line.684"></a>
+<FONT color="green">685</FONT>            GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("%blur%/misc/vignette.png"));<a name="line.685"></a>
+<FONT color="green">686</FONT>            Tessellator var4 = Tessellator.instance;<a name="line.686"></a>
+<FONT color="green">687</FONT>            var4.startDrawingQuads();<a name="line.687"></a>
+<FONT color="green">688</FONT>            var4.addVertexWithUV(0.0D, (double)par3, -90.0D, 0.0D, 1.0D);<a name="line.688"></a>
+<FONT color="green">689</FONT>            var4.addVertexWithUV((double)par2, (double)par3, -90.0D, 1.0D, 1.0D);<a name="line.689"></a>
+<FONT color="green">690</FONT>            var4.addVertexWithUV((double)par2, 0.0D, -90.0D, 1.0D, 0.0D);<a name="line.690"></a>
+<FONT color="green">691</FONT>            var4.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);<a name="line.691"></a>
+<FONT color="green">692</FONT>            var4.draw();<a name="line.692"></a>
+<FONT color="green">693</FONT>            GL11.glDepthMask(true);<a name="line.693"></a>
+<FONT color="green">694</FONT>            GL11.glEnable(GL11.GL_DEPTH_TEST);<a name="line.694"></a>
+<FONT color="green">695</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.695"></a>
+<FONT color="green">696</FONT>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.696"></a>
+<FONT color="green">697</FONT>        }<a name="line.697"></a>
+<FONT color="green">698</FONT>    <a name="line.698"></a>
+<FONT color="green">699</FONT>        /**<a name="line.699"></a>
+<FONT color="green">700</FONT>         * Renders the portal overlay. Args: portalStrength, width, height<a name="line.700"></a>
+<FONT color="green">701</FONT>         */<a name="line.701"></a>
+<FONT color="green">702</FONT>        private void renderPortalOverlay(float par1, int par2, int par3)<a name="line.702"></a>
+<FONT color="green">703</FONT>        {<a name="line.703"></a>
+<FONT color="green">704</FONT>            if (par1 &lt; 1.0F)<a name="line.704"></a>
+<FONT color="green">705</FONT>            {<a name="line.705"></a>
+<FONT color="green">706</FONT>                par1 *= par1;<a name="line.706"></a>
+<FONT color="green">707</FONT>                par1 *= par1;<a name="line.707"></a>
+<FONT color="green">708</FONT>                par1 = par1 * 0.8F + 0.2F;<a name="line.708"></a>
+<FONT color="green">709</FONT>            }<a name="line.709"></a>
+<FONT color="green">710</FONT>    <a name="line.710"></a>
+<FONT color="green">711</FONT>            GL11.glDisable(GL11.GL_ALPHA_TEST);<a name="line.711"></a>
+<FONT color="green">712</FONT>            GL11.glDisable(GL11.GL_DEPTH_TEST);<a name="line.712"></a>
+<FONT color="green">713</FONT>            GL11.glDepthMask(false);<a name="line.713"></a>
+<FONT color="green">714</FONT>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.714"></a>
+<FONT color="green">715</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, par1);<a name="line.715"></a>
+<FONT color="green">716</FONT>            GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/terrain.png"));<a name="line.716"></a>
+<FONT color="green">717</FONT>            float var4 = (float)(Block.portal.blockIndexInTexture % 16) / 16.0F;<a name="line.717"></a>
+<FONT color="green">718</FONT>            float var5 = (float)(Block.portal.blockIndexInTexture / 16) / 16.0F;<a name="line.718"></a>
+<FONT color="green">719</FONT>            float var6 = (float)(Block.portal.blockIndexInTexture % 16 + 1) / 16.0F;<a name="line.719"></a>
+<FONT color="green">720</FONT>            float var7 = (float)(Block.portal.blockIndexInTexture / 16 + 1) / 16.0F;<a name="line.720"></a>
+<FONT color="green">721</FONT>            Tessellator var8 = Tessellator.instance;<a name="line.721"></a>
+<FONT color="green">722</FONT>            var8.startDrawingQuads();<a name="line.722"></a>
+<FONT color="green">723</FONT>            var8.addVertexWithUV(0.0D, (double)par3, -90.0D, (double)var4, (double)var7);<a name="line.723"></a>
+<FONT color="green">724</FONT>            var8.addVertexWithUV((double)par2, (double)par3, -90.0D, (double)var6, (double)var7);<a name="line.724"></a>
+<FONT color="green">725</FONT>            var8.addVertexWithUV((double)par2, 0.0D, -90.0D, (double)var6, (double)var5);<a name="line.725"></a>
+<FONT color="green">726</FONT>            var8.addVertexWithUV(0.0D, 0.0D, -90.0D, (double)var4, (double)var5);<a name="line.726"></a>
+<FONT color="green">727</FONT>            var8.draw();<a name="line.727"></a>
+<FONT color="green">728</FONT>            GL11.glDepthMask(true);<a name="line.728"></a>
+<FONT color="green">729</FONT>            GL11.glEnable(GL11.GL_DEPTH_TEST);<a name="line.729"></a>
+<FONT color="green">730</FONT>            GL11.glEnable(GL11.GL_ALPHA_TEST);<a name="line.730"></a>
+<FONT color="green">731</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.731"></a>
+<FONT color="green">732</FONT>        }<a name="line.732"></a>
+<FONT color="green">733</FONT>    <a name="line.733"></a>
+<FONT color="green">734</FONT>        /**<a name="line.734"></a>
+<FONT color="green">735</FONT>         * Renders the specified item of the inventory slot at the specified location. Args: slot, x, y, partialTick<a name="line.735"></a>
+<FONT color="green">736</FONT>         */<a name="line.736"></a>
+<FONT color="green">737</FONT>        private void renderInventorySlot(int par1, int par2, int par3, float par4)<a name="line.737"></a>
+<FONT color="green">738</FONT>        {<a name="line.738"></a>
+<FONT color="green">739</FONT>            ItemStack var5 = this.mc.thePlayer.inventory.mainInventory[par1];<a name="line.739"></a>
+<FONT color="green">740</FONT>    <a name="line.740"></a>
+<FONT color="green">741</FONT>            if (var5 != null)<a name="line.741"></a>
+<FONT color="green">742</FONT>            {<a name="line.742"></a>
+<FONT color="green">743</FONT>                float var6 = (float)var5.animationsToGo - par4;<a name="line.743"></a>
+<FONT color="green">744</FONT>    <a name="line.744"></a>
+<FONT color="green">745</FONT>                if (var6 &gt; 0.0F)<a name="line.745"></a>
+<FONT color="green">746</FONT>                {<a name="line.746"></a>
+<FONT color="green">747</FONT>                    GL11.glPushMatrix();<a name="line.747"></a>
+<FONT color="green">748</FONT>                    float var7 = 1.0F + var6 / 5.0F;<a name="line.748"></a>
+<FONT color="green">749</FONT>                    GL11.glTranslatef((float)(par2 + 8), (float)(par3 + 12), 0.0F);<a name="line.749"></a>
+<FONT color="green">750</FONT>                    GL11.glScalef(1.0F / var7, (var7 + 1.0F) / 2.0F, 1.0F);<a name="line.750"></a>
+<FONT color="green">751</FONT>                    GL11.glTranslatef((float)(-(par2 + 8)), (float)(-(par3 + 12)), 0.0F);<a name="line.751"></a>
+<FONT color="green">752</FONT>                }<a name="line.752"></a>
+<FONT color="green">753</FONT>    <a name="line.753"></a>
+<FONT color="green">754</FONT>                itemRenderer.renderItemAndEffectIntoGUI(this.mc.fontRenderer, this.mc.renderEngine, var5, par2, par3);<a name="line.754"></a>
+<FONT color="green">755</FONT>    <a name="line.755"></a>
+<FONT color="green">756</FONT>                if (var6 &gt; 0.0F)<a name="line.756"></a>
+<FONT color="green">757</FONT>                {<a name="line.757"></a>
+<FONT color="green">758</FONT>                    GL11.glPopMatrix();<a name="line.758"></a>
+<FONT color="green">759</FONT>                }<a name="line.759"></a>
+<FONT color="green">760</FONT>    <a name="line.760"></a>
+<FONT color="green">761</FONT>                itemRenderer.renderItemOverlayIntoGUI(this.mc.fontRenderer, this.mc.renderEngine, var5, par2, par3);<a name="line.761"></a>
+<FONT color="green">762</FONT>            }<a name="line.762"></a>
+<FONT color="green">763</FONT>        }<a name="line.763"></a>
+<FONT color="green">764</FONT>    <a name="line.764"></a>
+<FONT color="green">765</FONT>        /**<a name="line.765"></a>
+<FONT color="green">766</FONT>         * The update tick for the ingame UI<a name="line.766"></a>
+<FONT color="green">767</FONT>         */<a name="line.767"></a>
+<FONT color="green">768</FONT>        public void updateTick()<a name="line.768"></a>
+<FONT color="green">769</FONT>        {<a name="line.769"></a>
+<FONT color="green">770</FONT>            if (this.recordPlayingUpFor &gt; 0)<a name="line.770"></a>
+<FONT color="green">771</FONT>            {<a name="line.771"></a>
+<FONT color="green">772</FONT>                --this.recordPlayingUpFor;<a name="line.772"></a>
+<FONT color="green">773</FONT>            }<a name="line.773"></a>
+<FONT color="green">774</FONT>    <a name="line.774"></a>
+<FONT color="green">775</FONT>            ++this.updateCounter;<a name="line.775"></a>
+<FONT color="green">776</FONT>    <a name="line.776"></a>
+<FONT color="green">777</FONT>            if (this.mc.thePlayer != null)<a name="line.777"></a>
+<FONT color="green">778</FONT>            {<a name="line.778"></a>
+<FONT color="green">779</FONT>                ItemStack var1 = this.mc.thePlayer.inventory.getCurrentItem();<a name="line.779"></a>
+<FONT color="green">780</FONT>    <a name="line.780"></a>
+<FONT color="green">781</FONT>                if (var1 == null)<a name="line.781"></a>
+<FONT color="green">782</FONT>                {<a name="line.782"></a>
+<FONT color="green">783</FONT>                    this.field_92017_k = 0;<a name="line.783"></a>
+<FONT color="green">784</FONT>                }<a name="line.784"></a>
+<FONT color="green">785</FONT>                else if (this.field_92016_l != null &amp;&amp; var1.itemID == this.field_92016_l.itemID &amp;&amp; ItemStack.areItemStackTagsEqual(var1, this.field_92016_l) &amp;&amp; (var1.isItemStackDamageable() || var1.getItemDamage() == this.field_92016_l.getItemDamage()))<a name="line.785"></a>
+<FONT color="green">786</FONT>                {<a name="line.786"></a>
+<FONT color="green">787</FONT>                    if (this.field_92017_k &gt; 0)<a name="line.787"></a>
+<FONT color="green">788</FONT>                    {<a name="line.788"></a>
+<FONT color="green">789</FONT>                        --this.field_92017_k;<a name="line.789"></a>
+<FONT color="green">790</FONT>                    }<a name="line.790"></a>
+<FONT color="green">791</FONT>                }<a name="line.791"></a>
+<FONT color="green">792</FONT>                else<a name="line.792"></a>
+<FONT color="green">793</FONT>                {<a name="line.793"></a>
+<FONT color="green">794</FONT>                    this.field_92017_k = 40;<a name="line.794"></a>
+<FONT color="green">795</FONT>                }<a name="line.795"></a>
+<FONT color="green">796</FONT>    <a name="line.796"></a>
+<FONT color="green">797</FONT>                this.field_92016_l = var1;<a name="line.797"></a>
+<FONT color="green">798</FONT>            }<a name="line.798"></a>
+<FONT color="green">799</FONT>        }<a name="line.799"></a>
+<FONT color="green">800</FONT>    <a name="line.800"></a>
+<FONT color="green">801</FONT>        public void setRecordPlayingMessage(String par1Str)<a name="line.801"></a>
+<FONT color="green">802</FONT>        {<a name="line.802"></a>
+<FONT color="green">803</FONT>            this.recordPlaying = "Now playing: " + par1Str;<a name="line.803"></a>
+<FONT color="green">804</FONT>            this.recordPlayingUpFor = 60;<a name="line.804"></a>
+<FONT color="green">805</FONT>            this.recordIsPlaying = true;<a name="line.805"></a>
+<FONT color="green">806</FONT>        }<a name="line.806"></a>
+<FONT color="green">807</FONT>    <a name="line.807"></a>
+<FONT color="green">808</FONT>        /**<a name="line.808"></a>
+<FONT color="green">809</FONT>         * returns a pointer to the persistant Chat GUI, containing all previous chat messages and such<a name="line.809"></a>
+<FONT color="green">810</FONT>         */<a name="line.810"></a>
+<FONT color="green">811</FONT>        public GuiNewChat getChatGUI()<a name="line.811"></a>
+<FONT color="green">812</FONT>        {<a name="line.812"></a>
+<FONT color="green">813</FONT>            return this.persistantChatGUI;<a name="line.813"></a>
+<FONT color="green">814</FONT>        }<a name="line.814"></a>
+<FONT color="green">815</FONT>    <a name="line.815"></a>
+<FONT color="green">816</FONT>        public int getUpdateCounter()<a name="line.816"></a>
+<FONT color="green">817</FONT>        {<a name="line.817"></a>
+<FONT color="green">818</FONT>            return this.updateCounter;<a name="line.818"></a>
+<FONT color="green">819</FONT>        }<a name="line.819"></a>
+<FONT color="green">820</FONT>    }<a name="line.820"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

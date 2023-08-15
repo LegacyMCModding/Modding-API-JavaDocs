@@ -1,0 +1,130 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.List;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.util.Random;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.block.Block;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.world.World;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    public class ComponentStrongholdPrison extends ComponentStronghold<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        protected final EnumDoor doorType;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        public ComponentStrongholdPrison(int par1, Random par2Random, StructureBoundingBox par3StructureBoundingBox, int par4)<a name="line.12"></a>
+<FONT color="green">013</FONT>        {<a name="line.13"></a>
+<FONT color="green">014</FONT>            super(par1);<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.coordBaseMode = par4;<a name="line.15"></a>
+<FONT color="green">016</FONT>            this.doorType = this.getRandomDoor(par2Random);<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.boundingBox = par3StructureBoundingBox;<a name="line.17"></a>
+<FONT color="green">018</FONT>        }<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        /**<a name="line.20"></a>
+<FONT color="green">021</FONT>         * Initiates construction of the Structure Component picked, at the current Location of StructGen<a name="line.21"></a>
+<FONT color="green">022</FONT>         */<a name="line.22"></a>
+<FONT color="green">023</FONT>        public void buildComponent(StructureComponent par1StructureComponent, List par2List, Random par3Random)<a name="line.23"></a>
+<FONT color="green">024</FONT>        {<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.getNextComponentNormal((ComponentStrongholdStairs2)par1StructureComponent, par2List, par3Random, 1, 1);<a name="line.25"></a>
+<FONT color="green">026</FONT>        }<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        public static ComponentStrongholdPrison findValidPlacement(List par0List, Random par1Random, int par2, int par3, int par4, int par5, int par6)<a name="line.28"></a>
+<FONT color="green">029</FONT>        {<a name="line.29"></a>
+<FONT color="green">030</FONT>            StructureBoundingBox var7 = StructureBoundingBox.getComponentToAddBoundingBox(par2, par3, par4, -1, -1, 0, 9, 5, 11, par5);<a name="line.30"></a>
+<FONT color="green">031</FONT>            return canStrongholdGoDeeper(var7) &amp;&amp; StructureComponent.findIntersecting(par0List, var7) == null ? new ComponentStrongholdPrison(par6, par1Random, var7, par5) : null;<a name="line.31"></a>
+<FONT color="green">032</FONT>        }<a name="line.32"></a>
+<FONT color="green">033</FONT>    <a name="line.33"></a>
+<FONT color="green">034</FONT>        /**<a name="line.34"></a>
+<FONT color="green">035</FONT>         * second Part of Structure generating, this for example places Spiderwebs, Mob Spawners, it closes Mineshafts at<a name="line.35"></a>
+<FONT color="green">036</FONT>         * the end, it adds Fences...<a name="line.36"></a>
+<FONT color="green">037</FONT>         */<a name="line.37"></a>
+<FONT color="green">038</FONT>        public boolean addComponentParts(World par1World, Random par2Random, StructureBoundingBox par3StructureBoundingBox)<a name="line.38"></a>
+<FONT color="green">039</FONT>        {<a name="line.39"></a>
+<FONT color="green">040</FONT>            if (this.isLiquidInStructureBoundingBox(par1World, par3StructureBoundingBox))<a name="line.40"></a>
+<FONT color="green">041</FONT>            {<a name="line.41"></a>
+<FONT color="green">042</FONT>                return false;<a name="line.42"></a>
+<FONT color="green">043</FONT>            }<a name="line.43"></a>
+<FONT color="green">044</FONT>            else<a name="line.44"></a>
+<FONT color="green">045</FONT>            {<a name="line.45"></a>
+<FONT color="green">046</FONT>                this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 0, 0, 0, 8, 4, 10, true, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.46"></a>
+<FONT color="green">047</FONT>                this.placeDoor(par1World, par2Random, par3StructureBoundingBox, this.doorType, 1, 1, 0);<a name="line.47"></a>
+<FONT color="green">048</FONT>                this.fillWithBlocks(par1World, par3StructureBoundingBox, 1, 1, 10, 3, 3, 10, 0, 0, false);<a name="line.48"></a>
+<FONT color="green">049</FONT>                this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 1, 1, 4, 3, 1, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.49"></a>
+<FONT color="green">050</FONT>                this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 1, 3, 4, 3, 3, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.50"></a>
+<FONT color="green">051</FONT>                this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 1, 7, 4, 3, 7, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.51"></a>
+<FONT color="green">052</FONT>                this.fillWithRandomizedBlocks(par1World, par3StructureBoundingBox, 4, 1, 9, 4, 3, 9, false, par2Random, StructureStrongholdPieces.getStrongholdStones());<a name="line.52"></a>
+<FONT color="green">053</FONT>                this.fillWithBlocks(par1World, par3StructureBoundingBox, 4, 1, 4, 4, 3, 6, Block.fenceIron.blockID, Block.fenceIron.blockID, false);<a name="line.53"></a>
+<FONT color="green">054</FONT>                this.fillWithBlocks(par1World, par3StructureBoundingBox, 5, 1, 5, 7, 3, 5, Block.fenceIron.blockID, Block.fenceIron.blockID, false);<a name="line.54"></a>
+<FONT color="green">055</FONT>                this.placeBlockAtCurrentPosition(par1World, Block.fenceIron.blockID, 0, 4, 3, 2, par3StructureBoundingBox);<a name="line.55"></a>
+<FONT color="green">056</FONT>                this.placeBlockAtCurrentPosition(par1World, Block.fenceIron.blockID, 0, 4, 3, 8, par3StructureBoundingBox);<a name="line.56"></a>
+<FONT color="green">057</FONT>                this.placeBlockAtCurrentPosition(par1World, Block.doorSteel.blockID, this.getMetadataWithOffset(Block.doorSteel.blockID, 3), 4, 1, 2, par3StructureBoundingBox);<a name="line.57"></a>
+<FONT color="green">058</FONT>                this.placeBlockAtCurrentPosition(par1World, Block.doorSteel.blockID, this.getMetadataWithOffset(Block.doorSteel.blockID, 3) + 8, 4, 2, 2, par3StructureBoundingBox);<a name="line.58"></a>
+<FONT color="green">059</FONT>                this.placeBlockAtCurrentPosition(par1World, Block.doorSteel.blockID, this.getMetadataWithOffset(Block.doorSteel.blockID, 3), 4, 1, 8, par3StructureBoundingBox);<a name="line.59"></a>
+<FONT color="green">060</FONT>                this.placeBlockAtCurrentPosition(par1World, Block.doorSteel.blockID, this.getMetadataWithOffset(Block.doorSteel.blockID, 3) + 8, 4, 2, 8, par3StructureBoundingBox);<a name="line.60"></a>
+<FONT color="green">061</FONT>                return true;<a name="line.61"></a>
+<FONT color="green">062</FONT>            }<a name="line.62"></a>
+<FONT color="green">063</FONT>        }<a name="line.63"></a>
+<FONT color="green">064</FONT>    }<a name="line.64"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,112 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.biome;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraft.block.Block;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.entity.boss.EntityDragon;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.world.gen.feature.WorldGenSpikes;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.world.gen.feature.WorldGenerator;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    public class BiomeEndDecorator extends BiomeDecorator<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        protected WorldGenerator spikeGen;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        public BiomeEndDecorator(BiomeGenBase par1BiomeGenBase)<a name="line.12"></a>
+<FONT color="green">013</FONT>        {<a name="line.13"></a>
+<FONT color="green">014</FONT>            super(par1BiomeGenBase);<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.spikeGen = new WorldGenSpikes(Block.whiteStone.blockID);<a name="line.15"></a>
+<FONT color="green">016</FONT>        }<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        /**<a name="line.18"></a>
+<FONT color="green">019</FONT>         * The method that does the work of actually decorating chunks<a name="line.19"></a>
+<FONT color="green">020</FONT>         */<a name="line.20"></a>
+<FONT color="green">021</FONT>        protected void decorate()<a name="line.21"></a>
+<FONT color="green">022</FONT>        {<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.generateOres();<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>            if (this.randomGenerator.nextInt(5) == 0)<a name="line.25"></a>
+<FONT color="green">026</FONT>            {<a name="line.26"></a>
+<FONT color="green">027</FONT>                int var1 = this.chunk_X + this.randomGenerator.nextInt(16) + 8;<a name="line.27"></a>
+<FONT color="green">028</FONT>                int var2 = this.chunk_Z + this.randomGenerator.nextInt(16) + 8;<a name="line.28"></a>
+<FONT color="green">029</FONT>                int var3 = this.currentWorld.getTopSolidOrLiquidBlock(var1, var2);<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>                if (var3 &gt; 0)<a name="line.31"></a>
+<FONT color="green">032</FONT>                {<a name="line.32"></a>
+<FONT color="green">033</FONT>                    ;<a name="line.33"></a>
+<FONT color="green">034</FONT>                }<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>                this.spikeGen.generate(this.currentWorld, this.randomGenerator, var1, var3, var2);<a name="line.36"></a>
+<FONT color="green">037</FONT>            }<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>            if (this.chunk_X == 0 &amp;&amp; this.chunk_Z == 0)<a name="line.39"></a>
+<FONT color="green">040</FONT>            {<a name="line.40"></a>
+<FONT color="green">041</FONT>                EntityDragon var4 = new EntityDragon(this.currentWorld);<a name="line.41"></a>
+<FONT color="green">042</FONT>                var4.setLocationAndAngles(0.0D, 128.0D, 0.0D, this.randomGenerator.nextFloat() * 360.0F, 0.0F);<a name="line.42"></a>
+<FONT color="green">043</FONT>                this.currentWorld.spawnEntityInWorld(var4);<a name="line.43"></a>
+<FONT color="green">044</FONT>            }<a name="line.44"></a>
+<FONT color="green">045</FONT>        }<a name="line.45"></a>
+<FONT color="green">046</FONT>    }<a name="line.46"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

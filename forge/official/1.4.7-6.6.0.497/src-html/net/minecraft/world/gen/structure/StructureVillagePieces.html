@@ -1,0 +1,322 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.ArrayList;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.util.Iterator;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.List;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.Random;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    import cpw.mods.fml.common.registry.VillagerRegistry;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.util.MathHelper;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>    public class StructureVillagePieces<a name="line.11"></a>
+<FONT color="green">012</FONT>    {<a name="line.12"></a>
+<FONT color="green">013</FONT>        public static ArrayList getStructureVillageWeightedPieceList(Random par0Random, int par1)<a name="line.13"></a>
+<FONT color="green">014</FONT>        {<a name="line.14"></a>
+<FONT color="green">015</FONT>            ArrayList var2 = new ArrayList();<a name="line.15"></a>
+<FONT color="green">016</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageHouse4_Garden.class, 4, MathHelper.getRandomIntegerInRange(par0Random, 2 + par1, 4 + par1 * 2)));<a name="line.16"></a>
+<FONT color="green">017</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageChurch.class, 20, MathHelper.getRandomIntegerInRange(par0Random, 0 + par1, 1 + par1)));<a name="line.17"></a>
+<FONT color="green">018</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageHouse1.class, 20, MathHelper.getRandomIntegerInRange(par0Random, 0 + par1, 2 + par1)));<a name="line.18"></a>
+<FONT color="green">019</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageWoodHut.class, 3, MathHelper.getRandomIntegerInRange(par0Random, 2 + par1, 5 + par1 * 3)));<a name="line.19"></a>
+<FONT color="green">020</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageHall.class, 15, MathHelper.getRandomIntegerInRange(par0Random, 0 + par1, 2 + par1)));<a name="line.20"></a>
+<FONT color="green">021</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageField.class, 3, MathHelper.getRandomIntegerInRange(par0Random, 1 + par1, 4 + par1)));<a name="line.21"></a>
+<FONT color="green">022</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageField2.class, 3, MathHelper.getRandomIntegerInRange(par0Random, 2 + par1, 4 + par1 * 2)));<a name="line.22"></a>
+<FONT color="green">023</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageHouse2.class, 15, MathHelper.getRandomIntegerInRange(par0Random, 0, 1 + par1)));<a name="line.23"></a>
+<FONT color="green">024</FONT>            var2.add(new StructureVillagePieceWeight(ComponentVillageHouse3.class, 8, MathHelper.getRandomIntegerInRange(par0Random, 0 + par1, 3 + par1 * 2)));<a name="line.24"></a>
+<FONT color="green">025</FONT>            VillagerRegistry.addExtraVillageComponents(var2, par0Random, par1);<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>            Iterator var3 = var2.iterator();<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>            while (var3.hasNext())<a name="line.29"></a>
+<FONT color="green">030</FONT>            {<a name="line.30"></a>
+<FONT color="green">031</FONT>                if (((StructureVillagePieceWeight)var3.next()).villagePiecesLimit == 0)<a name="line.31"></a>
+<FONT color="green">032</FONT>                {<a name="line.32"></a>
+<FONT color="green">033</FONT>                    var3.remove();<a name="line.33"></a>
+<FONT color="green">034</FONT>                }<a name="line.34"></a>
+<FONT color="green">035</FONT>            }<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>            return var2;<a name="line.37"></a>
+<FONT color="green">038</FONT>        }<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        private static int func_75079_a(List par0List)<a name="line.40"></a>
+<FONT color="green">041</FONT>        {<a name="line.41"></a>
+<FONT color="green">042</FONT>            boolean var1 = false;<a name="line.42"></a>
+<FONT color="green">043</FONT>            int var2 = 0;<a name="line.43"></a>
+<FONT color="green">044</FONT>            StructureVillagePieceWeight var4;<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>            for (Iterator var3 = par0List.iterator(); var3.hasNext(); var2 += var4.villagePieceWeight)<a name="line.46"></a>
+<FONT color="green">047</FONT>            {<a name="line.47"></a>
+<FONT color="green">048</FONT>                var4 = (StructureVillagePieceWeight)var3.next();<a name="line.48"></a>
+<FONT color="green">049</FONT>    <a name="line.49"></a>
+<FONT color="green">050</FONT>                if (var4.villagePiecesLimit &gt; 0 &amp;&amp; var4.villagePiecesSpawned &lt; var4.villagePiecesLimit)<a name="line.50"></a>
+<FONT color="green">051</FONT>                {<a name="line.51"></a>
+<FONT color="green">052</FONT>                    var1 = true;<a name="line.52"></a>
+<FONT color="green">053</FONT>                }<a name="line.53"></a>
+<FONT color="green">054</FONT>            }<a name="line.54"></a>
+<FONT color="green">055</FONT>    <a name="line.55"></a>
+<FONT color="green">056</FONT>            return var1 ? var2 : -1;<a name="line.56"></a>
+<FONT color="green">057</FONT>        }<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>        private static ComponentVillage func_75083_a(ComponentVillageStartPiece par0ComponentVillageStartPiece, StructureVillagePieceWeight par1StructureVillagePieceWeight, List par2List, Random par3Random, int par4, int par5, int par6, int par7, int par8)<a name="line.59"></a>
+<FONT color="green">060</FONT>        {<a name="line.60"></a>
+<FONT color="green">061</FONT>            Class var9 = par1StructureVillagePieceWeight.villagePieceClass;<a name="line.61"></a>
+<FONT color="green">062</FONT>            Object var10 = null;<a name="line.62"></a>
+<FONT color="green">063</FONT>    <a name="line.63"></a>
+<FONT color="green">064</FONT>            if (var9 == ComponentVillageHouse4_Garden.class)<a name="line.64"></a>
+<FONT color="green">065</FONT>            {<a name="line.65"></a>
+<FONT color="green">066</FONT>                var10 = ComponentVillageHouse4_Garden.func_74912_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.66"></a>
+<FONT color="green">067</FONT>            }<a name="line.67"></a>
+<FONT color="green">068</FONT>            else if (var9 == ComponentVillageChurch.class)<a name="line.68"></a>
+<FONT color="green">069</FONT>            {<a name="line.69"></a>
+<FONT color="green">070</FONT>                var10 = ComponentVillageChurch.func_74919_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.70"></a>
+<FONT color="green">071</FONT>            }<a name="line.71"></a>
+<FONT color="green">072</FONT>            else if (var9 == ComponentVillageHouse1.class)<a name="line.72"></a>
+<FONT color="green">073</FONT>            {<a name="line.73"></a>
+<FONT color="green">074</FONT>                var10 = ComponentVillageHouse1.func_74898_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.74"></a>
+<FONT color="green">075</FONT>            }<a name="line.75"></a>
+<FONT color="green">076</FONT>            else if (var9 == ComponentVillageWoodHut.class)<a name="line.76"></a>
+<FONT color="green">077</FONT>            {<a name="line.77"></a>
+<FONT color="green">078</FONT>                var10 = ComponentVillageWoodHut.func_74908_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.78"></a>
+<FONT color="green">079</FONT>            }<a name="line.79"></a>
+<FONT color="green">080</FONT>            else if (var9 == ComponentVillageHall.class)<a name="line.80"></a>
+<FONT color="green">081</FONT>            {<a name="line.81"></a>
+<FONT color="green">082</FONT>                var10 = ComponentVillageHall.func_74906_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.82"></a>
+<FONT color="green">083</FONT>            }<a name="line.83"></a>
+<FONT color="green">084</FONT>            else if (var9 == ComponentVillageField.class)<a name="line.84"></a>
+<FONT color="green">085</FONT>            {<a name="line.85"></a>
+<FONT color="green">086</FONT>                var10 = ComponentVillageField.func_74900_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.86"></a>
+<FONT color="green">087</FONT>            }<a name="line.87"></a>
+<FONT color="green">088</FONT>            else if (var9 == ComponentVillageField2.class)<a name="line.88"></a>
+<FONT color="green">089</FONT>            {<a name="line.89"></a>
+<FONT color="green">090</FONT>                var10 = ComponentVillageField2.func_74902_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.90"></a>
+<FONT color="green">091</FONT>            }<a name="line.91"></a>
+<FONT color="green">092</FONT>            else if (var9 == ComponentVillageHouse2.class)<a name="line.92"></a>
+<FONT color="green">093</FONT>            {<a name="line.93"></a>
+<FONT color="green">094</FONT>                var10 = ComponentVillageHouse2.func_74915_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.94"></a>
+<FONT color="green">095</FONT>            }<a name="line.95"></a>
+<FONT color="green">096</FONT>            else if (var9 == ComponentVillageHouse3.class)<a name="line.96"></a>
+<FONT color="green">097</FONT>            {<a name="line.97"></a>
+<FONT color="green">098</FONT>                var10 = ComponentVillageHouse3.func_74921_a(par0ComponentVillageStartPiece, par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.98"></a>
+<FONT color="green">099</FONT>            }<a name="line.99"></a>
+<FONT color="green">100</FONT>            else<a name="line.100"></a>
+<FONT color="green">101</FONT>            {<a name="line.101"></a>
+<FONT color="green">102</FONT>                var10 = VillagerRegistry.getVillageComponent(par1StructureVillagePieceWeight, par0ComponentVillageStartPiece , par2List, par3Random, par4, par5, par6, par7, par8);<a name="line.102"></a>
+<FONT color="green">103</FONT>            }<a name="line.103"></a>
+<FONT color="green">104</FONT>    <a name="line.104"></a>
+<FONT color="green">105</FONT>            return (ComponentVillage)var10;<a name="line.105"></a>
+<FONT color="green">106</FONT>        }<a name="line.106"></a>
+<FONT color="green">107</FONT>    <a name="line.107"></a>
+<FONT color="green">108</FONT>        /**<a name="line.108"></a>
+<FONT color="green">109</FONT>         * attempts to find a next Village Component to be spawned<a name="line.109"></a>
+<FONT color="green">110</FONT>         */<a name="line.110"></a>
+<FONT color="green">111</FONT>        private static ComponentVillage getNextVillageComponent(ComponentVillageStartPiece par0ComponentVillageStartPiece, List par1List, Random par2Random, int par3, int par4, int par5, int par6, int par7)<a name="line.111"></a>
+<FONT color="green">112</FONT>        {<a name="line.112"></a>
+<FONT color="green">113</FONT>            int var8 = func_75079_a(par0ComponentVillageStartPiece.structureVillageWeightedPieceList);<a name="line.113"></a>
+<FONT color="green">114</FONT>    <a name="line.114"></a>
+<FONT color="green">115</FONT>            if (var8 &lt;= 0)<a name="line.115"></a>
+<FONT color="green">116</FONT>            {<a name="line.116"></a>
+<FONT color="green">117</FONT>                return null;<a name="line.117"></a>
+<FONT color="green">118</FONT>            }<a name="line.118"></a>
+<FONT color="green">119</FONT>            else<a name="line.119"></a>
+<FONT color="green">120</FONT>            {<a name="line.120"></a>
+<FONT color="green">121</FONT>                int var9 = 0;<a name="line.121"></a>
+<FONT color="green">122</FONT>    <a name="line.122"></a>
+<FONT color="green">123</FONT>                while (var9 &lt; 5)<a name="line.123"></a>
+<FONT color="green">124</FONT>                {<a name="line.124"></a>
+<FONT color="green">125</FONT>                    ++var9;<a name="line.125"></a>
+<FONT color="green">126</FONT>                    int var10 = par2Random.nextInt(var8);<a name="line.126"></a>
+<FONT color="green">127</FONT>                    Iterator var11 = par0ComponentVillageStartPiece.structureVillageWeightedPieceList.iterator();<a name="line.127"></a>
+<FONT color="green">128</FONT>    <a name="line.128"></a>
+<FONT color="green">129</FONT>                    while (var11.hasNext())<a name="line.129"></a>
+<FONT color="green">130</FONT>                    {<a name="line.130"></a>
+<FONT color="green">131</FONT>                        StructureVillagePieceWeight var12 = (StructureVillagePieceWeight)var11.next();<a name="line.131"></a>
+<FONT color="green">132</FONT>                        var10 -= var12.villagePieceWeight;<a name="line.132"></a>
+<FONT color="green">133</FONT>    <a name="line.133"></a>
+<FONT color="green">134</FONT>                        if (var10 &lt; 0)<a name="line.134"></a>
+<FONT color="green">135</FONT>                        {<a name="line.135"></a>
+<FONT color="green">136</FONT>                            if (!var12.canSpawnMoreVillagePiecesOfType(par7) || var12 == par0ComponentVillageStartPiece.structVillagePieceWeight &amp;&amp; par0ComponentVillageStartPiece.structureVillageWeightedPieceList.size() &gt; 1)<a name="line.136"></a>
+<FONT color="green">137</FONT>                            {<a name="line.137"></a>
+<FONT color="green">138</FONT>                                break;<a name="line.138"></a>
+<FONT color="green">139</FONT>                            }<a name="line.139"></a>
+<FONT color="green">140</FONT>    <a name="line.140"></a>
+<FONT color="green">141</FONT>                            ComponentVillage var13 = func_75083_a(par0ComponentVillageStartPiece, var12, par1List, par2Random, par3, par4, par5, par6, par7);<a name="line.141"></a>
+<FONT color="green">142</FONT>    <a name="line.142"></a>
+<FONT color="green">143</FONT>                            if (var13 != null)<a name="line.143"></a>
+<FONT color="green">144</FONT>                            {<a name="line.144"></a>
+<FONT color="green">145</FONT>                                ++var12.villagePiecesSpawned;<a name="line.145"></a>
+<FONT color="green">146</FONT>                                par0ComponentVillageStartPiece.structVillagePieceWeight = var12;<a name="line.146"></a>
+<FONT color="green">147</FONT>    <a name="line.147"></a>
+<FONT color="green">148</FONT>                                if (!var12.canSpawnMoreVillagePieces())<a name="line.148"></a>
+<FONT color="green">149</FONT>                                {<a name="line.149"></a>
+<FONT color="green">150</FONT>                                    par0ComponentVillageStartPiece.structureVillageWeightedPieceList.remove(var12);<a name="line.150"></a>
+<FONT color="green">151</FONT>                                }<a name="line.151"></a>
+<FONT color="green">152</FONT>    <a name="line.152"></a>
+<FONT color="green">153</FONT>                                return var13;<a name="line.153"></a>
+<FONT color="green">154</FONT>                            }<a name="line.154"></a>
+<FONT color="green">155</FONT>                        }<a name="line.155"></a>
+<FONT color="green">156</FONT>                    }<a name="line.156"></a>
+<FONT color="green">157</FONT>                }<a name="line.157"></a>
+<FONT color="green">158</FONT>    <a name="line.158"></a>
+<FONT color="green">159</FONT>                StructureBoundingBox var14 = ComponentVillageTorch.func_74904_a(par0ComponentVillageStartPiece, par1List, par2Random, par3, par4, par5, par6);<a name="line.159"></a>
+<FONT color="green">160</FONT>    <a name="line.160"></a>
+<FONT color="green">161</FONT>                if (var14 != null)<a name="line.161"></a>
+<FONT color="green">162</FONT>                {<a name="line.162"></a>
+<FONT color="green">163</FONT>                    return new ComponentVillageTorch(par0ComponentVillageStartPiece, par7, par2Random, var14, par6);<a name="line.163"></a>
+<FONT color="green">164</FONT>                }<a name="line.164"></a>
+<FONT color="green">165</FONT>                else<a name="line.165"></a>
+<FONT color="green">166</FONT>                {<a name="line.166"></a>
+<FONT color="green">167</FONT>                    return null;<a name="line.167"></a>
+<FONT color="green">168</FONT>                }<a name="line.168"></a>
+<FONT color="green">169</FONT>            }<a name="line.169"></a>
+<FONT color="green">170</FONT>        }<a name="line.170"></a>
+<FONT color="green">171</FONT>    <a name="line.171"></a>
+<FONT color="green">172</FONT>        /**<a name="line.172"></a>
+<FONT color="green">173</FONT>         * attempts to find a next Structure Component to be spawned, private Village function<a name="line.173"></a>
+<FONT color="green">174</FONT>         */<a name="line.174"></a>
+<FONT color="green">175</FONT>        private static StructureComponent getNextVillageStructureComponent(ComponentVillageStartPiece par0ComponentVillageStartPiece, List par1List, Random par2Random, int par3, int par4, int par5, int par6, int par7)<a name="line.175"></a>
+<FONT color="green">176</FONT>        {<a name="line.176"></a>
+<FONT color="green">177</FONT>            if (par7 &gt; 50)<a name="line.177"></a>
+<FONT color="green">178</FONT>            {<a name="line.178"></a>
+<FONT color="green">179</FONT>                return null;<a name="line.179"></a>
+<FONT color="green">180</FONT>            }<a name="line.180"></a>
+<FONT color="green">181</FONT>            else if (Math.abs(par3 - par0ComponentVillageStartPiece.getBoundingBox().minX) &lt;= 112 &amp;&amp; Math.abs(par5 - par0ComponentVillageStartPiece.getBoundingBox().minZ) &lt;= 112)<a name="line.181"></a>
+<FONT color="green">182</FONT>            {<a name="line.182"></a>
+<FONT color="green">183</FONT>                ComponentVillage var8 = getNextVillageComponent(par0ComponentVillageStartPiece, par1List, par2Random, par3, par4, par5, par6, par7 + 1);<a name="line.183"></a>
+<FONT color="green">184</FONT>    <a name="line.184"></a>
+<FONT color="green">185</FONT>                if (var8 != null)<a name="line.185"></a>
+<FONT color="green">186</FONT>                {<a name="line.186"></a>
+<FONT color="green">187</FONT>                    int var9 = (var8.boundingBox.minX + var8.boundingBox.maxX) / 2;<a name="line.187"></a>
+<FONT color="green">188</FONT>                    int var10 = (var8.boundingBox.minZ + var8.boundingBox.maxZ) / 2;<a name="line.188"></a>
+<FONT color="green">189</FONT>                    int var11 = var8.boundingBox.maxX - var8.boundingBox.minX;<a name="line.189"></a>
+<FONT color="green">190</FONT>                    int var12 = var8.boundingBox.maxZ - var8.boundingBox.minZ;<a name="line.190"></a>
+<FONT color="green">191</FONT>                    int var13 = var11 &gt; var12 ? var11 : var12;<a name="line.191"></a>
+<FONT color="green">192</FONT>    <a name="line.192"></a>
+<FONT color="green">193</FONT>                    if (par0ComponentVillageStartPiece.getWorldChunkManager().areBiomesViable(var9, var10, var13 / 2 + 4, MapGenVillage.villageSpawnBiomes))<a name="line.193"></a>
+<FONT color="green">194</FONT>                    {<a name="line.194"></a>
+<FONT color="green">195</FONT>                        par1List.add(var8);<a name="line.195"></a>
+<FONT color="green">196</FONT>                        par0ComponentVillageStartPiece.field_74932_i.add(var8);<a name="line.196"></a>
+<FONT color="green">197</FONT>                        return var8;<a name="line.197"></a>
+<FONT color="green">198</FONT>                    }<a name="line.198"></a>
+<FONT color="green">199</FONT>                }<a name="line.199"></a>
+<FONT color="green">200</FONT>    <a name="line.200"></a>
+<FONT color="green">201</FONT>                return null;<a name="line.201"></a>
+<FONT color="green">202</FONT>            }<a name="line.202"></a>
+<FONT color="green">203</FONT>            else<a name="line.203"></a>
+<FONT color="green">204</FONT>            {<a name="line.204"></a>
+<FONT color="green">205</FONT>                return null;<a name="line.205"></a>
+<FONT color="green">206</FONT>            }<a name="line.206"></a>
+<FONT color="green">207</FONT>        }<a name="line.207"></a>
+<FONT color="green">208</FONT>    <a name="line.208"></a>
+<FONT color="green">209</FONT>        private static StructureComponent getNextComponentVillagePath(ComponentVillageStartPiece par0ComponentVillageStartPiece, List par1List, Random par2Random, int par3, int par4, int par5, int par6, int par7)<a name="line.209"></a>
+<FONT color="green">210</FONT>        {<a name="line.210"></a>
+<FONT color="green">211</FONT>            if (par7 &gt; 3 + par0ComponentVillageStartPiece.terrainType)<a name="line.211"></a>
+<FONT color="green">212</FONT>            {<a name="line.212"></a>
+<FONT color="green">213</FONT>                return null;<a name="line.213"></a>
+<FONT color="green">214</FONT>            }<a name="line.214"></a>
+<FONT color="green">215</FONT>            else if (Math.abs(par3 - par0ComponentVillageStartPiece.getBoundingBox().minX) &lt;= 112 &amp;&amp; Math.abs(par5 - par0ComponentVillageStartPiece.getBoundingBox().minZ) &lt;= 112)<a name="line.215"></a>
+<FONT color="green">216</FONT>            {<a name="line.216"></a>
+<FONT color="green">217</FONT>                StructureBoundingBox var8 = ComponentVillagePathGen.func_74933_a(par0ComponentVillageStartPiece, par1List, par2Random, par3, par4, par5, par6);<a name="line.217"></a>
+<FONT color="green">218</FONT>    <a name="line.218"></a>
+<FONT color="green">219</FONT>                if (var8 != null &amp;&amp; var8.minY &gt; 10)<a name="line.219"></a>
+<FONT color="green">220</FONT>                {<a name="line.220"></a>
+<FONT color="green">221</FONT>                    ComponentVillagePathGen var9 = new ComponentVillagePathGen(par0ComponentVillageStartPiece, par7, par2Random, var8, par6);<a name="line.221"></a>
+<FONT color="green">222</FONT>                    int var10 = (var9.boundingBox.minX + var9.boundingBox.maxX) / 2;<a name="line.222"></a>
+<FONT color="green">223</FONT>                    int var11 = (var9.boundingBox.minZ + var9.boundingBox.maxZ) / 2;<a name="line.223"></a>
+<FONT color="green">224</FONT>                    int var12 = var9.boundingBox.maxX - var9.boundingBox.minX;<a name="line.224"></a>
+<FONT color="green">225</FONT>                    int var13 = var9.boundingBox.maxZ - var9.boundingBox.minZ;<a name="line.225"></a>
+<FONT color="green">226</FONT>                    int var14 = var12 &gt; var13 ? var12 : var13;<a name="line.226"></a>
+<FONT color="green">227</FONT>    <a name="line.227"></a>
+<FONT color="green">228</FONT>                    if (par0ComponentVillageStartPiece.getWorldChunkManager().areBiomesViable(var10, var11, var14 / 2 + 4, MapGenVillage.villageSpawnBiomes))<a name="line.228"></a>
+<FONT color="green">229</FONT>                    {<a name="line.229"></a>
+<FONT color="green">230</FONT>                        par1List.add(var9);<a name="line.230"></a>
+<FONT color="green">231</FONT>                        par0ComponentVillageStartPiece.field_74930_j.add(var9);<a name="line.231"></a>
+<FONT color="green">232</FONT>                        return var9;<a name="line.232"></a>
+<FONT color="green">233</FONT>                    }<a name="line.233"></a>
+<FONT color="green">234</FONT>                }<a name="line.234"></a>
+<FONT color="green">235</FONT>    <a name="line.235"></a>
+<FONT color="green">236</FONT>                return null;<a name="line.236"></a>
+<FONT color="green">237</FONT>            }<a name="line.237"></a>
+<FONT color="green">238</FONT>            else<a name="line.238"></a>
+<FONT color="green">239</FONT>            {<a name="line.239"></a>
+<FONT color="green">240</FONT>                return null;<a name="line.240"></a>
+<FONT color="green">241</FONT>            }<a name="line.241"></a>
+<FONT color="green">242</FONT>        }<a name="line.242"></a>
+<FONT color="green">243</FONT>    <a name="line.243"></a>
+<FONT color="green">244</FONT>        /**<a name="line.244"></a>
+<FONT color="green">245</FONT>         * attempts to find a next Structure Component to be spawned<a name="line.245"></a>
+<FONT color="green">246</FONT>         */<a name="line.246"></a>
+<FONT color="green">247</FONT>        static StructureComponent getNextStructureComponent(ComponentVillageStartPiece par0ComponentVillageStartPiece, List par1List, Random par2Random, int par3, int par4, int par5, int par6, int par7)<a name="line.247"></a>
+<FONT color="green">248</FONT>        {<a name="line.248"></a>
+<FONT color="green">249</FONT>            return getNextVillageStructureComponent(par0ComponentVillageStartPiece, par1List, par2Random, par3, par4, par5, par6, par7);<a name="line.249"></a>
+<FONT color="green">250</FONT>        }<a name="line.250"></a>
+<FONT color="green">251</FONT>    <a name="line.251"></a>
+<FONT color="green">252</FONT>        static StructureComponent getNextStructureComponentVillagePath(ComponentVillageStartPiece par0ComponentVillageStartPiece, List par1List, Random par2Random, int par3, int par4, int par5, int par6, int par7)<a name="line.252"></a>
+<FONT color="green">253</FONT>        {<a name="line.253"></a>
+<FONT color="green">254</FONT>            return getNextComponentVillagePath(par0ComponentVillageStartPiece, par1List, par2Random, par3, par4, par5, par6, par7);<a name="line.254"></a>
+<FONT color="green">255</FONT>        }<a name="line.255"></a>
+<FONT color="green">256</FONT>    }<a name="line.256"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

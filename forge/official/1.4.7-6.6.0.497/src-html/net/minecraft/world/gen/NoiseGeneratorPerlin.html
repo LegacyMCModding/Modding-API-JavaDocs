@@ -1,0 +1,278 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.gen;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Random;<a name="line.3"></a>
+<FONT color="green">004</FONT>    <a name="line.4"></a>
+<FONT color="green">005</FONT>    public class NoiseGeneratorPerlin extends NoiseGenerator<a name="line.5"></a>
+<FONT color="green">006</FONT>    {<a name="line.6"></a>
+<FONT color="green">007</FONT>        private int[] permutations;<a name="line.7"></a>
+<FONT color="green">008</FONT>        public double xCoord;<a name="line.8"></a>
+<FONT color="green">009</FONT>        public double yCoord;<a name="line.9"></a>
+<FONT color="green">010</FONT>        public double zCoord;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        public NoiseGeneratorPerlin()<a name="line.12"></a>
+<FONT color="green">013</FONT>        {<a name="line.13"></a>
+<FONT color="green">014</FONT>            this(new Random());<a name="line.14"></a>
+<FONT color="green">015</FONT>        }<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        public NoiseGeneratorPerlin(Random par1Random)<a name="line.17"></a>
+<FONT color="green">018</FONT>        {<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.permutations = new int[512];<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.xCoord = par1Random.nextDouble() * 256.0D;<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.yCoord = par1Random.nextDouble() * 256.0D;<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.zCoord = par1Random.nextDouble() * 256.0D;<a name="line.22"></a>
+<FONT color="green">023</FONT>            int var2;<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>            for (var2 = 0; var2 &lt; 256; this.permutations[var2] = var2++)<a name="line.25"></a>
+<FONT color="green">026</FONT>            {<a name="line.26"></a>
+<FONT color="green">027</FONT>                ;<a name="line.27"></a>
+<FONT color="green">028</FONT>            }<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>            for (var2 = 0; var2 &lt; 256; ++var2)<a name="line.30"></a>
+<FONT color="green">031</FONT>            {<a name="line.31"></a>
+<FONT color="green">032</FONT>                int var3 = par1Random.nextInt(256 - var2) + var2;<a name="line.32"></a>
+<FONT color="green">033</FONT>                int var4 = this.permutations[var2];<a name="line.33"></a>
+<FONT color="green">034</FONT>                this.permutations[var2] = this.permutations[var3];<a name="line.34"></a>
+<FONT color="green">035</FONT>                this.permutations[var3] = var4;<a name="line.35"></a>
+<FONT color="green">036</FONT>                this.permutations[var2 + 256] = this.permutations[var2];<a name="line.36"></a>
+<FONT color="green">037</FONT>            }<a name="line.37"></a>
+<FONT color="green">038</FONT>        }<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        public final double lerp(double par1, double par3, double par5)<a name="line.40"></a>
+<FONT color="green">041</FONT>        {<a name="line.41"></a>
+<FONT color="green">042</FONT>            return par3 + par1 * (par5 - par3);<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        public final double func_76309_a(int par1, double par2, double par4)<a name="line.45"></a>
+<FONT color="green">046</FONT>        {<a name="line.46"></a>
+<FONT color="green">047</FONT>            int var6 = par1 &amp; 15;<a name="line.47"></a>
+<FONT color="green">048</FONT>            double var7 = (double)(1 - ((var6 &amp; 8) &gt;&gt; 3)) * par2;<a name="line.48"></a>
+<FONT color="green">049</FONT>            double var9 = var6 &lt; 4 ? 0.0D : (var6 != 12 &amp;&amp; var6 != 14 ? par4 : par2);<a name="line.49"></a>
+<FONT color="green">050</FONT>            return ((var6 &amp; 1) == 0 ? var7 : -var7) + ((var6 &amp; 2) == 0 ? var9 : -var9);<a name="line.50"></a>
+<FONT color="green">051</FONT>        }<a name="line.51"></a>
+<FONT color="green">052</FONT>    <a name="line.52"></a>
+<FONT color="green">053</FONT>        public final double grad(int par1, double par2, double par4, double par6)<a name="line.53"></a>
+<FONT color="green">054</FONT>        {<a name="line.54"></a>
+<FONT color="green">055</FONT>            int var8 = par1 &amp; 15;<a name="line.55"></a>
+<FONT color="green">056</FONT>            double var9 = var8 &lt; 8 ? par2 : par4;<a name="line.56"></a>
+<FONT color="green">057</FONT>            double var11 = var8 &lt; 4 ? par4 : (var8 != 12 &amp;&amp; var8 != 14 ? par6 : par2);<a name="line.57"></a>
+<FONT color="green">058</FONT>            return ((var8 &amp; 1) == 0 ? var9 : -var9) + ((var8 &amp; 2) == 0 ? var11 : -var11);<a name="line.58"></a>
+<FONT color="green">059</FONT>        }<a name="line.59"></a>
+<FONT color="green">060</FONT>    <a name="line.60"></a>
+<FONT color="green">061</FONT>        /**<a name="line.61"></a>
+<FONT color="green">062</FONT>         * pars: noiseArray , xOffset , yOffset , zOffset , xSize , ySize , zSize , xScale, yScale , zScale , noiseScale.<a name="line.62"></a>
+<FONT color="green">063</FONT>         * noiseArray should be xSize*ySize*zSize in size<a name="line.63"></a>
+<FONT color="green">064</FONT>         */<a name="line.64"></a>
+<FONT color="green">065</FONT>        public void populateNoiseArray(double[] par1ArrayOfDouble, double par2, double par4, double par6, int par8, int par9, int par10, double par11, double par13, double par15, double par17)<a name="line.65"></a>
+<FONT color="green">066</FONT>        {<a name="line.66"></a>
+<FONT color="green">067</FONT>            int var19;<a name="line.67"></a>
+<FONT color="green">068</FONT>            int var22;<a name="line.68"></a>
+<FONT color="green">069</FONT>            double var31;<a name="line.69"></a>
+<FONT color="green">070</FONT>            double var35;<a name="line.70"></a>
+<FONT color="green">071</FONT>            double var38;<a name="line.71"></a>
+<FONT color="green">072</FONT>            int var37;<a name="line.72"></a>
+<FONT color="green">073</FONT>            double var42;<a name="line.73"></a>
+<FONT color="green">074</FONT>            int var40;<a name="line.74"></a>
+<FONT color="green">075</FONT>            int var41;<a name="line.75"></a>
+<FONT color="green">076</FONT>            int var10001;<a name="line.76"></a>
+<FONT color="green">077</FONT>            int var77;<a name="line.77"></a>
+<FONT color="green">078</FONT>    <a name="line.78"></a>
+<FONT color="green">079</FONT>            if (par9 == 1)<a name="line.79"></a>
+<FONT color="green">080</FONT>            {<a name="line.80"></a>
+<FONT color="green">081</FONT>                boolean var66 = false;<a name="line.81"></a>
+<FONT color="green">082</FONT>                boolean var65 = false;<a name="line.82"></a>
+<FONT color="green">083</FONT>                boolean var21 = false;<a name="line.83"></a>
+<FONT color="green">084</FONT>                boolean var67 = false;<a name="line.84"></a>
+<FONT color="green">085</FONT>                double var72 = 0.0D;<a name="line.85"></a>
+<FONT color="green">086</FONT>                double var71 = 0.0D;<a name="line.86"></a>
+<FONT color="green">087</FONT>                var77 = 0;<a name="line.87"></a>
+<FONT color="green">088</FONT>                double var74 = 1.0D / par17;<a name="line.88"></a>
+<FONT color="green">089</FONT>    <a name="line.89"></a>
+<FONT color="green">090</FONT>                for (int var30 = 0; var30 &lt; par8; ++var30)<a name="line.90"></a>
+<FONT color="green">091</FONT>                {<a name="line.91"></a>
+<FONT color="green">092</FONT>                    var31 = par2 + (double)var30 * par11 + this.xCoord;<a name="line.92"></a>
+<FONT color="green">093</FONT>                    int var78 = (int)var31;<a name="line.93"></a>
+<FONT color="green">094</FONT>    <a name="line.94"></a>
+<FONT color="green">095</FONT>                    if (var31 &lt; (double)var78)<a name="line.95"></a>
+<FONT color="green">096</FONT>                    {<a name="line.96"></a>
+<FONT color="green">097</FONT>                        --var78;<a name="line.97"></a>
+<FONT color="green">098</FONT>                    }<a name="line.98"></a>
+<FONT color="green">099</FONT>    <a name="line.99"></a>
+<FONT color="green">100</FONT>                    int var34 = var78 &amp; 255;<a name="line.100"></a>
+<FONT color="green">101</FONT>                    var31 -= (double)var78;<a name="line.101"></a>
+<FONT color="green">102</FONT>                    var35 = var31 * var31 * var31 * (var31 * (var31 * 6.0D - 15.0D) + 10.0D);<a name="line.102"></a>
+<FONT color="green">103</FONT>    <a name="line.103"></a>
+<FONT color="green">104</FONT>                    for (var37 = 0; var37 &lt; par10; ++var37)<a name="line.104"></a>
+<FONT color="green">105</FONT>                    {<a name="line.105"></a>
+<FONT color="green">106</FONT>                        var38 = par6 + (double)var37 * par15 + this.zCoord;<a name="line.106"></a>
+<FONT color="green">107</FONT>                        var40 = (int)var38;<a name="line.107"></a>
+<FONT color="green">108</FONT>    <a name="line.108"></a>
+<FONT color="green">109</FONT>                        if (var38 &lt; (double)var40)<a name="line.109"></a>
+<FONT color="green">110</FONT>                        {<a name="line.110"></a>
+<FONT color="green">111</FONT>                            --var40;<a name="line.111"></a>
+<FONT color="green">112</FONT>                        }<a name="line.112"></a>
+<FONT color="green">113</FONT>    <a name="line.113"></a>
+<FONT color="green">114</FONT>                        var41 = var40 &amp; 255;<a name="line.114"></a>
+<FONT color="green">115</FONT>                        var38 -= (double)var40;<a name="line.115"></a>
+<FONT color="green">116</FONT>                        var42 = var38 * var38 * var38 * (var38 * (var38 * 6.0D - 15.0D) + 10.0D);<a name="line.116"></a>
+<FONT color="green">117</FONT>                        var19 = this.permutations[var34] + 0;<a name="line.117"></a>
+<FONT color="green">118</FONT>                        int var64 = this.permutations[var19] + var41;<a name="line.118"></a>
+<FONT color="green">119</FONT>                        int var69 = this.permutations[var34 + 1] + 0;<a name="line.119"></a>
+<FONT color="green">120</FONT>                        var22 = this.permutations[var69] + var41;<a name="line.120"></a>
+<FONT color="green">121</FONT>                        var72 = this.lerp(var35, this.func_76309_a(this.permutations[var64], var31, var38), this.grad(this.permutations[var22], var31 - 1.0D, 0.0D, var38));<a name="line.121"></a>
+<FONT color="green">122</FONT>                        var71 = this.lerp(var35, this.grad(this.permutations[var64 + 1], var31, 0.0D, var38 - 1.0D), this.grad(this.permutations[var22 + 1], var31 - 1.0D, 0.0D, var38 - 1.0D));<a name="line.122"></a>
+<FONT color="green">123</FONT>                        double var79 = this.lerp(var42, var72, var71);<a name="line.123"></a>
+<FONT color="green">124</FONT>                        var10001 = var77++;<a name="line.124"></a>
+<FONT color="green">125</FONT>                        par1ArrayOfDouble[var10001] += var79 * var74;<a name="line.125"></a>
+<FONT color="green">126</FONT>                    }<a name="line.126"></a>
+<FONT color="green">127</FONT>                }<a name="line.127"></a>
+<FONT color="green">128</FONT>            }<a name="line.128"></a>
+<FONT color="green">129</FONT>            else<a name="line.129"></a>
+<FONT color="green">130</FONT>            {<a name="line.130"></a>
+<FONT color="green">131</FONT>                var19 = 0;<a name="line.131"></a>
+<FONT color="green">132</FONT>                double var20 = 1.0D / par17;<a name="line.132"></a>
+<FONT color="green">133</FONT>                var22 = -1;<a name="line.133"></a>
+<FONT color="green">134</FONT>                boolean var23 = false;<a name="line.134"></a>
+<FONT color="green">135</FONT>                boolean var24 = false;<a name="line.135"></a>
+<FONT color="green">136</FONT>                boolean var25 = false;<a name="line.136"></a>
+<FONT color="green">137</FONT>                boolean var26 = false;<a name="line.137"></a>
+<FONT color="green">138</FONT>                boolean var27 = false;<a name="line.138"></a>
+<FONT color="green">139</FONT>                boolean var28 = false;<a name="line.139"></a>
+<FONT color="green">140</FONT>                double var29 = 0.0D;<a name="line.140"></a>
+<FONT color="green">141</FONT>                var31 = 0.0D;<a name="line.141"></a>
+<FONT color="green">142</FONT>                double var33 = 0.0D;<a name="line.142"></a>
+<FONT color="green">143</FONT>                var35 = 0.0D;<a name="line.143"></a>
+<FONT color="green">144</FONT>    <a name="line.144"></a>
+<FONT color="green">145</FONT>                for (var37 = 0; var37 &lt; par8; ++var37)<a name="line.145"></a>
+<FONT color="green">146</FONT>                {<a name="line.146"></a>
+<FONT color="green">147</FONT>                    var38 = par2 + (double)var37 * par11 + this.xCoord;<a name="line.147"></a>
+<FONT color="green">148</FONT>                    var40 = (int)var38;<a name="line.148"></a>
+<FONT color="green">149</FONT>    <a name="line.149"></a>
+<FONT color="green">150</FONT>                    if (var38 &lt; (double)var40)<a name="line.150"></a>
+<FONT color="green">151</FONT>                    {<a name="line.151"></a>
+<FONT color="green">152</FONT>                        --var40;<a name="line.152"></a>
+<FONT color="green">153</FONT>                    }<a name="line.153"></a>
+<FONT color="green">154</FONT>    <a name="line.154"></a>
+<FONT color="green">155</FONT>                    var41 = var40 &amp; 255;<a name="line.155"></a>
+<FONT color="green">156</FONT>                    var38 -= (double)var40;<a name="line.156"></a>
+<FONT color="green">157</FONT>                    var42 = var38 * var38 * var38 * (var38 * (var38 * 6.0D - 15.0D) + 10.0D);<a name="line.157"></a>
+<FONT color="green">158</FONT>    <a name="line.158"></a>
+<FONT color="green">159</FONT>                    for (int var44 = 0; var44 &lt; par10; ++var44)<a name="line.159"></a>
+<FONT color="green">160</FONT>                    {<a name="line.160"></a>
+<FONT color="green">161</FONT>                        double var45 = par6 + (double)var44 * par15 + this.zCoord;<a name="line.161"></a>
+<FONT color="green">162</FONT>                        int var47 = (int)var45;<a name="line.162"></a>
+<FONT color="green">163</FONT>    <a name="line.163"></a>
+<FONT color="green">164</FONT>                        if (var45 &lt; (double)var47)<a name="line.164"></a>
+<FONT color="green">165</FONT>                        {<a name="line.165"></a>
+<FONT color="green">166</FONT>                            --var47;<a name="line.166"></a>
+<FONT color="green">167</FONT>                        }<a name="line.167"></a>
+<FONT color="green">168</FONT>    <a name="line.168"></a>
+<FONT color="green">169</FONT>                        int var48 = var47 &amp; 255;<a name="line.169"></a>
+<FONT color="green">170</FONT>                        var45 -= (double)var47;<a name="line.170"></a>
+<FONT color="green">171</FONT>                        double var49 = var45 * var45 * var45 * (var45 * (var45 * 6.0D - 15.0D) + 10.0D);<a name="line.171"></a>
+<FONT color="green">172</FONT>    <a name="line.172"></a>
+<FONT color="green">173</FONT>                        for (int var51 = 0; var51 &lt; par9; ++var51)<a name="line.173"></a>
+<FONT color="green">174</FONT>                        {<a name="line.174"></a>
+<FONT color="green">175</FONT>                            double var52 = par4 + (double)var51 * par13 + this.yCoord;<a name="line.175"></a>
+<FONT color="green">176</FONT>                            int var54 = (int)var52;<a name="line.176"></a>
+<FONT color="green">177</FONT>    <a name="line.177"></a>
+<FONT color="green">178</FONT>                            if (var52 &lt; (double)var54)<a name="line.178"></a>
+<FONT color="green">179</FONT>                            {<a name="line.179"></a>
+<FONT color="green">180</FONT>                                --var54;<a name="line.180"></a>
+<FONT color="green">181</FONT>                            }<a name="line.181"></a>
+<FONT color="green">182</FONT>    <a name="line.182"></a>
+<FONT color="green">183</FONT>                            int var55 = var54 &amp; 255;<a name="line.183"></a>
+<FONT color="green">184</FONT>                            var52 -= (double)var54;<a name="line.184"></a>
+<FONT color="green">185</FONT>                            double var56 = var52 * var52 * var52 * (var52 * (var52 * 6.0D - 15.0D) + 10.0D);<a name="line.185"></a>
+<FONT color="green">186</FONT>    <a name="line.186"></a>
+<FONT color="green">187</FONT>                            if (var51 == 0 || var55 != var22)<a name="line.187"></a>
+<FONT color="green">188</FONT>                            {<a name="line.188"></a>
+<FONT color="green">189</FONT>                                var22 = var55;<a name="line.189"></a>
+<FONT color="green">190</FONT>                                int var68 = this.permutations[var41] + var55;<a name="line.190"></a>
+<FONT color="green">191</FONT>                                int var73 = this.permutations[var68] + var48;<a name="line.191"></a>
+<FONT color="green">192</FONT>                                int var70 = this.permutations[var68 + 1] + var48;<a name="line.192"></a>
+<FONT color="green">193</FONT>                                int var76 = this.permutations[var41 + 1] + var55;<a name="line.193"></a>
+<FONT color="green">194</FONT>                                var77 = this.permutations[var76] + var48;<a name="line.194"></a>
+<FONT color="green">195</FONT>                                int var75 = this.permutations[var76 + 1] + var48;<a name="line.195"></a>
+<FONT color="green">196</FONT>                                var29 = this.lerp(var42, this.grad(this.permutations[var73], var38, var52, var45), this.grad(this.permutations[var77], var38 - 1.0D, var52, var45));<a name="line.196"></a>
+<FONT color="green">197</FONT>                                var31 = this.lerp(var42, this.grad(this.permutations[var70], var38, var52 - 1.0D, var45), this.grad(this.permutations[var75], var38 - 1.0D, var52 - 1.0D, var45));<a name="line.197"></a>
+<FONT color="green">198</FONT>                                var33 = this.lerp(var42, this.grad(this.permutations[var73 + 1], var38, var52, var45 - 1.0D), this.grad(this.permutations[var77 + 1], var38 - 1.0D, var52, var45 - 1.0D));<a name="line.198"></a>
+<FONT color="green">199</FONT>                                var35 = this.lerp(var42, this.grad(this.permutations[var70 + 1], var38, var52 - 1.0D, var45 - 1.0D), this.grad(this.permutations[var75 + 1], var38 - 1.0D, var52 - 1.0D, var45 - 1.0D));<a name="line.199"></a>
+<FONT color="green">200</FONT>                            }<a name="line.200"></a>
+<FONT color="green">201</FONT>    <a name="line.201"></a>
+<FONT color="green">202</FONT>                            double var58 = this.lerp(var56, var29, var31);<a name="line.202"></a>
+<FONT color="green">203</FONT>                            double var60 = this.lerp(var56, var33, var35);<a name="line.203"></a>
+<FONT color="green">204</FONT>                            double var62 = this.lerp(var49, var58, var60);<a name="line.204"></a>
+<FONT color="green">205</FONT>                            var10001 = var19++;<a name="line.205"></a>
+<FONT color="green">206</FONT>                            par1ArrayOfDouble[var10001] += var62 * var20;<a name="line.206"></a>
+<FONT color="green">207</FONT>                        }<a name="line.207"></a>
+<FONT color="green">208</FONT>                    }<a name="line.208"></a>
+<FONT color="green">209</FONT>                }<a name="line.209"></a>
+<FONT color="green">210</FONT>            }<a name="line.210"></a>
+<FONT color="green">211</FONT>        }<a name="line.211"></a>
+<FONT color="green">212</FONT>    }<a name="line.212"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

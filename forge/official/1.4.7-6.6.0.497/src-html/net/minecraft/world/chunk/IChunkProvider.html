@@ -1,0 +1,133 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.chunk;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.List;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.entity.EnumCreatureType;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.util.IProgressUpdate;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.world.ChunkPosition;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.world.World;<a name="line.7"></a>
+<FONT color="green">008</FONT>    <a name="line.8"></a>
+<FONT color="green">009</FONT>    public interface IChunkProvider<a name="line.9"></a>
+<FONT color="green">010</FONT>    {<a name="line.10"></a>
+<FONT color="green">011</FONT>        /**<a name="line.11"></a>
+<FONT color="green">012</FONT>         * Checks to see if a chunk exists at x, y<a name="line.12"></a>
+<FONT color="green">013</FONT>         */<a name="line.13"></a>
+<FONT color="green">014</FONT>        boolean chunkExists(int var1, int var2);<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /**<a name="line.16"></a>
+<FONT color="green">017</FONT>         * Will return back a chunk, if it doesn't exist and its not a MP client it will generates all the blocks for the<a name="line.17"></a>
+<FONT color="green">018</FONT>         * specified chunk from the map seed and chunk seed<a name="line.18"></a>
+<FONT color="green">019</FONT>         */<a name="line.19"></a>
+<FONT color="green">020</FONT>        Chunk provideChunk(int var1, int var2);<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /**<a name="line.22"></a>
+<FONT color="green">023</FONT>         * loads or generates the chunk at the chunk location specified<a name="line.23"></a>
+<FONT color="green">024</FONT>         */<a name="line.24"></a>
+<FONT color="green">025</FONT>        Chunk loadChunk(int var1, int var2);<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>        /**<a name="line.27"></a>
+<FONT color="green">028</FONT>         * Populates chunk with ores etc etc<a name="line.28"></a>
+<FONT color="green">029</FONT>         */<a name="line.29"></a>
+<FONT color="green">030</FONT>        void populate(IChunkProvider var1, int var2, int var3);<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * Two modes of operation: if passed true, save all Chunks in one go.  If passed false, save up to two chunks.<a name="line.33"></a>
+<FONT color="green">034</FONT>         * Return true if all chunks have been saved.<a name="line.34"></a>
+<FONT color="green">035</FONT>         */<a name="line.35"></a>
+<FONT color="green">036</FONT>        boolean saveChunks(boolean var1, IProgressUpdate var2);<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>        /**<a name="line.38"></a>
+<FONT color="green">039</FONT>         * Unloads the 100 oldest chunks from memory, due to a bug with chunkSet.add() never being called it thinks the list<a name="line.39"></a>
+<FONT color="green">040</FONT>         * is always empty and will not remove any chunks.<a name="line.40"></a>
+<FONT color="green">041</FONT>         */<a name="line.41"></a>
+<FONT color="green">042</FONT>        boolean unload100OldestChunks();<a name="line.42"></a>
+<FONT color="green">043</FONT>    <a name="line.43"></a>
+<FONT color="green">044</FONT>        /**<a name="line.44"></a>
+<FONT color="green">045</FONT>         * Returns if the IChunkProvider supports saving.<a name="line.45"></a>
+<FONT color="green">046</FONT>         */<a name="line.46"></a>
+<FONT color="green">047</FONT>        boolean canSave();<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>        /**<a name="line.49"></a>
+<FONT color="green">050</FONT>         * Converts the instance data to a readable string.<a name="line.50"></a>
+<FONT color="green">051</FONT>         */<a name="line.51"></a>
+<FONT color="green">052</FONT>        String makeString();<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        /**<a name="line.54"></a>
+<FONT color="green">055</FONT>         * Returns a list of creatures of the specified type that can spawn at the given location.<a name="line.55"></a>
+<FONT color="green">056</FONT>         */<a name="line.56"></a>
+<FONT color="green">057</FONT>        List getPossibleCreatures(EnumCreatureType var1, int var2, int var3, int var4);<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>        /**<a name="line.59"></a>
+<FONT color="green">060</FONT>         * Returns the location of the closest structure of the specified type. If not found returns null.<a name="line.60"></a>
+<FONT color="green">061</FONT>         */<a name="line.61"></a>
+<FONT color="green">062</FONT>        ChunkPosition findClosestStructure(World var1, String var2, int var3, int var4, int var5);<a name="line.62"></a>
+<FONT color="green">063</FONT>    <a name="line.63"></a>
+<FONT color="green">064</FONT>        int getLoadedChunkCount();<a name="line.64"></a>
+<FONT color="green">065</FONT>    <a name="line.65"></a>
+<FONT color="green">066</FONT>        void recreateStructures(int var1, int var2);<a name="line.66"></a>
+<FONT color="green">067</FONT>    }<a name="line.67"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

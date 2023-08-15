@@ -1,0 +1,110 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.gen.structure;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.ArrayList;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.util.Random;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.world.biome.BiomeGenBase;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.world.biome.WorldChunkManager;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    public class ComponentVillageStartPiece extends ComponentVillageWell<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        public final WorldChunkManager worldChunkMngr;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** Boolean that determines if the village is in a desert or not. */<a name="line.12"></a>
+<FONT color="green">013</FONT>        public final boolean inDesert;<a name="line.13"></a>
+<FONT color="green">014</FONT>        public final BiomeGenBase biome;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /** World terrain type, 0 for normal, 1 for flap map */<a name="line.16"></a>
+<FONT color="green">017</FONT>        public final int terrainType;<a name="line.17"></a>
+<FONT color="green">018</FONT>        public StructureVillagePieceWeight structVillagePieceWeight;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        /**<a name="line.20"></a>
+<FONT color="green">021</FONT>         * Contains List of all spawnable Structure Piece Weights. If no more Pieces of a type can be spawned, they are<a name="line.21"></a>
+<FONT color="green">022</FONT>         * removed from this list<a name="line.22"></a>
+<FONT color="green">023</FONT>         */<a name="line.23"></a>
+<FONT color="green">024</FONT>        public ArrayList structureVillageWeightedPieceList;<a name="line.24"></a>
+<FONT color="green">025</FONT>        public ArrayList field_74932_i = new ArrayList();<a name="line.25"></a>
+<FONT color="green">026</FONT>        public ArrayList field_74930_j = new ArrayList();<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        public ComponentVillageStartPiece(WorldChunkManager par1WorldChunkManager, int par2, Random par3Random, int par4, int par5, ArrayList par6ArrayList, int par7)<a name="line.28"></a>
+<FONT color="green">029</FONT>        {<a name="line.29"></a>
+<FONT color="green">030</FONT>            super((ComponentVillageStartPiece)null, 0, par3Random, par4, par5);<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.worldChunkMngr = par1WorldChunkManager;<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.structureVillageWeightedPieceList = par6ArrayList;<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.terrainType = par7;<a name="line.33"></a>
+<FONT color="green">034</FONT>            BiomeGenBase var8 = par1WorldChunkManager.getBiomeGenAt(par4, par5);<a name="line.34"></a>
+<FONT color="green">035</FONT>            this.inDesert = var8 == BiomeGenBase.desert || var8 == BiomeGenBase.desertHills;<a name="line.35"></a>
+<FONT color="green">036</FONT>            this.biome = var8;<a name="line.36"></a>
+<FONT color="green">037</FONT>            this.startPiece = this;<a name="line.37"></a>
+<FONT color="green">038</FONT>        }<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        public WorldChunkManager getWorldChunkManager()<a name="line.40"></a>
+<FONT color="green">041</FONT>        {<a name="line.41"></a>
+<FONT color="green">042</FONT>            return this.worldChunkMngr;<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    }<a name="line.44"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

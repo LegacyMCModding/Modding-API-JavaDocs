@@ -1,0 +1,318 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.particle;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.client.Minecraft;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.client.renderer.Tessellator;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.nbt.NBTTagCompound;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.nbt.NBTTagList;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.util.MathHelper;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.world.World;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>    @SideOnly(Side.CLIENT)<a name="line.12"></a>
+<FONT color="green">013</FONT>    public class EntityFireworkStarterFX extends EntityFX<a name="line.13"></a>
+<FONT color="green">014</FONT>    {<a name="line.14"></a>
+<FONT color="green">015</FONT>        private int field_92042_ax = 0;<a name="line.15"></a>
+<FONT color="green">016</FONT>        private final EffectRenderer field_92040_ay;<a name="line.16"></a>
+<FONT color="green">017</FONT>        private NBTTagList field_92039_az;<a name="line.17"></a>
+<FONT color="green">018</FONT>        boolean field_92041_a;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        public EntityFireworkStarterFX(World par1World, double par2, double par4, double par6, double par8, double par10, double par12, EffectRenderer par14EffectRenderer, NBTTagCompound par15NBTTagCompound)<a name="line.20"></a>
+<FONT color="green">021</FONT>        {<a name="line.21"></a>
+<FONT color="green">022</FONT>            super(par1World, par2, par4, par6, 0.0D, 0.0D, 0.0D);<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.motionX = par8;<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.motionY = par10;<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.motionZ = par12;<a name="line.25"></a>
+<FONT color="green">026</FONT>            this.field_92040_ay = par14EffectRenderer;<a name="line.26"></a>
+<FONT color="green">027</FONT>            this.particleMaxAge = 8;<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>            if (par15NBTTagCompound != null)<a name="line.29"></a>
+<FONT color="green">030</FONT>            {<a name="line.30"></a>
+<FONT color="green">031</FONT>                this.field_92039_az = par15NBTTagCompound.getTagList("Explosions");<a name="line.31"></a>
+<FONT color="green">032</FONT>    <a name="line.32"></a>
+<FONT color="green">033</FONT>                if (this.field_92039_az != null &amp;&amp; this.field_92039_az.tagCount() == 0)<a name="line.33"></a>
+<FONT color="green">034</FONT>                {<a name="line.34"></a>
+<FONT color="green">035</FONT>                    this.field_92039_az = null;<a name="line.35"></a>
+<FONT color="green">036</FONT>                }<a name="line.36"></a>
+<FONT color="green">037</FONT>                else if (this.field_92039_az != null)<a name="line.37"></a>
+<FONT color="green">038</FONT>                {<a name="line.38"></a>
+<FONT color="green">039</FONT>                    this.particleMaxAge = this.field_92039_az.tagCount() * 2 - 1;<a name="line.39"></a>
+<FONT color="green">040</FONT>    <a name="line.40"></a>
+<FONT color="green">041</FONT>                    for (int var16 = 0; var16 &lt; this.field_92039_az.tagCount(); ++var16)<a name="line.41"></a>
+<FONT color="green">042</FONT>                    {<a name="line.42"></a>
+<FONT color="green">043</FONT>                        NBTTagCompound var17 = (NBTTagCompound)this.field_92039_az.tagAt(var16);<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>                        if (var17.getBoolean("Flicker"))<a name="line.45"></a>
+<FONT color="green">046</FONT>                        {<a name="line.46"></a>
+<FONT color="green">047</FONT>                            this.field_92041_a = true;<a name="line.47"></a>
+<FONT color="green">048</FONT>                            this.particleMaxAge += 15;<a name="line.48"></a>
+<FONT color="green">049</FONT>                            break;<a name="line.49"></a>
+<FONT color="green">050</FONT>                        }<a name="line.50"></a>
+<FONT color="green">051</FONT>                    }<a name="line.51"></a>
+<FONT color="green">052</FONT>                }<a name="line.52"></a>
+<FONT color="green">053</FONT>            }<a name="line.53"></a>
+<FONT color="green">054</FONT>        }<a name="line.54"></a>
+<FONT color="green">055</FONT>    <a name="line.55"></a>
+<FONT color="green">056</FONT>        public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7) {}<a name="line.56"></a>
+<FONT color="green">057</FONT>    <a name="line.57"></a>
+<FONT color="green">058</FONT>        /**<a name="line.58"></a>
+<FONT color="green">059</FONT>         * Called to update the entity's position/logic.<a name="line.59"></a>
+<FONT color="green">060</FONT>         */<a name="line.60"></a>
+<FONT color="green">061</FONT>        public void onUpdate()<a name="line.61"></a>
+<FONT color="green">062</FONT>        {<a name="line.62"></a>
+<FONT color="green">063</FONT>            boolean var1;<a name="line.63"></a>
+<FONT color="green">064</FONT>    <a name="line.64"></a>
+<FONT color="green">065</FONT>            if (this.field_92042_ax == 0 &amp;&amp; this.field_92039_az != null)<a name="line.65"></a>
+<FONT color="green">066</FONT>            {<a name="line.66"></a>
+<FONT color="green">067</FONT>                var1 = this.func_92037_i();<a name="line.67"></a>
+<FONT color="green">068</FONT>                boolean var2 = false;<a name="line.68"></a>
+<FONT color="green">069</FONT>    <a name="line.69"></a>
+<FONT color="green">070</FONT>                if (this.field_92039_az.tagCount() &gt;= 3)<a name="line.70"></a>
+<FONT color="green">071</FONT>                {<a name="line.71"></a>
+<FONT color="green">072</FONT>                    var2 = true;<a name="line.72"></a>
+<FONT color="green">073</FONT>                }<a name="line.73"></a>
+<FONT color="green">074</FONT>                else<a name="line.74"></a>
+<FONT color="green">075</FONT>                {<a name="line.75"></a>
+<FONT color="green">076</FONT>                    for (int var3 = 0; var3 &lt; this.field_92039_az.tagCount(); ++var3)<a name="line.76"></a>
+<FONT color="green">077</FONT>                    {<a name="line.77"></a>
+<FONT color="green">078</FONT>                        NBTTagCompound var4 = (NBTTagCompound)this.field_92039_az.tagAt(var3);<a name="line.78"></a>
+<FONT color="green">079</FONT>    <a name="line.79"></a>
+<FONT color="green">080</FONT>                        if (var4.getByte("Type") == 1)<a name="line.80"></a>
+<FONT color="green">081</FONT>                        {<a name="line.81"></a>
+<FONT color="green">082</FONT>                            var2 = true;<a name="line.82"></a>
+<FONT color="green">083</FONT>                            break;<a name="line.83"></a>
+<FONT color="green">084</FONT>                        }<a name="line.84"></a>
+<FONT color="green">085</FONT>                    }<a name="line.85"></a>
+<FONT color="green">086</FONT>                }<a name="line.86"></a>
+<FONT color="green">087</FONT>    <a name="line.87"></a>
+<FONT color="green">088</FONT>                String var15 = "fireworks." + (var2 ? "largeBlast" : "blast") + (var1 ? "_far" : "");<a name="line.88"></a>
+<FONT color="green">089</FONT>                this.worldObj.playSound(this.posX, this.posY, this.posZ, var15, 20.0F, 0.95F + this.rand.nextFloat() * 0.1F, true);<a name="line.89"></a>
+<FONT color="green">090</FONT>            }<a name="line.90"></a>
+<FONT color="green">091</FONT>    <a name="line.91"></a>
+<FONT color="green">092</FONT>            if (this.field_92042_ax % 2 == 0 &amp;&amp; this.field_92039_az != null &amp;&amp; this.field_92042_ax / 2 &lt; this.field_92039_az.tagCount())<a name="line.92"></a>
+<FONT color="green">093</FONT>            {<a name="line.93"></a>
+<FONT color="green">094</FONT>                int var13 = this.field_92042_ax / 2;<a name="line.94"></a>
+<FONT color="green">095</FONT>                NBTTagCompound var14 = (NBTTagCompound)this.field_92039_az.tagAt(var13);<a name="line.95"></a>
+<FONT color="green">096</FONT>                byte var17 = var14.getByte("Type");<a name="line.96"></a>
+<FONT color="green">097</FONT>                boolean var18 = var14.getBoolean("Trail");<a name="line.97"></a>
+<FONT color="green">098</FONT>                boolean var5 = var14.getBoolean("Flicker");<a name="line.98"></a>
+<FONT color="green">099</FONT>                int[] var6 = var14.getIntArray("Colors");<a name="line.99"></a>
+<FONT color="green">100</FONT>                int[] var7 = var14.getIntArray("FadeColors");<a name="line.100"></a>
+<FONT color="green">101</FONT>    <a name="line.101"></a>
+<FONT color="green">102</FONT>                if (var17 == 1)<a name="line.102"></a>
+<FONT color="green">103</FONT>                {<a name="line.103"></a>
+<FONT color="green">104</FONT>                    this.func_92035_a(0.5D, 4, var6, var7, var18, var5);<a name="line.104"></a>
+<FONT color="green">105</FONT>                }<a name="line.105"></a>
+<FONT color="green">106</FONT>                else if (var17 == 2)<a name="line.106"></a>
+<FONT color="green">107</FONT>                {<a name="line.107"></a>
+<FONT color="green">108</FONT>                    this.func_92038_a(0.5D, new double[][] {{0.0D, 1.0D}, {0.3455D, 0.309D}, {0.9511D, 0.309D}, {0.3795918367346939D, -0.12653061224489795D}, {0.6122448979591837D, -0.8040816326530612D}, {0.0D, -0.35918367346938773D}}, var6, var7, var18, var5, false);<a name="line.108"></a>
+<FONT color="green">109</FONT>                }<a name="line.109"></a>
+<FONT color="green">110</FONT>                else if (var17 == 3)<a name="line.110"></a>
+<FONT color="green">111</FONT>                {<a name="line.111"></a>
+<FONT color="green">112</FONT>                    this.func_92038_a(0.5D, new double[][] {{0.0D, 0.2D}, {0.2D, 0.2D}, {0.2D, 0.6D}, {0.6D, 0.6D}, {0.6D, 0.2D}, {0.2D, 0.2D}, {0.2D, 0.0D}, {0.4D, 0.0D}, {0.4D, -0.6D}, {0.2D, -0.6D}, {0.2D, -0.4D}, {0.0D, -0.4D}}, var6, var7, var18, var5, true);<a name="line.112"></a>
+<FONT color="green">113</FONT>                }<a name="line.113"></a>
+<FONT color="green">114</FONT>                else if (var17 == 4)<a name="line.114"></a>
+<FONT color="green">115</FONT>                {<a name="line.115"></a>
+<FONT color="green">116</FONT>                    this.func_92036_a(var6, var7, var18, var5);<a name="line.116"></a>
+<FONT color="green">117</FONT>                }<a name="line.117"></a>
+<FONT color="green">118</FONT>                else<a name="line.118"></a>
+<FONT color="green">119</FONT>                {<a name="line.119"></a>
+<FONT color="green">120</FONT>                    this.func_92035_a(0.25D, 2, var6, var7, var18, var5);<a name="line.120"></a>
+<FONT color="green">121</FONT>                }<a name="line.121"></a>
+<FONT color="green">122</FONT>    <a name="line.122"></a>
+<FONT color="green">123</FONT>                int var8 = var6[0];<a name="line.123"></a>
+<FONT color="green">124</FONT>                float var9 = (float)((var8 &amp; 16711680) &gt;&gt; 16) / 255.0F;<a name="line.124"></a>
+<FONT color="green">125</FONT>                float var10 = (float)((var8 &amp; 65280) &gt;&gt; 8) / 255.0F;<a name="line.125"></a>
+<FONT color="green">126</FONT>                float var11 = (float)((var8 &amp; 255) &gt;&gt; 0) / 255.0F;<a name="line.126"></a>
+<FONT color="green">127</FONT>                EntityFireworkOverlayFX var12 = new EntityFireworkOverlayFX(this.worldObj, this.posX, this.posY, this.posZ);<a name="line.127"></a>
+<FONT color="green">128</FONT>                var12.setRBGColorF(var9, var10, var11);<a name="line.128"></a>
+<FONT color="green">129</FONT>                this.field_92040_ay.addEffect(var12);<a name="line.129"></a>
+<FONT color="green">130</FONT>            }<a name="line.130"></a>
+<FONT color="green">131</FONT>    <a name="line.131"></a>
+<FONT color="green">132</FONT>            ++this.field_92042_ax;<a name="line.132"></a>
+<FONT color="green">133</FONT>    <a name="line.133"></a>
+<FONT color="green">134</FONT>            if (this.field_92042_ax &gt; this.particleMaxAge)<a name="line.134"></a>
+<FONT color="green">135</FONT>            {<a name="line.135"></a>
+<FONT color="green">136</FONT>                if (this.field_92041_a)<a name="line.136"></a>
+<FONT color="green">137</FONT>                {<a name="line.137"></a>
+<FONT color="green">138</FONT>                    var1 = this.func_92037_i();<a name="line.138"></a>
+<FONT color="green">139</FONT>                    String var16 = "fireworks." + (var1 ? "twinkle_far" : "twinkle");<a name="line.139"></a>
+<FONT color="green">140</FONT>                    this.worldObj.playSound(this.posX, this.posY, this.posZ, var16, 20.0F, 0.9F + this.rand.nextFloat() * 0.15F, true);<a name="line.140"></a>
+<FONT color="green">141</FONT>                }<a name="line.141"></a>
+<FONT color="green">142</FONT>    <a name="line.142"></a>
+<FONT color="green">143</FONT>                this.setDead();<a name="line.143"></a>
+<FONT color="green">144</FONT>            }<a name="line.144"></a>
+<FONT color="green">145</FONT>        }<a name="line.145"></a>
+<FONT color="green">146</FONT>    <a name="line.146"></a>
+<FONT color="green">147</FONT>        private boolean func_92037_i()<a name="line.147"></a>
+<FONT color="green">148</FONT>        {<a name="line.148"></a>
+<FONT color="green">149</FONT>            Minecraft var1 = Minecraft.getMinecraft();<a name="line.149"></a>
+<FONT color="green">150</FONT>            return var1 == null || var1.renderViewEntity == null || var1.renderViewEntity.getDistanceSq(this.posX, this.posY, this.posZ) &gt;= 256.0D;<a name="line.150"></a>
+<FONT color="green">151</FONT>        }<a name="line.151"></a>
+<FONT color="green">152</FONT>    <a name="line.152"></a>
+<FONT color="green">153</FONT>        private void func_92034_a(double par1, double par3, double par5, double par7, double par9, double par11, int[] par13ArrayOfInteger, int[] par14ArrayOfInteger, boolean par15, boolean par16)<a name="line.153"></a>
+<FONT color="green">154</FONT>        {<a name="line.154"></a>
+<FONT color="green">155</FONT>            EntityFireworkSparkFX var17 = new EntityFireworkSparkFX(this.worldObj, par1, par3, par5, par7, par9, par11, this.field_92040_ay);<a name="line.155"></a>
+<FONT color="green">156</FONT>            var17.func_92045_e(par15);<a name="line.156"></a>
+<FONT color="green">157</FONT>            var17.func_92043_f(par16);<a name="line.157"></a>
+<FONT color="green">158</FONT>            int var18 = this.rand.nextInt(par13ArrayOfInteger.length);<a name="line.158"></a>
+<FONT color="green">159</FONT>            var17.func_92044_a(par13ArrayOfInteger[var18]);<a name="line.159"></a>
+<FONT color="green">160</FONT>    <a name="line.160"></a>
+<FONT color="green">161</FONT>            if (par14ArrayOfInteger != null &amp;&amp; par14ArrayOfInteger.length &gt; 0)<a name="line.161"></a>
+<FONT color="green">162</FONT>            {<a name="line.162"></a>
+<FONT color="green">163</FONT>                var17.func_92046_g(par14ArrayOfInteger[this.rand.nextInt(par14ArrayOfInteger.length)]);<a name="line.163"></a>
+<FONT color="green">164</FONT>            }<a name="line.164"></a>
+<FONT color="green">165</FONT>    <a name="line.165"></a>
+<FONT color="green">166</FONT>            this.field_92040_ay.addEffect(var17);<a name="line.166"></a>
+<FONT color="green">167</FONT>        }<a name="line.167"></a>
+<FONT color="green">168</FONT>    <a name="line.168"></a>
+<FONT color="green">169</FONT>        private void func_92035_a(double par1, int par3, int[] par4ArrayOfInteger, int[] par5ArrayOfInteger, boolean par6, boolean par7)<a name="line.169"></a>
+<FONT color="green">170</FONT>        {<a name="line.170"></a>
+<FONT color="green">171</FONT>            double var8 = this.posX;<a name="line.171"></a>
+<FONT color="green">172</FONT>            double var10 = this.posY;<a name="line.172"></a>
+<FONT color="green">173</FONT>            double var12 = this.posZ;<a name="line.173"></a>
+<FONT color="green">174</FONT>    <a name="line.174"></a>
+<FONT color="green">175</FONT>            for (int var14 = -par3; var14 &lt;= par3; ++var14)<a name="line.175"></a>
+<FONT color="green">176</FONT>            {<a name="line.176"></a>
+<FONT color="green">177</FONT>                for (int var15 = -par3; var15 &lt;= par3; ++var15)<a name="line.177"></a>
+<FONT color="green">178</FONT>                {<a name="line.178"></a>
+<FONT color="green">179</FONT>                    for (int var16 = -par3; var16 &lt;= par3; ++var16)<a name="line.179"></a>
+<FONT color="green">180</FONT>                    {<a name="line.180"></a>
+<FONT color="green">181</FONT>                        double var17 = (double)var15 + (this.rand.nextDouble() - this.rand.nextDouble()) * 0.5D;<a name="line.181"></a>
+<FONT color="green">182</FONT>                        double var19 = (double)var14 + (this.rand.nextDouble() - this.rand.nextDouble()) * 0.5D;<a name="line.182"></a>
+<FONT color="green">183</FONT>                        double var21 = (double)var16 + (this.rand.nextDouble() - this.rand.nextDouble()) * 0.5D;<a name="line.183"></a>
+<FONT color="green">184</FONT>                        double var23 = (double)MathHelper.sqrt_double(var17 * var17 + var19 * var19 + var21 * var21) / par1 + this.rand.nextGaussian() * 0.05D;<a name="line.184"></a>
+<FONT color="green">185</FONT>                        this.func_92034_a(var8, var10, var12, var17 / var23, var19 / var23, var21 / var23, par4ArrayOfInteger, par5ArrayOfInteger, par6, par7);<a name="line.185"></a>
+<FONT color="green">186</FONT>    <a name="line.186"></a>
+<FONT color="green">187</FONT>                        if (var14 != -par3 &amp;&amp; var14 != par3 &amp;&amp; var15 != -par3 &amp;&amp; var15 != par3)<a name="line.187"></a>
+<FONT color="green">188</FONT>                        {<a name="line.188"></a>
+<FONT color="green">189</FONT>                            var16 += par3 * 2 - 1;<a name="line.189"></a>
+<FONT color="green">190</FONT>                        }<a name="line.190"></a>
+<FONT color="green">191</FONT>                    }<a name="line.191"></a>
+<FONT color="green">192</FONT>                }<a name="line.192"></a>
+<FONT color="green">193</FONT>            }<a name="line.193"></a>
+<FONT color="green">194</FONT>        }<a name="line.194"></a>
+<FONT color="green">195</FONT>    <a name="line.195"></a>
+<FONT color="green">196</FONT>        private void func_92038_a(double par1, double[][] par3ArrayOfDouble, int[] par4ArrayOfInteger, int[] par5ArrayOfInteger, boolean par6, boolean par7, boolean par8)<a name="line.196"></a>
+<FONT color="green">197</FONT>        {<a name="line.197"></a>
+<FONT color="green">198</FONT>            double var9 = par3ArrayOfDouble[0][0];<a name="line.198"></a>
+<FONT color="green">199</FONT>            double var11 = par3ArrayOfDouble[0][1];<a name="line.199"></a>
+<FONT color="green">200</FONT>            this.func_92034_a(this.posX, this.posY, this.posZ, var9 * par1, var11 * par1, 0.0D, par4ArrayOfInteger, par5ArrayOfInteger, par6, par7);<a name="line.200"></a>
+<FONT color="green">201</FONT>            float var13 = this.rand.nextFloat() * (float)Math.PI;<a name="line.201"></a>
+<FONT color="green">202</FONT>            double var14 = par8 ? 0.034D : 0.34D;<a name="line.202"></a>
+<FONT color="green">203</FONT>    <a name="line.203"></a>
+<FONT color="green">204</FONT>            for (int var16 = 0; var16 &lt; 3; ++var16)<a name="line.204"></a>
+<FONT color="green">205</FONT>            {<a name="line.205"></a>
+<FONT color="green">206</FONT>                double var17 = (double)var13 + (double)((float)var16 * (float)Math.PI) * var14;<a name="line.206"></a>
+<FONT color="green">207</FONT>                double var19 = var9;<a name="line.207"></a>
+<FONT color="green">208</FONT>                double var21 = var11;<a name="line.208"></a>
+<FONT color="green">209</FONT>    <a name="line.209"></a>
+<FONT color="green">210</FONT>                for (int var23 = 1; var23 &lt; par3ArrayOfDouble.length; ++var23)<a name="line.210"></a>
+<FONT color="green">211</FONT>                {<a name="line.211"></a>
+<FONT color="green">212</FONT>                    double var24 = par3ArrayOfDouble[var23][0];<a name="line.212"></a>
+<FONT color="green">213</FONT>                    double var26 = par3ArrayOfDouble[var23][1];<a name="line.213"></a>
+<FONT color="green">214</FONT>    <a name="line.214"></a>
+<FONT color="green">215</FONT>                    for (double var28 = 0.25D; var28 &lt;= 1.0D; var28 += 0.25D)<a name="line.215"></a>
+<FONT color="green">216</FONT>                    {<a name="line.216"></a>
+<FONT color="green">217</FONT>                        double var30 = (var19 + (var24 - var19) * var28) * par1;<a name="line.217"></a>
+<FONT color="green">218</FONT>                        double var32 = (var21 + (var26 - var21) * var28) * par1;<a name="line.218"></a>
+<FONT color="green">219</FONT>                        double var34 = var30 * Math.sin(var17);<a name="line.219"></a>
+<FONT color="green">220</FONT>                        var30 *= Math.cos(var17);<a name="line.220"></a>
+<FONT color="green">221</FONT>    <a name="line.221"></a>
+<FONT color="green">222</FONT>                        for (double var36 = -1.0D; var36 &lt;= 1.0D; var36 += 2.0D)<a name="line.222"></a>
+<FONT color="green">223</FONT>                        {<a name="line.223"></a>
+<FONT color="green">224</FONT>                            this.func_92034_a(this.posX, this.posY, this.posZ, var30 * var36, var32, var34 * var36, par4ArrayOfInteger, par5ArrayOfInteger, par6, par7);<a name="line.224"></a>
+<FONT color="green">225</FONT>                        }<a name="line.225"></a>
+<FONT color="green">226</FONT>                    }<a name="line.226"></a>
+<FONT color="green">227</FONT>    <a name="line.227"></a>
+<FONT color="green">228</FONT>                    var19 = var24;<a name="line.228"></a>
+<FONT color="green">229</FONT>                    var21 = var26;<a name="line.229"></a>
+<FONT color="green">230</FONT>                }<a name="line.230"></a>
+<FONT color="green">231</FONT>            }<a name="line.231"></a>
+<FONT color="green">232</FONT>        }<a name="line.232"></a>
+<FONT color="green">233</FONT>    <a name="line.233"></a>
+<FONT color="green">234</FONT>        private void func_92036_a(int[] par1ArrayOfInteger, int[] par2ArrayOfInteger, boolean par3, boolean par4)<a name="line.234"></a>
+<FONT color="green">235</FONT>        {<a name="line.235"></a>
+<FONT color="green">236</FONT>            double var5 = this.rand.nextGaussian() * 0.05D;<a name="line.236"></a>
+<FONT color="green">237</FONT>            double var7 = this.rand.nextGaussian() * 0.05D;<a name="line.237"></a>
+<FONT color="green">238</FONT>    <a name="line.238"></a>
+<FONT color="green">239</FONT>            for (int var9 = 0; var9 &lt; 70; ++var9)<a name="line.239"></a>
+<FONT color="green">240</FONT>            {<a name="line.240"></a>
+<FONT color="green">241</FONT>                double var10 = this.motionX * 0.5D + this.rand.nextGaussian() * 0.15D + var5;<a name="line.241"></a>
+<FONT color="green">242</FONT>                double var12 = this.motionZ * 0.5D + this.rand.nextGaussian() * 0.15D + var7;<a name="line.242"></a>
+<FONT color="green">243</FONT>                double var14 = this.motionY * 0.5D + this.rand.nextDouble() * 0.5D;<a name="line.243"></a>
+<FONT color="green">244</FONT>                this.func_92034_a(this.posX, this.posY, this.posZ, var10, var14, var12, par1ArrayOfInteger, par2ArrayOfInteger, par3, par4);<a name="line.244"></a>
+<FONT color="green">245</FONT>            }<a name="line.245"></a>
+<FONT color="green">246</FONT>        }<a name="line.246"></a>
+<FONT color="green">247</FONT>    <a name="line.247"></a>
+<FONT color="green">248</FONT>        public int getFXLayer()<a name="line.248"></a>
+<FONT color="green">249</FONT>        {<a name="line.249"></a>
+<FONT color="green">250</FONT>            return 0;<a name="line.250"></a>
+<FONT color="green">251</FONT>        }<a name="line.251"></a>
+<FONT color="green">252</FONT>    }<a name="line.252"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

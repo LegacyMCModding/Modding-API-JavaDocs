@@ -1,0 +1,96 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package cpw.mods.fml.relauncher;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    /**<a name="line.3"></a>
+<FONT color="green">004</FONT>     * Interface for certain core plugins to register libraries to<a name="line.4"></a>
+<FONT color="green">005</FONT>     * be loaded in by the FML class loader at launch time<a name="line.5"></a>
+<FONT color="green">006</FONT>     *<a name="line.6"></a>
+<FONT color="green">007</FONT>     * @author cpw<a name="line.7"></a>
+<FONT color="green">008</FONT>     *<a name="line.8"></a>
+<FONT color="green">009</FONT>     */<a name="line.9"></a>
+<FONT color="green">010</FONT>    public interface ILibrarySet<a name="line.10"></a>
+<FONT color="green">011</FONT>    {<a name="line.11"></a>
+<FONT color="green">012</FONT>        /**<a name="line.12"></a>
+<FONT color="green">013</FONT>         * Return a list of libraries available from a common location<a name="line.13"></a>
+<FONT color="green">014</FONT>         *<a name="line.14"></a>
+<FONT color="green">015</FONT>         * @return a list of libraries available from a common location<a name="line.15"></a>
+<FONT color="green">016</FONT>         */<a name="line.16"></a>
+<FONT color="green">017</FONT>        String[] getLibraries();<a name="line.17"></a>
+<FONT color="green">018</FONT>        /**<a name="line.18"></a>
+<FONT color="green">019</FONT>         * Return the string encoded sha1 hash for each library in the returned list<a name="line.19"></a>
+<FONT color="green">020</FONT>         *<a name="line.20"></a>
+<FONT color="green">021</FONT>         * @return the string encoded sha1 hash for each library in the returned list<a name="line.21"></a>
+<FONT color="green">022</FONT>         */<a name="line.22"></a>
+<FONT color="green">023</FONT>        String[] getHashes();<a name="line.23"></a>
+<FONT color="green">024</FONT>        /**<a name="line.24"></a>
+<FONT color="green">025</FONT>         * Return the root URL format string from which this library set can be obtained<a name="line.25"></a>
+<FONT color="green">026</FONT>         * There needs to be a single %s string substitution which is the library name<a name="line.26"></a>
+<FONT color="green">027</FONT>         * @return the root URL format string from which this library set can be obtained<a name="line.27"></a>
+<FONT color="green">028</FONT>         */<a name="line.28"></a>
+<FONT color="green">029</FONT>        String getRootURL();<a name="line.29"></a>
+<FONT color="green">030</FONT>    }<a name="line.30"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

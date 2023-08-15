@@ -1,0 +1,89 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.particle;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.world.World;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class EntitySplashFX extends EntityRainFX<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        public EntitySplashFX(World par1World, double par2, double par4, double par6, double par8, double par10, double par12)<a name="line.10"></a>
+<FONT color="green">011</FONT>        {<a name="line.11"></a>
+<FONT color="green">012</FONT>            super(par1World, par2, par4, par6);<a name="line.12"></a>
+<FONT color="green">013</FONT>            this.particleGravity = 0.04F;<a name="line.13"></a>
+<FONT color="green">014</FONT>            this.setParticleTextureIndex(this.getParticleTextureIndex() + 1);<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>            if (par10 == 0.0D &amp;&amp; (par8 != 0.0D || par12 != 0.0D))<a name="line.16"></a>
+<FONT color="green">017</FONT>            {<a name="line.17"></a>
+<FONT color="green">018</FONT>                this.motionX = par8;<a name="line.18"></a>
+<FONT color="green">019</FONT>                this.motionY = par10 + 0.1D;<a name="line.19"></a>
+<FONT color="green">020</FONT>                this.motionZ = par12;<a name="line.20"></a>
+<FONT color="green">021</FONT>            }<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    }<a name="line.23"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

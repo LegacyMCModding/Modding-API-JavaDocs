@@ -1,0 +1,376 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.item.crafting;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.ArrayList;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.util.Collections;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.HashMap;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.List;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.block.Block;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.inventory.InventoryCrafting;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.item.Item;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.item.ItemStack;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.world.World;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>    public class CraftingManager<a name="line.13"></a>
+<FONT color="green">014</FONT>    {<a name="line.14"></a>
+<FONT color="green">015</FONT>        /** The static instance of this class */<a name="line.15"></a>
+<FONT color="green">016</FONT>        private static final CraftingManager instance = new CraftingManager();<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        /** A list of all the recipes added */<a name="line.18"></a>
+<FONT color="green">019</FONT>        private List recipes = new ArrayList();<a name="line.19"></a>
+<FONT color="green">020</FONT>    <a name="line.20"></a>
+<FONT color="green">021</FONT>        /**<a name="line.21"></a>
+<FONT color="green">022</FONT>         * Returns the static instance of this class<a name="line.22"></a>
+<FONT color="green">023</FONT>         */<a name="line.23"></a>
+<FONT color="green">024</FONT>        public static final CraftingManager getInstance()<a name="line.24"></a>
+<FONT color="green">025</FONT>        {<a name="line.25"></a>
+<FONT color="green">026</FONT>            return instance;<a name="line.26"></a>
+<FONT color="green">027</FONT>        }<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>        private CraftingManager()<a name="line.29"></a>
+<FONT color="green">030</FONT>        {<a name="line.30"></a>
+<FONT color="green">031</FONT>            (new RecipesTools()).addRecipes(this);<a name="line.31"></a>
+<FONT color="green">032</FONT>            (new RecipesWeapons()).addRecipes(this);<a name="line.32"></a>
+<FONT color="green">033</FONT>            (new RecipesIngots()).addRecipes(this);<a name="line.33"></a>
+<FONT color="green">034</FONT>            (new RecipesFood()).addRecipes(this);<a name="line.34"></a>
+<FONT color="green">035</FONT>            (new RecipesCrafting()).addRecipes(this);<a name="line.35"></a>
+<FONT color="green">036</FONT>            (new RecipesArmor()).addRecipes(this);<a name="line.36"></a>
+<FONT color="green">037</FONT>            (new RecipesDyes()).addRecipes(this);<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.recipes.add(new RecipesArmorDyes());<a name="line.38"></a>
+<FONT color="green">039</FONT>            this.recipes.add(new RecipesMapCloning());<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.recipes.add(new RecipesMapExtending());<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.recipes.add(new RecipeFireworks());<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.func_92051_a(new ItemStack(Item.paper, 3), new Object[] {"###", '#', Item.reed});<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.addShapelessRecipe(new ItemStack(Item.book, 1), new Object[] {Item.paper, Item.paper, Item.paper, Item.leather});<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.addShapelessRecipe(new ItemStack(Item.writableBook, 1), new Object[] {Item.book, new ItemStack(Item.dyePowder, 1, 0), Item.feather});<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.func_92051_a(new ItemStack(Block.fence, 2), new Object[] {"###", "###", '#', Item.stick});<a name="line.45"></a>
+<FONT color="green">046</FONT>            this.func_92051_a(new ItemStack(Block.cobblestoneWall, 6, 0), new Object[] {"###", "###", '#', Block.cobblestone});<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.func_92051_a(new ItemStack(Block.cobblestoneWall, 6, 1), new Object[] {"###", "###", '#', Block.cobblestoneMossy});<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.func_92051_a(new ItemStack(Block.netherFence, 6), new Object[] {"###", "###", '#', Block.netherBrick});<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.func_92051_a(new ItemStack(Block.fenceGate, 1), new Object[] {"#W#", "#W#", '#', Item.stick, 'W', Block.planks});<a name="line.49"></a>
+<FONT color="green">050</FONT>            this.func_92051_a(new ItemStack(Block.jukebox, 1), new Object[] {"###", "#X#", "###", '#', Block.planks, 'X', Item.diamond});<a name="line.50"></a>
+<FONT color="green">051</FONT>            this.func_92051_a(new ItemStack(Block.music, 1), new Object[] {"###", "#X#", "###", '#', Block.planks, 'X', Item.redstone});<a name="line.51"></a>
+<FONT color="green">052</FONT>            this.func_92051_a(new ItemStack(Block.bookShelf, 1), new Object[] {"###", "XXX", "###", '#', Block.planks, 'X', Item.book});<a name="line.52"></a>
+<FONT color="green">053</FONT>            this.func_92051_a(new ItemStack(Block.blockSnow, 1), new Object[] {"##", "##", '#', Item.snowball});<a name="line.53"></a>
+<FONT color="green">054</FONT>            this.func_92051_a(new ItemStack(Block.blockClay, 1), new Object[] {"##", "##", '#', Item.clay});<a name="line.54"></a>
+<FONT color="green">055</FONT>            this.func_92051_a(new ItemStack(Block.brick, 1), new Object[] {"##", "##", '#', Item.brick});<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.func_92051_a(new ItemStack(Block.glowStone, 1), new Object[] {"##", "##", '#', Item.lightStoneDust});<a name="line.56"></a>
+<FONT color="green">057</FONT>            this.func_92051_a(new ItemStack(Block.cloth, 1), new Object[] {"##", "##", '#', Item.silk});<a name="line.57"></a>
+<FONT color="green">058</FONT>            this.func_92051_a(new ItemStack(Block.tnt, 1), new Object[] {"X#X", "#X#", "X#X", 'X', Item.gunpowder, '#', Block.sand});<a name="line.58"></a>
+<FONT color="green">059</FONT>            this.func_92051_a(new ItemStack(Block.stoneSingleSlab, 6, 3), new Object[] {"###", '#', Block.cobblestone});<a name="line.59"></a>
+<FONT color="green">060</FONT>            this.func_92051_a(new ItemStack(Block.stoneSingleSlab, 6, 0), new Object[] {"###", '#', Block.stone});<a name="line.60"></a>
+<FONT color="green">061</FONT>            this.func_92051_a(new ItemStack(Block.stoneSingleSlab, 6, 1), new Object[] {"###", '#', Block.sandStone});<a name="line.61"></a>
+<FONT color="green">062</FONT>            this.func_92051_a(new ItemStack(Block.stoneSingleSlab, 6, 4), new Object[] {"###", '#', Block.brick});<a name="line.62"></a>
+<FONT color="green">063</FONT>            this.func_92051_a(new ItemStack(Block.stoneSingleSlab, 6, 5), new Object[] {"###", '#', Block.stoneBrick});<a name="line.63"></a>
+<FONT color="green">064</FONT>            this.func_92051_a(new ItemStack(Block.stoneSingleSlab, 6, 6), new Object[] {"###", '#', Block.netherBrick});<a name="line.64"></a>
+<FONT color="green">065</FONT>            this.func_92051_a(new ItemStack(Block.woodSingleSlab, 6, 0), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 0)});<a name="line.65"></a>
+<FONT color="green">066</FONT>            this.func_92051_a(new ItemStack(Block.woodSingleSlab, 6, 2), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 2)});<a name="line.66"></a>
+<FONT color="green">067</FONT>            this.func_92051_a(new ItemStack(Block.woodSingleSlab, 6, 1), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 1)});<a name="line.67"></a>
+<FONT color="green">068</FONT>            this.func_92051_a(new ItemStack(Block.woodSingleSlab, 6, 3), new Object[] {"###", '#', new ItemStack(Block.planks, 1, 3)});<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.func_92051_a(new ItemStack(Block.ladder, 3), new Object[] {"# #", "###", "# #", '#', Item.stick});<a name="line.69"></a>
+<FONT color="green">070</FONT>            this.func_92051_a(new ItemStack(Item.doorWood, 1), new Object[] {"##", "##", "##", '#', Block.planks});<a name="line.70"></a>
+<FONT color="green">071</FONT>            this.func_92051_a(new ItemStack(Block.trapdoor, 2), new Object[] {"###", "###", '#', Block.planks});<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.func_92051_a(new ItemStack(Item.doorSteel, 1), new Object[] {"##", "##", "##", '#', Item.ingotIron});<a name="line.72"></a>
+<FONT color="green">073</FONT>            this.func_92051_a(new ItemStack(Item.sign, 3), new Object[] {"###", "###", " X ", '#', Block.planks, 'X', Item.stick});<a name="line.73"></a>
+<FONT color="green">074</FONT>            this.func_92051_a(new ItemStack(Item.cake, 1), new Object[] {"AAA", "BEB", "CCC", 'A', Item.bucketMilk, 'B', Item.sugar, 'C', Item.wheat, 'E', Item.egg});<a name="line.74"></a>
+<FONT color="green">075</FONT>            this.func_92051_a(new ItemStack(Item.sugar, 1), new Object[] {"#", '#', Item.reed});<a name="line.75"></a>
+<FONT color="green">076</FONT>            this.func_92051_a(new ItemStack(Block.planks, 4, 0), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 0)});<a name="line.76"></a>
+<FONT color="green">077</FONT>            this.func_92051_a(new ItemStack(Block.planks, 4, 1), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 1)});<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.func_92051_a(new ItemStack(Block.planks, 4, 2), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 2)});<a name="line.78"></a>
+<FONT color="green">079</FONT>            this.func_92051_a(new ItemStack(Block.planks, 4, 3), new Object[] {"#", '#', new ItemStack(Block.wood, 1, 3)});<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.func_92051_a(new ItemStack(Item.stick, 4), new Object[] {"#", "#", '#', Block.planks});<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.func_92051_a(new ItemStack(Block.torchWood, 4), new Object[] {"X", "#", 'X', Item.coal, '#', Item.stick});<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.func_92051_a(new ItemStack(Block.torchWood, 4), new Object[] {"X", "#", 'X', new ItemStack(Item.coal, 1, 1), '#', Item.stick});<a name="line.82"></a>
+<FONT color="green">083</FONT>            this.func_92051_a(new ItemStack(Item.bowlEmpty, 4), new Object[] {"# #", " # ", '#', Block.planks});<a name="line.83"></a>
+<FONT color="green">084</FONT>            this.func_92051_a(new ItemStack(Item.glassBottle, 3), new Object[] {"# #", " # ", '#', Block.glass});<a name="line.84"></a>
+<FONT color="green">085</FONT>            this.func_92051_a(new ItemStack(Block.rail, 16), new Object[] {"X X", "X#X", "X X", 'X', Item.ingotIron, '#', Item.stick});<a name="line.85"></a>
+<FONT color="green">086</FONT>            this.func_92051_a(new ItemStack(Block.railPowered, 6), new Object[] {"X X", "X#X", "XRX", 'X', Item.ingotGold, 'R', Item.redstone, '#', Item.stick});<a name="line.86"></a>
+<FONT color="green">087</FONT>            this.func_92051_a(new ItemStack(Block.railDetector, 6), new Object[] {"X X", "X#X", "XRX", 'X', Item.ingotIron, 'R', Item.redstone, '#', Block.pressurePlateStone});<a name="line.87"></a>
+<FONT color="green">088</FONT>            this.func_92051_a(new ItemStack(Item.minecartEmpty, 1), new Object[] {"# #", "###", '#', Item.ingotIron});<a name="line.88"></a>
+<FONT color="green">089</FONT>            this.func_92051_a(new ItemStack(Item.cauldron, 1), new Object[] {"# #", "# #", "###", '#', Item.ingotIron});<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.func_92051_a(new ItemStack(Item.brewingStand, 1), new Object[] {" B ", "###", '#', Block.cobblestone, 'B', Item.blazeRod});<a name="line.90"></a>
+<FONT color="green">091</FONT>            this.func_92051_a(new ItemStack(Block.pumpkinLantern, 1), new Object[] {"A", "B", 'A', Block.pumpkin, 'B', Block.torchWood});<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.func_92051_a(new ItemStack(Item.minecartCrate, 1), new Object[] {"A", "B", 'A', Block.chest, 'B', Item.minecartEmpty});<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.func_92051_a(new ItemStack(Item.minecartPowered, 1), new Object[] {"A", "B", 'A', Block.stoneOvenIdle, 'B', Item.minecartEmpty});<a name="line.93"></a>
+<FONT color="green">094</FONT>            this.func_92051_a(new ItemStack(Item.boat, 1), new Object[] {"# #", "###", '#', Block.planks});<a name="line.94"></a>
+<FONT color="green">095</FONT>            this.func_92051_a(new ItemStack(Item.bucketEmpty, 1), new Object[] {"# #", " # ", '#', Item.ingotIron});<a name="line.95"></a>
+<FONT color="green">096</FONT>            this.func_92051_a(new ItemStack(Item.flowerPot, 1), new Object[] {"# #", " # ", '#', Item.brick});<a name="line.96"></a>
+<FONT color="green">097</FONT>            this.func_92051_a(new ItemStack(Item.flintAndSteel, 1), new Object[] {"A ", " B", 'A', Item.ingotIron, 'B', Item.flint});<a name="line.97"></a>
+<FONT color="green">098</FONT>            this.func_92051_a(new ItemStack(Item.bread, 1), new Object[] {"###", '#', Item.wheat});<a name="line.98"></a>
+<FONT color="green">099</FONT>            this.func_92051_a(new ItemStack(Block.stairCompactPlanks, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 0)});<a name="line.99"></a>
+<FONT color="green">100</FONT>            this.func_92051_a(new ItemStack(Block.stairsWoodBirch, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 2)});<a name="line.100"></a>
+<FONT color="green">101</FONT>            this.func_92051_a(new ItemStack(Block.stairsWoodSpruce, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 1)});<a name="line.101"></a>
+<FONT color="green">102</FONT>            this.func_92051_a(new ItemStack(Block.stairsWoodJungle, 4), new Object[] {"#  ", "## ", "###", '#', new ItemStack(Block.planks, 1, 3)});<a name="line.102"></a>
+<FONT color="green">103</FONT>            this.func_92051_a(new ItemStack(Item.fishingRod, 1), new Object[] {"  #", " #X", "# X", '#', Item.stick, 'X', Item.silk});<a name="line.103"></a>
+<FONT color="green">104</FONT>            this.func_92051_a(new ItemStack(Item.carrotOnAStick, 1), new Object[] {"# ", " X", '#', Item.fishingRod, 'X', Item.carrot}).func_92048_c();<a name="line.104"></a>
+<FONT color="green">105</FONT>            this.func_92051_a(new ItemStack(Block.stairCompactCobblestone, 4), new Object[] {"#  ", "## ", "###", '#', Block.cobblestone});<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.func_92051_a(new ItemStack(Block.stairsBrick, 4), new Object[] {"#  ", "## ", "###", '#', Block.brick});<a name="line.106"></a>
+<FONT color="green">107</FONT>            this.func_92051_a(new ItemStack(Block.stairsStoneBrickSmooth, 4), new Object[] {"#  ", "## ", "###", '#', Block.stoneBrick});<a name="line.107"></a>
+<FONT color="green">108</FONT>            this.func_92051_a(new ItemStack(Block.stairsNetherBrick, 4), new Object[] {"#  ", "## ", "###", '#', Block.netherBrick});<a name="line.108"></a>
+<FONT color="green">109</FONT>            this.func_92051_a(new ItemStack(Block.stairsSandStone, 4), new Object[] {"#  ", "## ", "###", '#', Block.sandStone});<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.func_92051_a(new ItemStack(Item.painting, 1), new Object[] {"###", "#X#", "###", '#', Item.stick, 'X', Block.cloth});<a name="line.110"></a>
+<FONT color="green">111</FONT>            this.func_92051_a(new ItemStack(Item.itemFrame, 1), new Object[] {"###", "#X#", "###", '#', Item.stick, 'X', Item.leather});<a name="line.111"></a>
+<FONT color="green">112</FONT>            this.func_92051_a(new ItemStack(Item.appleGold, 1, 0), new Object[] {"###", "#X#", "###", '#', Item.goldNugget, 'X', Item.appleRed});<a name="line.112"></a>
+<FONT color="green">113</FONT>            this.func_92051_a(new ItemStack(Item.appleGold, 1, 1), new Object[] {"###", "#X#", "###", '#', Block.blockGold, 'X', Item.appleRed});<a name="line.113"></a>
+<FONT color="green">114</FONT>            this.func_92051_a(new ItemStack(Item.goldenCarrot, 1, 0), new Object[] {"###", "#X#", "###", '#', Item.goldNugget, 'X', Item.carrot});<a name="line.114"></a>
+<FONT color="green">115</FONT>            this.func_92051_a(new ItemStack(Block.lever, 1), new Object[] {"X", "#", '#', Block.cobblestone, 'X', Item.stick});<a name="line.115"></a>
+<FONT color="green">116</FONT>            this.func_92051_a(new ItemStack(Block.tripWireSource, 2), new Object[] {"I", "S", "#", '#', Block.planks, 'S', Item.stick, 'I', Item.ingotIron});<a name="line.116"></a>
+<FONT color="green">117</FONT>            this.func_92051_a(new ItemStack(Block.torchRedstoneActive, 1), new Object[] {"X", "#", '#', Item.stick, 'X', Item.redstone});<a name="line.117"></a>
+<FONT color="green">118</FONT>            this.func_92051_a(new ItemStack(Item.redstoneRepeater, 1), new Object[] {"#X#", "III", '#', Block.torchRedstoneActive, 'X', Item.redstone, 'I', Block.stone});<a name="line.118"></a>
+<FONT color="green">119</FONT>            this.func_92051_a(new ItemStack(Item.pocketSundial, 1), new Object[] {" # ", "#X#", " # ", '#', Item.ingotGold, 'X', Item.redstone});<a name="line.119"></a>
+<FONT color="green">120</FONT>            this.func_92051_a(new ItemStack(Item.compass, 1), new Object[] {" # ", "#X#", " # ", '#', Item.ingotIron, 'X', Item.redstone});<a name="line.120"></a>
+<FONT color="green">121</FONT>            this.func_92051_a(new ItemStack(Item.emptyMap, 1), new Object[] {"###", "#X#", "###", '#', Item.paper, 'X', Item.compass});<a name="line.121"></a>
+<FONT color="green">122</FONT>            this.func_92051_a(new ItemStack(Block.stoneButton, 1), new Object[] {"#", '#', Block.stone});<a name="line.122"></a>
+<FONT color="green">123</FONT>            this.func_92051_a(new ItemStack(Block.woodenButton, 1), new Object[] {"#", '#', Block.planks});<a name="line.123"></a>
+<FONT color="green">124</FONT>            this.func_92051_a(new ItemStack(Block.pressurePlateStone, 1), new Object[] {"##", '#', Block.stone});<a name="line.124"></a>
+<FONT color="green">125</FONT>            this.func_92051_a(new ItemStack(Block.pressurePlatePlanks, 1), new Object[] {"##", '#', Block.planks});<a name="line.125"></a>
+<FONT color="green">126</FONT>            this.func_92051_a(new ItemStack(Block.dispenser, 1), new Object[] {"###", "#X#", "#R#", '#', Block.cobblestone, 'X', Item.bow, 'R', Item.redstone});<a name="line.126"></a>
+<FONT color="green">127</FONT>            this.func_92051_a(new ItemStack(Block.pistonBase, 1), new Object[] {"TTT", "#X#", "#R#", '#', Block.cobblestone, 'X', Item.ingotIron, 'R', Item.redstone, 'T', Block.planks});<a name="line.127"></a>
+<FONT color="green">128</FONT>            this.func_92051_a(new ItemStack(Block.pistonStickyBase, 1), new Object[] {"S", "P", 'S', Item.slimeBall, 'P', Block.pistonBase});<a name="line.128"></a>
+<FONT color="green">129</FONT>            this.func_92051_a(new ItemStack(Item.bed, 1), new Object[] {"###", "XXX", '#', Block.cloth, 'X', Block.planks});<a name="line.129"></a>
+<FONT color="green">130</FONT>            this.func_92051_a(new ItemStack(Block.enchantmentTable, 1), new Object[] {" B ", "D#D", "###", '#', Block.obsidian, 'B', Item.book, 'D', Item.diamond});<a name="line.130"></a>
+<FONT color="green">131</FONT>            this.func_92051_a(new ItemStack(Block.anvil, 1), new Object[] {"III", " i ", "iii", 'I', Block.blockSteel, 'i', Item.ingotIron});<a name="line.131"></a>
+<FONT color="green">132</FONT>            this.addShapelessRecipe(new ItemStack(Item.eyeOfEnder, 1), new Object[] {Item.enderPearl, Item.blazePowder});<a name="line.132"></a>
+<FONT color="green">133</FONT>            this.addShapelessRecipe(new ItemStack(Item.fireballCharge, 3), new Object[] {Item.gunpowder, Item.blazePowder, Item.coal});<a name="line.133"></a>
+<FONT color="green">134</FONT>            this.addShapelessRecipe(new ItemStack(Item.fireballCharge, 3), new Object[] {Item.gunpowder, Item.blazePowder, new ItemStack(Item.coal, 1, 1)});<a name="line.134"></a>
+<FONT color="green">135</FONT>            Collections.sort(this.recipes, new RecipeSorter(this));<a name="line.135"></a>
+<FONT color="green">136</FONT>            System.out.println(this.recipes.size() + " recipes");<a name="line.136"></a>
+<FONT color="green">137</FONT>        }<a name="line.137"></a>
+<FONT color="green">138</FONT>    <a name="line.138"></a>
+<FONT color="green">139</FONT>        public ShapedRecipes func_92051_a(ItemStack par1ItemStack, Object ... par2ArrayOfObj)<a name="line.139"></a>
+<FONT color="green">140</FONT>        {<a name="line.140"></a>
+<FONT color="green">141</FONT>            String var3 = "";<a name="line.141"></a>
+<FONT color="green">142</FONT>            int var4 = 0;<a name="line.142"></a>
+<FONT color="green">143</FONT>            int var5 = 0;<a name="line.143"></a>
+<FONT color="green">144</FONT>            int var6 = 0;<a name="line.144"></a>
+<FONT color="green">145</FONT>    <a name="line.145"></a>
+<FONT color="green">146</FONT>            if (par2ArrayOfObj[var4] instanceof String[])<a name="line.146"></a>
+<FONT color="green">147</FONT>            {<a name="line.147"></a>
+<FONT color="green">148</FONT>                String[] var7 = (String[])((String[])par2ArrayOfObj[var4++]);<a name="line.148"></a>
+<FONT color="green">149</FONT>    <a name="line.149"></a>
+<FONT color="green">150</FONT>                for (int var8 = 0; var8 &lt; var7.length; ++var8)<a name="line.150"></a>
+<FONT color="green">151</FONT>                {<a name="line.151"></a>
+<FONT color="green">152</FONT>                    String var9 = var7[var8];<a name="line.152"></a>
+<FONT color="green">153</FONT>                    ++var6;<a name="line.153"></a>
+<FONT color="green">154</FONT>                    var5 = var9.length();<a name="line.154"></a>
+<FONT color="green">155</FONT>                    var3 = var3 + var9;<a name="line.155"></a>
+<FONT color="green">156</FONT>                }<a name="line.156"></a>
+<FONT color="green">157</FONT>            }<a name="line.157"></a>
+<FONT color="green">158</FONT>            else<a name="line.158"></a>
+<FONT color="green">159</FONT>            {<a name="line.159"></a>
+<FONT color="green">160</FONT>                while (par2ArrayOfObj[var4] instanceof String)<a name="line.160"></a>
+<FONT color="green">161</FONT>                {<a name="line.161"></a>
+<FONT color="green">162</FONT>                    String var11 = (String)par2ArrayOfObj[var4++];<a name="line.162"></a>
+<FONT color="green">163</FONT>                    ++var6;<a name="line.163"></a>
+<FONT color="green">164</FONT>                    var5 = var11.length();<a name="line.164"></a>
+<FONT color="green">165</FONT>                    var3 = var3 + var11;<a name="line.165"></a>
+<FONT color="green">166</FONT>                }<a name="line.166"></a>
+<FONT color="green">167</FONT>            }<a name="line.167"></a>
+<FONT color="green">168</FONT>    <a name="line.168"></a>
+<FONT color="green">169</FONT>            HashMap var12;<a name="line.169"></a>
+<FONT color="green">170</FONT>    <a name="line.170"></a>
+<FONT color="green">171</FONT>            for (var12 = new HashMap(); var4 &lt; par2ArrayOfObj.length; var4 += 2)<a name="line.171"></a>
+<FONT color="green">172</FONT>            {<a name="line.172"></a>
+<FONT color="green">173</FONT>                Character var13 = (Character)par2ArrayOfObj[var4];<a name="line.173"></a>
+<FONT color="green">174</FONT>                ItemStack var14 = null;<a name="line.174"></a>
+<FONT color="green">175</FONT>    <a name="line.175"></a>
+<FONT color="green">176</FONT>                if (par2ArrayOfObj[var4 + 1] instanceof Item)<a name="line.176"></a>
+<FONT color="green">177</FONT>                {<a name="line.177"></a>
+<FONT color="green">178</FONT>                    var14 = new ItemStack((Item)par2ArrayOfObj[var4 + 1]);<a name="line.178"></a>
+<FONT color="green">179</FONT>                }<a name="line.179"></a>
+<FONT color="green">180</FONT>                else if (par2ArrayOfObj[var4 + 1] instanceof Block)<a name="line.180"></a>
+<FONT color="green">181</FONT>                {<a name="line.181"></a>
+<FONT color="green">182</FONT>                    var14 = new ItemStack((Block)par2ArrayOfObj[var4 + 1], 1, -1);<a name="line.182"></a>
+<FONT color="green">183</FONT>                }<a name="line.183"></a>
+<FONT color="green">184</FONT>                else if (par2ArrayOfObj[var4 + 1] instanceof ItemStack)<a name="line.184"></a>
+<FONT color="green">185</FONT>                {<a name="line.185"></a>
+<FONT color="green">186</FONT>                    var14 = (ItemStack)par2ArrayOfObj[var4 + 1];<a name="line.186"></a>
+<FONT color="green">187</FONT>                }<a name="line.187"></a>
+<FONT color="green">188</FONT>    <a name="line.188"></a>
+<FONT color="green">189</FONT>                var12.put(var13, var14);<a name="line.189"></a>
+<FONT color="green">190</FONT>            }<a name="line.190"></a>
+<FONT color="green">191</FONT>    <a name="line.191"></a>
+<FONT color="green">192</FONT>            ItemStack[] var15 = new ItemStack[var5 * var6];<a name="line.192"></a>
+<FONT color="green">193</FONT>    <a name="line.193"></a>
+<FONT color="green">194</FONT>            for (int var16 = 0; var16 &lt; var5 * var6; ++var16)<a name="line.194"></a>
+<FONT color="green">195</FONT>            {<a name="line.195"></a>
+<FONT color="green">196</FONT>                char var10 = var3.charAt(var16);<a name="line.196"></a>
+<FONT color="green">197</FONT>    <a name="line.197"></a>
+<FONT color="green">198</FONT>                if (var12.containsKey(Character.valueOf(var10)))<a name="line.198"></a>
+<FONT color="green">199</FONT>                {<a name="line.199"></a>
+<FONT color="green">200</FONT>                    var15[var16] = ((ItemStack)var12.get(Character.valueOf(var10))).copy();<a name="line.200"></a>
+<FONT color="green">201</FONT>                }<a name="line.201"></a>
+<FONT color="green">202</FONT>                else<a name="line.202"></a>
+<FONT color="green">203</FONT>                {<a name="line.203"></a>
+<FONT color="green">204</FONT>                    var15[var16] = null;<a name="line.204"></a>
+<FONT color="green">205</FONT>                }<a name="line.205"></a>
+<FONT color="green">206</FONT>            }<a name="line.206"></a>
+<FONT color="green">207</FONT>    <a name="line.207"></a>
+<FONT color="green">208</FONT>            ShapedRecipes var17 = new ShapedRecipes(var5, var6, var15, par1ItemStack);<a name="line.208"></a>
+<FONT color="green">209</FONT>            this.recipes.add(var17);<a name="line.209"></a>
+<FONT color="green">210</FONT>            return var17;<a name="line.210"></a>
+<FONT color="green">211</FONT>        }<a name="line.211"></a>
+<FONT color="green">212</FONT>    <a name="line.212"></a>
+<FONT color="green">213</FONT>        public void addShapelessRecipe(ItemStack par1ItemStack, Object ... par2ArrayOfObj)<a name="line.213"></a>
+<FONT color="green">214</FONT>        {<a name="line.214"></a>
+<FONT color="green">215</FONT>            ArrayList var3 = new ArrayList();<a name="line.215"></a>
+<FONT color="green">216</FONT>            Object[] var4 = par2ArrayOfObj;<a name="line.216"></a>
+<FONT color="green">217</FONT>            int var5 = par2ArrayOfObj.length;<a name="line.217"></a>
+<FONT color="green">218</FONT>    <a name="line.218"></a>
+<FONT color="green">219</FONT>            for (int var6 = 0; var6 &lt; var5; ++var6)<a name="line.219"></a>
+<FONT color="green">220</FONT>            {<a name="line.220"></a>
+<FONT color="green">221</FONT>                Object var7 = var4[var6];<a name="line.221"></a>
+<FONT color="green">222</FONT>    <a name="line.222"></a>
+<FONT color="green">223</FONT>                if (var7 instanceof ItemStack)<a name="line.223"></a>
+<FONT color="green">224</FONT>                {<a name="line.224"></a>
+<FONT color="green">225</FONT>                    var3.add(((ItemStack)var7).copy());<a name="line.225"></a>
+<FONT color="green">226</FONT>                }<a name="line.226"></a>
+<FONT color="green">227</FONT>                else if (var7 instanceof Item)<a name="line.227"></a>
+<FONT color="green">228</FONT>                {<a name="line.228"></a>
+<FONT color="green">229</FONT>                    var3.add(new ItemStack((Item)var7));<a name="line.229"></a>
+<FONT color="green">230</FONT>                }<a name="line.230"></a>
+<FONT color="green">231</FONT>                else<a name="line.231"></a>
+<FONT color="green">232</FONT>                {<a name="line.232"></a>
+<FONT color="green">233</FONT>                    if (!(var7 instanceof Block))<a name="line.233"></a>
+<FONT color="green">234</FONT>                    {<a name="line.234"></a>
+<FONT color="green">235</FONT>                        throw new RuntimeException("Invalid shapeless recipy!");<a name="line.235"></a>
+<FONT color="green">236</FONT>                    }<a name="line.236"></a>
+<FONT color="green">237</FONT>    <a name="line.237"></a>
+<FONT color="green">238</FONT>                    var3.add(new ItemStack((Block)var7));<a name="line.238"></a>
+<FONT color="green">239</FONT>                }<a name="line.239"></a>
+<FONT color="green">240</FONT>            }<a name="line.240"></a>
+<FONT color="green">241</FONT>    <a name="line.241"></a>
+<FONT color="green">242</FONT>            this.recipes.add(new ShapelessRecipes(par1ItemStack, var3));<a name="line.242"></a>
+<FONT color="green">243</FONT>        }<a name="line.243"></a>
+<FONT color="green">244</FONT>    <a name="line.244"></a>
+<FONT color="green">245</FONT>        public ItemStack findMatchingRecipe(InventoryCrafting par1InventoryCrafting, World par2World)<a name="line.245"></a>
+<FONT color="green">246</FONT>        {<a name="line.246"></a>
+<FONT color="green">247</FONT>            int var3 = 0;<a name="line.247"></a>
+<FONT color="green">248</FONT>            ItemStack var4 = null;<a name="line.248"></a>
+<FONT color="green">249</FONT>            ItemStack var5 = null;<a name="line.249"></a>
+<FONT color="green">250</FONT>            int var6;<a name="line.250"></a>
+<FONT color="green">251</FONT>    <a name="line.251"></a>
+<FONT color="green">252</FONT>            for (var6 = 0; var6 &lt; par1InventoryCrafting.getSizeInventory(); ++var6)<a name="line.252"></a>
+<FONT color="green">253</FONT>            {<a name="line.253"></a>
+<FONT color="green">254</FONT>                ItemStack var7 = par1InventoryCrafting.getStackInSlot(var6);<a name="line.254"></a>
+<FONT color="green">255</FONT>    <a name="line.255"></a>
+<FONT color="green">256</FONT>                if (var7 != null)<a name="line.256"></a>
+<FONT color="green">257</FONT>                {<a name="line.257"></a>
+<FONT color="green">258</FONT>                    if (var3 == 0)<a name="line.258"></a>
+<FONT color="green">259</FONT>                    {<a name="line.259"></a>
+<FONT color="green">260</FONT>                        var4 = var7;<a name="line.260"></a>
+<FONT color="green">261</FONT>                    }<a name="line.261"></a>
+<FONT color="green">262</FONT>    <a name="line.262"></a>
+<FONT color="green">263</FONT>                    if (var3 == 1)<a name="line.263"></a>
+<FONT color="green">264</FONT>                    {<a name="line.264"></a>
+<FONT color="green">265</FONT>                        var5 = var7;<a name="line.265"></a>
+<FONT color="green">266</FONT>                    }<a name="line.266"></a>
+<FONT color="green">267</FONT>    <a name="line.267"></a>
+<FONT color="green">268</FONT>                    ++var3;<a name="line.268"></a>
+<FONT color="green">269</FONT>                }<a name="line.269"></a>
+<FONT color="green">270</FONT>            }<a name="line.270"></a>
+<FONT color="green">271</FONT>    <a name="line.271"></a>
+<FONT color="green">272</FONT>            if (var3 == 2 &amp;&amp; var4.itemID == var5.itemID &amp;&amp; var4.stackSize == 1 &amp;&amp; var5.stackSize == 1 &amp;&amp; Item.itemsList[var4.itemID].isRepairable())<a name="line.272"></a>
+<FONT color="green">273</FONT>            {<a name="line.273"></a>
+<FONT color="green">274</FONT>                Item var11 = Item.itemsList[var4.itemID];<a name="line.274"></a>
+<FONT color="green">275</FONT>                int var13 = var11.getMaxDamage() - var4.getItemDamageForDisplay();<a name="line.275"></a>
+<FONT color="green">276</FONT>                int var8 = var11.getMaxDamage() - var5.getItemDamageForDisplay();<a name="line.276"></a>
+<FONT color="green">277</FONT>                int var9 = var13 + var8 + var11.getMaxDamage() * 5 / 100;<a name="line.277"></a>
+<FONT color="green">278</FONT>                int var10 = var11.getMaxDamage() - var9;<a name="line.278"></a>
+<FONT color="green">279</FONT>    <a name="line.279"></a>
+<FONT color="green">280</FONT>                if (var10 &lt; 0)<a name="line.280"></a>
+<FONT color="green">281</FONT>                {<a name="line.281"></a>
+<FONT color="green">282</FONT>                    var10 = 0;<a name="line.282"></a>
+<FONT color="green">283</FONT>                }<a name="line.283"></a>
+<FONT color="green">284</FONT>    <a name="line.284"></a>
+<FONT color="green">285</FONT>                return new ItemStack(var4.itemID, 1, var10);<a name="line.285"></a>
+<FONT color="green">286</FONT>            }<a name="line.286"></a>
+<FONT color="green">287</FONT>            else<a name="line.287"></a>
+<FONT color="green">288</FONT>            {<a name="line.288"></a>
+<FONT color="green">289</FONT>                for (var6 = 0; var6 &lt; this.recipes.size(); ++var6)<a name="line.289"></a>
+<FONT color="green">290</FONT>                {<a name="line.290"></a>
+<FONT color="green">291</FONT>                    IRecipe var12 = (IRecipe)this.recipes.get(var6);<a name="line.291"></a>
+<FONT color="green">292</FONT>    <a name="line.292"></a>
+<FONT color="green">293</FONT>                    if (var12.matches(par1InventoryCrafting, par2World))<a name="line.293"></a>
+<FONT color="green">294</FONT>                    {<a name="line.294"></a>
+<FONT color="green">295</FONT>                        return var12.getCraftingResult(par1InventoryCrafting);<a name="line.295"></a>
+<FONT color="green">296</FONT>                    }<a name="line.296"></a>
+<FONT color="green">297</FONT>                }<a name="line.297"></a>
+<FONT color="green">298</FONT>    <a name="line.298"></a>
+<FONT color="green">299</FONT>                return null;<a name="line.299"></a>
+<FONT color="green">300</FONT>            }<a name="line.300"></a>
+<FONT color="green">301</FONT>        }<a name="line.301"></a>
+<FONT color="green">302</FONT>    <a name="line.302"></a>
+<FONT color="green">303</FONT>        /**<a name="line.303"></a>
+<FONT color="green">304</FONT>         * returns the List&lt;&gt; of all recipes<a name="line.304"></a>
+<FONT color="green">305</FONT>         */<a name="line.305"></a>
+<FONT color="green">306</FONT>        public List getRecipeList()<a name="line.306"></a>
+<FONT color="green">307</FONT>        {<a name="line.307"></a>
+<FONT color="green">308</FONT>            return this.recipes;<a name="line.308"></a>
+<FONT color="green">309</FONT>        }<a name="line.309"></a>
+<FONT color="green">310</FONT>    }<a name="line.310"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

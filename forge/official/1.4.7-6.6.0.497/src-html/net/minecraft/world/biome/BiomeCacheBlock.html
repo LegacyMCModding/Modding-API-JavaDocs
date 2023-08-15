@@ -1,0 +1,112 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.biome;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    public class BiomeCacheBlock<a name="line.3"></a>
+<FONT color="green">004</FONT>    {<a name="line.4"></a>
+<FONT color="green">005</FONT>        /** An array of chunk temperatures saved by this cache. */<a name="line.5"></a>
+<FONT color="green">006</FONT>        public float[] temperatureValues;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>        /** An array of chunk rainfall values saved by this cache. */<a name="line.8"></a>
+<FONT color="green">009</FONT>        public float[] rainfallValues;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>        /** The array of biome types stored in this BiomeCacheBlock. */<a name="line.11"></a>
+<FONT color="green">012</FONT>        public BiomeGenBase[] biomes;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        /** The x coordinate of the BiomeCacheBlock. */<a name="line.14"></a>
+<FONT color="green">015</FONT>        public int xPosition;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        /** The z coordinate of the BiomeCacheBlock. */<a name="line.17"></a>
+<FONT color="green">018</FONT>        public int zPosition;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        /** The last time this BiomeCacheBlock was accessed, in milliseconds. */<a name="line.20"></a>
+<FONT color="green">021</FONT>        public long lastAccessTime;<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>        /** The BiomeCache object that contains this BiomeCacheBlock */<a name="line.23"></a>
+<FONT color="green">024</FONT>        final BiomeCache theBiomeCache;<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        public BiomeCacheBlock(BiomeCache par1BiomeCache, int par2, int par3)<a name="line.26"></a>
+<FONT color="green">027</FONT>        {<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.theBiomeCache = par1BiomeCache;<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.temperatureValues = new float[256];<a name="line.29"></a>
+<FONT color="green">030</FONT>            this.rainfallValues = new float[256];<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.biomes = new BiomeGenBase[256];<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.xPosition = par2;<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.zPosition = par3;<a name="line.33"></a>
+<FONT color="green">034</FONT>            BiomeCache.getChunkManager(par1BiomeCache).getTemperatures(this.temperatureValues, par2 &lt;&lt; 4, par3 &lt;&lt; 4, 16, 16);<a name="line.34"></a>
+<FONT color="green">035</FONT>            BiomeCache.getChunkManager(par1BiomeCache).getRainfall(this.rainfallValues, par2 &lt;&lt; 4, par3 &lt;&lt; 4, 16, 16);<a name="line.35"></a>
+<FONT color="green">036</FONT>            BiomeCache.getChunkManager(par1BiomeCache).getBiomeGenAt(this.biomes, par2 &lt;&lt; 4, par3 &lt;&lt; 4, 16, 16, false);<a name="line.36"></a>
+<FONT color="green">037</FONT>        }<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        /**<a name="line.39"></a>
+<FONT color="green">040</FONT>         * Returns the BiomeGenBase related to the x, z position from the cache block.<a name="line.40"></a>
+<FONT color="green">041</FONT>         */<a name="line.41"></a>
+<FONT color="green">042</FONT>        public BiomeGenBase getBiomeGenAt(int par1, int par2)<a name="line.42"></a>
+<FONT color="green">043</FONT>        {<a name="line.43"></a>
+<FONT color="green">044</FONT>            return this.biomes[par1 &amp; 15 | (par2 &amp; 15) &lt;&lt; 4];<a name="line.44"></a>
+<FONT color="green">045</FONT>        }<a name="line.45"></a>
+<FONT color="green">046</FONT>    }<a name="line.46"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,166 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.gui;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.net.URI;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.client.settings.GameSettings;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.util.StatCollector;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import org.lwjgl.input.Keyboard;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import org.lwjgl.opengl.GL11;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>    @SideOnly(Side.CLIENT)<a name="line.11"></a>
+<FONT color="green">012</FONT>    public class GuiScreenDemo extends GuiScreen<a name="line.12"></a>
+<FONT color="green">013</FONT>    {<a name="line.13"></a>
+<FONT color="green">014</FONT>        /**<a name="line.14"></a>
+<FONT color="green">015</FONT>         * Adds the buttons (and other controls) to the screen in question.<a name="line.15"></a>
+<FONT color="green">016</FONT>         */<a name="line.16"></a>
+<FONT color="green">017</FONT>        public void initGui()<a name="line.17"></a>
+<FONT color="green">018</FONT>        {<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.controlList.clear();<a name="line.19"></a>
+<FONT color="green">020</FONT>            byte var1 = -16;<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.controlList.add(new GuiButton(1, this.width / 2 - 116, this.height / 2 + 62 + var1, 114, 20, StatCollector.translateToLocal("demo.help.buy")));<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.controlList.add(new GuiButton(2, this.width / 2 + 2, this.height / 2 + 62 + var1, 114, 20, StatCollector.translateToLocal("demo.help.later")));<a name="line.22"></a>
+<FONT color="green">023</FONT>        }<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>        /**<a name="line.25"></a>
+<FONT color="green">026</FONT>         * Fired when a control is clicked. This is the equivalent of ActionListener.actionPerformed(ActionEvent e).<a name="line.26"></a>
+<FONT color="green">027</FONT>         */<a name="line.27"></a>
+<FONT color="green">028</FONT>        protected void actionPerformed(GuiButton par1GuiButton)<a name="line.28"></a>
+<FONT color="green">029</FONT>        {<a name="line.29"></a>
+<FONT color="green">030</FONT>            switch (par1GuiButton.id)<a name="line.30"></a>
+<FONT color="green">031</FONT>            {<a name="line.31"></a>
+<FONT color="green">032</FONT>                case 1:<a name="line.32"></a>
+<FONT color="green">033</FONT>                    par1GuiButton.enabled = false;<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>                    try<a name="line.35"></a>
+<FONT color="green">036</FONT>                    {<a name="line.36"></a>
+<FONT color="green">037</FONT>                        Class var2 = Class.forName("java.awt.Desktop");<a name="line.37"></a>
+<FONT color="green">038</FONT>                        Object var3 = var2.getMethod("getDesktop", new Class[0]).invoke((Object)null, new Object[0]);<a name="line.38"></a>
+<FONT color="green">039</FONT>                        var2.getMethod("browse", new Class[] {URI.class}).invoke(var3, new Object[] {new URI("http://www.minecraft.net/store?source=demo")});<a name="line.39"></a>
+<FONT color="green">040</FONT>                    }<a name="line.40"></a>
+<FONT color="green">041</FONT>                    catch (Throwable var4)<a name="line.41"></a>
+<FONT color="green">042</FONT>                    {<a name="line.42"></a>
+<FONT color="green">043</FONT>                        var4.printStackTrace();<a name="line.43"></a>
+<FONT color="green">044</FONT>                    }<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>                    break;<a name="line.46"></a>
+<FONT color="green">047</FONT>                case 2:<a name="line.47"></a>
+<FONT color="green">048</FONT>                    this.mc.displayGuiScreen((GuiScreen)null);<a name="line.48"></a>
+<FONT color="green">049</FONT>                    this.mc.setIngameFocus();<a name="line.49"></a>
+<FONT color="green">050</FONT>            }<a name="line.50"></a>
+<FONT color="green">051</FONT>        }<a name="line.51"></a>
+<FONT color="green">052</FONT>    <a name="line.52"></a>
+<FONT color="green">053</FONT>        /**<a name="line.53"></a>
+<FONT color="green">054</FONT>         * Called from the main game loop to update the screen.<a name="line.54"></a>
+<FONT color="green">055</FONT>         */<a name="line.55"></a>
+<FONT color="green">056</FONT>        public void updateScreen()<a name="line.56"></a>
+<FONT color="green">057</FONT>        {<a name="line.57"></a>
+<FONT color="green">058</FONT>            super.updateScreen();<a name="line.58"></a>
+<FONT color="green">059</FONT>        }<a name="line.59"></a>
+<FONT color="green">060</FONT>    <a name="line.60"></a>
+<FONT color="green">061</FONT>        /**<a name="line.61"></a>
+<FONT color="green">062</FONT>         * Draws either a gradient over the background screen (when it exists) or a flat gradient over background.png<a name="line.62"></a>
+<FONT color="green">063</FONT>         */<a name="line.63"></a>
+<FONT color="green">064</FONT>        public void drawDefaultBackground()<a name="line.64"></a>
+<FONT color="green">065</FONT>        {<a name="line.65"></a>
+<FONT color="green">066</FONT>            super.drawDefaultBackground();<a name="line.66"></a>
+<FONT color="green">067</FONT>            int var1 = this.mc.renderEngine.getTexture("/gui/demo_bg.png");<a name="line.67"></a>
+<FONT color="green">068</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.mc.renderEngine.bindTexture(var1);<a name="line.69"></a>
+<FONT color="green">070</FONT>            int var2 = (this.width - 248) / 2;<a name="line.70"></a>
+<FONT color="green">071</FONT>            int var3 = (this.height - 166) / 2;<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.drawTexturedModalRect(var2, var3, 0, 0, 248, 166);<a name="line.72"></a>
+<FONT color="green">073</FONT>        }<a name="line.73"></a>
+<FONT color="green">074</FONT>    <a name="line.74"></a>
+<FONT color="green">075</FONT>        /**<a name="line.75"></a>
+<FONT color="green">076</FONT>         * Draws the screen and all the components in it.<a name="line.76"></a>
+<FONT color="green">077</FONT>         */<a name="line.77"></a>
+<FONT color="green">078</FONT>        public void drawScreen(int par1, int par2, float par3)<a name="line.78"></a>
+<FONT color="green">079</FONT>        {<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.drawDefaultBackground();<a name="line.80"></a>
+<FONT color="green">081</FONT>            int var4 = (this.width - 248) / 2 + 10;<a name="line.81"></a>
+<FONT color="green">082</FONT>            int var5 = (this.height - 166) / 2 + 8;<a name="line.82"></a>
+<FONT color="green">083</FONT>            this.fontRenderer.drawString(StatCollector.translateToLocal("demo.help.title"), var4, var5, 2039583);<a name="line.83"></a>
+<FONT color="green">084</FONT>            var5 += 12;<a name="line.84"></a>
+<FONT color="green">085</FONT>            GameSettings var7 = this.mc.gameSettings;<a name="line.85"></a>
+<FONT color="green">086</FONT>            String var6 = StatCollector.translateToLocal("demo.help.movementShort");<a name="line.86"></a>
+<FONT color="green">087</FONT>            var6 = String.format(var6, new Object[] {Keyboard.getKeyName(var7.keyBindForward.keyCode), Keyboard.getKeyName(var7.keyBindLeft.keyCode), Keyboard.getKeyName(var7.keyBindBack.keyCode), Keyboard.getKeyName(var7.keyBindRight.keyCode)});<a name="line.87"></a>
+<FONT color="green">088</FONT>            this.fontRenderer.drawString(var6, var4, var5, 5197647);<a name="line.88"></a>
+<FONT color="green">089</FONT>            var6 = StatCollector.translateToLocal("demo.help.movementMouse");<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.fontRenderer.drawString(var6, var4, var5 + 12, 5197647);<a name="line.90"></a>
+<FONT color="green">091</FONT>            var6 = StatCollector.translateToLocal("demo.help.jump");<a name="line.91"></a>
+<FONT color="green">092</FONT>            var6 = String.format(var6, new Object[] {Keyboard.getKeyName(var7.keyBindJump.keyCode)});<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.fontRenderer.drawString(var6, var4, var5 + 24, 5197647);<a name="line.93"></a>
+<FONT color="green">094</FONT>            var6 = StatCollector.translateToLocal("demo.help.inventory");<a name="line.94"></a>
+<FONT color="green">095</FONT>            var6 = String.format(var6, new Object[] {Keyboard.getKeyName(var7.keyBindInventory.keyCode)});<a name="line.95"></a>
+<FONT color="green">096</FONT>            this.fontRenderer.drawString(var6, var4, var5 + 36, 5197647);<a name="line.96"></a>
+<FONT color="green">097</FONT>            this.fontRenderer.drawSplitString(StatCollector.translateToLocal("demo.help.fullWrapped"), var4, var5 + 68, 218, 2039583);<a name="line.97"></a>
+<FONT color="green">098</FONT>            super.drawScreen(par1, par2, par3);<a name="line.98"></a>
+<FONT color="green">099</FONT>        }<a name="line.99"></a>
+<FONT color="green">100</FONT>    }<a name="line.100"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

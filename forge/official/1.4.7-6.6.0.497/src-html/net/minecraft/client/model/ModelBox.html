@@ -1,0 +1,178 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.model;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.client.renderer.Tessellator;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelBox<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /**<a name="line.9"></a>
+<FONT color="green">010</FONT>         * The (x,y,z) vertex positions and (u,v) texture coordinates for each of the 8 points on a cube<a name="line.10"></a>
+<FONT color="green">011</FONT>         */<a name="line.11"></a>
+<FONT color="green">012</FONT>        private PositionTextureVertex[] vertexPositions;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        /** An array of 6 TexturedQuads, one for each face of a cube */<a name="line.14"></a>
+<FONT color="green">015</FONT>        private TexturedQuad[] quadList;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        /** X vertex coordinate of lower box corner */<a name="line.17"></a>
+<FONT color="green">018</FONT>        public final float posX1;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        /** Y vertex coordinate of lower box corner */<a name="line.20"></a>
+<FONT color="green">021</FONT>        public final float posY1;<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>        /** Z vertex coordinate of lower box corner */<a name="line.23"></a>
+<FONT color="green">024</FONT>        public final float posZ1;<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        /** X vertex coordinate of upper box corner */<a name="line.26"></a>
+<FONT color="green">027</FONT>        public final float posX2;<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>        /** Y vertex coordinate of upper box corner */<a name="line.29"></a>
+<FONT color="green">030</FONT>        public final float posY2;<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /** Z vertex coordinate of upper box corner */<a name="line.32"></a>
+<FONT color="green">033</FONT>        public final float posZ2;<a name="line.33"></a>
+<FONT color="green">034</FONT>        public String field_78247_g;<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>        public ModelBox(ModelRenderer par1ModelRenderer, int par2, int par3, float par4, float par5, float par6, int par7, int par8, int par9, float par10)<a name="line.36"></a>
+<FONT color="green">037</FONT>        {<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.posX1 = par4;<a name="line.38"></a>
+<FONT color="green">039</FONT>            this.posY1 = par5;<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.posZ1 = par6;<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.posX2 = par4 + (float)par7;<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.posY2 = par5 + (float)par8;<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.posZ2 = par6 + (float)par9;<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.vertexPositions = new PositionTextureVertex[8];<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.quadList = new TexturedQuad[6];<a name="line.45"></a>
+<FONT color="green">046</FONT>            float var11 = par4 + (float)par7;<a name="line.46"></a>
+<FONT color="green">047</FONT>            float var12 = par5 + (float)par8;<a name="line.47"></a>
+<FONT color="green">048</FONT>            float var13 = par6 + (float)par9;<a name="line.48"></a>
+<FONT color="green">049</FONT>            par4 -= par10;<a name="line.49"></a>
+<FONT color="green">050</FONT>            par5 -= par10;<a name="line.50"></a>
+<FONT color="green">051</FONT>            par6 -= par10;<a name="line.51"></a>
+<FONT color="green">052</FONT>            var11 += par10;<a name="line.52"></a>
+<FONT color="green">053</FONT>            var12 += par10;<a name="line.53"></a>
+<FONT color="green">054</FONT>            var13 += par10;<a name="line.54"></a>
+<FONT color="green">055</FONT>    <a name="line.55"></a>
+<FONT color="green">056</FONT>            if (par1ModelRenderer.mirror)<a name="line.56"></a>
+<FONT color="green">057</FONT>            {<a name="line.57"></a>
+<FONT color="green">058</FONT>                float var14 = var11;<a name="line.58"></a>
+<FONT color="green">059</FONT>                var11 = par4;<a name="line.59"></a>
+<FONT color="green">060</FONT>                par4 = var14;<a name="line.60"></a>
+<FONT color="green">061</FONT>            }<a name="line.61"></a>
+<FONT color="green">062</FONT>    <a name="line.62"></a>
+<FONT color="green">063</FONT>            PositionTextureVertex var23 = new PositionTextureVertex(par4, par5, par6, 0.0F, 0.0F);<a name="line.63"></a>
+<FONT color="green">064</FONT>            PositionTextureVertex var15 = new PositionTextureVertex(var11, par5, par6, 0.0F, 8.0F);<a name="line.64"></a>
+<FONT color="green">065</FONT>            PositionTextureVertex var16 = new PositionTextureVertex(var11, var12, par6, 8.0F, 8.0F);<a name="line.65"></a>
+<FONT color="green">066</FONT>            PositionTextureVertex var17 = new PositionTextureVertex(par4, var12, par6, 8.0F, 0.0F);<a name="line.66"></a>
+<FONT color="green">067</FONT>            PositionTextureVertex var18 = new PositionTextureVertex(par4, par5, var13, 0.0F, 0.0F);<a name="line.67"></a>
+<FONT color="green">068</FONT>            PositionTextureVertex var19 = new PositionTextureVertex(var11, par5, var13, 0.0F, 8.0F);<a name="line.68"></a>
+<FONT color="green">069</FONT>            PositionTextureVertex var20 = new PositionTextureVertex(var11, var12, var13, 8.0F, 8.0F);<a name="line.69"></a>
+<FONT color="green">070</FONT>            PositionTextureVertex var21 = new PositionTextureVertex(par4, var12, var13, 8.0F, 0.0F);<a name="line.70"></a>
+<FONT color="green">071</FONT>            this.vertexPositions[0] = var23;<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.vertexPositions[1] = var15;<a name="line.72"></a>
+<FONT color="green">073</FONT>            this.vertexPositions[2] = var16;<a name="line.73"></a>
+<FONT color="green">074</FONT>            this.vertexPositions[3] = var17;<a name="line.74"></a>
+<FONT color="green">075</FONT>            this.vertexPositions[4] = var18;<a name="line.75"></a>
+<FONT color="green">076</FONT>            this.vertexPositions[5] = var19;<a name="line.76"></a>
+<FONT color="green">077</FONT>            this.vertexPositions[6] = var20;<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.vertexPositions[7] = var21;<a name="line.78"></a>
+<FONT color="green">079</FONT>            this.quadList[0] = new TexturedQuad(new PositionTextureVertex[] {var19, var15, var16, var20}, par2 + par9 + par7, par3 + par9, par2 + par9 + par7 + par9, par3 + par9 + par8, par1ModelRenderer.textureWidth, par1ModelRenderer.textureHeight);<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.quadList[1] = new TexturedQuad(new PositionTextureVertex[] {var23, var18, var21, var17}, par2, par3 + par9, par2 + par9, par3 + par9 + par8, par1ModelRenderer.textureWidth, par1ModelRenderer.textureHeight);<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.quadList[2] = new TexturedQuad(new PositionTextureVertex[] {var19, var18, var23, var15}, par2 + par9, par3, par2 + par9 + par7, par3 + par9, par1ModelRenderer.textureWidth, par1ModelRenderer.textureHeight);<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.quadList[3] = new TexturedQuad(new PositionTextureVertex[] {var16, var17, var21, var20}, par2 + par9 + par7, par3 + par9, par2 + par9 + par7 + par7, par3, par1ModelRenderer.textureWidth, par1ModelRenderer.textureHeight);<a name="line.82"></a>
+<FONT color="green">083</FONT>            this.quadList[4] = new TexturedQuad(new PositionTextureVertex[] {var15, var23, var17, var16}, par2 + par9, par3 + par9, par2 + par9 + par7, par3 + par9 + par8, par1ModelRenderer.textureWidth, par1ModelRenderer.textureHeight);<a name="line.83"></a>
+<FONT color="green">084</FONT>            this.quadList[5] = new TexturedQuad(new PositionTextureVertex[] {var18, var19, var20, var21}, par2 + par9 + par7 + par9, par3 + par9, par2 + par9 + par7 + par9 + par7, par3 + par9 + par8, par1ModelRenderer.textureWidth, par1ModelRenderer.textureHeight);<a name="line.84"></a>
+<FONT color="green">085</FONT>    <a name="line.85"></a>
+<FONT color="green">086</FONT>            if (par1ModelRenderer.mirror)<a name="line.86"></a>
+<FONT color="green">087</FONT>            {<a name="line.87"></a>
+<FONT color="green">088</FONT>                for (int var22 = 0; var22 &lt; this.quadList.length; ++var22)<a name="line.88"></a>
+<FONT color="green">089</FONT>                {<a name="line.89"></a>
+<FONT color="green">090</FONT>                    this.quadList[var22].flipFace();<a name="line.90"></a>
+<FONT color="green">091</FONT>                }<a name="line.91"></a>
+<FONT color="green">092</FONT>            }<a name="line.92"></a>
+<FONT color="green">093</FONT>        }<a name="line.93"></a>
+<FONT color="green">094</FONT>    <a name="line.94"></a>
+<FONT color="green">095</FONT>        /**<a name="line.95"></a>
+<FONT color="green">096</FONT>         * Draw the six sided box defined by this ModelBox<a name="line.96"></a>
+<FONT color="green">097</FONT>         */<a name="line.97"></a>
+<FONT color="green">098</FONT>        @SideOnly(Side.CLIENT)<a name="line.98"></a>
+<FONT color="green">099</FONT>        public void render(Tessellator par1Tessellator, float par2)<a name="line.99"></a>
+<FONT color="green">100</FONT>        {<a name="line.100"></a>
+<FONT color="green">101</FONT>            for (int var3 = 0; var3 &lt; this.quadList.length; ++var3)<a name="line.101"></a>
+<FONT color="green">102</FONT>            {<a name="line.102"></a>
+<FONT color="green">103</FONT>                this.quadList[var3].draw(par1Tessellator, par2);<a name="line.103"></a>
+<FONT color="green">104</FONT>            }<a name="line.104"></a>
+<FONT color="green">105</FONT>        }<a name="line.105"></a>
+<FONT color="green">106</FONT>    <a name="line.106"></a>
+<FONT color="green">107</FONT>        public ModelBox func_78244_a(String par1Str)<a name="line.107"></a>
+<FONT color="green">108</FONT>        {<a name="line.108"></a>
+<FONT color="green">109</FONT>            this.field_78247_g = par1Str;<a name="line.109"></a>
+<FONT color="green">110</FONT>            return this;<a name="line.110"></a>
+<FONT color="green">111</FONT>        }<a name="line.111"></a>
+<FONT color="green">112</FONT>    }<a name="line.112"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

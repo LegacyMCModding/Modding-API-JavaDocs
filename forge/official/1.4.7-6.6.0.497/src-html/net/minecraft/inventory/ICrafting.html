@@ -1,0 +1,88 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.inventory;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.List;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.item.ItemStack;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public interface ICrafting<a name="line.6"></a>
+<FONT color="green">007</FONT>    {<a name="line.7"></a>
+<FONT color="green">008</FONT>        void sendContainerAndContentsToPlayer(Container var1, List var2);<a name="line.8"></a>
+<FONT color="green">009</FONT>    <a name="line.9"></a>
+<FONT color="green">010</FONT>        /**<a name="line.10"></a>
+<FONT color="green">011</FONT>         * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual<a name="line.11"></a>
+<FONT color="green">012</FONT>         * contents of that slot. Args: Container, slot number, slot contents<a name="line.12"></a>
+<FONT color="green">013</FONT>         */<a name="line.13"></a>
+<FONT color="green">014</FONT>        void sendSlotContents(Container var1, int var2, ItemStack var3);<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /**<a name="line.16"></a>
+<FONT color="green">017</FONT>         * Sends two ints to the client-side Container. Used for furnace burning time, smelting progress, brewing progress,<a name="line.17"></a>
+<FONT color="green">018</FONT>         * and enchanting level. Normally the first int identifies which variable to update, and the second contains the new<a name="line.18"></a>
+<FONT color="green">019</FONT>         * value. Both are truncated to shorts in non-local SMP.<a name="line.19"></a>
+<FONT color="green">020</FONT>         */<a name="line.20"></a>
+<FONT color="green">021</FONT>        void sendProgressBarUpdate(Container var1, int var2, int var3);<a name="line.21"></a>
+<FONT color="green">022</FONT>    }<a name="line.22"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

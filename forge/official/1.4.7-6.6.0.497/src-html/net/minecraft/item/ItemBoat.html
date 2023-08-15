@@ -1,0 +1,181 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.item;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.List;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.block.Block;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.creativetab.CreativeTabs;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.entity.Entity;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.entity.item.EntityBoat;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.entity.player.EntityPlayer;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.util.AxisAlignedBB;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.util.EnumMovingObjectType;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.util.MathHelper;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraft.util.MovingObjectPosition;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraft.util.Vec3;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import net.minecraft.world.World;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>    public class ItemBoat extends Item<a name="line.16"></a>
+<FONT color="green">017</FONT>    {<a name="line.17"></a>
+<FONT color="green">018</FONT>        public ItemBoat(int par1)<a name="line.18"></a>
+<FONT color="green">019</FONT>        {<a name="line.19"></a>
+<FONT color="green">020</FONT>            super(par1);<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.maxStackSize = 1;<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.setCreativeTab(CreativeTabs.tabTransport);<a name="line.22"></a>
+<FONT color="green">023</FONT>        }<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>        /**<a name="line.25"></a>
+<FONT color="green">026</FONT>         * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer<a name="line.26"></a>
+<FONT color="green">027</FONT>         */<a name="line.27"></a>
+<FONT color="green">028</FONT>        public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer)<a name="line.28"></a>
+<FONT color="green">029</FONT>        {<a name="line.29"></a>
+<FONT color="green">030</FONT>            float var4 = 1.0F;<a name="line.30"></a>
+<FONT color="green">031</FONT>            float var5 = par3EntityPlayer.prevRotationPitch + (par3EntityPlayer.rotationPitch - par3EntityPlayer.prevRotationPitch) * var4;<a name="line.31"></a>
+<FONT color="green">032</FONT>            float var6 = par3EntityPlayer.prevRotationYaw + (par3EntityPlayer.rotationYaw - par3EntityPlayer.prevRotationYaw) * var4;<a name="line.32"></a>
+<FONT color="green">033</FONT>            double var7 = par3EntityPlayer.prevPosX + (par3EntityPlayer.posX - par3EntityPlayer.prevPosX) * (double)var4;<a name="line.33"></a>
+<FONT color="green">034</FONT>            double var9 = par3EntityPlayer.prevPosY + (par3EntityPlayer.posY - par3EntityPlayer.prevPosY) * (double)var4 + 1.62D - (double)par3EntityPlayer.yOffset;<a name="line.34"></a>
+<FONT color="green">035</FONT>            double var11 = par3EntityPlayer.prevPosZ + (par3EntityPlayer.posZ - par3EntityPlayer.prevPosZ) * (double)var4;<a name="line.35"></a>
+<FONT color="green">036</FONT>            Vec3 var13 = par2World.getWorldVec3Pool().getVecFromPool(var7, var9, var11);<a name="line.36"></a>
+<FONT color="green">037</FONT>            float var14 = MathHelper.cos(-var6 * 0.017453292F - (float)Math.PI);<a name="line.37"></a>
+<FONT color="green">038</FONT>            float var15 = MathHelper.sin(-var6 * 0.017453292F - (float)Math.PI);<a name="line.38"></a>
+<FONT color="green">039</FONT>            float var16 = -MathHelper.cos(-var5 * 0.017453292F);<a name="line.39"></a>
+<FONT color="green">040</FONT>            float var17 = MathHelper.sin(-var5 * 0.017453292F);<a name="line.40"></a>
+<FONT color="green">041</FONT>            float var18 = var15 * var16;<a name="line.41"></a>
+<FONT color="green">042</FONT>            float var20 = var14 * var16;<a name="line.42"></a>
+<FONT color="green">043</FONT>            double var21 = 5.0D;<a name="line.43"></a>
+<FONT color="green">044</FONT>            Vec3 var23 = var13.addVector((double)var18 * var21, (double)var17 * var21, (double)var20 * var21);<a name="line.44"></a>
+<FONT color="green">045</FONT>            MovingObjectPosition var24 = par2World.rayTraceBlocks_do(var13, var23, true);<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>            if (var24 == null)<a name="line.47"></a>
+<FONT color="green">048</FONT>            {<a name="line.48"></a>
+<FONT color="green">049</FONT>                return par1ItemStack;<a name="line.49"></a>
+<FONT color="green">050</FONT>            }<a name="line.50"></a>
+<FONT color="green">051</FONT>            else<a name="line.51"></a>
+<FONT color="green">052</FONT>            {<a name="line.52"></a>
+<FONT color="green">053</FONT>                Vec3 var25 = par3EntityPlayer.getLook(var4);<a name="line.53"></a>
+<FONT color="green">054</FONT>                boolean var26 = false;<a name="line.54"></a>
+<FONT color="green">055</FONT>                float var27 = 1.0F;<a name="line.55"></a>
+<FONT color="green">056</FONT>                List var28 = par2World.getEntitiesWithinAABBExcludingEntity(par3EntityPlayer, par3EntityPlayer.boundingBox.addCoord(var25.xCoord * var21, var25.yCoord * var21, var25.zCoord * var21).expand((double)var27, (double)var27, (double)var27));<a name="line.56"></a>
+<FONT color="green">057</FONT>                int var29;<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>                for (var29 = 0; var29 &lt; var28.size(); ++var29)<a name="line.59"></a>
+<FONT color="green">060</FONT>                {<a name="line.60"></a>
+<FONT color="green">061</FONT>                    Entity var30 = (Entity)var28.get(var29);<a name="line.61"></a>
+<FONT color="green">062</FONT>    <a name="line.62"></a>
+<FONT color="green">063</FONT>                    if (var30.canBeCollidedWith())<a name="line.63"></a>
+<FONT color="green">064</FONT>                    {<a name="line.64"></a>
+<FONT color="green">065</FONT>                        float var31 = var30.getCollisionBorderSize();<a name="line.65"></a>
+<FONT color="green">066</FONT>                        AxisAlignedBB var32 = var30.boundingBox.expand((double)var31, (double)var31, (double)var31);<a name="line.66"></a>
+<FONT color="green">067</FONT>    <a name="line.67"></a>
+<FONT color="green">068</FONT>                        if (var32.isVecInside(var13))<a name="line.68"></a>
+<FONT color="green">069</FONT>                        {<a name="line.69"></a>
+<FONT color="green">070</FONT>                            var26 = true;<a name="line.70"></a>
+<FONT color="green">071</FONT>                        }<a name="line.71"></a>
+<FONT color="green">072</FONT>                    }<a name="line.72"></a>
+<FONT color="green">073</FONT>                }<a name="line.73"></a>
+<FONT color="green">074</FONT>    <a name="line.74"></a>
+<FONT color="green">075</FONT>                if (var26)<a name="line.75"></a>
+<FONT color="green">076</FONT>                {<a name="line.76"></a>
+<FONT color="green">077</FONT>                    return par1ItemStack;<a name="line.77"></a>
+<FONT color="green">078</FONT>                }<a name="line.78"></a>
+<FONT color="green">079</FONT>                else<a name="line.79"></a>
+<FONT color="green">080</FONT>                {<a name="line.80"></a>
+<FONT color="green">081</FONT>                    if (var24.typeOfHit == EnumMovingObjectType.TILE)<a name="line.81"></a>
+<FONT color="green">082</FONT>                    {<a name="line.82"></a>
+<FONT color="green">083</FONT>                        var29 = var24.blockX;<a name="line.83"></a>
+<FONT color="green">084</FONT>                        int var33 = var24.blockY;<a name="line.84"></a>
+<FONT color="green">085</FONT>                        int var34 = var24.blockZ;<a name="line.85"></a>
+<FONT color="green">086</FONT>    <a name="line.86"></a>
+<FONT color="green">087</FONT>                        if (par2World.getBlockId(var29, var33, var34) == Block.snow.blockID)<a name="line.87"></a>
+<FONT color="green">088</FONT>                        {<a name="line.88"></a>
+<FONT color="green">089</FONT>                            --var33;<a name="line.89"></a>
+<FONT color="green">090</FONT>                        }<a name="line.90"></a>
+<FONT color="green">091</FONT>    <a name="line.91"></a>
+<FONT color="green">092</FONT>                        EntityBoat var35 = new EntityBoat(par2World, (double)((float)var29 + 0.5F), (double)((float)var33 + 1.0F), (double)((float)var34 + 0.5F));<a name="line.92"></a>
+<FONT color="green">093</FONT>                        var35.rotationYaw = (float)(((MathHelper.floor_double((double)(par3EntityPlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) &amp; 3) - 1) * 90);<a name="line.93"></a>
+<FONT color="green">094</FONT>    <a name="line.94"></a>
+<FONT color="green">095</FONT>                        if (!par2World.getCollidingBoundingBoxes(var35, var35.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty())<a name="line.95"></a>
+<FONT color="green">096</FONT>                        {<a name="line.96"></a>
+<FONT color="green">097</FONT>                            return par1ItemStack;<a name="line.97"></a>
+<FONT color="green">098</FONT>                        }<a name="line.98"></a>
+<FONT color="green">099</FONT>    <a name="line.99"></a>
+<FONT color="green">100</FONT>                        if (!par2World.isRemote)<a name="line.100"></a>
+<FONT color="green">101</FONT>                        {<a name="line.101"></a>
+<FONT color="green">102</FONT>                            par2World.spawnEntityInWorld(var35);<a name="line.102"></a>
+<FONT color="green">103</FONT>                        }<a name="line.103"></a>
+<FONT color="green">104</FONT>    <a name="line.104"></a>
+<FONT color="green">105</FONT>                        if (!par3EntityPlayer.capabilities.isCreativeMode)<a name="line.105"></a>
+<FONT color="green">106</FONT>                        {<a name="line.106"></a>
+<FONT color="green">107</FONT>                            --par1ItemStack.stackSize;<a name="line.107"></a>
+<FONT color="green">108</FONT>                        }<a name="line.108"></a>
+<FONT color="green">109</FONT>                    }<a name="line.109"></a>
+<FONT color="green">110</FONT>    <a name="line.110"></a>
+<FONT color="green">111</FONT>                    return par1ItemStack;<a name="line.111"></a>
+<FONT color="green">112</FONT>                }<a name="line.112"></a>
+<FONT color="green">113</FONT>            }<a name="line.113"></a>
+<FONT color="green">114</FONT>        }<a name="line.114"></a>
+<FONT color="green">115</FONT>    }<a name="line.115"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

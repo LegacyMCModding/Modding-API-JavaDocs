@@ -1,0 +1,107 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.network.packet;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.HashMap;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.util.Map;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public class PacketCount<a name="line.6"></a>
+<FONT color="green">007</FONT>    {<a name="line.7"></a>
+<FONT color="green">008</FONT>        /** If false, countPacket does nothing */<a name="line.8"></a>
+<FONT color="green">009</FONT>        public static boolean allowCounting = true;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>        /** A count of the total number of each packet sent grouped by IDs. */<a name="line.11"></a>
+<FONT color="green">012</FONT>        private static final Map packetCountForID = new HashMap();<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        /** A count of the total size of each packet sent grouped by IDs. */<a name="line.14"></a>
+<FONT color="green">015</FONT>        private static final Map sizeCountForID = new HashMap();<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        /** Used to make threads queue to add packets */<a name="line.17"></a>
+<FONT color="green">018</FONT>        private static final Object lock = new Object();<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        public static void countPacket(int par0, long par1)<a name="line.20"></a>
+<FONT color="green">021</FONT>        {<a name="line.21"></a>
+<FONT color="green">022</FONT>            if (allowCounting)<a name="line.22"></a>
+<FONT color="green">023</FONT>            {<a name="line.23"></a>
+<FONT color="green">024</FONT>                Object var3 = lock;<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>                synchronized (lock)<a name="line.26"></a>
+<FONT color="green">027</FONT>                {<a name="line.27"></a>
+<FONT color="green">028</FONT>                    if (packetCountForID.containsKey(Integer.valueOf(par0)))<a name="line.28"></a>
+<FONT color="green">029</FONT>                    {<a name="line.29"></a>
+<FONT color="green">030</FONT>                        packetCountForID.put(Integer.valueOf(par0), Long.valueOf(((Long)packetCountForID.get(Integer.valueOf(par0))).longValue() + 1L));<a name="line.30"></a>
+<FONT color="green">031</FONT>                        sizeCountForID.put(Integer.valueOf(par0), Long.valueOf(((Long)sizeCountForID.get(Integer.valueOf(par0))).longValue() + par1));<a name="line.31"></a>
+<FONT color="green">032</FONT>                    }<a name="line.32"></a>
+<FONT color="green">033</FONT>                    else<a name="line.33"></a>
+<FONT color="green">034</FONT>                    {<a name="line.34"></a>
+<FONT color="green">035</FONT>                        packetCountForID.put(Integer.valueOf(par0), Long.valueOf(1L));<a name="line.35"></a>
+<FONT color="green">036</FONT>                        sizeCountForID.put(Integer.valueOf(par0), Long.valueOf(par1));<a name="line.36"></a>
+<FONT color="green">037</FONT>                    }<a name="line.37"></a>
+<FONT color="green">038</FONT>                }<a name="line.38"></a>
+<FONT color="green">039</FONT>            }<a name="line.39"></a>
+<FONT color="green">040</FONT>        }<a name="line.40"></a>
+<FONT color="green">041</FONT>    }<a name="line.41"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,837 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.entity.boss;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.Iterator;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.List;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.block.Block;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.block.BlockEndPortal;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.entity.Entity;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.entity.EntityLiving;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.entity.IEntityMultiPart;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraft.entity.item.EntityEnderCrystal;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraft.entity.item.EntityXPOrb;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import net.minecraft.entity.player.EntityPlayer;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import net.minecraft.util.AxisAlignedBB;<a name="line.15"></a>
+<FONT color="green">016</FONT>    import net.minecraft.util.DamageSource;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import net.minecraft.util.MathHelper;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import net.minecraft.util.Vec3;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import net.minecraft.world.World;<a name="line.19"></a>
+<FONT color="green">020</FONT>    <a name="line.20"></a>
+<FONT color="green">021</FONT>    public class EntityDragon extends EntityLiving implements IBossDisplayData, IEntityMultiPart<a name="line.21"></a>
+<FONT color="green">022</FONT>    {<a name="line.22"></a>
+<FONT color="green">023</FONT>        public double targetX;<a name="line.23"></a>
+<FONT color="green">024</FONT>        public double targetY;<a name="line.24"></a>
+<FONT color="green">025</FONT>        public double targetZ;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>        /**<a name="line.27"></a>
+<FONT color="green">028</FONT>         * Ring buffer array for the last 64 Y-positions and yaw rotations. Used to calculate offsets for the animations.<a name="line.28"></a>
+<FONT color="green">029</FONT>         */<a name="line.29"></a>
+<FONT color="green">030</FONT>        public double[][] ringBuffer = new double[64][3];<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * Index into the ring buffer. Incremented once per tick and restarts at 0 once it reaches the end of the buffer.<a name="line.33"></a>
+<FONT color="green">034</FONT>         */<a name="line.34"></a>
+<FONT color="green">035</FONT>        public int ringBufferIndex = -1;<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>        /** An array containing all body parts of this dragon */<a name="line.37"></a>
+<FONT color="green">038</FONT>        public EntityDragonPart[] dragonPartArray;<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        /** The head bounding box of a dragon */<a name="line.40"></a>
+<FONT color="green">041</FONT>        public EntityDragonPart dragonPartHead;<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>        /** The body bounding box of a dragon */<a name="line.43"></a>
+<FONT color="green">044</FONT>        public EntityDragonPart dragonPartBody;<a name="line.44"></a>
+<FONT color="green">045</FONT>        public EntityDragonPart dragonPartTail1;<a name="line.45"></a>
+<FONT color="green">046</FONT>        public EntityDragonPart dragonPartTail2;<a name="line.46"></a>
+<FONT color="green">047</FONT>        public EntityDragonPart dragonPartTail3;<a name="line.47"></a>
+<FONT color="green">048</FONT>        public EntityDragonPart dragonPartWing1;<a name="line.48"></a>
+<FONT color="green">049</FONT>        public EntityDragonPart dragonPartWing2;<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        /** Animation time at previous tick. */<a name="line.51"></a>
+<FONT color="green">052</FONT>        public float prevAnimTime = 0.0F;<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        /**<a name="line.54"></a>
+<FONT color="green">055</FONT>         * Animation time, used to control the speed of the animation cycles (wings flapping, jaw opening, etc.)<a name="line.55"></a>
+<FONT color="green">056</FONT>         */<a name="line.56"></a>
+<FONT color="green">057</FONT>        public float animTime = 0.0F;<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>        /** Force selecting a new flight target at next tick if set to true. */<a name="line.59"></a>
+<FONT color="green">060</FONT>        public boolean forceNewTarget = false;<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>        /**<a name="line.62"></a>
+<FONT color="green">063</FONT>         * Activated if the dragon is flying though obsidian, white stone or bedrock. Slows movement and animation speed.<a name="line.63"></a>
+<FONT color="green">064</FONT>         */<a name="line.64"></a>
+<FONT color="green">065</FONT>        public boolean slowed = false;<a name="line.65"></a>
+<FONT color="green">066</FONT>        private Entity target;<a name="line.66"></a>
+<FONT color="green">067</FONT>        public int deathTicks = 0;<a name="line.67"></a>
+<FONT color="green">068</FONT>    <a name="line.68"></a>
+<FONT color="green">069</FONT>        /** The current endercrystal that is healing this dragon */<a name="line.69"></a>
+<FONT color="green">070</FONT>        public EntityEnderCrystal healingEnderCrystal = null;<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>        public EntityDragon(World par1World)<a name="line.72"></a>
+<FONT color="green">073</FONT>        {<a name="line.73"></a>
+<FONT color="green">074</FONT>            super(par1World);<a name="line.74"></a>
+<FONT color="green">075</FONT>            this.dragonPartArray = new EntityDragonPart[] {this.dragonPartHead = new EntityDragonPart(this, "head", 6.0F, 6.0F), this.dragonPartBody = new EntityDragonPart(this, "body", 8.0F, 8.0F), this.dragonPartTail1 = new EntityDragonPart(this, "tail", 4.0F, 4.0F), this.dragonPartTail2 = new EntityDragonPart(this, "tail", 4.0F, 4.0F), this.dragonPartTail3 = new EntityDragonPart(this, "tail", 4.0F, 4.0F), this.dragonPartWing1 = new EntityDragonPart(this, "wing", 4.0F, 4.0F), this.dragonPartWing2 = new EntityDragonPart(this, "wing", 4.0F, 4.0F)};<a name="line.75"></a>
+<FONT color="green">076</FONT>            this.setEntityHealth(this.getMaxHealth());<a name="line.76"></a>
+<FONT color="green">077</FONT>            this.texture = "/mob/enderdragon/ender.png";<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.setSize(16.0F, 8.0F);<a name="line.78"></a>
+<FONT color="green">079</FONT>            this.noClip = true;<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.isImmuneToFire = true;<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.targetY = 100.0D;<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.ignoreFrustumCheck = true;<a name="line.82"></a>
+<FONT color="green">083</FONT>        }<a name="line.83"></a>
+<FONT color="green">084</FONT>    <a name="line.84"></a>
+<FONT color="green">085</FONT>        public int getMaxHealth()<a name="line.85"></a>
+<FONT color="green">086</FONT>        {<a name="line.86"></a>
+<FONT color="green">087</FONT>            return 200;<a name="line.87"></a>
+<FONT color="green">088</FONT>        }<a name="line.88"></a>
+<FONT color="green">089</FONT>    <a name="line.89"></a>
+<FONT color="green">090</FONT>        protected void entityInit()<a name="line.90"></a>
+<FONT color="green">091</FONT>        {<a name="line.91"></a>
+<FONT color="green">092</FONT>            super.entityInit();<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.dataWatcher.addObject(16, new Integer(this.getMaxHealth()));<a name="line.93"></a>
+<FONT color="green">094</FONT>        }<a name="line.94"></a>
+<FONT color="green">095</FONT>    <a name="line.95"></a>
+<FONT color="green">096</FONT>        /**<a name="line.96"></a>
+<FONT color="green">097</FONT>         * Returns a double[3] array with movement offsets, used to calculate trailing tail/neck positions. [0] = yaw<a name="line.97"></a>
+<FONT color="green">098</FONT>         * offset, [1] = y offset, [2] = unused, always 0. Parameters: buffer index offset, partial ticks.<a name="line.98"></a>
+<FONT color="green">099</FONT>         */<a name="line.99"></a>
+<FONT color="green">100</FONT>        public double[] getMovementOffsets(int par1, float par2)<a name="line.100"></a>
+<FONT color="green">101</FONT>        {<a name="line.101"></a>
+<FONT color="green">102</FONT>            if (this.health &lt;= 0)<a name="line.102"></a>
+<FONT color="green">103</FONT>            {<a name="line.103"></a>
+<FONT color="green">104</FONT>                par2 = 0.0F;<a name="line.104"></a>
+<FONT color="green">105</FONT>            }<a name="line.105"></a>
+<FONT color="green">106</FONT>    <a name="line.106"></a>
+<FONT color="green">107</FONT>            par2 = 1.0F - par2;<a name="line.107"></a>
+<FONT color="green">108</FONT>            int var3 = this.ringBufferIndex - par1 * 1 &amp; 63;<a name="line.108"></a>
+<FONT color="green">109</FONT>            int var4 = this.ringBufferIndex - par1 * 1 - 1 &amp; 63;<a name="line.109"></a>
+<FONT color="green">110</FONT>            double[] var5 = new double[3];<a name="line.110"></a>
+<FONT color="green">111</FONT>            double var6 = this.ringBuffer[var3][0];<a name="line.111"></a>
+<FONT color="green">112</FONT>            double var8 = MathHelper.wrapAngleTo180_double(this.ringBuffer[var4][0] - var6);<a name="line.112"></a>
+<FONT color="green">113</FONT>            var5[0] = var6 + var8 * (double)par2;<a name="line.113"></a>
+<FONT color="green">114</FONT>            var6 = this.ringBuffer[var3][1];<a name="line.114"></a>
+<FONT color="green">115</FONT>            var8 = this.ringBuffer[var4][1] - var6;<a name="line.115"></a>
+<FONT color="green">116</FONT>            var5[1] = var6 + var8 * (double)par2;<a name="line.116"></a>
+<FONT color="green">117</FONT>            var5[2] = this.ringBuffer[var3][2] + (this.ringBuffer[var4][2] - this.ringBuffer[var3][2]) * (double)par2;<a name="line.117"></a>
+<FONT color="green">118</FONT>            return var5;<a name="line.118"></a>
+<FONT color="green">119</FONT>        }<a name="line.119"></a>
+<FONT color="green">120</FONT>    <a name="line.120"></a>
+<FONT color="green">121</FONT>        /**<a name="line.121"></a>
+<FONT color="green">122</FONT>         * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons<a name="line.122"></a>
+<FONT color="green">123</FONT>         * use this to react to sunlight and start to burn.<a name="line.123"></a>
+<FONT color="green">124</FONT>         */<a name="line.124"></a>
+<FONT color="green">125</FONT>        public void onLivingUpdate()<a name="line.125"></a>
+<FONT color="green">126</FONT>        {<a name="line.126"></a>
+<FONT color="green">127</FONT>            float var1;<a name="line.127"></a>
+<FONT color="green">128</FONT>            float var2;<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>            if (!this.worldObj.isRemote)<a name="line.130"></a>
+<FONT color="green">131</FONT>            {<a name="line.131"></a>
+<FONT color="green">132</FONT>                this.dataWatcher.updateObject(16, Integer.valueOf(this.health));<a name="line.132"></a>
+<FONT color="green">133</FONT>            }<a name="line.133"></a>
+<FONT color="green">134</FONT>            else<a name="line.134"></a>
+<FONT color="green">135</FONT>            {<a name="line.135"></a>
+<FONT color="green">136</FONT>                var1 = MathHelper.cos(this.animTime * (float)Math.PI * 2.0F);<a name="line.136"></a>
+<FONT color="green">137</FONT>                var2 = MathHelper.cos(this.prevAnimTime * (float)Math.PI * 2.0F);<a name="line.137"></a>
+<FONT color="green">138</FONT>    <a name="line.138"></a>
+<FONT color="green">139</FONT>                if (var2 &lt;= -0.3F &amp;&amp; var1 &gt;= -0.3F)<a name="line.139"></a>
+<FONT color="green">140</FONT>                {<a name="line.140"></a>
+<FONT color="green">141</FONT>                    this.worldObj.playSound(this.posX, this.posY, this.posZ, "mob.enderdragon.wings", 5.0F, 0.8F + this.rand.nextFloat() * 0.3F, false);<a name="line.141"></a>
+<FONT color="green">142</FONT>                }<a name="line.142"></a>
+<FONT color="green">143</FONT>            }<a name="line.143"></a>
+<FONT color="green">144</FONT>    <a name="line.144"></a>
+<FONT color="green">145</FONT>            this.prevAnimTime = this.animTime;<a name="line.145"></a>
+<FONT color="green">146</FONT>            float var3;<a name="line.146"></a>
+<FONT color="green">147</FONT>    <a name="line.147"></a>
+<FONT color="green">148</FONT>            if (this.health &lt;= 0)<a name="line.148"></a>
+<FONT color="green">149</FONT>            {<a name="line.149"></a>
+<FONT color="green">150</FONT>                var1 = (this.rand.nextFloat() - 0.5F) * 8.0F;<a name="line.150"></a>
+<FONT color="green">151</FONT>                var2 = (this.rand.nextFloat() - 0.5F) * 4.0F;<a name="line.151"></a>
+<FONT color="green">152</FONT>                var3 = (this.rand.nextFloat() - 0.5F) * 8.0F;<a name="line.152"></a>
+<FONT color="green">153</FONT>                this.worldObj.spawnParticle("largeexplode", this.posX + (double)var1, this.posY + 2.0D + (double)var2, this.posZ + (double)var3, 0.0D, 0.0D, 0.0D);<a name="line.153"></a>
+<FONT color="green">154</FONT>            }<a name="line.154"></a>
+<FONT color="green">155</FONT>            else<a name="line.155"></a>
+<FONT color="green">156</FONT>            {<a name="line.156"></a>
+<FONT color="green">157</FONT>                this.updateDragonEnderCrystal();<a name="line.157"></a>
+<FONT color="green">158</FONT>                var1 = 0.2F / (MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ) * 10.0F + 1.0F);<a name="line.158"></a>
+<FONT color="green">159</FONT>                var1 *= (float)Math.pow(2.0D, this.motionY);<a name="line.159"></a>
+<FONT color="green">160</FONT>    <a name="line.160"></a>
+<FONT color="green">161</FONT>                if (this.slowed)<a name="line.161"></a>
+<FONT color="green">162</FONT>                {<a name="line.162"></a>
+<FONT color="green">163</FONT>                    this.animTime += var1 * 0.5F;<a name="line.163"></a>
+<FONT color="green">164</FONT>                }<a name="line.164"></a>
+<FONT color="green">165</FONT>                else<a name="line.165"></a>
+<FONT color="green">166</FONT>                {<a name="line.166"></a>
+<FONT color="green">167</FONT>                    this.animTime += var1;<a name="line.167"></a>
+<FONT color="green">168</FONT>                }<a name="line.168"></a>
+<FONT color="green">169</FONT>    <a name="line.169"></a>
+<FONT color="green">170</FONT>                this.rotationYaw = MathHelper.wrapAngleTo180_float(this.rotationYaw);<a name="line.170"></a>
+<FONT color="green">171</FONT>    <a name="line.171"></a>
+<FONT color="green">172</FONT>                if (this.ringBufferIndex &lt; 0)<a name="line.172"></a>
+<FONT color="green">173</FONT>                {<a name="line.173"></a>
+<FONT color="green">174</FONT>                    for (int var25 = 0; var25 &lt; this.ringBuffer.length; ++var25)<a name="line.174"></a>
+<FONT color="green">175</FONT>                    {<a name="line.175"></a>
+<FONT color="green">176</FONT>                        this.ringBuffer[var25][0] = (double)this.rotationYaw;<a name="line.176"></a>
+<FONT color="green">177</FONT>                        this.ringBuffer[var25][1] = this.posY;<a name="line.177"></a>
+<FONT color="green">178</FONT>                    }<a name="line.178"></a>
+<FONT color="green">179</FONT>                }<a name="line.179"></a>
+<FONT color="green">180</FONT>    <a name="line.180"></a>
+<FONT color="green">181</FONT>                if (++this.ringBufferIndex == this.ringBuffer.length)<a name="line.181"></a>
+<FONT color="green">182</FONT>                {<a name="line.182"></a>
+<FONT color="green">183</FONT>                    this.ringBufferIndex = 0;<a name="line.183"></a>
+<FONT color="green">184</FONT>                }<a name="line.184"></a>
+<FONT color="green">185</FONT>    <a name="line.185"></a>
+<FONT color="green">186</FONT>                this.ringBuffer[this.ringBufferIndex][0] = (double)this.rotationYaw;<a name="line.186"></a>
+<FONT color="green">187</FONT>                this.ringBuffer[this.ringBufferIndex][1] = this.posY;<a name="line.187"></a>
+<FONT color="green">188</FONT>                double var4;<a name="line.188"></a>
+<FONT color="green">189</FONT>                double var6;<a name="line.189"></a>
+<FONT color="green">190</FONT>                double var8;<a name="line.190"></a>
+<FONT color="green">191</FONT>                double var26;<a name="line.191"></a>
+<FONT color="green">192</FONT>                float var33;<a name="line.192"></a>
+<FONT color="green">193</FONT>    <a name="line.193"></a>
+<FONT color="green">194</FONT>                if (this.worldObj.isRemote)<a name="line.194"></a>
+<FONT color="green">195</FONT>                {<a name="line.195"></a>
+<FONT color="green">196</FONT>                    if (this.newPosRotationIncrements &gt; 0)<a name="line.196"></a>
+<FONT color="green">197</FONT>                    {<a name="line.197"></a>
+<FONT color="green">198</FONT>                        var26 = this.posX + (this.newPosX - this.posX) / (double)this.newPosRotationIncrements;<a name="line.198"></a>
+<FONT color="green">199</FONT>                        var4 = this.posY + (this.newPosY - this.posY) / (double)this.newPosRotationIncrements;<a name="line.199"></a>
+<FONT color="green">200</FONT>                        var6 = this.posZ + (this.newPosZ - this.posZ) / (double)this.newPosRotationIncrements;<a name="line.200"></a>
+<FONT color="green">201</FONT>                        var8 = MathHelper.wrapAngleTo180_double(this.newRotationYaw - (double)this.rotationYaw);<a name="line.201"></a>
+<FONT color="green">202</FONT>                        this.rotationYaw = (float)((double)this.rotationYaw + var8 / (double)this.newPosRotationIncrements);<a name="line.202"></a>
+<FONT color="green">203</FONT>                        this.rotationPitch = (float)((double)this.rotationPitch + (this.newRotationPitch - (double)this.rotationPitch) / (double)this.newPosRotationIncrements);<a name="line.203"></a>
+<FONT color="green">204</FONT>                        --this.newPosRotationIncrements;<a name="line.204"></a>
+<FONT color="green">205</FONT>                        this.setPosition(var26, var4, var6);<a name="line.205"></a>
+<FONT color="green">206</FONT>                        this.setRotation(this.rotationYaw, this.rotationPitch);<a name="line.206"></a>
+<FONT color="green">207</FONT>                    }<a name="line.207"></a>
+<FONT color="green">208</FONT>                }<a name="line.208"></a>
+<FONT color="green">209</FONT>                else<a name="line.209"></a>
+<FONT color="green">210</FONT>                {<a name="line.210"></a>
+<FONT color="green">211</FONT>                    var26 = this.targetX - this.posX;<a name="line.211"></a>
+<FONT color="green">212</FONT>                    var4 = this.targetY - this.posY;<a name="line.212"></a>
+<FONT color="green">213</FONT>                    var6 = this.targetZ - this.posZ;<a name="line.213"></a>
+<FONT color="green">214</FONT>                    var8 = var26 * var26 + var4 * var4 + var6 * var6;<a name="line.214"></a>
+<FONT color="green">215</FONT>    <a name="line.215"></a>
+<FONT color="green">216</FONT>                    if (this.target != null)<a name="line.216"></a>
+<FONT color="green">217</FONT>                    {<a name="line.217"></a>
+<FONT color="green">218</FONT>                        this.targetX = this.target.posX;<a name="line.218"></a>
+<FONT color="green">219</FONT>                        this.targetZ = this.target.posZ;<a name="line.219"></a>
+<FONT color="green">220</FONT>                        double var10 = this.targetX - this.posX;<a name="line.220"></a>
+<FONT color="green">221</FONT>                        double var12 = this.targetZ - this.posZ;<a name="line.221"></a>
+<FONT color="green">222</FONT>                        double var14 = Math.sqrt(var10 * var10 + var12 * var12);<a name="line.222"></a>
+<FONT color="green">223</FONT>                        double var16 = 0.4000000059604645D + var14 / 80.0D - 1.0D;<a name="line.223"></a>
+<FONT color="green">224</FONT>    <a name="line.224"></a>
+<FONT color="green">225</FONT>                        if (var16 &gt; 10.0D)<a name="line.225"></a>
+<FONT color="green">226</FONT>                        {<a name="line.226"></a>
+<FONT color="green">227</FONT>                            var16 = 10.0D;<a name="line.227"></a>
+<FONT color="green">228</FONT>                        }<a name="line.228"></a>
+<FONT color="green">229</FONT>    <a name="line.229"></a>
+<FONT color="green">230</FONT>                        this.targetY = this.target.boundingBox.minY + var16;<a name="line.230"></a>
+<FONT color="green">231</FONT>                    }<a name="line.231"></a>
+<FONT color="green">232</FONT>                    else<a name="line.232"></a>
+<FONT color="green">233</FONT>                    {<a name="line.233"></a>
+<FONT color="green">234</FONT>                        this.targetX += this.rand.nextGaussian() * 2.0D;<a name="line.234"></a>
+<FONT color="green">235</FONT>                        this.targetZ += this.rand.nextGaussian() * 2.0D;<a name="line.235"></a>
+<FONT color="green">236</FONT>                    }<a name="line.236"></a>
+<FONT color="green">237</FONT>    <a name="line.237"></a>
+<FONT color="green">238</FONT>                    if (this.forceNewTarget || var8 &lt; 100.0D || var8 &gt; 22500.0D || this.isCollidedHorizontally || this.isCollidedVertically)<a name="line.238"></a>
+<FONT color="green">239</FONT>                    {<a name="line.239"></a>
+<FONT color="green">240</FONT>                        this.setNewTarget();<a name="line.240"></a>
+<FONT color="green">241</FONT>                    }<a name="line.241"></a>
+<FONT color="green">242</FONT>    <a name="line.242"></a>
+<FONT color="green">243</FONT>                    var4 /= (double)MathHelper.sqrt_double(var26 * var26 + var6 * var6);<a name="line.243"></a>
+<FONT color="green">244</FONT>                    var33 = 0.6F;<a name="line.244"></a>
+<FONT color="green">245</FONT>    <a name="line.245"></a>
+<FONT color="green">246</FONT>                    if (var4 &lt; (double)(-var33))<a name="line.246"></a>
+<FONT color="green">247</FONT>                    {<a name="line.247"></a>
+<FONT color="green">248</FONT>                        var4 = (double)(-var33);<a name="line.248"></a>
+<FONT color="green">249</FONT>                    }<a name="line.249"></a>
+<FONT color="green">250</FONT>    <a name="line.250"></a>
+<FONT color="green">251</FONT>                    if (var4 &gt; (double)var33)<a name="line.251"></a>
+<FONT color="green">252</FONT>                    {<a name="line.252"></a>
+<FONT color="green">253</FONT>                        var4 = (double)var33;<a name="line.253"></a>
+<FONT color="green">254</FONT>                    }<a name="line.254"></a>
+<FONT color="green">255</FONT>    <a name="line.255"></a>
+<FONT color="green">256</FONT>                    this.motionY += var4 * 0.10000000149011612D;<a name="line.256"></a>
+<FONT color="green">257</FONT>                    this.rotationYaw = MathHelper.wrapAngleTo180_float(this.rotationYaw);<a name="line.257"></a>
+<FONT color="green">258</FONT>                    double var11 = 180.0D - Math.atan2(var26, var6) * 180.0D / Math.PI;<a name="line.258"></a>
+<FONT color="green">259</FONT>                    double var13 = MathHelper.wrapAngleTo180_double(var11 - (double)this.rotationYaw);<a name="line.259"></a>
+<FONT color="green">260</FONT>    <a name="line.260"></a>
+<FONT color="green">261</FONT>                    if (var13 &gt; 50.0D)<a name="line.261"></a>
+<FONT color="green">262</FONT>                    {<a name="line.262"></a>
+<FONT color="green">263</FONT>                        var13 = 50.0D;<a name="line.263"></a>
+<FONT color="green">264</FONT>                    }<a name="line.264"></a>
+<FONT color="green">265</FONT>    <a name="line.265"></a>
+<FONT color="green">266</FONT>                    if (var13 &lt; -50.0D)<a name="line.266"></a>
+<FONT color="green">267</FONT>                    {<a name="line.267"></a>
+<FONT color="green">268</FONT>                        var13 = -50.0D;<a name="line.268"></a>
+<FONT color="green">269</FONT>                    }<a name="line.269"></a>
+<FONT color="green">270</FONT>    <a name="line.270"></a>
+<FONT color="green">271</FONT>                    Vec3 var15 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.targetX - this.posX, this.targetY - this.posY, this.targetZ - this.posZ).normalize();<a name="line.271"></a>
+<FONT color="green">272</FONT>                    Vec3 var40 = this.worldObj.getWorldVec3Pool().getVecFromPool((double)MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F), this.motionY, (double)(-MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F))).normalize();<a name="line.272"></a>
+<FONT color="green">273</FONT>                    float var17 = (float)(var40.dotProduct(var15) + 0.5D) / 1.5F;<a name="line.273"></a>
+<FONT color="green">274</FONT>    <a name="line.274"></a>
+<FONT color="green">275</FONT>                    if (var17 &lt; 0.0F)<a name="line.275"></a>
+<FONT color="green">276</FONT>                    {<a name="line.276"></a>
+<FONT color="green">277</FONT>                        var17 = 0.0F;<a name="line.277"></a>
+<FONT color="green">278</FONT>                    }<a name="line.278"></a>
+<FONT color="green">279</FONT>    <a name="line.279"></a>
+<FONT color="green">280</FONT>                    this.randomYawVelocity *= 0.8F;<a name="line.280"></a>
+<FONT color="green">281</FONT>                    float var18 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ) * 1.0F + 1.0F;<a name="line.281"></a>
+<FONT color="green">282</FONT>                    double var19 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ) * 1.0D + 1.0D;<a name="line.282"></a>
+<FONT color="green">283</FONT>    <a name="line.283"></a>
+<FONT color="green">284</FONT>                    if (var19 &gt; 40.0D)<a name="line.284"></a>
+<FONT color="green">285</FONT>                    {<a name="line.285"></a>
+<FONT color="green">286</FONT>                        var19 = 40.0D;<a name="line.286"></a>
+<FONT color="green">287</FONT>                    }<a name="line.287"></a>
+<FONT color="green">288</FONT>    <a name="line.288"></a>
+<FONT color="green">289</FONT>                    this.randomYawVelocity = (float)((double)this.randomYawVelocity + var13 * (0.699999988079071D / var19 / (double)var18));<a name="line.289"></a>
+<FONT color="green">290</FONT>                    this.rotationYaw += this.randomYawVelocity * 0.1F;<a name="line.290"></a>
+<FONT color="green">291</FONT>                    float var21 = (float)(2.0D / (var19 + 1.0D));<a name="line.291"></a>
+<FONT color="green">292</FONT>                    float var22 = 0.06F;<a name="line.292"></a>
+<FONT color="green">293</FONT>                    this.moveFlying(0.0F, -1.0F, var22 * (var17 * var21 + (1.0F - var21)));<a name="line.293"></a>
+<FONT color="green">294</FONT>    <a name="line.294"></a>
+<FONT color="green">295</FONT>                    if (this.slowed)<a name="line.295"></a>
+<FONT color="green">296</FONT>                    {<a name="line.296"></a>
+<FONT color="green">297</FONT>                        this.moveEntity(this.motionX * 0.800000011920929D, this.motionY * 0.800000011920929D, this.motionZ * 0.800000011920929D);<a name="line.297"></a>
+<FONT color="green">298</FONT>                    }<a name="line.298"></a>
+<FONT color="green">299</FONT>                    else<a name="line.299"></a>
+<FONT color="green">300</FONT>                    {<a name="line.300"></a>
+<FONT color="green">301</FONT>                        this.moveEntity(this.motionX, this.motionY, this.motionZ);<a name="line.301"></a>
+<FONT color="green">302</FONT>                    }<a name="line.302"></a>
+<FONT color="green">303</FONT>    <a name="line.303"></a>
+<FONT color="green">304</FONT>                    Vec3 var23 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.motionX, this.motionY, this.motionZ).normalize();<a name="line.304"></a>
+<FONT color="green">305</FONT>                    float var24 = (float)(var23.dotProduct(var40) + 1.0D) / 2.0F;<a name="line.305"></a>
+<FONT color="green">306</FONT>                    var24 = 0.8F + 0.15F * var24;<a name="line.306"></a>
+<FONT color="green">307</FONT>                    this.motionX *= (double)var24;<a name="line.307"></a>
+<FONT color="green">308</FONT>                    this.motionZ *= (double)var24;<a name="line.308"></a>
+<FONT color="green">309</FONT>                    this.motionY *= 0.9100000262260437D;<a name="line.309"></a>
+<FONT color="green">310</FONT>                }<a name="line.310"></a>
+<FONT color="green">311</FONT>    <a name="line.311"></a>
+<FONT color="green">312</FONT>                this.renderYawOffset = this.rotationYaw;<a name="line.312"></a>
+<FONT color="green">313</FONT>                this.dragonPartHead.width = this.dragonPartHead.height = 3.0F;<a name="line.313"></a>
+<FONT color="green">314</FONT>                this.dragonPartTail1.width = this.dragonPartTail1.height = 2.0F;<a name="line.314"></a>
+<FONT color="green">315</FONT>                this.dragonPartTail2.width = this.dragonPartTail2.height = 2.0F;<a name="line.315"></a>
+<FONT color="green">316</FONT>                this.dragonPartTail3.width = this.dragonPartTail3.height = 2.0F;<a name="line.316"></a>
+<FONT color="green">317</FONT>                this.dragonPartBody.height = 3.0F;<a name="line.317"></a>
+<FONT color="green">318</FONT>                this.dragonPartBody.width = 5.0F;<a name="line.318"></a>
+<FONT color="green">319</FONT>                this.dragonPartWing1.height = 2.0F;<a name="line.319"></a>
+<FONT color="green">320</FONT>                this.dragonPartWing1.width = 4.0F;<a name="line.320"></a>
+<FONT color="green">321</FONT>                this.dragonPartWing2.height = 3.0F;<a name="line.321"></a>
+<FONT color="green">322</FONT>                this.dragonPartWing2.width = 4.0F;<a name="line.322"></a>
+<FONT color="green">323</FONT>                var2 = (float)(this.getMovementOffsets(5, 1.0F)[1] - this.getMovementOffsets(10, 1.0F)[1]) * 10.0F / 180.0F * (float)Math.PI;<a name="line.323"></a>
+<FONT color="green">324</FONT>                var3 = MathHelper.cos(var2);<a name="line.324"></a>
+<FONT color="green">325</FONT>                float var28 = -MathHelper.sin(var2);<a name="line.325"></a>
+<FONT color="green">326</FONT>                float var5 = this.rotationYaw * (float)Math.PI / 180.0F;<a name="line.326"></a>
+<FONT color="green">327</FONT>                float var27 = MathHelper.sin(var5);<a name="line.327"></a>
+<FONT color="green">328</FONT>                float var7 = MathHelper.cos(var5);<a name="line.328"></a>
+<FONT color="green">329</FONT>                this.dragonPartBody.onUpdate();<a name="line.329"></a>
+<FONT color="green">330</FONT>                this.dragonPartBody.setLocationAndAngles(this.posX + (double)(var27 * 0.5F), this.posY, this.posZ - (double)(var7 * 0.5F), 0.0F, 0.0F);<a name="line.330"></a>
+<FONT color="green">331</FONT>                this.dragonPartWing1.onUpdate();<a name="line.331"></a>
+<FONT color="green">332</FONT>                this.dragonPartWing1.setLocationAndAngles(this.posX + (double)(var7 * 4.5F), this.posY + 2.0D, this.posZ + (double)(var27 * 4.5F), 0.0F, 0.0F);<a name="line.332"></a>
+<FONT color="green">333</FONT>                this.dragonPartWing2.onUpdate();<a name="line.333"></a>
+<FONT color="green">334</FONT>                this.dragonPartWing2.setLocationAndAngles(this.posX - (double)(var7 * 4.5F), this.posY + 2.0D, this.posZ - (double)(var27 * 4.5F), 0.0F, 0.0F);<a name="line.334"></a>
+<FONT color="green">335</FONT>    <a name="line.335"></a>
+<FONT color="green">336</FONT>                if (!this.worldObj.isRemote &amp;&amp; this.hurtTime == 0)<a name="line.336"></a>
+<FONT color="green">337</FONT>                {<a name="line.337"></a>
+<FONT color="green">338</FONT>                    this.collideWithEntities(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartWing1.boundingBox.expand(4.0D, 2.0D, 4.0D).offset(0.0D, -2.0D, 0.0D)));<a name="line.338"></a>
+<FONT color="green">339</FONT>                    this.collideWithEntities(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartWing2.boundingBox.expand(4.0D, 2.0D, 4.0D).offset(0.0D, -2.0D, 0.0D)));<a name="line.339"></a>
+<FONT color="green">340</FONT>                    this.attackEntitiesInList(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.dragonPartHead.boundingBox.expand(1.0D, 1.0D, 1.0D)));<a name="line.340"></a>
+<FONT color="green">341</FONT>                }<a name="line.341"></a>
+<FONT color="green">342</FONT>    <a name="line.342"></a>
+<FONT color="green">343</FONT>                double[] var29 = this.getMovementOffsets(5, 1.0F);<a name="line.343"></a>
+<FONT color="green">344</FONT>                double[] var9 = this.getMovementOffsets(0, 1.0F);<a name="line.344"></a>
+<FONT color="green">345</FONT>                var33 = MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0F - this.randomYawVelocity * 0.01F);<a name="line.345"></a>
+<FONT color="green">346</FONT>                float var32 = MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0F - this.randomYawVelocity * 0.01F);<a name="line.346"></a>
+<FONT color="green">347</FONT>                this.dragonPartHead.onUpdate();<a name="line.347"></a>
+<FONT color="green">348</FONT>                this.dragonPartHead.setLocationAndAngles(this.posX + (double)(var33 * 5.5F * var3), this.posY + (var9[1] - var29[1]) * 1.0D + (double)(var28 * 5.5F), this.posZ - (double)(var32 * 5.5F * var3), 0.0F, 0.0F);<a name="line.348"></a>
+<FONT color="green">349</FONT>    <a name="line.349"></a>
+<FONT color="green">350</FONT>                for (int var30 = 0; var30 &lt; 3; ++var30)<a name="line.350"></a>
+<FONT color="green">351</FONT>                {<a name="line.351"></a>
+<FONT color="green">352</FONT>                    EntityDragonPart var31 = null;<a name="line.352"></a>
+<FONT color="green">353</FONT>    <a name="line.353"></a>
+<FONT color="green">354</FONT>                    if (var30 == 0)<a name="line.354"></a>
+<FONT color="green">355</FONT>                    {<a name="line.355"></a>
+<FONT color="green">356</FONT>                        var31 = this.dragonPartTail1;<a name="line.356"></a>
+<FONT color="green">357</FONT>                    }<a name="line.357"></a>
+<FONT color="green">358</FONT>    <a name="line.358"></a>
+<FONT color="green">359</FONT>                    if (var30 == 1)<a name="line.359"></a>
+<FONT color="green">360</FONT>                    {<a name="line.360"></a>
+<FONT color="green">361</FONT>                        var31 = this.dragonPartTail2;<a name="line.361"></a>
+<FONT color="green">362</FONT>                    }<a name="line.362"></a>
+<FONT color="green">363</FONT>    <a name="line.363"></a>
+<FONT color="green">364</FONT>                    if (var30 == 2)<a name="line.364"></a>
+<FONT color="green">365</FONT>                    {<a name="line.365"></a>
+<FONT color="green">366</FONT>                        var31 = this.dragonPartTail3;<a name="line.366"></a>
+<FONT color="green">367</FONT>                    }<a name="line.367"></a>
+<FONT color="green">368</FONT>    <a name="line.368"></a>
+<FONT color="green">369</FONT>                    double[] var35 = this.getMovementOffsets(12 + var30 * 2, 1.0F);<a name="line.369"></a>
+<FONT color="green">370</FONT>                    float var34 = this.rotationYaw * (float)Math.PI / 180.0F + this.simplifyAngle(var35[0] - var29[0]) * (float)Math.PI / 180.0F * 1.0F;<a name="line.370"></a>
+<FONT color="green">371</FONT>                    float var38 = MathHelper.sin(var34);<a name="line.371"></a>
+<FONT color="green">372</FONT>                    float var37 = MathHelper.cos(var34);<a name="line.372"></a>
+<FONT color="green">373</FONT>                    float var36 = 1.5F;<a name="line.373"></a>
+<FONT color="green">374</FONT>                    float var39 = (float)(var30 + 1) * 2.0F;<a name="line.374"></a>
+<FONT color="green">375</FONT>                    var31.onUpdate();<a name="line.375"></a>
+<FONT color="green">376</FONT>                    var31.setLocationAndAngles(this.posX - (double)((var27 * var36 + var38 * var39) * var3), this.posY + (var35[1] - var29[1]) * 1.0D - (double)((var39 + var36) * var28) + 1.5D, this.posZ + (double)((var7 * var36 + var37 * var39) * var3), 0.0F, 0.0F);<a name="line.376"></a>
+<FONT color="green">377</FONT>                }<a name="line.377"></a>
+<FONT color="green">378</FONT>    <a name="line.378"></a>
+<FONT color="green">379</FONT>                if (!this.worldObj.isRemote)<a name="line.379"></a>
+<FONT color="green">380</FONT>                {<a name="line.380"></a>
+<FONT color="green">381</FONT>                    this.slowed = this.destroyBlocksInAABB(this.dragonPartHead.boundingBox) | this.destroyBlocksInAABB(this.dragonPartBody.boundingBox);<a name="line.381"></a>
+<FONT color="green">382</FONT>                }<a name="line.382"></a>
+<FONT color="green">383</FONT>            }<a name="line.383"></a>
+<FONT color="green">384</FONT>        }<a name="line.384"></a>
+<FONT color="green">385</FONT>    <a name="line.385"></a>
+<FONT color="green">386</FONT>        /**<a name="line.386"></a>
+<FONT color="green">387</FONT>         * Updates the state of the enderdragon's current endercrystal.<a name="line.387"></a>
+<FONT color="green">388</FONT>         */<a name="line.388"></a>
+<FONT color="green">389</FONT>        private void updateDragonEnderCrystal()<a name="line.389"></a>
+<FONT color="green">390</FONT>        {<a name="line.390"></a>
+<FONT color="green">391</FONT>            if (this.healingEnderCrystal != null)<a name="line.391"></a>
+<FONT color="green">392</FONT>            {<a name="line.392"></a>
+<FONT color="green">393</FONT>                if (this.healingEnderCrystal.isDead)<a name="line.393"></a>
+<FONT color="green">394</FONT>                {<a name="line.394"></a>
+<FONT color="green">395</FONT>                    if (!this.worldObj.isRemote)<a name="line.395"></a>
+<FONT color="green">396</FONT>                    {<a name="line.396"></a>
+<FONT color="green">397</FONT>                        this.attackEntityFromPart(this.dragonPartHead, DamageSource.explosion, 10);<a name="line.397"></a>
+<FONT color="green">398</FONT>                    }<a name="line.398"></a>
+<FONT color="green">399</FONT>    <a name="line.399"></a>
+<FONT color="green">400</FONT>                    this.healingEnderCrystal = null;<a name="line.400"></a>
+<FONT color="green">401</FONT>                }<a name="line.401"></a>
+<FONT color="green">402</FONT>                else if (this.ticksExisted % 10 == 0 &amp;&amp; this.health &lt; this.getMaxHealth())<a name="line.402"></a>
+<FONT color="green">403</FONT>                {<a name="line.403"></a>
+<FONT color="green">404</FONT>                    ++this.health;<a name="line.404"></a>
+<FONT color="green">405</FONT>                }<a name="line.405"></a>
+<FONT color="green">406</FONT>            }<a name="line.406"></a>
+<FONT color="green">407</FONT>    <a name="line.407"></a>
+<FONT color="green">408</FONT>            if (this.rand.nextInt(10) == 0)<a name="line.408"></a>
+<FONT color="green">409</FONT>            {<a name="line.409"></a>
+<FONT color="green">410</FONT>                float var1 = 32.0F;<a name="line.410"></a>
+<FONT color="green">411</FONT>                List var2 = this.worldObj.getEntitiesWithinAABB(EntityEnderCrystal.class, this.boundingBox.expand((double)var1, (double)var1, (double)var1));<a name="line.411"></a>
+<FONT color="green">412</FONT>                EntityEnderCrystal var3 = null;<a name="line.412"></a>
+<FONT color="green">413</FONT>                double var4 = Double.MAX_VALUE;<a name="line.413"></a>
+<FONT color="green">414</FONT>                Iterator var6 = var2.iterator();<a name="line.414"></a>
+<FONT color="green">415</FONT>    <a name="line.415"></a>
+<FONT color="green">416</FONT>                while (var6.hasNext())<a name="line.416"></a>
+<FONT color="green">417</FONT>                {<a name="line.417"></a>
+<FONT color="green">418</FONT>                    EntityEnderCrystal var7 = (EntityEnderCrystal)var6.next();<a name="line.418"></a>
+<FONT color="green">419</FONT>                    double var8 = var7.getDistanceSqToEntity(this);<a name="line.419"></a>
+<FONT color="green">420</FONT>    <a name="line.420"></a>
+<FONT color="green">421</FONT>                    if (var8 &lt; var4)<a name="line.421"></a>
+<FONT color="green">422</FONT>                    {<a name="line.422"></a>
+<FONT color="green">423</FONT>                        var4 = var8;<a name="line.423"></a>
+<FONT color="green">424</FONT>                        var3 = var7;<a name="line.424"></a>
+<FONT color="green">425</FONT>                    }<a name="line.425"></a>
+<FONT color="green">426</FONT>                }<a name="line.426"></a>
+<FONT color="green">427</FONT>    <a name="line.427"></a>
+<FONT color="green">428</FONT>                this.healingEnderCrystal = var3;<a name="line.428"></a>
+<FONT color="green">429</FONT>            }<a name="line.429"></a>
+<FONT color="green">430</FONT>        }<a name="line.430"></a>
+<FONT color="green">431</FONT>    <a name="line.431"></a>
+<FONT color="green">432</FONT>        /**<a name="line.432"></a>
+<FONT color="green">433</FONT>         * Pushes all entities inside the list away from the enderdragon.<a name="line.433"></a>
+<FONT color="green">434</FONT>         */<a name="line.434"></a>
+<FONT color="green">435</FONT>        private void collideWithEntities(List par1List)<a name="line.435"></a>
+<FONT color="green">436</FONT>        {<a name="line.436"></a>
+<FONT color="green">437</FONT>            double var2 = (this.dragonPartBody.boundingBox.minX + this.dragonPartBody.boundingBox.maxX) / 2.0D;<a name="line.437"></a>
+<FONT color="green">438</FONT>            double var4 = (this.dragonPartBody.boundingBox.minZ + this.dragonPartBody.boundingBox.maxZ) / 2.0D;<a name="line.438"></a>
+<FONT color="green">439</FONT>            Iterator var6 = par1List.iterator();<a name="line.439"></a>
+<FONT color="green">440</FONT>    <a name="line.440"></a>
+<FONT color="green">441</FONT>            while (var6.hasNext())<a name="line.441"></a>
+<FONT color="green">442</FONT>            {<a name="line.442"></a>
+<FONT color="green">443</FONT>                Entity var7 = (Entity)var6.next();<a name="line.443"></a>
+<FONT color="green">444</FONT>    <a name="line.444"></a>
+<FONT color="green">445</FONT>                if (var7 instanceof EntityLiving)<a name="line.445"></a>
+<FONT color="green">446</FONT>                {<a name="line.446"></a>
+<FONT color="green">447</FONT>                    double var8 = var7.posX - var2;<a name="line.447"></a>
+<FONT color="green">448</FONT>                    double var10 = var7.posZ - var4;<a name="line.448"></a>
+<FONT color="green">449</FONT>                    double var12 = var8 * var8 + var10 * var10;<a name="line.449"></a>
+<FONT color="green">450</FONT>                    var7.addVelocity(var8 / var12 * 4.0D, 0.20000000298023224D, var10 / var12 * 4.0D);<a name="line.450"></a>
+<FONT color="green">451</FONT>                }<a name="line.451"></a>
+<FONT color="green">452</FONT>            }<a name="line.452"></a>
+<FONT color="green">453</FONT>        }<a name="line.453"></a>
+<FONT color="green">454</FONT>    <a name="line.454"></a>
+<FONT color="green">455</FONT>        /**<a name="line.455"></a>
+<FONT color="green">456</FONT>         * Attacks all entities inside this list, dealing 5 hearts of damage.<a name="line.456"></a>
+<FONT color="green">457</FONT>         */<a name="line.457"></a>
+<FONT color="green">458</FONT>        private void attackEntitiesInList(List par1List)<a name="line.458"></a>
+<FONT color="green">459</FONT>        {<a name="line.459"></a>
+<FONT color="green">460</FONT>            for (int var2 = 0; var2 &lt; par1List.size(); ++var2)<a name="line.460"></a>
+<FONT color="green">461</FONT>            {<a name="line.461"></a>
+<FONT color="green">462</FONT>                Entity var3 = (Entity)par1List.get(var2);<a name="line.462"></a>
+<FONT color="green">463</FONT>    <a name="line.463"></a>
+<FONT color="green">464</FONT>                if (var3 instanceof EntityLiving)<a name="line.464"></a>
+<FONT color="green">465</FONT>                {<a name="line.465"></a>
+<FONT color="green">466</FONT>                    var3.attackEntityFrom(DamageSource.causeMobDamage(this), 10);<a name="line.466"></a>
+<FONT color="green">467</FONT>                }<a name="line.467"></a>
+<FONT color="green">468</FONT>            }<a name="line.468"></a>
+<FONT color="green">469</FONT>        }<a name="line.469"></a>
+<FONT color="green">470</FONT>    <a name="line.470"></a>
+<FONT color="green">471</FONT>        /**<a name="line.471"></a>
+<FONT color="green">472</FONT>         * Sets a new target for the flight AI. It can be a random coordinate or a nearby player.<a name="line.472"></a>
+<FONT color="green">473</FONT>         */<a name="line.473"></a>
+<FONT color="green">474</FONT>        private void setNewTarget()<a name="line.474"></a>
+<FONT color="green">475</FONT>        {<a name="line.475"></a>
+<FONT color="green">476</FONT>            this.forceNewTarget = false;<a name="line.476"></a>
+<FONT color="green">477</FONT>    <a name="line.477"></a>
+<FONT color="green">478</FONT>            if (this.rand.nextInt(2) == 0 &amp;&amp; !this.worldObj.playerEntities.isEmpty())<a name="line.478"></a>
+<FONT color="green">479</FONT>            {<a name="line.479"></a>
+<FONT color="green">480</FONT>                this.target = (Entity)this.worldObj.playerEntities.get(this.rand.nextInt(this.worldObj.playerEntities.size()));<a name="line.480"></a>
+<FONT color="green">481</FONT>            }<a name="line.481"></a>
+<FONT color="green">482</FONT>            else<a name="line.482"></a>
+<FONT color="green">483</FONT>            {<a name="line.483"></a>
+<FONT color="green">484</FONT>                boolean var1 = false;<a name="line.484"></a>
+<FONT color="green">485</FONT>    <a name="line.485"></a>
+<FONT color="green">486</FONT>                do<a name="line.486"></a>
+<FONT color="green">487</FONT>                {<a name="line.487"></a>
+<FONT color="green">488</FONT>                    this.targetX = 0.0D;<a name="line.488"></a>
+<FONT color="green">489</FONT>                    this.targetY = (double)(70.0F + this.rand.nextFloat() * 50.0F);<a name="line.489"></a>
+<FONT color="green">490</FONT>                    this.targetZ = 0.0D;<a name="line.490"></a>
+<FONT color="green">491</FONT>                    this.targetX += (double)(this.rand.nextFloat() * 120.0F - 60.0F);<a name="line.491"></a>
+<FONT color="green">492</FONT>                    this.targetZ += (double)(this.rand.nextFloat() * 120.0F - 60.0F);<a name="line.492"></a>
+<FONT color="green">493</FONT>                    double var2 = this.posX - this.targetX;<a name="line.493"></a>
+<FONT color="green">494</FONT>                    double var4 = this.posY - this.targetY;<a name="line.494"></a>
+<FONT color="green">495</FONT>                    double var6 = this.posZ - this.targetZ;<a name="line.495"></a>
+<FONT color="green">496</FONT>                    var1 = var2 * var2 + var4 * var4 + var6 * var6 &gt; 100.0D;<a name="line.496"></a>
+<FONT color="green">497</FONT>                }<a name="line.497"></a>
+<FONT color="green">498</FONT>                while (!var1);<a name="line.498"></a>
+<FONT color="green">499</FONT>    <a name="line.499"></a>
+<FONT color="green">500</FONT>                this.target = null;<a name="line.500"></a>
+<FONT color="green">501</FONT>            }<a name="line.501"></a>
+<FONT color="green">502</FONT>        }<a name="line.502"></a>
+<FONT color="green">503</FONT>    <a name="line.503"></a>
+<FONT color="green">504</FONT>        /**<a name="line.504"></a>
+<FONT color="green">505</FONT>         * Simplifies the value of a number by adding/subtracting 180 to the point that the number is between -180 and 180.<a name="line.505"></a>
+<FONT color="green">506</FONT>         */<a name="line.506"></a>
+<FONT color="green">507</FONT>        private float simplifyAngle(double par1)<a name="line.507"></a>
+<FONT color="green">508</FONT>        {<a name="line.508"></a>
+<FONT color="green">509</FONT>            return (float)MathHelper.wrapAngleTo180_double(par1);<a name="line.509"></a>
+<FONT color="green">510</FONT>        }<a name="line.510"></a>
+<FONT color="green">511</FONT>    <a name="line.511"></a>
+<FONT color="green">512</FONT>        /**<a name="line.512"></a>
+<FONT color="green">513</FONT>         * Destroys all blocks that aren't associated with 'The End' inside the given bounding box.<a name="line.513"></a>
+<FONT color="green">514</FONT>         */<a name="line.514"></a>
+<FONT color="green">515</FONT>        private boolean destroyBlocksInAABB(AxisAlignedBB par1AxisAlignedBB)<a name="line.515"></a>
+<FONT color="green">516</FONT>        {<a name="line.516"></a>
+<FONT color="green">517</FONT>            int var2 = MathHelper.floor_double(par1AxisAlignedBB.minX);<a name="line.517"></a>
+<FONT color="green">518</FONT>            int var3 = MathHelper.floor_double(par1AxisAlignedBB.minY);<a name="line.518"></a>
+<FONT color="green">519</FONT>            int var4 = MathHelper.floor_double(par1AxisAlignedBB.minZ);<a name="line.519"></a>
+<FONT color="green">520</FONT>            int var5 = MathHelper.floor_double(par1AxisAlignedBB.maxX);<a name="line.520"></a>
+<FONT color="green">521</FONT>            int var6 = MathHelper.floor_double(par1AxisAlignedBB.maxY);<a name="line.521"></a>
+<FONT color="green">522</FONT>            int var7 = MathHelper.floor_double(par1AxisAlignedBB.maxZ);<a name="line.522"></a>
+<FONT color="green">523</FONT>            boolean var8 = false;<a name="line.523"></a>
+<FONT color="green">524</FONT>            boolean var9 = false;<a name="line.524"></a>
+<FONT color="green">525</FONT>    <a name="line.525"></a>
+<FONT color="green">526</FONT>            for (int var10 = var2; var10 &lt;= var5; ++var10)<a name="line.526"></a>
+<FONT color="green">527</FONT>            {<a name="line.527"></a>
+<FONT color="green">528</FONT>                for (int var11 = var3; var11 &lt;= var6; ++var11)<a name="line.528"></a>
+<FONT color="green">529</FONT>                {<a name="line.529"></a>
+<FONT color="green">530</FONT>                    for (int var12 = var4; var12 &lt;= var7; ++var12)<a name="line.530"></a>
+<FONT color="green">531</FONT>                    {<a name="line.531"></a>
+<FONT color="green">532</FONT>                        int var13 = this.worldObj.getBlockId(var10, var11, var12);<a name="line.532"></a>
+<FONT color="green">533</FONT>                        Block block = Block.blocksList[var13];<a name="line.533"></a>
+<FONT color="green">534</FONT>    <a name="line.534"></a>
+<FONT color="green">535</FONT>                        if (block != null)<a name="line.535"></a>
+<FONT color="green">536</FONT>                        {<a name="line.536"></a>
+<FONT color="green">537</FONT>                            if (block.canDragonDestroy(worldObj, var10, var11, var12))<a name="line.537"></a>
+<FONT color="green">538</FONT>                            {<a name="line.538"></a>
+<FONT color="green">539</FONT>                                var9 = true;<a name="line.539"></a>
+<FONT color="green">540</FONT>                                this.worldObj.setBlockWithNotify(var10, var11, var12, 0);<a name="line.540"></a>
+<FONT color="green">541</FONT>                            }<a name="line.541"></a>
+<FONT color="green">542</FONT>                            else<a name="line.542"></a>
+<FONT color="green">543</FONT>                            {<a name="line.543"></a>
+<FONT color="green">544</FONT>                                var8 = true;<a name="line.544"></a>
+<FONT color="green">545</FONT>                            }<a name="line.545"></a>
+<FONT color="green">546</FONT>                        }<a name="line.546"></a>
+<FONT color="green">547</FONT>                    }<a name="line.547"></a>
+<FONT color="green">548</FONT>                }<a name="line.548"></a>
+<FONT color="green">549</FONT>            }<a name="line.549"></a>
+<FONT color="green">550</FONT>    <a name="line.550"></a>
+<FONT color="green">551</FONT>            if (var9)<a name="line.551"></a>
+<FONT color="green">552</FONT>            {<a name="line.552"></a>
+<FONT color="green">553</FONT>                double var16 = par1AxisAlignedBB.minX + (par1AxisAlignedBB.maxX - par1AxisAlignedBB.minX) * (double)this.rand.nextFloat();<a name="line.553"></a>
+<FONT color="green">554</FONT>                double var17 = par1AxisAlignedBB.minY + (par1AxisAlignedBB.maxY - par1AxisAlignedBB.minY) * (double)this.rand.nextFloat();<a name="line.554"></a>
+<FONT color="green">555</FONT>                double var14 = par1AxisAlignedBB.minZ + (par1AxisAlignedBB.maxZ - par1AxisAlignedBB.minZ) * (double)this.rand.nextFloat();<a name="line.555"></a>
+<FONT color="green">556</FONT>                this.worldObj.spawnParticle("largeexplode", var16, var17, var14, 0.0D, 0.0D, 0.0D);<a name="line.556"></a>
+<FONT color="green">557</FONT>            }<a name="line.557"></a>
+<FONT color="green">558</FONT>    <a name="line.558"></a>
+<FONT color="green">559</FONT>            return var8;<a name="line.559"></a>
+<FONT color="green">560</FONT>        }<a name="line.560"></a>
+<FONT color="green">561</FONT>    <a name="line.561"></a>
+<FONT color="green">562</FONT>        public boolean attackEntityFromPart(EntityDragonPart par1EntityDragonPart, DamageSource par2DamageSource, int par3)<a name="line.562"></a>
+<FONT color="green">563</FONT>        {<a name="line.563"></a>
+<FONT color="green">564</FONT>            if (par1EntityDragonPart != this.dragonPartHead)<a name="line.564"></a>
+<FONT color="green">565</FONT>            {<a name="line.565"></a>
+<FONT color="green">566</FONT>                par3 = par3 / 4 + 1;<a name="line.566"></a>
+<FONT color="green">567</FONT>            }<a name="line.567"></a>
+<FONT color="green">568</FONT>    <a name="line.568"></a>
+<FONT color="green">569</FONT>            float var4 = this.rotationYaw * (float)Math.PI / 180.0F;<a name="line.569"></a>
+<FONT color="green">570</FONT>            float var5 = MathHelper.sin(var4);<a name="line.570"></a>
+<FONT color="green">571</FONT>            float var6 = MathHelper.cos(var4);<a name="line.571"></a>
+<FONT color="green">572</FONT>            this.targetX = this.posX + (double)(var5 * 5.0F) + (double)((this.rand.nextFloat() - 0.5F) * 2.0F);<a name="line.572"></a>
+<FONT color="green">573</FONT>            this.targetY = this.posY + (double)(this.rand.nextFloat() * 3.0F) + 1.0D;<a name="line.573"></a>
+<FONT color="green">574</FONT>            this.targetZ = this.posZ - (double)(var6 * 5.0F) + (double)((this.rand.nextFloat() - 0.5F) * 2.0F);<a name="line.574"></a>
+<FONT color="green">575</FONT>            this.target = null;<a name="line.575"></a>
+<FONT color="green">576</FONT>    <a name="line.576"></a>
+<FONT color="green">577</FONT>            if (par2DamageSource.getEntity() instanceof EntityPlayer || par2DamageSource == DamageSource.explosion)<a name="line.577"></a>
+<FONT color="green">578</FONT>            {<a name="line.578"></a>
+<FONT color="green">579</FONT>                this.func_82195_e(par2DamageSource, par3);<a name="line.579"></a>
+<FONT color="green">580</FONT>            }<a name="line.580"></a>
+<FONT color="green">581</FONT>    <a name="line.581"></a>
+<FONT color="green">582</FONT>            return true;<a name="line.582"></a>
+<FONT color="green">583</FONT>        }<a name="line.583"></a>
+<FONT color="green">584</FONT>    <a name="line.584"></a>
+<FONT color="green">585</FONT>        /**<a name="line.585"></a>
+<FONT color="green">586</FONT>         * Called when the entity is attacked.<a name="line.586"></a>
+<FONT color="green">587</FONT>         */<a name="line.587"></a>
+<FONT color="green">588</FONT>        public boolean attackEntityFrom(DamageSource par1DamageSource, int par2)<a name="line.588"></a>
+<FONT color="green">589</FONT>        {<a name="line.589"></a>
+<FONT color="green">590</FONT>            return false;<a name="line.590"></a>
+<FONT color="green">591</FONT>        }<a name="line.591"></a>
+<FONT color="green">592</FONT>    <a name="line.592"></a>
+<FONT color="green">593</FONT>        protected boolean func_82195_e(DamageSource par1DamageSource, int par2)<a name="line.593"></a>
+<FONT color="green">594</FONT>        {<a name="line.594"></a>
+<FONT color="green">595</FONT>            return super.attackEntityFrom(par1DamageSource, par2);<a name="line.595"></a>
+<FONT color="green">596</FONT>        }<a name="line.596"></a>
+<FONT color="green">597</FONT>    <a name="line.597"></a>
+<FONT color="green">598</FONT>        /**<a name="line.598"></a>
+<FONT color="green">599</FONT>         * handles entity death timer, experience orb and particle creation<a name="line.599"></a>
+<FONT color="green">600</FONT>         */<a name="line.600"></a>
+<FONT color="green">601</FONT>        protected void onDeathUpdate()<a name="line.601"></a>
+<FONT color="green">602</FONT>        {<a name="line.602"></a>
+<FONT color="green">603</FONT>            ++this.deathTicks;<a name="line.603"></a>
+<FONT color="green">604</FONT>    <a name="line.604"></a>
+<FONT color="green">605</FONT>            if (this.deathTicks &gt;= 180 &amp;&amp; this.deathTicks &lt;= 200)<a name="line.605"></a>
+<FONT color="green">606</FONT>            {<a name="line.606"></a>
+<FONT color="green">607</FONT>                float var1 = (this.rand.nextFloat() - 0.5F) * 8.0F;<a name="line.607"></a>
+<FONT color="green">608</FONT>                float var2 = (this.rand.nextFloat() - 0.5F) * 4.0F;<a name="line.608"></a>
+<FONT color="green">609</FONT>                float var3 = (this.rand.nextFloat() - 0.5F) * 8.0F;<a name="line.609"></a>
+<FONT color="green">610</FONT>                this.worldObj.spawnParticle("hugeexplosion", this.posX + (double)var1, this.posY + 2.0D + (double)var2, this.posZ + (double)var3, 0.0D, 0.0D, 0.0D);<a name="line.610"></a>
+<FONT color="green">611</FONT>            }<a name="line.611"></a>
+<FONT color="green">612</FONT>    <a name="line.612"></a>
+<FONT color="green">613</FONT>            int var4;<a name="line.613"></a>
+<FONT color="green">614</FONT>            int var5;<a name="line.614"></a>
+<FONT color="green">615</FONT>    <a name="line.615"></a>
+<FONT color="green">616</FONT>            if (!this.worldObj.isRemote)<a name="line.616"></a>
+<FONT color="green">617</FONT>            {<a name="line.617"></a>
+<FONT color="green">618</FONT>                if (this.deathTicks &gt; 150 &amp;&amp; this.deathTicks % 5 == 0)<a name="line.618"></a>
+<FONT color="green">619</FONT>                {<a name="line.619"></a>
+<FONT color="green">620</FONT>                    var4 = 1000;<a name="line.620"></a>
+<FONT color="green">621</FONT>    <a name="line.621"></a>
+<FONT color="green">622</FONT>                    while (var4 &gt; 0)<a name="line.622"></a>
+<FONT color="green">623</FONT>                    {<a name="line.623"></a>
+<FONT color="green">624</FONT>                        var5 = EntityXPOrb.getXPSplit(var4);<a name="line.624"></a>
+<FONT color="green">625</FONT>                        var4 -= var5;<a name="line.625"></a>
+<FONT color="green">626</FONT>                        this.worldObj.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, var5));<a name="line.626"></a>
+<FONT color="green">627</FONT>                    }<a name="line.627"></a>
+<FONT color="green">628</FONT>                }<a name="line.628"></a>
+<FONT color="green">629</FONT>    <a name="line.629"></a>
+<FONT color="green">630</FONT>                if (this.deathTicks == 1)<a name="line.630"></a>
+<FONT color="green">631</FONT>                {<a name="line.631"></a>
+<FONT color="green">632</FONT>                    this.worldObj.func_82739_e(1018, (int)this.posX, (int)this.posY, (int)this.posZ, 0);<a name="line.632"></a>
+<FONT color="green">633</FONT>                }<a name="line.633"></a>
+<FONT color="green">634</FONT>            }<a name="line.634"></a>
+<FONT color="green">635</FONT>    <a name="line.635"></a>
+<FONT color="green">636</FONT>            this.moveEntity(0.0D, 0.10000000149011612D, 0.0D);<a name="line.636"></a>
+<FONT color="green">637</FONT>            this.renderYawOffset = this.rotationYaw += 20.0F;<a name="line.637"></a>
+<FONT color="green">638</FONT>    <a name="line.638"></a>
+<FONT color="green">639</FONT>            if (this.deathTicks == 200 &amp;&amp; !this.worldObj.isRemote)<a name="line.639"></a>
+<FONT color="green">640</FONT>            {<a name="line.640"></a>
+<FONT color="green">641</FONT>                var4 = 2000;<a name="line.641"></a>
+<FONT color="green">642</FONT>    <a name="line.642"></a>
+<FONT color="green">643</FONT>                while (var4 &gt; 0)<a name="line.643"></a>
+<FONT color="green">644</FONT>                {<a name="line.644"></a>
+<FONT color="green">645</FONT>                    var5 = EntityXPOrb.getXPSplit(var4);<a name="line.645"></a>
+<FONT color="green">646</FONT>                    var4 -= var5;<a name="line.646"></a>
+<FONT color="green">647</FONT>                    this.worldObj.spawnEntityInWorld(new EntityXPOrb(this.worldObj, this.posX, this.posY, this.posZ, var5));<a name="line.647"></a>
+<FONT color="green">648</FONT>                }<a name="line.648"></a>
+<FONT color="green">649</FONT>    <a name="line.649"></a>
+<FONT color="green">650</FONT>                this.createEnderPortal(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posZ));<a name="line.650"></a>
+<FONT color="green">651</FONT>                this.setDead();<a name="line.651"></a>
+<FONT color="green">652</FONT>            }<a name="line.652"></a>
+<FONT color="green">653</FONT>        }<a name="line.653"></a>
+<FONT color="green">654</FONT>    <a name="line.654"></a>
+<FONT color="green">655</FONT>        /**<a name="line.655"></a>
+<FONT color="green">656</FONT>         * Creates the ender portal leading back to the normal world after defeating the enderdragon.<a name="line.656"></a>
+<FONT color="green">657</FONT>         */<a name="line.657"></a>
+<FONT color="green">658</FONT>        private void createEnderPortal(int par1, int par2)<a name="line.658"></a>
+<FONT color="green">659</FONT>        {<a name="line.659"></a>
+<FONT color="green">660</FONT>            byte var3 = 64;<a name="line.660"></a>
+<FONT color="green">661</FONT>            BlockEndPortal.bossDefeated = true;<a name="line.661"></a>
+<FONT color="green">662</FONT>            byte var4 = 4;<a name="line.662"></a>
+<FONT color="green">663</FONT>    <a name="line.663"></a>
+<FONT color="green">664</FONT>            for (int var5 = var3 - 1; var5 &lt;= var3 + 32; ++var5)<a name="line.664"></a>
+<FONT color="green">665</FONT>            {<a name="line.665"></a>
+<FONT color="green">666</FONT>                for (int var6 = par1 - var4; var6 &lt;= par1 + var4; ++var6)<a name="line.666"></a>
+<FONT color="green">667</FONT>                {<a name="line.667"></a>
+<FONT color="green">668</FONT>                    for (int var7 = par2 - var4; var7 &lt;= par2 + var4; ++var7)<a name="line.668"></a>
+<FONT color="green">669</FONT>                    {<a name="line.669"></a>
+<FONT color="green">670</FONT>                        double var8 = (double)(var6 - par1);<a name="line.670"></a>
+<FONT color="green">671</FONT>                        double var10 = (double)(var7 - par2);<a name="line.671"></a>
+<FONT color="green">672</FONT>                        double var12 = var8 * var8 + var10 * var10;<a name="line.672"></a>
+<FONT color="green">673</FONT>    <a name="line.673"></a>
+<FONT color="green">674</FONT>                        if (var12 &lt;= ((double)var4 - 0.5D) * ((double)var4 - 0.5D))<a name="line.674"></a>
+<FONT color="green">675</FONT>                        {<a name="line.675"></a>
+<FONT color="green">676</FONT>                            if (var5 &lt; var3)<a name="line.676"></a>
+<FONT color="green">677</FONT>                            {<a name="line.677"></a>
+<FONT color="green">678</FONT>                                if (var12 &lt;= ((double)(var4 - 1) - 0.5D) * ((double)(var4 - 1) - 0.5D))<a name="line.678"></a>
+<FONT color="green">679</FONT>                                {<a name="line.679"></a>
+<FONT color="green">680</FONT>                                    this.worldObj.setBlockWithNotify(var6, var5, var7, Block.bedrock.blockID);<a name="line.680"></a>
+<FONT color="green">681</FONT>                                }<a name="line.681"></a>
+<FONT color="green">682</FONT>                            }<a name="line.682"></a>
+<FONT color="green">683</FONT>                            else if (var5 &gt; var3)<a name="line.683"></a>
+<FONT color="green">684</FONT>                            {<a name="line.684"></a>
+<FONT color="green">685</FONT>                                this.worldObj.setBlockWithNotify(var6, var5, var7, 0);<a name="line.685"></a>
+<FONT color="green">686</FONT>                            }<a name="line.686"></a>
+<FONT color="green">687</FONT>                            else if (var12 &gt; ((double)(var4 - 1) - 0.5D) * ((double)(var4 - 1) - 0.5D))<a name="line.687"></a>
+<FONT color="green">688</FONT>                            {<a name="line.688"></a>
+<FONT color="green">689</FONT>                                this.worldObj.setBlockWithNotify(var6, var5, var7, Block.bedrock.blockID);<a name="line.689"></a>
+<FONT color="green">690</FONT>                            }<a name="line.690"></a>
+<FONT color="green">691</FONT>                            else<a name="line.691"></a>
+<FONT color="green">692</FONT>                            {<a name="line.692"></a>
+<FONT color="green">693</FONT>                                this.worldObj.setBlockWithNotify(var6, var5, var7, Block.endPortal.blockID);<a name="line.693"></a>
+<FONT color="green">694</FONT>                            }<a name="line.694"></a>
+<FONT color="green">695</FONT>                        }<a name="line.695"></a>
+<FONT color="green">696</FONT>                    }<a name="line.696"></a>
+<FONT color="green">697</FONT>                }<a name="line.697"></a>
+<FONT color="green">698</FONT>            }<a name="line.698"></a>
+<FONT color="green">699</FONT>    <a name="line.699"></a>
+<FONT color="green">700</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 0, par2, Block.bedrock.blockID);<a name="line.700"></a>
+<FONT color="green">701</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 1, par2, Block.bedrock.blockID);<a name="line.701"></a>
+<FONT color="green">702</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 2, par2, Block.bedrock.blockID);<a name="line.702"></a>
+<FONT color="green">703</FONT>            this.worldObj.setBlockWithNotify(par1 - 1, var3 + 2, par2, Block.torchWood.blockID);<a name="line.703"></a>
+<FONT color="green">704</FONT>            this.worldObj.setBlockWithNotify(par1 + 1, var3 + 2, par2, Block.torchWood.blockID);<a name="line.704"></a>
+<FONT color="green">705</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 2, par2 - 1, Block.torchWood.blockID);<a name="line.705"></a>
+<FONT color="green">706</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 2, par2 + 1, Block.torchWood.blockID);<a name="line.706"></a>
+<FONT color="green">707</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 3, par2, Block.bedrock.blockID);<a name="line.707"></a>
+<FONT color="green">708</FONT>            this.worldObj.setBlockWithNotify(par1, var3 + 4, par2, Block.dragonEgg.blockID);<a name="line.708"></a>
+<FONT color="green">709</FONT>            BlockEndPortal.bossDefeated = false;<a name="line.709"></a>
+<FONT color="green">710</FONT>        }<a name="line.710"></a>
+<FONT color="green">711</FONT>    <a name="line.711"></a>
+<FONT color="green">712</FONT>        /**<a name="line.712"></a>
+<FONT color="green">713</FONT>         * Makes the entity despawn if requirements are reached<a name="line.713"></a>
+<FONT color="green">714</FONT>         */<a name="line.714"></a>
+<FONT color="green">715</FONT>        protected void despawnEntity() {}<a name="line.715"></a>
+<FONT color="green">716</FONT>    <a name="line.716"></a>
+<FONT color="green">717</FONT>        /**<a name="line.717"></a>
+<FONT color="green">718</FONT>         * Return the Entity parts making up this Entity (currently only for dragons)<a name="line.718"></a>
+<FONT color="green">719</FONT>         */<a name="line.719"></a>
+<FONT color="green">720</FONT>        public Entity[] getParts()<a name="line.720"></a>
+<FONT color="green">721</FONT>        {<a name="line.721"></a>
+<FONT color="green">722</FONT>            return this.dragonPartArray;<a name="line.722"></a>
+<FONT color="green">723</FONT>        }<a name="line.723"></a>
+<FONT color="green">724</FONT>    <a name="line.724"></a>
+<FONT color="green">725</FONT>        /**<a name="line.725"></a>
+<FONT color="green">726</FONT>         * Returns true if other Entities should be prevented from moving through this Entity.<a name="line.726"></a>
+<FONT color="green">727</FONT>         */<a name="line.727"></a>
+<FONT color="green">728</FONT>        public boolean canBeCollidedWith()<a name="line.728"></a>
+<FONT color="green">729</FONT>        {<a name="line.729"></a>
+<FONT color="green">730</FONT>            return false;<a name="line.730"></a>
+<FONT color="green">731</FONT>        }<a name="line.731"></a>
+<FONT color="green">732</FONT>    <a name="line.732"></a>
+<FONT color="green">733</FONT>        @SideOnly(Side.CLIENT)<a name="line.733"></a>
+<FONT color="green">734</FONT>    <a name="line.734"></a>
+<FONT color="green">735</FONT>        /**<a name="line.735"></a>
+<FONT color="green">736</FONT>         * Returns the health points of the dragon.<a name="line.736"></a>
+<FONT color="green">737</FONT>         */<a name="line.737"></a>
+<FONT color="green">738</FONT>        public int getDragonHealth()<a name="line.738"></a>
+<FONT color="green">739</FONT>        {<a name="line.739"></a>
+<FONT color="green">740</FONT>            return this.dataWatcher.getWatchableObjectInt(16);<a name="line.740"></a>
+<FONT color="green">741</FONT>        }<a name="line.741"></a>
+<FONT color="green">742</FONT>    <a name="line.742"></a>
+<FONT color="green">743</FONT>        public World func_82194_d()<a name="line.743"></a>
+<FONT color="green">744</FONT>        {<a name="line.744"></a>
+<FONT color="green">745</FONT>            return this.worldObj;<a name="line.745"></a>
+<FONT color="green">746</FONT>        }<a name="line.746"></a>
+<FONT color="green">747</FONT>    <a name="line.747"></a>
+<FONT color="green">748</FONT>        /**<a name="line.748"></a>
+<FONT color="green">749</FONT>         * Returns the sound this mob makes while it's alive.<a name="line.749"></a>
+<FONT color="green">750</FONT>         */<a name="line.750"></a>
+<FONT color="green">751</FONT>        protected String getLivingSound()<a name="line.751"></a>
+<FONT color="green">752</FONT>        {<a name="line.752"></a>
+<FONT color="green">753</FONT>            return "mob.enderdragon.growl";<a name="line.753"></a>
+<FONT color="green">754</FONT>        }<a name="line.754"></a>
+<FONT color="green">755</FONT>    <a name="line.755"></a>
+<FONT color="green">756</FONT>        /**<a name="line.756"></a>
+<FONT color="green">757</FONT>         * Returns the sound this mob makes when it is hurt.<a name="line.757"></a>
+<FONT color="green">758</FONT>         */<a name="line.758"></a>
+<FONT color="green">759</FONT>        protected String getHurtSound()<a name="line.759"></a>
+<FONT color="green">760</FONT>        {<a name="line.760"></a>
+<FONT color="green">761</FONT>            return "mob.enderdragon.hit";<a name="line.761"></a>
+<FONT color="green">762</FONT>        }<a name="line.762"></a>
+<FONT color="green">763</FONT>    <a name="line.763"></a>
+<FONT color="green">764</FONT>        /**<a name="line.764"></a>
+<FONT color="green">765</FONT>         * Returns the volume for the sounds this mob makes.<a name="line.765"></a>
+<FONT color="green">766</FONT>         */<a name="line.766"></a>
+<FONT color="green">767</FONT>        protected float getSoundVolume()<a name="line.767"></a>
+<FONT color="green">768</FONT>        {<a name="line.768"></a>
+<FONT color="green">769</FONT>            return 5.0F;<a name="line.769"></a>
+<FONT color="green">770</FONT>        }<a name="line.770"></a>
+<FONT color="green">771</FONT>    }<a name="line.771"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
