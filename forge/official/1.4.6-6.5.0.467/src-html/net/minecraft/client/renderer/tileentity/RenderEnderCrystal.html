@@ -1,0 +1,121 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.renderer.tileentity;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.client.model.ModelBase;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.client.model.ModelEnderCrystal;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.client.renderer.entity.Render;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.entity.Entity;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.entity.item.EntityEnderCrystal;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.util.MathHelper;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import org.lwjgl.opengl.GL11;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>    @SideOnly(Side.CLIENT)<a name="line.13"></a>
+<FONT color="green">014</FONT>    public class RenderEnderCrystal extends Render<a name="line.14"></a>
+<FONT color="green">015</FONT>    {<a name="line.15"></a>
+<FONT color="green">016</FONT>        private int field_76996_a = -1;<a name="line.16"></a>
+<FONT color="green">017</FONT>        private ModelBase field_76995_b;<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        public RenderEnderCrystal()<a name="line.19"></a>
+<FONT color="green">020</FONT>        {<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.shadowSize = 0.5F;<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        /**<a name="line.24"></a>
+<FONT color="green">025</FONT>         * Renders the Ender Crystal.<a name="line.25"></a>
+<FONT color="green">026</FONT>         */<a name="line.26"></a>
+<FONT color="green">027</FONT>        public void doRenderEnderCrystal(EntityEnderCrystal par1EntityEnderCrystal, double par2, double par4, double par6, float par8, float par9)<a name="line.27"></a>
+<FONT color="green">028</FONT>        {<a name="line.28"></a>
+<FONT color="green">029</FONT>            if (this.field_76996_a != 1)<a name="line.29"></a>
+<FONT color="green">030</FONT>            {<a name="line.30"></a>
+<FONT color="green">031</FONT>                this.field_76995_b = new ModelEnderCrystal(0.0F, true);<a name="line.31"></a>
+<FONT color="green">032</FONT>                this.field_76996_a = 1;<a name="line.32"></a>
+<FONT color="green">033</FONT>            }<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>            float var10 = (float)par1EntityEnderCrystal.innerRotation + par9;<a name="line.35"></a>
+<FONT color="green">036</FONT>            GL11.glPushMatrix();<a name="line.36"></a>
+<FONT color="green">037</FONT>            GL11.glTranslatef((float)par2, (float)par4, (float)par6);<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.loadTexture("/mob/enderdragon/crystal.png");<a name="line.38"></a>
+<FONT color="green">039</FONT>            float var11 = MathHelper.sin(var10 * 0.2F) / 2.0F + 0.5F;<a name="line.39"></a>
+<FONT color="green">040</FONT>            var11 += var11 * var11;<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.field_76995_b.render(par1EntityEnderCrystal, 0.0F, var10 * 3.0F, var11 * 0.2F, 0.0F, 0.0F, 0.0625F);<a name="line.41"></a>
+<FONT color="green">042</FONT>            GL11.glPopMatrix();<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        /**<a name="line.45"></a>
+<FONT color="green">046</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.46"></a>
+<FONT color="green">047</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.47"></a>
+<FONT color="green">048</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.48"></a>
+<FONT color="green">049</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.49"></a>
+<FONT color="green">050</FONT>         */<a name="line.50"></a>
+<FONT color="green">051</FONT>        public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.51"></a>
+<FONT color="green">052</FONT>        {<a name="line.52"></a>
+<FONT color="green">053</FONT>            this.doRenderEnderCrystal((EntityEnderCrystal)par1Entity, par2, par4, par6, par8, par9);<a name="line.53"></a>
+<FONT color="green">054</FONT>        }<a name="line.54"></a>
+<FONT color="green">055</FONT>    }<a name="line.55"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

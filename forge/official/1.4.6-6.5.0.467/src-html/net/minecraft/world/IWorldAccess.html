@@ -1,0 +1,130 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraft.entity.Entity;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.entity.player.EntityPlayer;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public interface IWorldAccess<a name="line.6"></a>
+<FONT color="green">007</FONT>    {<a name="line.7"></a>
+<FONT color="green">008</FONT>        /**<a name="line.8"></a>
+<FONT color="green">009</FONT>         * On the client, re-renders the block. On the server, sends the block to the client (which will re-render it),<a name="line.9"></a>
+<FONT color="green">010</FONT>         * including the tile entity description packet if applicable. Args: x, y, z<a name="line.10"></a>
+<FONT color="green">011</FONT>         */<a name="line.11"></a>
+<FONT color="green">012</FONT>        void markBlockForUpdate(int var1, int var2, int var3);<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        /**<a name="line.14"></a>
+<FONT color="green">015</FONT>         * On the client, re-renders this block. On the server, does nothing. Used for lighting updates.<a name="line.15"></a>
+<FONT color="green">016</FONT>         */<a name="line.16"></a>
+<FONT color="green">017</FONT>        void markBlockForRenderUpdate(int var1, int var2, int var3);<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        /**<a name="line.19"></a>
+<FONT color="green">020</FONT>         * On the client, re-renders all blocks in this range, inclusive. On the server, does nothing. Args: min x, min y,<a name="line.20"></a>
+<FONT color="green">021</FONT>         * min z, max x, max y, max z<a name="line.21"></a>
+<FONT color="green">022</FONT>         */<a name="line.22"></a>
+<FONT color="green">023</FONT>        void markBlockRangeForRenderUpdate(int var1, int var2, int var3, int var4, int var5, int var6);<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>        /**<a name="line.25"></a>
+<FONT color="green">026</FONT>         * Plays the specified sound. Arg: soundName, x, y, z, volume, pitch<a name="line.26"></a>
+<FONT color="green">027</FONT>         */<a name="line.27"></a>
+<FONT color="green">028</FONT>        void playSound(String var1, double var2, double var4, double var6, float var8, float var9);<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>        void func_85102_a(EntityPlayer var1, String var2, double var3, double var5, double var7, float var9, float var10);<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * Spawns a particle. Arg: particleType, x, y, z, velX, velY, velZ<a name="line.33"></a>
+<FONT color="green">034</FONT>         */<a name="line.34"></a>
+<FONT color="green">035</FONT>        void spawnParticle(String var1, double var2, double var4, double var6, double var8, double var10, double var12);<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>        /**<a name="line.37"></a>
+<FONT color="green">038</FONT>         * Start the skin for this entity downloading, if necessary, and increment its reference counter<a name="line.38"></a>
+<FONT color="green">039</FONT>         */<a name="line.39"></a>
+<FONT color="green">040</FONT>        void obtainEntitySkin(Entity var1);<a name="line.40"></a>
+<FONT color="green">041</FONT>    <a name="line.41"></a>
+<FONT color="green">042</FONT>        /**<a name="line.42"></a>
+<FONT color="green">043</FONT>         * Decrement the reference counter for this entity's skin image data<a name="line.43"></a>
+<FONT color="green">044</FONT>         */<a name="line.44"></a>
+<FONT color="green">045</FONT>        void releaseEntitySkin(Entity var1);<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>        /**<a name="line.47"></a>
+<FONT color="green">048</FONT>         * Plays the specified record. Arg: recordName, x, y, z<a name="line.48"></a>
+<FONT color="green">049</FONT>         */<a name="line.49"></a>
+<FONT color="green">050</FONT>        void playRecord(String var1, int var2, int var3, int var4);<a name="line.50"></a>
+<FONT color="green">051</FONT>    <a name="line.51"></a>
+<FONT color="green">052</FONT>        void broadcastSound(int var1, int var2, int var3, int var4, int var5);<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        /**<a name="line.54"></a>
+<FONT color="green">055</FONT>         * Plays a pre-canned sound effect along with potentially auxiliary data-driven one-shot behaviour (particles, etc).<a name="line.55"></a>
+<FONT color="green">056</FONT>         */<a name="line.56"></a>
+<FONT color="green">057</FONT>        void playAuxSFX(EntityPlayer var1, int var2, int var3, int var4, int var5, int var6);<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>        /**<a name="line.59"></a>
+<FONT color="green">060</FONT>         * Starts (or continues) destroying a block with given ID at the given coordinates for the given partially destroyed<a name="line.60"></a>
+<FONT color="green">061</FONT>         * value<a name="line.61"></a>
+<FONT color="green">062</FONT>         */<a name="line.62"></a>
+<FONT color="green">063</FONT>        void destroyBlockPartially(int var1, int var2, int var3, int var4, int var5);<a name="line.63"></a>
+<FONT color="green">064</FONT>    }<a name="line.64"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

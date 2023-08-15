@@ -1,0 +1,428 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.renderer.entity;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.block.Block;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.client.gui.FontRenderer;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.client.model.ModelBase;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.client.model.ModelBiped;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.client.renderer.RenderBlocks;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.client.renderer.RenderEngine;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.client.renderer.Tessellator;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraft.entity.Entity;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraft.entity.EntityLiving;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import net.minecraft.util.AxisAlignedBB;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import net.minecraft.util.MathHelper;<a name="line.15"></a>
+<FONT color="green">016</FONT>    import net.minecraft.world.World;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import org.lwjgl.opengl.GL11;<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>    @SideOnly(Side.CLIENT)<a name="line.19"></a>
+<FONT color="green">020</FONT>    public abstract class Render<a name="line.20"></a>
+<FONT color="green">021</FONT>    {<a name="line.21"></a>
+<FONT color="green">022</FONT>        protected RenderManager renderManager;<a name="line.22"></a>
+<FONT color="green">023</FONT>        private ModelBase modelBase = new ModelBiped();<a name="line.23"></a>
+<FONT color="green">024</FONT>        protected RenderBlocks renderBlocks = new RenderBlocks();<a name="line.24"></a>
+<FONT color="green">025</FONT>        protected float shadowSize = 0.0F;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>        /**<a name="line.27"></a>
+<FONT color="green">028</FONT>         * Determines the darkness of the object's shadow. Higher value makes a darker shadow.<a name="line.28"></a>
+<FONT color="green">029</FONT>         */<a name="line.29"></a>
+<FONT color="green">030</FONT>        protected float shadowOpaque = 1.0F;<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.33"></a>
+<FONT color="green">034</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.34"></a>
+<FONT color="green">035</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.35"></a>
+<FONT color="green">036</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.36"></a>
+<FONT color="green">037</FONT>         */<a name="line.37"></a>
+<FONT color="green">038</FONT>        public abstract void doRender(Entity var1, double var2, double var4, double var6, float var8, float var9);<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        /**<a name="line.40"></a>
+<FONT color="green">041</FONT>         * loads the specified texture<a name="line.41"></a>
+<FONT color="green">042</FONT>         */<a name="line.42"></a>
+<FONT color="green">043</FONT>        protected void loadTexture(String par1Str)<a name="line.43"></a>
+<FONT color="green">044</FONT>        {<a name="line.44"></a>
+<FONT color="green">045</FONT>            RenderEngine var2 = this.renderManager.renderEngine;<a name="line.45"></a>
+<FONT color="green">046</FONT>            var2.bindTexture(var2.getTexture(par1Str));<a name="line.46"></a>
+<FONT color="green">047</FONT>        }<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>        /**<a name="line.49"></a>
+<FONT color="green">050</FONT>         * loads the specified downloadable texture or alternative built in texture<a name="line.50"></a>
+<FONT color="green">051</FONT>         */<a name="line.51"></a>
+<FONT color="green">052</FONT>        protected boolean loadDownloadableImageTexture(String par1Str, String par2Str)<a name="line.52"></a>
+<FONT color="green">053</FONT>        {<a name="line.53"></a>
+<FONT color="green">054</FONT>            RenderEngine var3 = this.renderManager.renderEngine;<a name="line.54"></a>
+<FONT color="green">055</FONT>            int var4 = var3.getTextureForDownloadableImage(par1Str, par2Str);<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>            if (var4 &gt;= 0)<a name="line.57"></a>
+<FONT color="green">058</FONT>            {<a name="line.58"></a>
+<FONT color="green">059</FONT>                var3.bindTexture(var4);<a name="line.59"></a>
+<FONT color="green">060</FONT>                return true;<a name="line.60"></a>
+<FONT color="green">061</FONT>            }<a name="line.61"></a>
+<FONT color="green">062</FONT>            else<a name="line.62"></a>
+<FONT color="green">063</FONT>            {<a name="line.63"></a>
+<FONT color="green">064</FONT>                return false;<a name="line.64"></a>
+<FONT color="green">065</FONT>            }<a name="line.65"></a>
+<FONT color="green">066</FONT>        }<a name="line.66"></a>
+<FONT color="green">067</FONT>    <a name="line.67"></a>
+<FONT color="green">068</FONT>        /**<a name="line.68"></a>
+<FONT color="green">069</FONT>         * Renders fire on top of the entity. Args: entity, x, y, z, partialTickTime<a name="line.69"></a>
+<FONT color="green">070</FONT>         */<a name="line.70"></a>
+<FONT color="green">071</FONT>        private void renderEntityOnFire(Entity par1Entity, double par2, double par4, double par6, float par8)<a name="line.71"></a>
+<FONT color="green">072</FONT>        {<a name="line.72"></a>
+<FONT color="green">073</FONT>            GL11.glDisable(GL11.GL_LIGHTING);<a name="line.73"></a>
+<FONT color="green">074</FONT>            int var9 = Block.fire.blockIndexInTexture;<a name="line.74"></a>
+<FONT color="green">075</FONT>            int var10 = (var9 &amp; 15) &lt;&lt; 4;<a name="line.75"></a>
+<FONT color="green">076</FONT>            int var11 = var9 &amp; 240;<a name="line.76"></a>
+<FONT color="green">077</FONT>            float var12 = (float)var10 / 256.0F;<a name="line.77"></a>
+<FONT color="green">078</FONT>            float var13 = ((float)var10 + 15.99F) / 256.0F;<a name="line.78"></a>
+<FONT color="green">079</FONT>            float var14 = (float)var11 / 256.0F;<a name="line.79"></a>
+<FONT color="green">080</FONT>            float var15 = ((float)var11 + 15.99F) / 256.0F;<a name="line.80"></a>
+<FONT color="green">081</FONT>            GL11.glPushMatrix();<a name="line.81"></a>
+<FONT color="green">082</FONT>            GL11.glTranslatef((float)par2, (float)par4, (float)par6);<a name="line.82"></a>
+<FONT color="green">083</FONT>            float var16 = par1Entity.width * 1.4F;<a name="line.83"></a>
+<FONT color="green">084</FONT>            GL11.glScalef(var16, var16, var16);<a name="line.84"></a>
+<FONT color="green">085</FONT>            this.loadTexture("/terrain.png");<a name="line.85"></a>
+<FONT color="green">086</FONT>            Tessellator var17 = Tessellator.instance;<a name="line.86"></a>
+<FONT color="green">087</FONT>            float var18 = 0.5F;<a name="line.87"></a>
+<FONT color="green">088</FONT>            float var19 = 0.0F;<a name="line.88"></a>
+<FONT color="green">089</FONT>            float var20 = par1Entity.height / var16;<a name="line.89"></a>
+<FONT color="green">090</FONT>            float var21 = (float)(par1Entity.posY - par1Entity.boundingBox.minY);<a name="line.90"></a>
+<FONT color="green">091</FONT>            GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);<a name="line.91"></a>
+<FONT color="green">092</FONT>            GL11.glTranslatef(0.0F, 0.0F, -0.3F + (float)((int)var20) * 0.02F);<a name="line.92"></a>
+<FONT color="green">093</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.93"></a>
+<FONT color="green">094</FONT>            float var22 = 0.0F;<a name="line.94"></a>
+<FONT color="green">095</FONT>            int var23 = 0;<a name="line.95"></a>
+<FONT color="green">096</FONT>            var17.startDrawingQuads();<a name="line.96"></a>
+<FONT color="green">097</FONT>    <a name="line.97"></a>
+<FONT color="green">098</FONT>            while (var20 &gt; 0.0F)<a name="line.98"></a>
+<FONT color="green">099</FONT>            {<a name="line.99"></a>
+<FONT color="green">100</FONT>                if (var23 % 2 == 0)<a name="line.100"></a>
+<FONT color="green">101</FONT>                {<a name="line.101"></a>
+<FONT color="green">102</FONT>                    var12 = (float)var10 / 256.0F;<a name="line.102"></a>
+<FONT color="green">103</FONT>                    var13 = ((float)var10 + 15.99F) / 256.0F;<a name="line.103"></a>
+<FONT color="green">104</FONT>                    var14 = (float)var11 / 256.0F;<a name="line.104"></a>
+<FONT color="green">105</FONT>                    var15 = ((float)var11 + 15.99F) / 256.0F;<a name="line.105"></a>
+<FONT color="green">106</FONT>                }<a name="line.106"></a>
+<FONT color="green">107</FONT>                else<a name="line.107"></a>
+<FONT color="green">108</FONT>                {<a name="line.108"></a>
+<FONT color="green">109</FONT>                    var12 = (float)var10 / 256.0F;<a name="line.109"></a>
+<FONT color="green">110</FONT>                    var13 = ((float)var10 + 15.99F) / 256.0F;<a name="line.110"></a>
+<FONT color="green">111</FONT>                    var14 = (float)(var11 + 16) / 256.0F;<a name="line.111"></a>
+<FONT color="green">112</FONT>                    var15 = ((float)(var11 + 16) + 15.99F) / 256.0F;<a name="line.112"></a>
+<FONT color="green">113</FONT>                }<a name="line.113"></a>
+<FONT color="green">114</FONT>    <a name="line.114"></a>
+<FONT color="green">115</FONT>                if (var23 / 2 % 2 == 0)<a name="line.115"></a>
+<FONT color="green">116</FONT>                {<a name="line.116"></a>
+<FONT color="green">117</FONT>                    float var24 = var13;<a name="line.117"></a>
+<FONT color="green">118</FONT>                    var13 = var12;<a name="line.118"></a>
+<FONT color="green">119</FONT>                    var12 = var24;<a name="line.119"></a>
+<FONT color="green">120</FONT>                }<a name="line.120"></a>
+<FONT color="green">121</FONT>    <a name="line.121"></a>
+<FONT color="green">122</FONT>                var17.addVertexWithUV((double)(var18 - var19), (double)(0.0F - var21), (double)var22, (double)var13, (double)var15);<a name="line.122"></a>
+<FONT color="green">123</FONT>                var17.addVertexWithUV((double)(-var18 - var19), (double)(0.0F - var21), (double)var22, (double)var12, (double)var15);<a name="line.123"></a>
+<FONT color="green">124</FONT>                var17.addVertexWithUV((double)(-var18 - var19), (double)(1.4F - var21), (double)var22, (double)var12, (double)var14);<a name="line.124"></a>
+<FONT color="green">125</FONT>                var17.addVertexWithUV((double)(var18 - var19), (double)(1.4F - var21), (double)var22, (double)var13, (double)var14);<a name="line.125"></a>
+<FONT color="green">126</FONT>                var20 -= 0.45F;<a name="line.126"></a>
+<FONT color="green">127</FONT>                var21 -= 0.45F;<a name="line.127"></a>
+<FONT color="green">128</FONT>                var18 *= 0.9F;<a name="line.128"></a>
+<FONT color="green">129</FONT>                var22 += 0.03F;<a name="line.129"></a>
+<FONT color="green">130</FONT>                ++var23;<a name="line.130"></a>
+<FONT color="green">131</FONT>            }<a name="line.131"></a>
+<FONT color="green">132</FONT>    <a name="line.132"></a>
+<FONT color="green">133</FONT>            var17.draw();<a name="line.133"></a>
+<FONT color="green">134</FONT>            GL11.glPopMatrix();<a name="line.134"></a>
+<FONT color="green">135</FONT>            GL11.glEnable(GL11.GL_LIGHTING);<a name="line.135"></a>
+<FONT color="green">136</FONT>        }<a name="line.136"></a>
+<FONT color="green">137</FONT>    <a name="line.137"></a>
+<FONT color="green">138</FONT>        /**<a name="line.138"></a>
+<FONT color="green">139</FONT>         * Renders the entity shadows at the position, shadow alpha and partialTickTime. Args: entity, x, y, z, shadowAlpha,<a name="line.139"></a>
+<FONT color="green">140</FONT>         * partialTickTime<a name="line.140"></a>
+<FONT color="green">141</FONT>         */<a name="line.141"></a>
+<FONT color="green">142</FONT>        private void renderShadow(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.142"></a>
+<FONT color="green">143</FONT>        {<a name="line.143"></a>
+<FONT color="green">144</FONT>            GL11.glEnable(GL11.GL_BLEND);<a name="line.144"></a>
+<FONT color="green">145</FONT>            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.145"></a>
+<FONT color="green">146</FONT>            RenderEngine var10 = this.renderManager.renderEngine;<a name="line.146"></a>
+<FONT color="green">147</FONT>            var10.bindTexture(var10.getTexture("%clamp%/misc/shadow.png"));<a name="line.147"></a>
+<FONT color="green">148</FONT>            World var11 = this.getWorldFromRenderManager();<a name="line.148"></a>
+<FONT color="green">149</FONT>            GL11.glDepthMask(false);<a name="line.149"></a>
+<FONT color="green">150</FONT>            float var12 = this.shadowSize;<a name="line.150"></a>
+<FONT color="green">151</FONT>    <a name="line.151"></a>
+<FONT color="green">152</FONT>            if (par1Entity instanceof EntityLiving)<a name="line.152"></a>
+<FONT color="green">153</FONT>            {<a name="line.153"></a>
+<FONT color="green">154</FONT>                EntityLiving var13 = (EntityLiving)par1Entity;<a name="line.154"></a>
+<FONT color="green">155</FONT>                var12 *= var13.getRenderSizeModifier();<a name="line.155"></a>
+<FONT color="green">156</FONT>    <a name="line.156"></a>
+<FONT color="green">157</FONT>                if (var13.isChild())<a name="line.157"></a>
+<FONT color="green">158</FONT>                {<a name="line.158"></a>
+<FONT color="green">159</FONT>                    var12 *= 0.5F;<a name="line.159"></a>
+<FONT color="green">160</FONT>                }<a name="line.160"></a>
+<FONT color="green">161</FONT>            }<a name="line.161"></a>
+<FONT color="green">162</FONT>    <a name="line.162"></a>
+<FONT color="green">163</FONT>            double var36 = par1Entity.lastTickPosX + (par1Entity.posX - par1Entity.lastTickPosX) * (double)par9;<a name="line.163"></a>
+<FONT color="green">164</FONT>            double var15 = par1Entity.lastTickPosY + (par1Entity.posY - par1Entity.lastTickPosY) * (double)par9 + (double)par1Entity.getShadowSize();<a name="line.164"></a>
+<FONT color="green">165</FONT>            double var17 = par1Entity.lastTickPosZ + (par1Entity.posZ - par1Entity.lastTickPosZ) * (double)par9;<a name="line.165"></a>
+<FONT color="green">166</FONT>            int var19 = MathHelper.floor_double(var36 - (double)var12);<a name="line.166"></a>
+<FONT color="green">167</FONT>            int var20 = MathHelper.floor_double(var36 + (double)var12);<a name="line.167"></a>
+<FONT color="green">168</FONT>            int var21 = MathHelper.floor_double(var15 - (double)var12);<a name="line.168"></a>
+<FONT color="green">169</FONT>            int var22 = MathHelper.floor_double(var15);<a name="line.169"></a>
+<FONT color="green">170</FONT>            int var23 = MathHelper.floor_double(var17 - (double)var12);<a name="line.170"></a>
+<FONT color="green">171</FONT>            int var24 = MathHelper.floor_double(var17 + (double)var12);<a name="line.171"></a>
+<FONT color="green">172</FONT>            double var25 = par2 - var36;<a name="line.172"></a>
+<FONT color="green">173</FONT>            double var27 = par4 - var15;<a name="line.173"></a>
+<FONT color="green">174</FONT>            double var29 = par6 - var17;<a name="line.174"></a>
+<FONT color="green">175</FONT>            Tessellator var31 = Tessellator.instance;<a name="line.175"></a>
+<FONT color="green">176</FONT>            var31.startDrawingQuads();<a name="line.176"></a>
+<FONT color="green">177</FONT>    <a name="line.177"></a>
+<FONT color="green">178</FONT>            for (int var32 = var19; var32 &lt;= var20; ++var32)<a name="line.178"></a>
+<FONT color="green">179</FONT>            {<a name="line.179"></a>
+<FONT color="green">180</FONT>                for (int var33 = var21; var33 &lt;= var22; ++var33)<a name="line.180"></a>
+<FONT color="green">181</FONT>                {<a name="line.181"></a>
+<FONT color="green">182</FONT>                    for (int var34 = var23; var34 &lt;= var24; ++var34)<a name="line.182"></a>
+<FONT color="green">183</FONT>                    {<a name="line.183"></a>
+<FONT color="green">184</FONT>                        int var35 = var11.getBlockId(var32, var33 - 1, var34);<a name="line.184"></a>
+<FONT color="green">185</FONT>    <a name="line.185"></a>
+<FONT color="green">186</FONT>                        if (var35 &gt; 0 &amp;&amp; var11.getBlockLightValue(var32, var33, var34) &gt; 3)<a name="line.186"></a>
+<FONT color="green">187</FONT>                        {<a name="line.187"></a>
+<FONT color="green">188</FONT>                            this.renderShadowOnBlock(Block.blocksList[var35], par2, par4 + (double)par1Entity.getShadowSize(), par6, var32, var33, var34, par8, var12, var25, var27 + (double)par1Entity.getShadowSize(), var29);<a name="line.188"></a>
+<FONT color="green">189</FONT>                        }<a name="line.189"></a>
+<FONT color="green">190</FONT>                    }<a name="line.190"></a>
+<FONT color="green">191</FONT>                }<a name="line.191"></a>
+<FONT color="green">192</FONT>            }<a name="line.192"></a>
+<FONT color="green">193</FONT>    <a name="line.193"></a>
+<FONT color="green">194</FONT>            var31.draw();<a name="line.194"></a>
+<FONT color="green">195</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.195"></a>
+<FONT color="green">196</FONT>            GL11.glDisable(GL11.GL_BLEND);<a name="line.196"></a>
+<FONT color="green">197</FONT>            GL11.glDepthMask(true);<a name="line.197"></a>
+<FONT color="green">198</FONT>        }<a name="line.198"></a>
+<FONT color="green">199</FONT>    <a name="line.199"></a>
+<FONT color="green">200</FONT>        /**<a name="line.200"></a>
+<FONT color="green">201</FONT>         * Returns the render manager's world object<a name="line.201"></a>
+<FONT color="green">202</FONT>         */<a name="line.202"></a>
+<FONT color="green">203</FONT>        private World getWorldFromRenderManager()<a name="line.203"></a>
+<FONT color="green">204</FONT>        {<a name="line.204"></a>
+<FONT color="green">205</FONT>            return this.renderManager.worldObj;<a name="line.205"></a>
+<FONT color="green">206</FONT>        }<a name="line.206"></a>
+<FONT color="green">207</FONT>    <a name="line.207"></a>
+<FONT color="green">208</FONT>        /**<a name="line.208"></a>
+<FONT color="green">209</FONT>         * Renders a shadow projected down onto the specified block. Brightness of the block plus how far away on the Y axis<a name="line.209"></a>
+<FONT color="green">210</FONT>         * determines the alpha of the shadow.  Args: block, centerX, centerY, centerZ, blockX, blockY, blockZ, baseAlpha,<a name="line.210"></a>
+<FONT color="green">211</FONT>         * shadowSize, xOffset, yOffset, zOffset<a name="line.211"></a>
+<FONT color="green">212</FONT>         */<a name="line.212"></a>
+<FONT color="green">213</FONT>        private void renderShadowOnBlock(Block par1Block, double par2, double par4, double par6, int par8, int par9, int par10, float par11, float par12, double par13, double par15, double par17)<a name="line.213"></a>
+<FONT color="green">214</FONT>        {<a name="line.214"></a>
+<FONT color="green">215</FONT>            Tessellator var19 = Tessellator.instance;<a name="line.215"></a>
+<FONT color="green">216</FONT>    <a name="line.216"></a>
+<FONT color="green">217</FONT>            if (par1Block.renderAsNormalBlock())<a name="line.217"></a>
+<FONT color="green">218</FONT>            {<a name="line.218"></a>
+<FONT color="green">219</FONT>                double var20 = ((double)par11 - (par4 - ((double)par9 + par15)) / 2.0D) * 0.5D * (double)this.getWorldFromRenderManager().getLightBrightness(par8, par9, par10);<a name="line.219"></a>
+<FONT color="green">220</FONT>    <a name="line.220"></a>
+<FONT color="green">221</FONT>                if (var20 &gt;= 0.0D)<a name="line.221"></a>
+<FONT color="green">222</FONT>                {<a name="line.222"></a>
+<FONT color="green">223</FONT>                    if (var20 &gt; 1.0D)<a name="line.223"></a>
+<FONT color="green">224</FONT>                    {<a name="line.224"></a>
+<FONT color="green">225</FONT>                        var20 = 1.0D;<a name="line.225"></a>
+<FONT color="green">226</FONT>                    }<a name="line.226"></a>
+<FONT color="green">227</FONT>    <a name="line.227"></a>
+<FONT color="green">228</FONT>                    var19.setColorRGBA_F(1.0F, 1.0F, 1.0F, (float)var20);<a name="line.228"></a>
+<FONT color="green">229</FONT>                    double var22 = (double)par8 + par1Block.getBlockBoundsMinX() + par13;<a name="line.229"></a>
+<FONT color="green">230</FONT>                    double var24 = (double)par8 + par1Block.getBlockBoundsMaxX() + par13;<a name="line.230"></a>
+<FONT color="green">231</FONT>                    double var26 = (double)par9 + par1Block.getBlockBoundsMinY() + par15 + 0.015625D;<a name="line.231"></a>
+<FONT color="green">232</FONT>                    double var28 = (double)par10 + par1Block.getBlockBoundsMinZ() + par17;<a name="line.232"></a>
+<FONT color="green">233</FONT>                    double var30 = (double)par10 + par1Block.getBlockBoundsMaxZ() + par17;<a name="line.233"></a>
+<FONT color="green">234</FONT>                    float var32 = (float)((par2 - var22) / 2.0D / (double)par12 + 0.5D);<a name="line.234"></a>
+<FONT color="green">235</FONT>                    float var33 = (float)((par2 - var24) / 2.0D / (double)par12 + 0.5D);<a name="line.235"></a>
+<FONT color="green">236</FONT>                    float var34 = (float)((par6 - var28) / 2.0D / (double)par12 + 0.5D);<a name="line.236"></a>
+<FONT color="green">237</FONT>                    float var35 = (float)((par6 - var30) / 2.0D / (double)par12 + 0.5D);<a name="line.237"></a>
+<FONT color="green">238</FONT>                    var19.addVertexWithUV(var22, var26, var28, (double)var32, (double)var34);<a name="line.238"></a>
+<FONT color="green">239</FONT>                    var19.addVertexWithUV(var22, var26, var30, (double)var32, (double)var35);<a name="line.239"></a>
+<FONT color="green">240</FONT>                    var19.addVertexWithUV(var24, var26, var30, (double)var33, (double)var35);<a name="line.240"></a>
+<FONT color="green">241</FONT>                    var19.addVertexWithUV(var24, var26, var28, (double)var33, (double)var34);<a name="line.241"></a>
+<FONT color="green">242</FONT>                }<a name="line.242"></a>
+<FONT color="green">243</FONT>            }<a name="line.243"></a>
+<FONT color="green">244</FONT>        }<a name="line.244"></a>
+<FONT color="green">245</FONT>    <a name="line.245"></a>
+<FONT color="green">246</FONT>        /**<a name="line.246"></a>
+<FONT color="green">247</FONT>         * Renders a white box with the bounds of the AABB translated by the offset. Args: aabb, x, y, z<a name="line.247"></a>
+<FONT color="green">248</FONT>         */<a name="line.248"></a>
+<FONT color="green">249</FONT>        public static void renderOffsetAABB(AxisAlignedBB par0AxisAlignedBB, double par1, double par3, double par5)<a name="line.249"></a>
+<FONT color="green">250</FONT>        {<a name="line.250"></a>
+<FONT color="green">251</FONT>            GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.251"></a>
+<FONT color="green">252</FONT>            Tessellator var7 = Tessellator.instance;<a name="line.252"></a>
+<FONT color="green">253</FONT>            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.253"></a>
+<FONT color="green">254</FONT>            var7.startDrawingQuads();<a name="line.254"></a>
+<FONT color="green">255</FONT>            var7.setTranslation(par1, par3, par5);<a name="line.255"></a>
+<FONT color="green">256</FONT>            var7.setNormal(0.0F, 0.0F, -1.0F);<a name="line.256"></a>
+<FONT color="green">257</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.257"></a>
+<FONT color="green">258</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.258"></a>
+<FONT color="green">259</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.259"></a>
+<FONT color="green">260</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.260"></a>
+<FONT color="green">261</FONT>            var7.setNormal(0.0F, 0.0F, 1.0F);<a name="line.261"></a>
+<FONT color="green">262</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.262"></a>
+<FONT color="green">263</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.263"></a>
+<FONT color="green">264</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.264"></a>
+<FONT color="green">265</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.265"></a>
+<FONT color="green">266</FONT>            var7.setNormal(0.0F, -1.0F, 0.0F);<a name="line.266"></a>
+<FONT color="green">267</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.267"></a>
+<FONT color="green">268</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.268"></a>
+<FONT color="green">269</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.269"></a>
+<FONT color="green">270</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.270"></a>
+<FONT color="green">271</FONT>            var7.setNormal(0.0F, 1.0F, 0.0F);<a name="line.271"></a>
+<FONT color="green">272</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.272"></a>
+<FONT color="green">273</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.273"></a>
+<FONT color="green">274</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.274"></a>
+<FONT color="green">275</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.275"></a>
+<FONT color="green">276</FONT>            var7.setNormal(-1.0F, 0.0F, 0.0F);<a name="line.276"></a>
+<FONT color="green">277</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.277"></a>
+<FONT color="green">278</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.278"></a>
+<FONT color="green">279</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.279"></a>
+<FONT color="green">280</FONT>            var7.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.280"></a>
+<FONT color="green">281</FONT>            var7.setNormal(1.0F, 0.0F, 0.0F);<a name="line.281"></a>
+<FONT color="green">282</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.282"></a>
+<FONT color="green">283</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.283"></a>
+<FONT color="green">284</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.284"></a>
+<FONT color="green">285</FONT>            var7.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.285"></a>
+<FONT color="green">286</FONT>            var7.setTranslation(0.0D, 0.0D, 0.0D);<a name="line.286"></a>
+<FONT color="green">287</FONT>            var7.draw();<a name="line.287"></a>
+<FONT color="green">288</FONT>            GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.288"></a>
+<FONT color="green">289</FONT>        }<a name="line.289"></a>
+<FONT color="green">290</FONT>    <a name="line.290"></a>
+<FONT color="green">291</FONT>        /**<a name="line.291"></a>
+<FONT color="green">292</FONT>         * Adds to the tesselator a box using the aabb for the bounds. Args: aabb<a name="line.292"></a>
+<FONT color="green">293</FONT>         */<a name="line.293"></a>
+<FONT color="green">294</FONT>        public static void renderAABB(AxisAlignedBB par0AxisAlignedBB)<a name="line.294"></a>
+<FONT color="green">295</FONT>        {<a name="line.295"></a>
+<FONT color="green">296</FONT>            Tessellator var1 = Tessellator.instance;<a name="line.296"></a>
+<FONT color="green">297</FONT>            var1.startDrawingQuads();<a name="line.297"></a>
+<FONT color="green">298</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.298"></a>
+<FONT color="green">299</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.299"></a>
+<FONT color="green">300</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.300"></a>
+<FONT color="green">301</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.301"></a>
+<FONT color="green">302</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.302"></a>
+<FONT color="green">303</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.303"></a>
+<FONT color="green">304</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.304"></a>
+<FONT color="green">305</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.305"></a>
+<FONT color="green">306</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.306"></a>
+<FONT color="green">307</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.307"></a>
+<FONT color="green">308</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.308"></a>
+<FONT color="green">309</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.309"></a>
+<FONT color="green">310</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.310"></a>
+<FONT color="green">311</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.311"></a>
+<FONT color="green">312</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.312"></a>
+<FONT color="green">313</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.313"></a>
+<FONT color="green">314</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.314"></a>
+<FONT color="green">315</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.315"></a>
+<FONT color="green">316</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.316"></a>
+<FONT color="green">317</FONT>            var1.addVertex(par0AxisAlignedBB.minX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.317"></a>
+<FONT color="green">318</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.minZ);<a name="line.318"></a>
+<FONT color="green">319</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.minZ);<a name="line.319"></a>
+<FONT color="green">320</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.maxY, par0AxisAlignedBB.maxZ);<a name="line.320"></a>
+<FONT color="green">321</FONT>            var1.addVertex(par0AxisAlignedBB.maxX, par0AxisAlignedBB.minY, par0AxisAlignedBB.maxZ);<a name="line.321"></a>
+<FONT color="green">322</FONT>            var1.draw();<a name="line.322"></a>
+<FONT color="green">323</FONT>        }<a name="line.323"></a>
+<FONT color="green">324</FONT>    <a name="line.324"></a>
+<FONT color="green">325</FONT>        /**<a name="line.325"></a>
+<FONT color="green">326</FONT>         * Sets the RenderManager.<a name="line.326"></a>
+<FONT color="green">327</FONT>         */<a name="line.327"></a>
+<FONT color="green">328</FONT>        public void setRenderManager(RenderManager par1RenderManager)<a name="line.328"></a>
+<FONT color="green">329</FONT>        {<a name="line.329"></a>
+<FONT color="green">330</FONT>            this.renderManager = par1RenderManager;<a name="line.330"></a>
+<FONT color="green">331</FONT>        }<a name="line.331"></a>
+<FONT color="green">332</FONT>    <a name="line.332"></a>
+<FONT color="green">333</FONT>        /**<a name="line.333"></a>
+<FONT color="green">334</FONT>         * Renders the entity's shadow and fire (if its on fire). Args: entity, x, y, z, yaw, partialTickTime<a name="line.334"></a>
+<FONT color="green">335</FONT>         */<a name="line.335"></a>
+<FONT color="green">336</FONT>        public void doRenderShadowAndFire(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.336"></a>
+<FONT color="green">337</FONT>        {<a name="line.337"></a>
+<FONT color="green">338</FONT>            if (this.renderManager.options.fancyGraphics &amp;&amp; this.shadowSize &gt; 0.0F &amp;&amp; !par1Entity.getHasActivePotion())<a name="line.338"></a>
+<FONT color="green">339</FONT>            {<a name="line.339"></a>
+<FONT color="green">340</FONT>                double var10 = this.renderManager.getDistanceToCamera(par1Entity.posX, par1Entity.posY, par1Entity.posZ);<a name="line.340"></a>
+<FONT color="green">341</FONT>                float var12 = (float)((1.0D - var10 / 256.0D) * (double)this.shadowOpaque);<a name="line.341"></a>
+<FONT color="green">342</FONT>    <a name="line.342"></a>
+<FONT color="green">343</FONT>                if (var12 &gt; 0.0F)<a name="line.343"></a>
+<FONT color="green">344</FONT>                {<a name="line.344"></a>
+<FONT color="green">345</FONT>                    this.renderShadow(par1Entity, par2, par4, par6, var12, par9);<a name="line.345"></a>
+<FONT color="green">346</FONT>                }<a name="line.346"></a>
+<FONT color="green">347</FONT>            }<a name="line.347"></a>
+<FONT color="green">348</FONT>    <a name="line.348"></a>
+<FONT color="green">349</FONT>            if (par1Entity.canRenderOnFire())<a name="line.349"></a>
+<FONT color="green">350</FONT>            {<a name="line.350"></a>
+<FONT color="green">351</FONT>                this.renderEntityOnFire(par1Entity, par2, par4, par6, par9);<a name="line.351"></a>
+<FONT color="green">352</FONT>            }<a name="line.352"></a>
+<FONT color="green">353</FONT>        }<a name="line.353"></a>
+<FONT color="green">354</FONT>    <a name="line.354"></a>
+<FONT color="green">355</FONT>        /**<a name="line.355"></a>
+<FONT color="green">356</FONT>         * Returns the font renderer from the set render manager<a name="line.356"></a>
+<FONT color="green">357</FONT>         */<a name="line.357"></a>
+<FONT color="green">358</FONT>        public FontRenderer getFontRendererFromRenderManager()<a name="line.358"></a>
+<FONT color="green">359</FONT>        {<a name="line.359"></a>
+<FONT color="green">360</FONT>            return this.renderManager.getFontRenderer();<a name="line.360"></a>
+<FONT color="green">361</FONT>        }<a name="line.361"></a>
+<FONT color="green">362</FONT>    }<a name="line.362"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

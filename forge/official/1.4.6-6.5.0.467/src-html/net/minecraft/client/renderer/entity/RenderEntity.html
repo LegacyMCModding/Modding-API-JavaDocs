@@ -1,0 +1,89 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.client.renderer.entity;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.entity.Entity;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import org.lwjgl.opengl.GL11;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    @SideOnly(Side.CLIENT)<a name="line.8"></a>
+<FONT color="green">009</FONT>    public class RenderEntity extends Render<a name="line.9"></a>
+<FONT color="green">010</FONT>    {<a name="line.10"></a>
+<FONT color="green">011</FONT>        /**<a name="line.11"></a>
+<FONT color="green">012</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.12"></a>
+<FONT color="green">013</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.13"></a>
+<FONT color="green">014</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.14"></a>
+<FONT color="green">015</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.15"></a>
+<FONT color="green">016</FONT>         */<a name="line.16"></a>
+<FONT color="green">017</FONT>        public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.17"></a>
+<FONT color="green">018</FONT>        {<a name="line.18"></a>
+<FONT color="green">019</FONT>            GL11.glPushMatrix();<a name="line.19"></a>
+<FONT color="green">020</FONT>            renderOffsetAABB(par1Entity.boundingBox, par2 - par1Entity.lastTickPosX, par4 - par1Entity.lastTickPosY, par6 - par1Entity.lastTickPosZ);<a name="line.20"></a>
+<FONT color="green">021</FONT>            GL11.glPopMatrix();<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    }<a name="line.23"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

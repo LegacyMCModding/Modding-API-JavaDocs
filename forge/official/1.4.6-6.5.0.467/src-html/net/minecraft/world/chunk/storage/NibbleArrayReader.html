@@ -1,0 +1,89 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.world.chunk.storage;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    public class NibbleArrayReader<a name="line.3"></a>
+<FONT color="green">004</FONT>    {<a name="line.4"></a>
+<FONT color="green">005</FONT>        public final byte[] data;<a name="line.5"></a>
+<FONT color="green">006</FONT>        private final int depthBits;<a name="line.6"></a>
+<FONT color="green">007</FONT>        private final int depthBitsPlusFour;<a name="line.7"></a>
+<FONT color="green">008</FONT>    <a name="line.8"></a>
+<FONT color="green">009</FONT>        public NibbleArrayReader(byte[] par1ArrayOfByte, int par2)<a name="line.9"></a>
+<FONT color="green">010</FONT>        {<a name="line.10"></a>
+<FONT color="green">011</FONT>            this.data = par1ArrayOfByte;<a name="line.11"></a>
+<FONT color="green">012</FONT>            this.depthBits = par2;<a name="line.12"></a>
+<FONT color="green">013</FONT>            this.depthBitsPlusFour = par2 + 4;<a name="line.13"></a>
+<FONT color="green">014</FONT>        }<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        public int get(int par1, int par2, int par3)<a name="line.16"></a>
+<FONT color="green">017</FONT>        {<a name="line.17"></a>
+<FONT color="green">018</FONT>            int var4 = par1 &lt;&lt; this.depthBitsPlusFour | par3 &lt;&lt; this.depthBits | par2;<a name="line.18"></a>
+<FONT color="green">019</FONT>            int var5 = var4 &gt;&gt; 1;<a name="line.19"></a>
+<FONT color="green">020</FONT>            int var6 = var4 &amp; 1;<a name="line.20"></a>
+<FONT color="green">021</FONT>            return var6 == 0 ? this.data[var5] &amp; 15 : this.data[var5] &gt;&gt; 4 &amp; 15;<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    }<a name="line.23"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

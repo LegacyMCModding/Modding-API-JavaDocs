@@ -1,0 +1,106 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraftforge.event.entity.player;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraft.entity.player.EntityPlayer;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.item.ItemStack;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.world.World;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraftforge.event.Cancelable;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraftforge.event.Event;<a name="line.7"></a>
+<FONT color="green">008</FONT>    <a name="line.8"></a>
+<FONT color="green">009</FONT>    @Cancelable<a name="line.9"></a>
+<FONT color="green">010</FONT>    @Event.HasResult<a name="line.10"></a>
+<FONT color="green">011</FONT>    public class UseHoeEvent extends PlayerEvent<a name="line.11"></a>
+<FONT color="green">012</FONT>    {<a name="line.12"></a>
+<FONT color="green">013</FONT>        /**<a name="line.13"></a>
+<FONT color="green">014</FONT>         * This event is fired when a player attempts to use a Hoe on a block, it <a name="line.14"></a>
+<FONT color="green">015</FONT>         * can be canceled to completely prevent any further processing.<a name="line.15"></a>
+<FONT color="green">016</FONT>         * <a name="line.16"></a>
+<FONT color="green">017</FONT>         * You can also set the result to ALLOW to mark the event as processed <a name="line.17"></a>
+<FONT color="green">018</FONT>         * and damage the hoe.<a name="line.18"></a>
+<FONT color="green">019</FONT>         * <a name="line.19"></a>
+<FONT color="green">020</FONT>         * setResult(ALLOW) is the same as the old setHandeled();<a name="line.20"></a>
+<FONT color="green">021</FONT>         */<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>        public final ItemStack current;<a name="line.23"></a>
+<FONT color="green">024</FONT>        public final World world;<a name="line.24"></a>
+<FONT color="green">025</FONT>        public final int x;<a name="line.25"></a>
+<FONT color="green">026</FONT>        public final int y;<a name="line.26"></a>
+<FONT color="green">027</FONT>        public final int z;<a name="line.27"></a>
+<FONT color="green">028</FONT>        <a name="line.28"></a>
+<FONT color="green">029</FONT>        private boolean handeled = false;<a name="line.29"></a>
+<FONT color="green">030</FONT>        <a name="line.30"></a>
+<FONT color="green">031</FONT>        public UseHoeEvent(EntityPlayer player, ItemStack current, World world, int x, int y, int z)<a name="line.31"></a>
+<FONT color="green">032</FONT>        {<a name="line.32"></a>
+<FONT color="green">033</FONT>            super(player);<a name="line.33"></a>
+<FONT color="green">034</FONT>            this.current = current;<a name="line.34"></a>
+<FONT color="green">035</FONT>            this.world = world;<a name="line.35"></a>
+<FONT color="green">036</FONT>            this.x = x;<a name="line.36"></a>
+<FONT color="green">037</FONT>            this.y = y;<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.z = z;<a name="line.38"></a>
+<FONT color="green">039</FONT>        }<a name="line.39"></a>
+<FONT color="green">040</FONT>    }<a name="line.40"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

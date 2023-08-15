@@ -1,0 +1,594 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.entity.projectile;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.List;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.block.material.Material;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.entity.Entity;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.entity.item.EntityItem;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.entity.item.EntityXPOrb;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.entity.player.EntityPlayer;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import net.minecraft.item.Item;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import net.minecraft.item.ItemStack;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import net.minecraft.nbt.NBTTagCompound;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import net.minecraft.stats.StatList;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import net.minecraft.util.AxisAlignedBB;<a name="line.15"></a>
+<FONT color="green">016</FONT>    import net.minecraft.util.DamageSource;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import net.minecraft.util.MathHelper;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import net.minecraft.util.MovingObjectPosition;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import net.minecraft.util.Vec3;<a name="line.19"></a>
+<FONT color="green">020</FONT>    import net.minecraft.world.World;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>    public class EntityFishHook extends Entity<a name="line.22"></a>
+<FONT color="green">023</FONT>    {<a name="line.23"></a>
+<FONT color="green">024</FONT>        /** The tile this entity is on, X position */<a name="line.24"></a>
+<FONT color="green">025</FONT>        private int xTile;<a name="line.25"></a>
+<FONT color="green">026</FONT>    <a name="line.26"></a>
+<FONT color="green">027</FONT>        /** The tile this entity is on, Y position */<a name="line.27"></a>
+<FONT color="green">028</FONT>        private int yTile;<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>        /** The tile this entity is on, Z position */<a name="line.30"></a>
+<FONT color="green">031</FONT>        private int zTile;<a name="line.31"></a>
+<FONT color="green">032</FONT>        private int inTile;<a name="line.32"></a>
+<FONT color="green">033</FONT>        private boolean inGround;<a name="line.33"></a>
+<FONT color="green">034</FONT>        public int shake;<a name="line.34"></a>
+<FONT color="green">035</FONT>        public EntityPlayer angler;<a name="line.35"></a>
+<FONT color="green">036</FONT>        private int ticksInGround;<a name="line.36"></a>
+<FONT color="green">037</FONT>        private int ticksInAir;<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        /** the number of ticks remaining until this fish can no longer be caught */<a name="line.39"></a>
+<FONT color="green">040</FONT>        private int ticksCatchable;<a name="line.40"></a>
+<FONT color="green">041</FONT>    <a name="line.41"></a>
+<FONT color="green">042</FONT>        /**<a name="line.42"></a>
+<FONT color="green">043</FONT>         * The entity that the fishing rod is connected to, if any. When you right click on the fishing rod and the hook<a name="line.43"></a>
+<FONT color="green">044</FONT>         * falls on to an entity, this it that entity.<a name="line.44"></a>
+<FONT color="green">045</FONT>         */<a name="line.45"></a>
+<FONT color="green">046</FONT>        public Entity bobber;<a name="line.46"></a>
+<FONT color="green">047</FONT>        private int fishPosRotationIncrements;<a name="line.47"></a>
+<FONT color="green">048</FONT>        private double fishX;<a name="line.48"></a>
+<FONT color="green">049</FONT>        private double fishY;<a name="line.49"></a>
+<FONT color="green">050</FONT>        private double fishZ;<a name="line.50"></a>
+<FONT color="green">051</FONT>        private double fishYaw;<a name="line.51"></a>
+<FONT color="green">052</FONT>        private double fishPitch;<a name="line.52"></a>
+<FONT color="green">053</FONT>        @SideOnly(Side.CLIENT)<a name="line.53"></a>
+<FONT color="green">054</FONT>        private double velocityX;<a name="line.54"></a>
+<FONT color="green">055</FONT>        @SideOnly(Side.CLIENT)<a name="line.55"></a>
+<FONT color="green">056</FONT>        private double velocityY;<a name="line.56"></a>
+<FONT color="green">057</FONT>        @SideOnly(Side.CLIENT)<a name="line.57"></a>
+<FONT color="green">058</FONT>        private double velocityZ;<a name="line.58"></a>
+<FONT color="green">059</FONT>    <a name="line.59"></a>
+<FONT color="green">060</FONT>        public EntityFishHook(World par1World)<a name="line.60"></a>
+<FONT color="green">061</FONT>        {<a name="line.61"></a>
+<FONT color="green">062</FONT>            super(par1World);<a name="line.62"></a>
+<FONT color="green">063</FONT>            this.xTile = -1;<a name="line.63"></a>
+<FONT color="green">064</FONT>            this.yTile = -1;<a name="line.64"></a>
+<FONT color="green">065</FONT>            this.zTile = -1;<a name="line.65"></a>
+<FONT color="green">066</FONT>            this.inTile = 0;<a name="line.66"></a>
+<FONT color="green">067</FONT>            this.inGround = false;<a name="line.67"></a>
+<FONT color="green">068</FONT>            this.shake = 0;<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.ticksInAir = 0;<a name="line.69"></a>
+<FONT color="green">070</FONT>            this.ticksCatchable = 0;<a name="line.70"></a>
+<FONT color="green">071</FONT>            this.bobber = null;<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.setSize(0.25F, 0.25F);<a name="line.72"></a>
+<FONT color="green">073</FONT>            this.ignoreFrustumCheck = true;<a name="line.73"></a>
+<FONT color="green">074</FONT>        }<a name="line.74"></a>
+<FONT color="green">075</FONT>    <a name="line.75"></a>
+<FONT color="green">076</FONT>        @SideOnly(Side.CLIENT)<a name="line.76"></a>
+<FONT color="green">077</FONT>        public EntityFishHook(World par1World, double par2, double par4, double par6, EntityPlayer par8EntityPlayer)<a name="line.77"></a>
+<FONT color="green">078</FONT>        {<a name="line.78"></a>
+<FONT color="green">079</FONT>            this(par1World);<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.setPosition(par2, par4, par6);<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.ignoreFrustumCheck = true;<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.angler = par8EntityPlayer;<a name="line.82"></a>
+<FONT color="green">083</FONT>            par8EntityPlayer.fishEntity = this;<a name="line.83"></a>
+<FONT color="green">084</FONT>        }<a name="line.84"></a>
+<FONT color="green">085</FONT>    <a name="line.85"></a>
+<FONT color="green">086</FONT>        public EntityFishHook(World par1World, EntityPlayer par2EntityPlayer)<a name="line.86"></a>
+<FONT color="green">087</FONT>        {<a name="line.87"></a>
+<FONT color="green">088</FONT>            super(par1World);<a name="line.88"></a>
+<FONT color="green">089</FONT>            this.xTile = -1;<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.yTile = -1;<a name="line.90"></a>
+<FONT color="green">091</FONT>            this.zTile = -1;<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.inTile = 0;<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.inGround = false;<a name="line.93"></a>
+<FONT color="green">094</FONT>            this.shake = 0;<a name="line.94"></a>
+<FONT color="green">095</FONT>            this.ticksInAir = 0;<a name="line.95"></a>
+<FONT color="green">096</FONT>            this.ticksCatchable = 0;<a name="line.96"></a>
+<FONT color="green">097</FONT>            this.bobber = null;<a name="line.97"></a>
+<FONT color="green">098</FONT>            this.ignoreFrustumCheck = true;<a name="line.98"></a>
+<FONT color="green">099</FONT>            this.angler = par2EntityPlayer;<a name="line.99"></a>
+<FONT color="green">100</FONT>            this.angler.fishEntity = this;<a name="line.100"></a>
+<FONT color="green">101</FONT>            this.setSize(0.25F, 0.25F);<a name="line.101"></a>
+<FONT color="green">102</FONT>            this.setLocationAndAngles(par2EntityPlayer.posX, par2EntityPlayer.posY + 1.62D - (double)par2EntityPlayer.yOffset, par2EntityPlayer.posZ, par2EntityPlayer.rotationYaw, par2EntityPlayer.rotationPitch);<a name="line.102"></a>
+<FONT color="green">103</FONT>            this.posX -= (double)(MathHelper.cos(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);<a name="line.103"></a>
+<FONT color="green">104</FONT>            this.posY -= 0.10000000149011612D;<a name="line.104"></a>
+<FONT color="green">105</FONT>            this.posZ -= (double)(MathHelper.sin(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.setPosition(this.posX, this.posY, this.posZ);<a name="line.106"></a>
+<FONT color="green">107</FONT>            this.yOffset = 0.0F;<a name="line.107"></a>
+<FONT color="green">108</FONT>            float var3 = 0.4F;<a name="line.108"></a>
+<FONT color="green">109</FONT>            this.motionX = (double)(-MathHelper.sin(this.rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float)Math.PI) * var3);<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.motionZ = (double)(MathHelper.cos(this.rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float)Math.PI) * var3);<a name="line.110"></a>
+<FONT color="green">111</FONT>            this.motionY = (double)(-MathHelper.sin(this.rotationPitch / 180.0F * (float)Math.PI) * var3);<a name="line.111"></a>
+<FONT color="green">112</FONT>            this.calculateVelocity(this.motionX, this.motionY, this.motionZ, 1.5F, 1.0F);<a name="line.112"></a>
+<FONT color="green">113</FONT>        }<a name="line.113"></a>
+<FONT color="green">114</FONT>    <a name="line.114"></a>
+<FONT color="green">115</FONT>        protected void entityInit() {}<a name="line.115"></a>
+<FONT color="green">116</FONT>    <a name="line.116"></a>
+<FONT color="green">117</FONT>        @SideOnly(Side.CLIENT)<a name="line.117"></a>
+<FONT color="green">118</FONT>    <a name="line.118"></a>
+<FONT color="green">119</FONT>        /**<a name="line.119"></a>
+<FONT color="green">120</FONT>         * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge<a name="line.120"></a>
+<FONT color="green">121</FONT>         * length * 64 * renderDistanceWeight Args: distance<a name="line.121"></a>
+<FONT color="green">122</FONT>         */<a name="line.122"></a>
+<FONT color="green">123</FONT>        public boolean isInRangeToRenderDist(double par1)<a name="line.123"></a>
+<FONT color="green">124</FONT>        {<a name="line.124"></a>
+<FONT color="green">125</FONT>            double var3 = this.boundingBox.getAverageEdgeLength() * 4.0D;<a name="line.125"></a>
+<FONT color="green">126</FONT>            var3 *= 64.0D;<a name="line.126"></a>
+<FONT color="green">127</FONT>            return par1 &lt; var3 * var3;<a name="line.127"></a>
+<FONT color="green">128</FONT>        }<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>        public void calculateVelocity(double par1, double par3, double par5, float par7, float par8)<a name="line.130"></a>
+<FONT color="green">131</FONT>        {<a name="line.131"></a>
+<FONT color="green">132</FONT>            float var9 = MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5);<a name="line.132"></a>
+<FONT color="green">133</FONT>            par1 /= (double)var9;<a name="line.133"></a>
+<FONT color="green">134</FONT>            par3 /= (double)var9;<a name="line.134"></a>
+<FONT color="green">135</FONT>            par5 /= (double)var9;<a name="line.135"></a>
+<FONT color="green">136</FONT>            par1 += this.rand.nextGaussian() * 0.007499999832361937D * (double)par8;<a name="line.136"></a>
+<FONT color="green">137</FONT>            par3 += this.rand.nextGaussian() * 0.007499999832361937D * (double)par8;<a name="line.137"></a>
+<FONT color="green">138</FONT>            par5 += this.rand.nextGaussian() * 0.007499999832361937D * (double)par8;<a name="line.138"></a>
+<FONT color="green">139</FONT>            par1 *= (double)par7;<a name="line.139"></a>
+<FONT color="green">140</FONT>            par3 *= (double)par7;<a name="line.140"></a>
+<FONT color="green">141</FONT>            par5 *= (double)par7;<a name="line.141"></a>
+<FONT color="green">142</FONT>            this.motionX = par1;<a name="line.142"></a>
+<FONT color="green">143</FONT>            this.motionY = par3;<a name="line.143"></a>
+<FONT color="green">144</FONT>            this.motionZ = par5;<a name="line.144"></a>
+<FONT color="green">145</FONT>            float var10 = MathHelper.sqrt_double(par1 * par1 + par5 * par5);<a name="line.145"></a>
+<FONT color="green">146</FONT>            this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(par1, par5) * 180.0D / Math.PI);<a name="line.146"></a>
+<FONT color="green">147</FONT>            this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(par3, (double)var10) * 180.0D / Math.PI);<a name="line.147"></a>
+<FONT color="green">148</FONT>            this.ticksInGround = 0;<a name="line.148"></a>
+<FONT color="green">149</FONT>        }<a name="line.149"></a>
+<FONT color="green">150</FONT>    <a name="line.150"></a>
+<FONT color="green">151</FONT>        @SideOnly(Side.CLIENT)<a name="line.151"></a>
+<FONT color="green">152</FONT>    <a name="line.152"></a>
+<FONT color="green">153</FONT>        /**<a name="line.153"></a>
+<FONT color="green">154</FONT>         * Sets the position and rotation. Only difference from the other one is no bounding on the rotation. Args: posX,<a name="line.154"></a>
+<FONT color="green">155</FONT>         * posY, posZ, yaw, pitch<a name="line.155"></a>
+<FONT color="green">156</FONT>         */<a name="line.156"></a>
+<FONT color="green">157</FONT>        public void setPositionAndRotation2(double par1, double par3, double par5, float par7, float par8, int par9)<a name="line.157"></a>
+<FONT color="green">158</FONT>        {<a name="line.158"></a>
+<FONT color="green">159</FONT>            this.fishX = par1;<a name="line.159"></a>
+<FONT color="green">160</FONT>            this.fishY = par3;<a name="line.160"></a>
+<FONT color="green">161</FONT>            this.fishZ = par5;<a name="line.161"></a>
+<FONT color="green">162</FONT>            this.fishYaw = (double)par7;<a name="line.162"></a>
+<FONT color="green">163</FONT>            this.fishPitch = (double)par8;<a name="line.163"></a>
+<FONT color="green">164</FONT>            this.fishPosRotationIncrements = par9;<a name="line.164"></a>
+<FONT color="green">165</FONT>            this.motionX = this.velocityX;<a name="line.165"></a>
+<FONT color="green">166</FONT>            this.motionY = this.velocityY;<a name="line.166"></a>
+<FONT color="green">167</FONT>            this.motionZ = this.velocityZ;<a name="line.167"></a>
+<FONT color="green">168</FONT>        }<a name="line.168"></a>
+<FONT color="green">169</FONT>    <a name="line.169"></a>
+<FONT color="green">170</FONT>        @SideOnly(Side.CLIENT)<a name="line.170"></a>
+<FONT color="green">171</FONT>    <a name="line.171"></a>
+<FONT color="green">172</FONT>        /**<a name="line.172"></a>
+<FONT color="green">173</FONT>         * Sets the velocity to the args. Args: x, y, z<a name="line.173"></a>
+<FONT color="green">174</FONT>         */<a name="line.174"></a>
+<FONT color="green">175</FONT>        public void setVelocity(double par1, double par3, double par5)<a name="line.175"></a>
+<FONT color="green">176</FONT>        {<a name="line.176"></a>
+<FONT color="green">177</FONT>            this.velocityX = this.motionX = par1;<a name="line.177"></a>
+<FONT color="green">178</FONT>            this.velocityY = this.motionY = par3;<a name="line.178"></a>
+<FONT color="green">179</FONT>            this.velocityZ = this.motionZ = par5;<a name="line.179"></a>
+<FONT color="green">180</FONT>        }<a name="line.180"></a>
+<FONT color="green">181</FONT>    <a name="line.181"></a>
+<FONT color="green">182</FONT>        /**<a name="line.182"></a>
+<FONT color="green">183</FONT>         * Called to update the entity's position/logic.<a name="line.183"></a>
+<FONT color="green">184</FONT>         */<a name="line.184"></a>
+<FONT color="green">185</FONT>        public void onUpdate()<a name="line.185"></a>
+<FONT color="green">186</FONT>        {<a name="line.186"></a>
+<FONT color="green">187</FONT>            super.onUpdate();<a name="line.187"></a>
+<FONT color="green">188</FONT>    <a name="line.188"></a>
+<FONT color="green">189</FONT>            if (this.fishPosRotationIncrements &gt; 0)<a name="line.189"></a>
+<FONT color="green">190</FONT>            {<a name="line.190"></a>
+<FONT color="green">191</FONT>                double var21 = this.posX + (this.fishX - this.posX) / (double)this.fishPosRotationIncrements;<a name="line.191"></a>
+<FONT color="green">192</FONT>                double var22 = this.posY + (this.fishY - this.posY) / (double)this.fishPosRotationIncrements;<a name="line.192"></a>
+<FONT color="green">193</FONT>                double var23 = this.posZ + (this.fishZ - this.posZ) / (double)this.fishPosRotationIncrements;<a name="line.193"></a>
+<FONT color="green">194</FONT>                double var7 = MathHelper.wrapAngleTo180_double(this.fishYaw - (double)this.rotationYaw);<a name="line.194"></a>
+<FONT color="green">195</FONT>                this.rotationYaw = (float)((double)this.rotationYaw + var7 / (double)this.fishPosRotationIncrements);<a name="line.195"></a>
+<FONT color="green">196</FONT>                this.rotationPitch = (float)((double)this.rotationPitch + (this.fishPitch - (double)this.rotationPitch) / (double)this.fishPosRotationIncrements);<a name="line.196"></a>
+<FONT color="green">197</FONT>                --this.fishPosRotationIncrements;<a name="line.197"></a>
+<FONT color="green">198</FONT>                this.setPosition(var21, var22, var23);<a name="line.198"></a>
+<FONT color="green">199</FONT>                this.setRotation(this.rotationYaw, this.rotationPitch);<a name="line.199"></a>
+<FONT color="green">200</FONT>            }<a name="line.200"></a>
+<FONT color="green">201</FONT>            else<a name="line.201"></a>
+<FONT color="green">202</FONT>            {<a name="line.202"></a>
+<FONT color="green">203</FONT>                if (!this.worldObj.isRemote)<a name="line.203"></a>
+<FONT color="green">204</FONT>                {<a name="line.204"></a>
+<FONT color="green">205</FONT>                    ItemStack var1 = this.angler.getCurrentEquippedItem();<a name="line.205"></a>
+<FONT color="green">206</FONT>    <a name="line.206"></a>
+<FONT color="green">207</FONT>                    if (this.angler.isDead || !this.angler.isEntityAlive() || var1 == null || var1.getItem() != Item.fishingRod || this.getDistanceSqToEntity(this.angler) &gt; 1024.0D)<a name="line.207"></a>
+<FONT color="green">208</FONT>                    {<a name="line.208"></a>
+<FONT color="green">209</FONT>                        this.setDead();<a name="line.209"></a>
+<FONT color="green">210</FONT>                        this.angler.fishEntity = null;<a name="line.210"></a>
+<FONT color="green">211</FONT>                        return;<a name="line.211"></a>
+<FONT color="green">212</FONT>                    }<a name="line.212"></a>
+<FONT color="green">213</FONT>    <a name="line.213"></a>
+<FONT color="green">214</FONT>                    if (this.bobber != null)<a name="line.214"></a>
+<FONT color="green">215</FONT>                    {<a name="line.215"></a>
+<FONT color="green">216</FONT>                        if (!this.bobber.isDead)<a name="line.216"></a>
+<FONT color="green">217</FONT>                        {<a name="line.217"></a>
+<FONT color="green">218</FONT>                            this.posX = this.bobber.posX;<a name="line.218"></a>
+<FONT color="green">219</FONT>                            this.posY = this.bobber.boundingBox.minY + (double)this.bobber.height * 0.8D;<a name="line.219"></a>
+<FONT color="green">220</FONT>                            this.posZ = this.bobber.posZ;<a name="line.220"></a>
+<FONT color="green">221</FONT>                            return;<a name="line.221"></a>
+<FONT color="green">222</FONT>                        }<a name="line.222"></a>
+<FONT color="green">223</FONT>    <a name="line.223"></a>
+<FONT color="green">224</FONT>                        this.bobber = null;<a name="line.224"></a>
+<FONT color="green">225</FONT>                    }<a name="line.225"></a>
+<FONT color="green">226</FONT>                }<a name="line.226"></a>
+<FONT color="green">227</FONT>    <a name="line.227"></a>
+<FONT color="green">228</FONT>                if (this.shake &gt; 0)<a name="line.228"></a>
+<FONT color="green">229</FONT>                {<a name="line.229"></a>
+<FONT color="green">230</FONT>                    --this.shake;<a name="line.230"></a>
+<FONT color="green">231</FONT>                }<a name="line.231"></a>
+<FONT color="green">232</FONT>    <a name="line.232"></a>
+<FONT color="green">233</FONT>                if (this.inGround)<a name="line.233"></a>
+<FONT color="green">234</FONT>                {<a name="line.234"></a>
+<FONT color="green">235</FONT>                    int var19 = this.worldObj.getBlockId(this.xTile, this.yTile, this.zTile);<a name="line.235"></a>
+<FONT color="green">236</FONT>    <a name="line.236"></a>
+<FONT color="green">237</FONT>                    if (var19 == this.inTile)<a name="line.237"></a>
+<FONT color="green">238</FONT>                    {<a name="line.238"></a>
+<FONT color="green">239</FONT>                        ++this.ticksInGround;<a name="line.239"></a>
+<FONT color="green">240</FONT>    <a name="line.240"></a>
+<FONT color="green">241</FONT>                        if (this.ticksInGround == 1200)<a name="line.241"></a>
+<FONT color="green">242</FONT>                        {<a name="line.242"></a>
+<FONT color="green">243</FONT>                            this.setDead();<a name="line.243"></a>
+<FONT color="green">244</FONT>                        }<a name="line.244"></a>
+<FONT color="green">245</FONT>    <a name="line.245"></a>
+<FONT color="green">246</FONT>                        return;<a name="line.246"></a>
+<FONT color="green">247</FONT>                    }<a name="line.247"></a>
+<FONT color="green">248</FONT>    <a name="line.248"></a>
+<FONT color="green">249</FONT>                    this.inGround = false;<a name="line.249"></a>
+<FONT color="green">250</FONT>                    this.motionX *= (double)(this.rand.nextFloat() * 0.2F);<a name="line.250"></a>
+<FONT color="green">251</FONT>                    this.motionY *= (double)(this.rand.nextFloat() * 0.2F);<a name="line.251"></a>
+<FONT color="green">252</FONT>                    this.motionZ *= (double)(this.rand.nextFloat() * 0.2F);<a name="line.252"></a>
+<FONT color="green">253</FONT>                    this.ticksInGround = 0;<a name="line.253"></a>
+<FONT color="green">254</FONT>                    this.ticksInAir = 0;<a name="line.254"></a>
+<FONT color="green">255</FONT>                }<a name="line.255"></a>
+<FONT color="green">256</FONT>                else<a name="line.256"></a>
+<FONT color="green">257</FONT>                {<a name="line.257"></a>
+<FONT color="green">258</FONT>                    ++this.ticksInAir;<a name="line.258"></a>
+<FONT color="green">259</FONT>                }<a name="line.259"></a>
+<FONT color="green">260</FONT>    <a name="line.260"></a>
+<FONT color="green">261</FONT>                Vec3 var20 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ);<a name="line.261"></a>
+<FONT color="green">262</FONT>                Vec3 var2 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);<a name="line.262"></a>
+<FONT color="green">263</FONT>                MovingObjectPosition var3 = this.worldObj.rayTraceBlocks(var20, var2);<a name="line.263"></a>
+<FONT color="green">264</FONT>                var20 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX, this.posY, this.posZ);<a name="line.264"></a>
+<FONT color="green">265</FONT>                var2 = this.worldObj.getWorldVec3Pool().getVecFromPool(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);<a name="line.265"></a>
+<FONT color="green">266</FONT>    <a name="line.266"></a>
+<FONT color="green">267</FONT>                if (var3 != null)<a name="line.267"></a>
+<FONT color="green">268</FONT>                {<a name="line.268"></a>
+<FONT color="green">269</FONT>                    var2 = this.worldObj.getWorldVec3Pool().getVecFromPool(var3.hitVec.xCoord, var3.hitVec.yCoord, var3.hitVec.zCoord);<a name="line.269"></a>
+<FONT color="green">270</FONT>                }<a name="line.270"></a>
+<FONT color="green">271</FONT>    <a name="line.271"></a>
+<FONT color="green">272</FONT>                Entity var4 = null;<a name="line.272"></a>
+<FONT color="green">273</FONT>                List var5 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));<a name="line.273"></a>
+<FONT color="green">274</FONT>                double var6 = 0.0D;<a name="line.274"></a>
+<FONT color="green">275</FONT>                double var13;<a name="line.275"></a>
+<FONT color="green">276</FONT>    <a name="line.276"></a>
+<FONT color="green">277</FONT>                for (int var8 = 0; var8 &lt; var5.size(); ++var8)<a name="line.277"></a>
+<FONT color="green">278</FONT>                {<a name="line.278"></a>
+<FONT color="green">279</FONT>                    Entity var9 = (Entity)var5.get(var8);<a name="line.279"></a>
+<FONT color="green">280</FONT>    <a name="line.280"></a>
+<FONT color="green">281</FONT>                    if (var9.canBeCollidedWith() &amp;&amp; (var9 != this.angler || this.ticksInAir &gt;= 5))<a name="line.281"></a>
+<FONT color="green">282</FONT>                    {<a name="line.282"></a>
+<FONT color="green">283</FONT>                        float var10 = 0.3F;<a name="line.283"></a>
+<FONT color="green">284</FONT>                        AxisAlignedBB var11 = var9.boundingBox.expand((double)var10, (double)var10, (double)var10);<a name="line.284"></a>
+<FONT color="green">285</FONT>                        MovingObjectPosition var12 = var11.calculateIntercept(var20, var2);<a name="line.285"></a>
+<FONT color="green">286</FONT>    <a name="line.286"></a>
+<FONT color="green">287</FONT>                        if (var12 != null)<a name="line.287"></a>
+<FONT color="green">288</FONT>                        {<a name="line.288"></a>
+<FONT color="green">289</FONT>                            var13 = var20.distanceTo(var12.hitVec);<a name="line.289"></a>
+<FONT color="green">290</FONT>    <a name="line.290"></a>
+<FONT color="green">291</FONT>                            if (var13 &lt; var6 || var6 == 0.0D)<a name="line.291"></a>
+<FONT color="green">292</FONT>                            {<a name="line.292"></a>
+<FONT color="green">293</FONT>                                var4 = var9;<a name="line.293"></a>
+<FONT color="green">294</FONT>                                var6 = var13;<a name="line.294"></a>
+<FONT color="green">295</FONT>                            }<a name="line.295"></a>
+<FONT color="green">296</FONT>                        }<a name="line.296"></a>
+<FONT color="green">297</FONT>                    }<a name="line.297"></a>
+<FONT color="green">298</FONT>                }<a name="line.298"></a>
+<FONT color="green">299</FONT>    <a name="line.299"></a>
+<FONT color="green">300</FONT>                if (var4 != null)<a name="line.300"></a>
+<FONT color="green">301</FONT>                {<a name="line.301"></a>
+<FONT color="green">302</FONT>                    var3 = new MovingObjectPosition(var4);<a name="line.302"></a>
+<FONT color="green">303</FONT>                }<a name="line.303"></a>
+<FONT color="green">304</FONT>    <a name="line.304"></a>
+<FONT color="green">305</FONT>                if (var3 != null)<a name="line.305"></a>
+<FONT color="green">306</FONT>                {<a name="line.306"></a>
+<FONT color="green">307</FONT>                    if (var3.entityHit != null)<a name="line.307"></a>
+<FONT color="green">308</FONT>                    {<a name="line.308"></a>
+<FONT color="green">309</FONT>                        if (var3.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.angler), 0))<a name="line.309"></a>
+<FONT color="green">310</FONT>                        {<a name="line.310"></a>
+<FONT color="green">311</FONT>                            this.bobber = var3.entityHit;<a name="line.311"></a>
+<FONT color="green">312</FONT>                        }<a name="line.312"></a>
+<FONT color="green">313</FONT>                    }<a name="line.313"></a>
+<FONT color="green">314</FONT>                    else<a name="line.314"></a>
+<FONT color="green">315</FONT>                    {<a name="line.315"></a>
+<FONT color="green">316</FONT>                        this.inGround = true;<a name="line.316"></a>
+<FONT color="green">317</FONT>                    }<a name="line.317"></a>
+<FONT color="green">318</FONT>                }<a name="line.318"></a>
+<FONT color="green">319</FONT>    <a name="line.319"></a>
+<FONT color="green">320</FONT>                if (!this.inGround)<a name="line.320"></a>
+<FONT color="green">321</FONT>                {<a name="line.321"></a>
+<FONT color="green">322</FONT>                    this.moveEntity(this.motionX, this.motionY, this.motionZ);<a name="line.322"></a>
+<FONT color="green">323</FONT>                    float var24 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);<a name="line.323"></a>
+<FONT color="green">324</FONT>                    this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);<a name="line.324"></a>
+<FONT color="green">325</FONT>    <a name="line.325"></a>
+<FONT color="green">326</FONT>                    for (this.rotationPitch = (float)(Math.atan2(this.motionY, (double)var24) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch &lt; -180.0F; this.prevRotationPitch -= 360.0F)<a name="line.326"></a>
+<FONT color="green">327</FONT>                    {<a name="line.327"></a>
+<FONT color="green">328</FONT>                        ;<a name="line.328"></a>
+<FONT color="green">329</FONT>                    }<a name="line.329"></a>
+<FONT color="green">330</FONT>    <a name="line.330"></a>
+<FONT color="green">331</FONT>                    while (this.rotationPitch - this.prevRotationPitch &gt;= 180.0F)<a name="line.331"></a>
+<FONT color="green">332</FONT>                    {<a name="line.332"></a>
+<FONT color="green">333</FONT>                        this.prevRotationPitch += 360.0F;<a name="line.333"></a>
+<FONT color="green">334</FONT>                    }<a name="line.334"></a>
+<FONT color="green">335</FONT>    <a name="line.335"></a>
+<FONT color="green">336</FONT>                    while (this.rotationYaw - this.prevRotationYaw &lt; -180.0F)<a name="line.336"></a>
+<FONT color="green">337</FONT>                    {<a name="line.337"></a>
+<FONT color="green">338</FONT>                        this.prevRotationYaw -= 360.0F;<a name="line.338"></a>
+<FONT color="green">339</FONT>                    }<a name="line.339"></a>
+<FONT color="green">340</FONT>    <a name="line.340"></a>
+<FONT color="green">341</FONT>                    while (this.rotationYaw - this.prevRotationYaw &gt;= 180.0F)<a name="line.341"></a>
+<FONT color="green">342</FONT>                    {<a name="line.342"></a>
+<FONT color="green">343</FONT>                        this.prevRotationYaw += 360.0F;<a name="line.343"></a>
+<FONT color="green">344</FONT>                    }<a name="line.344"></a>
+<FONT color="green">345</FONT>    <a name="line.345"></a>
+<FONT color="green">346</FONT>                    this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;<a name="line.346"></a>
+<FONT color="green">347</FONT>                    this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;<a name="line.347"></a>
+<FONT color="green">348</FONT>                    float var25 = 0.92F;<a name="line.348"></a>
+<FONT color="green">349</FONT>    <a name="line.349"></a>
+<FONT color="green">350</FONT>                    if (this.onGround || this.isCollidedHorizontally)<a name="line.350"></a>
+<FONT color="green">351</FONT>                    {<a name="line.351"></a>
+<FONT color="green">352</FONT>                        var25 = 0.5F;<a name="line.352"></a>
+<FONT color="green">353</FONT>                    }<a name="line.353"></a>
+<FONT color="green">354</FONT>    <a name="line.354"></a>
+<FONT color="green">355</FONT>                    byte var27 = 5;<a name="line.355"></a>
+<FONT color="green">356</FONT>                    double var26 = 0.0D;<a name="line.356"></a>
+<FONT color="green">357</FONT>    <a name="line.357"></a>
+<FONT color="green">358</FONT>                    for (int var29 = 0; var29 &lt; var27; ++var29)<a name="line.358"></a>
+<FONT color="green">359</FONT>                    {<a name="line.359"></a>
+<FONT color="green">360</FONT>                        double var14 = this.boundingBox.minY + (this.boundingBox.maxY - this.boundingBox.minY) * (double)(var29 + 0) / (double)var27 - 0.125D + 0.125D;<a name="line.360"></a>
+<FONT color="green">361</FONT>                        double var16 = this.boundingBox.minY + (this.boundingBox.maxY - this.boundingBox.minY) * (double)(var29 + 1) / (double)var27 - 0.125D + 0.125D;<a name="line.361"></a>
+<FONT color="green">362</FONT>                        AxisAlignedBB var18 = AxisAlignedBB.getAABBPool().addOrModifyAABBInPool(this.boundingBox.minX, var14, this.boundingBox.minZ, this.boundingBox.maxX, var16, this.boundingBox.maxZ);<a name="line.362"></a>
+<FONT color="green">363</FONT>    <a name="line.363"></a>
+<FONT color="green">364</FONT>                        if (this.worldObj.isAABBInMaterial(var18, Material.water))<a name="line.364"></a>
+<FONT color="green">365</FONT>                        {<a name="line.365"></a>
+<FONT color="green">366</FONT>                            var26 += 1.0D / (double)var27;<a name="line.366"></a>
+<FONT color="green">367</FONT>                        }<a name="line.367"></a>
+<FONT color="green">368</FONT>                    }<a name="line.368"></a>
+<FONT color="green">369</FONT>    <a name="line.369"></a>
+<FONT color="green">370</FONT>                    if (var26 &gt; 0.0D)<a name="line.370"></a>
+<FONT color="green">371</FONT>                    {<a name="line.371"></a>
+<FONT color="green">372</FONT>                        if (this.ticksCatchable &gt; 0)<a name="line.372"></a>
+<FONT color="green">373</FONT>                        {<a name="line.373"></a>
+<FONT color="green">374</FONT>                            --this.ticksCatchable;<a name="line.374"></a>
+<FONT color="green">375</FONT>                        }<a name="line.375"></a>
+<FONT color="green">376</FONT>                        else<a name="line.376"></a>
+<FONT color="green">377</FONT>                        {<a name="line.377"></a>
+<FONT color="green">378</FONT>                            short var28 = 500;<a name="line.378"></a>
+<FONT color="green">379</FONT>    <a name="line.379"></a>
+<FONT color="green">380</FONT>                            if (this.worldObj.canLightningStrikeAt(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ)))<a name="line.380"></a>
+<FONT color="green">381</FONT>                            {<a name="line.381"></a>
+<FONT color="green">382</FONT>                                var28 = 300;<a name="line.382"></a>
+<FONT color="green">383</FONT>                            }<a name="line.383"></a>
+<FONT color="green">384</FONT>    <a name="line.384"></a>
+<FONT color="green">385</FONT>                            if (this.rand.nextInt(var28) == 0)<a name="line.385"></a>
+<FONT color="green">386</FONT>                            {<a name="line.386"></a>
+<FONT color="green">387</FONT>                                this.ticksCatchable = this.rand.nextInt(30) + 10;<a name="line.387"></a>
+<FONT color="green">388</FONT>                                this.motionY -= 0.20000000298023224D;<a name="line.388"></a>
+<FONT color="green">389</FONT>                                this.func_85030_a("random.splash", 0.25F, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);<a name="line.389"></a>
+<FONT color="green">390</FONT>                                float var30 = (float)MathHelper.floor_double(this.boundingBox.minY);<a name="line.390"></a>
+<FONT color="green">391</FONT>                                int var15;<a name="line.391"></a>
+<FONT color="green">392</FONT>                                float var17;<a name="line.392"></a>
+<FONT color="green">393</FONT>                                float var31;<a name="line.393"></a>
+<FONT color="green">394</FONT>    <a name="line.394"></a>
+<FONT color="green">395</FONT>                                for (var15 = 0; (float)var15 &lt; 1.0F + this.width * 20.0F; ++var15)<a name="line.395"></a>
+<FONT color="green">396</FONT>                                {<a name="line.396"></a>
+<FONT color="green">397</FONT>                                    var31 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;<a name="line.397"></a>
+<FONT color="green">398</FONT>                                    var17 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;<a name="line.398"></a>
+<FONT color="green">399</FONT>                                    this.worldObj.spawnParticle("bubble", this.posX + (double)var31, (double)(var30 + 1.0F), this.posZ + (double)var17, this.motionX, this.motionY - (double)(this.rand.nextFloat() * 0.2F), this.motionZ);<a name="line.399"></a>
+<FONT color="green">400</FONT>                                }<a name="line.400"></a>
+<FONT color="green">401</FONT>    <a name="line.401"></a>
+<FONT color="green">402</FONT>                                for (var15 = 0; (float)var15 &lt; 1.0F + this.width * 20.0F; ++var15)<a name="line.402"></a>
+<FONT color="green">403</FONT>                                {<a name="line.403"></a>
+<FONT color="green">404</FONT>                                    var31 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;<a name="line.404"></a>
+<FONT color="green">405</FONT>                                    var17 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;<a name="line.405"></a>
+<FONT color="green">406</FONT>                                    this.worldObj.spawnParticle("splash", this.posX + (double)var31, (double)(var30 + 1.0F), this.posZ + (double)var17, this.motionX, this.motionY, this.motionZ);<a name="line.406"></a>
+<FONT color="green">407</FONT>                                }<a name="line.407"></a>
+<FONT color="green">408</FONT>                            }<a name="line.408"></a>
+<FONT color="green">409</FONT>                        }<a name="line.409"></a>
+<FONT color="green">410</FONT>                    }<a name="line.410"></a>
+<FONT color="green">411</FONT>    <a name="line.411"></a>
+<FONT color="green">412</FONT>                    if (this.ticksCatchable &gt; 0)<a name="line.412"></a>
+<FONT color="green">413</FONT>                    {<a name="line.413"></a>
+<FONT color="green">414</FONT>                        this.motionY -= (double)(this.rand.nextFloat() * this.rand.nextFloat() * this.rand.nextFloat()) * 0.2D;<a name="line.414"></a>
+<FONT color="green">415</FONT>                    }<a name="line.415"></a>
+<FONT color="green">416</FONT>    <a name="line.416"></a>
+<FONT color="green">417</FONT>                    var13 = var26 * 2.0D - 1.0D;<a name="line.417"></a>
+<FONT color="green">418</FONT>                    this.motionY += 0.03999999910593033D * var13;<a name="line.418"></a>
+<FONT color="green">419</FONT>    <a name="line.419"></a>
+<FONT color="green">420</FONT>                    if (var26 &gt; 0.0D)<a name="line.420"></a>
+<FONT color="green">421</FONT>                    {<a name="line.421"></a>
+<FONT color="green">422</FONT>                        var25 = (float)((double)var25 * 0.9D);<a name="line.422"></a>
+<FONT color="green">423</FONT>                        this.motionY *= 0.8D;<a name="line.423"></a>
+<FONT color="green">424</FONT>                    }<a name="line.424"></a>
+<FONT color="green">425</FONT>    <a name="line.425"></a>
+<FONT color="green">426</FONT>                    this.motionX *= (double)var25;<a name="line.426"></a>
+<FONT color="green">427</FONT>                    this.motionY *= (double)var25;<a name="line.427"></a>
+<FONT color="green">428</FONT>                    this.motionZ *= (double)var25;<a name="line.428"></a>
+<FONT color="green">429</FONT>                    this.setPosition(this.posX, this.posY, this.posZ);<a name="line.429"></a>
+<FONT color="green">430</FONT>                }<a name="line.430"></a>
+<FONT color="green">431</FONT>            }<a name="line.431"></a>
+<FONT color="green">432</FONT>        }<a name="line.432"></a>
+<FONT color="green">433</FONT>    <a name="line.433"></a>
+<FONT color="green">434</FONT>        /**<a name="line.434"></a>
+<FONT color="green">435</FONT>         * (abstract) Protected helper method to write subclass entity data to NBT.<a name="line.435"></a>
+<FONT color="green">436</FONT>         */<a name="line.436"></a>
+<FONT color="green">437</FONT>        public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)<a name="line.437"></a>
+<FONT color="green">438</FONT>        {<a name="line.438"></a>
+<FONT color="green">439</FONT>            par1NBTTagCompound.setShort("xTile", (short)this.xTile);<a name="line.439"></a>
+<FONT color="green">440</FONT>            par1NBTTagCompound.setShort("yTile", (short)this.yTile);<a name="line.440"></a>
+<FONT color="green">441</FONT>            par1NBTTagCompound.setShort("zTile", (short)this.zTile);<a name="line.441"></a>
+<FONT color="green">442</FONT>            par1NBTTagCompound.setByte("inTile", (byte)this.inTile);<a name="line.442"></a>
+<FONT color="green">443</FONT>            par1NBTTagCompound.setByte("shake", (byte)this.shake);<a name="line.443"></a>
+<FONT color="green">444</FONT>            par1NBTTagCompound.setByte("inGround", (byte)(this.inGround ? 1 : 0));<a name="line.444"></a>
+<FONT color="green">445</FONT>        }<a name="line.445"></a>
+<FONT color="green">446</FONT>    <a name="line.446"></a>
+<FONT color="green">447</FONT>        /**<a name="line.447"></a>
+<FONT color="green">448</FONT>         * (abstract) Protected helper method to read subclass entity data from NBT.<a name="line.448"></a>
+<FONT color="green">449</FONT>         */<a name="line.449"></a>
+<FONT color="green">450</FONT>        public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)<a name="line.450"></a>
+<FONT color="green">451</FONT>        {<a name="line.451"></a>
+<FONT color="green">452</FONT>            this.xTile = par1NBTTagCompound.getShort("xTile");<a name="line.452"></a>
+<FONT color="green">453</FONT>            this.yTile = par1NBTTagCompound.getShort("yTile");<a name="line.453"></a>
+<FONT color="green">454</FONT>            this.zTile = par1NBTTagCompound.getShort("zTile");<a name="line.454"></a>
+<FONT color="green">455</FONT>            this.inTile = par1NBTTagCompound.getByte("inTile") &amp; 255;<a name="line.455"></a>
+<FONT color="green">456</FONT>            this.shake = par1NBTTagCompound.getByte("shake") &amp; 255;<a name="line.456"></a>
+<FONT color="green">457</FONT>            this.inGround = par1NBTTagCompound.getByte("inGround") == 1;<a name="line.457"></a>
+<FONT color="green">458</FONT>        }<a name="line.458"></a>
+<FONT color="green">459</FONT>    <a name="line.459"></a>
+<FONT color="green">460</FONT>        @SideOnly(Side.CLIENT)<a name="line.460"></a>
+<FONT color="green">461</FONT>        public float getShadowSize()<a name="line.461"></a>
+<FONT color="green">462</FONT>        {<a name="line.462"></a>
+<FONT color="green">463</FONT>            return 0.0F;<a name="line.463"></a>
+<FONT color="green">464</FONT>        }<a name="line.464"></a>
+<FONT color="green">465</FONT>    <a name="line.465"></a>
+<FONT color="green">466</FONT>        public int catchFish()<a name="line.466"></a>
+<FONT color="green">467</FONT>        {<a name="line.467"></a>
+<FONT color="green">468</FONT>            if (this.worldObj.isRemote)<a name="line.468"></a>
+<FONT color="green">469</FONT>            {<a name="line.469"></a>
+<FONT color="green">470</FONT>                return 0;<a name="line.470"></a>
+<FONT color="green">471</FONT>            }<a name="line.471"></a>
+<FONT color="green">472</FONT>            else<a name="line.472"></a>
+<FONT color="green">473</FONT>            {<a name="line.473"></a>
+<FONT color="green">474</FONT>                byte var1 = 0;<a name="line.474"></a>
+<FONT color="green">475</FONT>    <a name="line.475"></a>
+<FONT color="green">476</FONT>                if (this.bobber != null)<a name="line.476"></a>
+<FONT color="green">477</FONT>                {<a name="line.477"></a>
+<FONT color="green">478</FONT>                    double var2 = this.angler.posX - this.posX;<a name="line.478"></a>
+<FONT color="green">479</FONT>                    double var4 = this.angler.posY - this.posY;<a name="line.479"></a>
+<FONT color="green">480</FONT>                    double var6 = this.angler.posZ - this.posZ;<a name="line.480"></a>
+<FONT color="green">481</FONT>                    double var8 = (double)MathHelper.sqrt_double(var2 * var2 + var4 * var4 + var6 * var6);<a name="line.481"></a>
+<FONT color="green">482</FONT>                    double var10 = 0.1D;<a name="line.482"></a>
+<FONT color="green">483</FONT>                    this.bobber.motionX += var2 * var10;<a name="line.483"></a>
+<FONT color="green">484</FONT>                    this.bobber.motionY += var4 * var10 + (double)MathHelper.sqrt_double(var8) * 0.08D;<a name="line.484"></a>
+<FONT color="green">485</FONT>                    this.bobber.motionZ += var6 * var10;<a name="line.485"></a>
+<FONT color="green">486</FONT>                    var1 = 3;<a name="line.486"></a>
+<FONT color="green">487</FONT>                }<a name="line.487"></a>
+<FONT color="green">488</FONT>                else if (this.ticksCatchable &gt; 0)<a name="line.488"></a>
+<FONT color="green">489</FONT>                {<a name="line.489"></a>
+<FONT color="green">490</FONT>                    EntityItem var13 = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, new ItemStack(Item.fishRaw));<a name="line.490"></a>
+<FONT color="green">491</FONT>                    double var3 = this.angler.posX - this.posX;<a name="line.491"></a>
+<FONT color="green">492</FONT>                    double var5 = this.angler.posY - this.posY;<a name="line.492"></a>
+<FONT color="green">493</FONT>                    double var7 = this.angler.posZ - this.posZ;<a name="line.493"></a>
+<FONT color="green">494</FONT>                    double var9 = (double)MathHelper.sqrt_double(var3 * var3 + var5 * var5 + var7 * var7);<a name="line.494"></a>
+<FONT color="green">495</FONT>                    double var11 = 0.1D;<a name="line.495"></a>
+<FONT color="green">496</FONT>                    var13.motionX = var3 * var11;<a name="line.496"></a>
+<FONT color="green">497</FONT>                    var13.motionY = var5 * var11 + (double)MathHelper.sqrt_double(var9) * 0.08D;<a name="line.497"></a>
+<FONT color="green">498</FONT>                    var13.motionZ = var7 * var11;<a name="line.498"></a>
+<FONT color="green">499</FONT>                    this.worldObj.spawnEntityInWorld(var13);<a name="line.499"></a>
+<FONT color="green">500</FONT>                    this.angler.addStat(StatList.fishCaughtStat, 1);<a name="line.500"></a>
+<FONT color="green">501</FONT>                    this.angler.worldObj.spawnEntityInWorld(new EntityXPOrb(this.angler.worldObj, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));<a name="line.501"></a>
+<FONT color="green">502</FONT>                    var1 = 1;<a name="line.502"></a>
+<FONT color="green">503</FONT>                }<a name="line.503"></a>
+<FONT color="green">504</FONT>    <a name="line.504"></a>
+<FONT color="green">505</FONT>                if (this.inGround)<a name="line.505"></a>
+<FONT color="green">506</FONT>                {<a name="line.506"></a>
+<FONT color="green">507</FONT>                    var1 = 2;<a name="line.507"></a>
+<FONT color="green">508</FONT>                }<a name="line.508"></a>
+<FONT color="green">509</FONT>    <a name="line.509"></a>
+<FONT color="green">510</FONT>                this.setDead();<a name="line.510"></a>
+<FONT color="green">511</FONT>                this.angler.fishEntity = null;<a name="line.511"></a>
+<FONT color="green">512</FONT>                return var1;<a name="line.512"></a>
+<FONT color="green">513</FONT>            }<a name="line.513"></a>
+<FONT color="green">514</FONT>        }<a name="line.514"></a>
+<FONT color="green">515</FONT>    <a name="line.515"></a>
+<FONT color="green">516</FONT>        /**<a name="line.516"></a>
+<FONT color="green">517</FONT>         * Will get destroyed next tick.<a name="line.517"></a>
+<FONT color="green">518</FONT>         */<a name="line.518"></a>
+<FONT color="green">519</FONT>        public void setDead()<a name="line.519"></a>
+<FONT color="green">520</FONT>        {<a name="line.520"></a>
+<FONT color="green">521</FONT>            super.setDead();<a name="line.521"></a>
+<FONT color="green">522</FONT>    <a name="line.522"></a>
+<FONT color="green">523</FONT>            if (this.angler != null)<a name="line.523"></a>
+<FONT color="green">524</FONT>            {<a name="line.524"></a>
+<FONT color="green">525</FONT>                this.angler.fishEntity = null;<a name="line.525"></a>
+<FONT color="green">526</FONT>            }<a name="line.526"></a>
+<FONT color="green">527</FONT>        }<a name="line.527"></a>
+<FONT color="green">528</FONT>    }<a name="line.528"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

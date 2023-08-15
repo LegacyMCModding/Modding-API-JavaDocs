@@ -1,0 +1,198 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.enchantment;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraft.entity.Entity;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.util.DamageSource;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.util.MathHelper;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    public class EnchantmentProtection extends Enchantment<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** Holds the name to be translated of each protection type. */<a name="line.9"></a>
+<FONT color="green">010</FONT>        private static final String[] protectionName = new String[] {"all", "fire", "fall", "explosion", "projectile"};<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /**<a name="line.12"></a>
+<FONT color="green">013</FONT>         * Holds the base factor of enchantability needed to be able to use the enchant.<a name="line.13"></a>
+<FONT color="green">014</FONT>         */<a name="line.14"></a>
+<FONT color="green">015</FONT>        private static final int[] baseEnchantability = new int[] {1, 10, 5, 5, 3};<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        /**<a name="line.17"></a>
+<FONT color="green">018</FONT>         * Holds how much each level increased the enchantability factor to be able to use this enchant.<a name="line.18"></a>
+<FONT color="green">019</FONT>         */<a name="line.19"></a>
+<FONT color="green">020</FONT>        private static final int[] levelEnchantability = new int[] {11, 8, 6, 8, 6};<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /**<a name="line.22"></a>
+<FONT color="green">023</FONT>         * Used on the formula of base enchantability, this is the 'window' factor of values to be able to use thing<a name="line.23"></a>
+<FONT color="green">024</FONT>         * enchant.<a name="line.24"></a>
+<FONT color="green">025</FONT>         */<a name="line.25"></a>
+<FONT color="green">026</FONT>        private static final int[] thresholdEnchantability = new int[] {20, 12, 10, 12, 15};<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        /**<a name="line.28"></a>
+<FONT color="green">029</FONT>         * Defines the type of protection of the enchantment, 0 = all, 1 = fire, 2 = fall (feather fall), 3 = explosion and<a name="line.29"></a>
+<FONT color="green">030</FONT>         * 4 = projectile.<a name="line.30"></a>
+<FONT color="green">031</FONT>         */<a name="line.31"></a>
+<FONT color="green">032</FONT>        public final int protectionType;<a name="line.32"></a>
+<FONT color="green">033</FONT>    <a name="line.33"></a>
+<FONT color="green">034</FONT>        public EnchantmentProtection(int par1, int par2, int par3)<a name="line.34"></a>
+<FONT color="green">035</FONT>        {<a name="line.35"></a>
+<FONT color="green">036</FONT>            super(par1, par2, EnumEnchantmentType.armor);<a name="line.36"></a>
+<FONT color="green">037</FONT>            this.protectionType = par3;<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>            if (par3 == 2)<a name="line.39"></a>
+<FONT color="green">040</FONT>            {<a name="line.40"></a>
+<FONT color="green">041</FONT>                this.type = EnumEnchantmentType.armor_feet;<a name="line.41"></a>
+<FONT color="green">042</FONT>            }<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        /**<a name="line.45"></a>
+<FONT color="green">046</FONT>         * Returns the minimal value of enchantability needed on the enchantment level passed.<a name="line.46"></a>
+<FONT color="green">047</FONT>         */<a name="line.47"></a>
+<FONT color="green">048</FONT>        public int getMinEnchantability(int par1)<a name="line.48"></a>
+<FONT color="green">049</FONT>        {<a name="line.49"></a>
+<FONT color="green">050</FONT>            return baseEnchantability[this.protectionType] + (par1 - 1) * levelEnchantability[this.protectionType];<a name="line.50"></a>
+<FONT color="green">051</FONT>        }<a name="line.51"></a>
+<FONT color="green">052</FONT>    <a name="line.52"></a>
+<FONT color="green">053</FONT>        /**<a name="line.53"></a>
+<FONT color="green">054</FONT>         * Returns the maximum value of enchantability nedded on the enchantment level passed.<a name="line.54"></a>
+<FONT color="green">055</FONT>         */<a name="line.55"></a>
+<FONT color="green">056</FONT>        public int getMaxEnchantability(int par1)<a name="line.56"></a>
+<FONT color="green">057</FONT>        {<a name="line.57"></a>
+<FONT color="green">058</FONT>            return this.getMinEnchantability(par1) + thresholdEnchantability[this.protectionType];<a name="line.58"></a>
+<FONT color="green">059</FONT>        }<a name="line.59"></a>
+<FONT color="green">060</FONT>    <a name="line.60"></a>
+<FONT color="green">061</FONT>        /**<a name="line.61"></a>
+<FONT color="green">062</FONT>         * Returns the maximum level that the enchantment can have.<a name="line.62"></a>
+<FONT color="green">063</FONT>         */<a name="line.63"></a>
+<FONT color="green">064</FONT>        public int getMaxLevel()<a name="line.64"></a>
+<FONT color="green">065</FONT>        {<a name="line.65"></a>
+<FONT color="green">066</FONT>            return 4;<a name="line.66"></a>
+<FONT color="green">067</FONT>        }<a name="line.67"></a>
+<FONT color="green">068</FONT>    <a name="line.68"></a>
+<FONT color="green">069</FONT>        /**<a name="line.69"></a>
+<FONT color="green">070</FONT>         * Calculates de damage protection of the enchantment based on level and damage source passed.<a name="line.70"></a>
+<FONT color="green">071</FONT>         */<a name="line.71"></a>
+<FONT color="green">072</FONT>        public int calcModifierDamage(int par1, DamageSource par2DamageSource)<a name="line.72"></a>
+<FONT color="green">073</FONT>        {<a name="line.73"></a>
+<FONT color="green">074</FONT>            if (par2DamageSource.canHarmInCreative())<a name="line.74"></a>
+<FONT color="green">075</FONT>            {<a name="line.75"></a>
+<FONT color="green">076</FONT>                return 0;<a name="line.76"></a>
+<FONT color="green">077</FONT>            }<a name="line.77"></a>
+<FONT color="green">078</FONT>            else<a name="line.78"></a>
+<FONT color="green">079</FONT>            {<a name="line.79"></a>
+<FONT color="green">080</FONT>                float var3 = (float)(6 + par1 * par1) / 3.0F;<a name="line.80"></a>
+<FONT color="green">081</FONT>                return this.protectionType == 0 ? MathHelper.floor_float(var3 * 0.75F) : (this.protectionType == 1 &amp;&amp; par2DamageSource.isFireDamage() ? MathHelper.floor_float(var3 * 1.25F) : (this.protectionType == 2 &amp;&amp; par2DamageSource == DamageSource.fall ? MathHelper.floor_float(var3 * 2.5F) : ((this.protectionType != 3 || par2DamageSource != DamageSource.explosion) &amp;&amp; par2DamageSource != DamageSource.field_76375_l ? (this.protectionType == 4 &amp;&amp; par2DamageSource.isProjectile() ? MathHelper.floor_float(var3 * 1.5F) : 0) : MathHelper.floor_float(var3 * 1.5F))));<a name="line.81"></a>
+<FONT color="green">082</FONT>            }<a name="line.82"></a>
+<FONT color="green">083</FONT>        }<a name="line.83"></a>
+<FONT color="green">084</FONT>    <a name="line.84"></a>
+<FONT color="green">085</FONT>        /**<a name="line.85"></a>
+<FONT color="green">086</FONT>         * Return the name of key in translation table of this enchantment.<a name="line.86"></a>
+<FONT color="green">087</FONT>         */<a name="line.87"></a>
+<FONT color="green">088</FONT>        public String getName()<a name="line.88"></a>
+<FONT color="green">089</FONT>        {<a name="line.89"></a>
+<FONT color="green">090</FONT>            return "enchantment.protect." + protectionName[this.protectionType];<a name="line.90"></a>
+<FONT color="green">091</FONT>        }<a name="line.91"></a>
+<FONT color="green">092</FONT>    <a name="line.92"></a>
+<FONT color="green">093</FONT>        /**<a name="line.93"></a>
+<FONT color="green">094</FONT>         * Determines if the enchantment passed can be applyied together with this enchantment.<a name="line.94"></a>
+<FONT color="green">095</FONT>         */<a name="line.95"></a>
+<FONT color="green">096</FONT>        public boolean canApplyTogether(Enchantment par1Enchantment)<a name="line.96"></a>
+<FONT color="green">097</FONT>        {<a name="line.97"></a>
+<FONT color="green">098</FONT>            if (par1Enchantment instanceof EnchantmentProtection)<a name="line.98"></a>
+<FONT color="green">099</FONT>            {<a name="line.99"></a>
+<FONT color="green">100</FONT>                EnchantmentProtection var2 = (EnchantmentProtection)par1Enchantment;<a name="line.100"></a>
+<FONT color="green">101</FONT>                return var2.protectionType == this.protectionType ? false : this.protectionType == 2 || var2.protectionType == 2;<a name="line.101"></a>
+<FONT color="green">102</FONT>            }<a name="line.102"></a>
+<FONT color="green">103</FONT>            else<a name="line.103"></a>
+<FONT color="green">104</FONT>            {<a name="line.104"></a>
+<FONT color="green">105</FONT>                return super.canApplyTogether(par1Enchantment);<a name="line.105"></a>
+<FONT color="green">106</FONT>            }<a name="line.106"></a>
+<FONT color="green">107</FONT>        }<a name="line.107"></a>
+<FONT color="green">108</FONT>    <a name="line.108"></a>
+<FONT color="green">109</FONT>        public static int func_92041_a(Entity par0Entity, int par1)<a name="line.109"></a>
+<FONT color="green">110</FONT>        {<a name="line.110"></a>
+<FONT color="green">111</FONT>            int var2 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantment.fireProtection.effectId, par0Entity.getLastActiveItems());<a name="line.111"></a>
+<FONT color="green">112</FONT>    <a name="line.112"></a>
+<FONT color="green">113</FONT>            if (var2 &gt; 0)<a name="line.113"></a>
+<FONT color="green">114</FONT>            {<a name="line.114"></a>
+<FONT color="green">115</FONT>                par1 -= MathHelper.floor_float((float)par1 * (float)var2 * 0.15F);<a name="line.115"></a>
+<FONT color="green">116</FONT>            }<a name="line.116"></a>
+<FONT color="green">117</FONT>    <a name="line.117"></a>
+<FONT color="green">118</FONT>            return par1;<a name="line.118"></a>
+<FONT color="green">119</FONT>        }<a name="line.119"></a>
+<FONT color="green">120</FONT>    <a name="line.120"></a>
+<FONT color="green">121</FONT>        public static double func_92040_a(Entity par0Entity, double par1)<a name="line.121"></a>
+<FONT color="green">122</FONT>        {<a name="line.122"></a>
+<FONT color="green">123</FONT>            int var3 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantment.blastProtection.effectId, par0Entity.getLastActiveItems());<a name="line.123"></a>
+<FONT color="green">124</FONT>    <a name="line.124"></a>
+<FONT color="green">125</FONT>            if (var3 &gt; 0)<a name="line.125"></a>
+<FONT color="green">126</FONT>            {<a name="line.126"></a>
+<FONT color="green">127</FONT>                par1 -= (double)MathHelper.floor_double(par1 * (double)((float)var3 * 0.15F));<a name="line.127"></a>
+<FONT color="green">128</FONT>            }<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>            return par1;<a name="line.130"></a>
+<FONT color="green">131</FONT>        }<a name="line.131"></a>
+<FONT color="green">132</FONT>    }<a name="line.132"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

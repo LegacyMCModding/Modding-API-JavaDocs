@@ -1,0 +1,128 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.entity.item;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.relauncher.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.relauncher.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.entity.EntityLiving;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.entity.player.EntityPlayerMP;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.entity.projectile.EntityThrowable;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.util.DamageSource;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.util.MovingObjectPosition;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraft.world.World;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>    public class EntityEnderPearl extends EntityThrowable<a name="line.12"></a>
+<FONT color="green">013</FONT>    {<a name="line.13"></a>
+<FONT color="green">014</FONT>        public EntityEnderPearl(World par1World)<a name="line.14"></a>
+<FONT color="green">015</FONT>        {<a name="line.15"></a>
+<FONT color="green">016</FONT>            super(par1World);<a name="line.16"></a>
+<FONT color="green">017</FONT>        }<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        public EntityEnderPearl(World par1World, EntityLiving par2EntityLiving)<a name="line.19"></a>
+<FONT color="green">020</FONT>        {<a name="line.20"></a>
+<FONT color="green">021</FONT>            super(par1World, par2EntityLiving);<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        @SideOnly(Side.CLIENT)<a name="line.24"></a>
+<FONT color="green">025</FONT>        public EntityEnderPearl(World par1World, double par2, double par4, double par6)<a name="line.25"></a>
+<FONT color="green">026</FONT>        {<a name="line.26"></a>
+<FONT color="green">027</FONT>            super(par1World, par2, par4, par6);<a name="line.27"></a>
+<FONT color="green">028</FONT>        }<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>        /**<a name="line.30"></a>
+<FONT color="green">031</FONT>         * Called when this EntityThrowable hits a block or entity.<a name="line.31"></a>
+<FONT color="green">032</FONT>         */<a name="line.32"></a>
+<FONT color="green">033</FONT>        protected void onImpact(MovingObjectPosition par1MovingObjectPosition)<a name="line.33"></a>
+<FONT color="green">034</FONT>        {<a name="line.34"></a>
+<FONT color="green">035</FONT>            if (par1MovingObjectPosition.entityHit != null)<a name="line.35"></a>
+<FONT color="green">036</FONT>            {<a name="line.36"></a>
+<FONT color="green">037</FONT>                par1MovingObjectPosition.entityHit.attackEntityFrom(DamageSource.causeThrownDamage(this, this.func_85052_h()), 0);<a name="line.37"></a>
+<FONT color="green">038</FONT>            }<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>            for (int var2 = 0; var2 &lt; 32; ++var2)<a name="line.40"></a>
+<FONT color="green">041</FONT>            {<a name="line.41"></a>
+<FONT color="green">042</FONT>                this.worldObj.spawnParticle("portal", this.posX, this.posY + this.rand.nextDouble() * 2.0D, this.posZ, this.rand.nextGaussian(), 0.0D, this.rand.nextGaussian());<a name="line.42"></a>
+<FONT color="green">043</FONT>            }<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>            if (!this.worldObj.isRemote)<a name="line.45"></a>
+<FONT color="green">046</FONT>            {<a name="line.46"></a>
+<FONT color="green">047</FONT>                if (this.func_85052_h() != null &amp;&amp; this.func_85052_h() instanceof EntityPlayerMP)<a name="line.47"></a>
+<FONT color="green">048</FONT>                {<a name="line.48"></a>
+<FONT color="green">049</FONT>                    EntityPlayerMP var3 = (EntityPlayerMP)this.func_85052_h();<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>                    if (!var3.playerNetServerHandler.connectionClosed &amp;&amp; var3.worldObj == this.worldObj)<a name="line.51"></a>
+<FONT color="green">052</FONT>                    {<a name="line.52"></a>
+<FONT color="green">053</FONT>                        this.func_85052_h().setPositionAndUpdate(this.posX, this.posY, this.posZ);<a name="line.53"></a>
+<FONT color="green">054</FONT>                        this.func_85052_h().fallDistance = 0.0F;<a name="line.54"></a>
+<FONT color="green">055</FONT>                        this.func_85052_h().attackEntityFrom(DamageSource.fall, 5);<a name="line.55"></a>
+<FONT color="green">056</FONT>                    }<a name="line.56"></a>
+<FONT color="green">057</FONT>                }<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>                this.setDead();<a name="line.59"></a>
+<FONT color="green">060</FONT>            }<a name="line.60"></a>
+<FONT color="green">061</FONT>        }<a name="line.61"></a>
+<FONT color="green">062</FONT>    }<a name="line.62"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
