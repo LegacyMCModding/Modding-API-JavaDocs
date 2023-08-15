@@ -1,0 +1,113 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class EntityHugeExplodeFX extends EntityFX<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        private int timeSinceStart = 0;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>        /** the maximum time for the explosion */<a name="line.11"></a>
+<FONT color="green">012</FONT>        private int maximumTime = 0;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        public EntityHugeExplodeFX(World par1World, double par2, double par4, double par6, double par8, double par10, double par12)<a name="line.14"></a>
+<FONT color="green">015</FONT>        {<a name="line.15"></a>
+<FONT color="green">016</FONT>            super(par1World, par2, par4, par6, 0.0D, 0.0D, 0.0D);<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.maximumTime = 8;<a name="line.17"></a>
+<FONT color="green">018</FONT>        }<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7) {}<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /**<a name="line.22"></a>
+<FONT color="green">023</FONT>         * Called to update the entity's position/logic.<a name="line.23"></a>
+<FONT color="green">024</FONT>         */<a name="line.24"></a>
+<FONT color="green">025</FONT>        public void onUpdate()<a name="line.25"></a>
+<FONT color="green">026</FONT>        {<a name="line.26"></a>
+<FONT color="green">027</FONT>            for (int var1 = 0; var1 &lt; 6; ++var1)<a name="line.27"></a>
+<FONT color="green">028</FONT>            {<a name="line.28"></a>
+<FONT color="green">029</FONT>                double var2 = this.posX + (this.rand.nextDouble() - this.rand.nextDouble()) * 4.0D;<a name="line.29"></a>
+<FONT color="green">030</FONT>                double var4 = this.posY + (this.rand.nextDouble() - this.rand.nextDouble()) * 4.0D;<a name="line.30"></a>
+<FONT color="green">031</FONT>                double var6 = this.posZ + (this.rand.nextDouble() - this.rand.nextDouble()) * 4.0D;<a name="line.31"></a>
+<FONT color="green">032</FONT>                this.worldObj.spawnParticle("largeexplode", var2, var4, var6, (double)((float)this.timeSinceStart / (float)this.maximumTime), 0.0D, 0.0D);<a name="line.32"></a>
+<FONT color="green">033</FONT>            }<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>            ++this.timeSinceStart;<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>            if (this.timeSinceStart == this.maximumTime)<a name="line.37"></a>
+<FONT color="green">038</FONT>            {<a name="line.38"></a>
+<FONT color="green">039</FONT>                this.setDead();<a name="line.39"></a>
+<FONT color="green">040</FONT>            }<a name="line.40"></a>
+<FONT color="green">041</FONT>        }<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>        public int getFXLayer()<a name="line.43"></a>
+<FONT color="green">044</FONT>        {<a name="line.44"></a>
+<FONT color="green">045</FONT>            return 1;<a name="line.45"></a>
+<FONT color="green">046</FONT>        }<a name="line.46"></a>
+<FONT color="green">047</FONT>    }<a name="line.47"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

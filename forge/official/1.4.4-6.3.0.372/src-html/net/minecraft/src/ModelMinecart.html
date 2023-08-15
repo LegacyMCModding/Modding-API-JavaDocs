@@ -1,0 +1,120 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelMinecart extends ModelBase<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        public ModelRenderer[] sideModels = new ModelRenderer[7];<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>        public ModelMinecart()<a name="line.11"></a>
+<FONT color="green">012</FONT>        {<a name="line.12"></a>
+<FONT color="green">013</FONT>            this.sideModels[0] = new ModelRenderer(this, 0, 10);<a name="line.13"></a>
+<FONT color="green">014</FONT>            this.sideModels[1] = new ModelRenderer(this, 0, 0);<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.sideModels[2] = new ModelRenderer(this, 0, 0);<a name="line.15"></a>
+<FONT color="green">016</FONT>            this.sideModels[3] = new ModelRenderer(this, 0, 0);<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.sideModels[4] = new ModelRenderer(this, 0, 0);<a name="line.17"></a>
+<FONT color="green">018</FONT>            this.sideModels[5] = new ModelRenderer(this, 44, 10);<a name="line.18"></a>
+<FONT color="green">019</FONT>            byte var1 = 20;<a name="line.19"></a>
+<FONT color="green">020</FONT>            byte var2 = 8;<a name="line.20"></a>
+<FONT color="green">021</FONT>            byte var3 = 16;<a name="line.21"></a>
+<FONT color="green">022</FONT>            byte var4 = 4;<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.sideModels[0].addBox((float)(-var1 / 2), (float)(-var3 / 2), -1.0F, var1, var3, 2, 0.0F);<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.sideModels[0].setRotationPoint(0.0F, (float)var4, 0.0F);<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.sideModels[5].addBox((float)(-var1 / 2 + 1), (float)(-var3 / 2 + 1), -1.0F, var1 - 2, var3 - 2, 1, 0.0F);<a name="line.25"></a>
+<FONT color="green">026</FONT>            this.sideModels[5].setRotationPoint(0.0F, (float)var4, 0.0F);<a name="line.26"></a>
+<FONT color="green">027</FONT>            this.sideModels[1].addBox((float)(-var1 / 2 + 2), (float)(-var2 - 1), -1.0F, var1 - 4, var2, 2, 0.0F);<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.sideModels[1].setRotationPoint((float)(-var1 / 2 + 1), (float)var4, 0.0F);<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.sideModels[2].addBox((float)(-var1 / 2 + 2), (float)(-var2 - 1), -1.0F, var1 - 4, var2, 2, 0.0F);<a name="line.29"></a>
+<FONT color="green">030</FONT>            this.sideModels[2].setRotationPoint((float)(var1 / 2 - 1), (float)var4, 0.0F);<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.sideModels[3].addBox((float)(-var1 / 2 + 2), (float)(-var2 - 1), -1.0F, var1 - 4, var2, 2, 0.0F);<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.sideModels[3].setRotationPoint(0.0F, (float)var4, (float)(-var3 / 2 + 1));<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.sideModels[4].addBox((float)(-var1 / 2 + 2), (float)(-var2 - 1), -1.0F, var1 - 4, var2, 2, 0.0F);<a name="line.33"></a>
+<FONT color="green">034</FONT>            this.sideModels[4].setRotationPoint(0.0F, (float)var4, (float)(var3 / 2 - 1));<a name="line.34"></a>
+<FONT color="green">035</FONT>            this.sideModels[0].rotateAngleX = ((float)Math.PI / 2F);<a name="line.35"></a>
+<FONT color="green">036</FONT>            this.sideModels[1].rotateAngleY = ((float)Math.PI * 3F / 2F);<a name="line.36"></a>
+<FONT color="green">037</FONT>            this.sideModels[2].rotateAngleY = ((float)Math.PI / 2F);<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.sideModels[3].rotateAngleY = (float)Math.PI;<a name="line.38"></a>
+<FONT color="green">039</FONT>            this.sideModels[5].rotateAngleX = -((float)Math.PI / 2F);<a name="line.39"></a>
+<FONT color="green">040</FONT>        }<a name="line.40"></a>
+<FONT color="green">041</FONT>    <a name="line.41"></a>
+<FONT color="green">042</FONT>        /**<a name="line.42"></a>
+<FONT color="green">043</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.43"></a>
+<FONT color="green">044</FONT>         */<a name="line.44"></a>
+<FONT color="green">045</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.45"></a>
+<FONT color="green">046</FONT>        {<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.sideModels[5].rotationPointY = 4.0F - par4;<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>            for (int var8 = 0; var8 &lt; 6; ++var8)<a name="line.49"></a>
+<FONT color="green">050</FONT>            {<a name="line.50"></a>
+<FONT color="green">051</FONT>                this.sideModels[var8].render(par7);<a name="line.51"></a>
+<FONT color="green">052</FONT>            }<a name="line.52"></a>
+<FONT color="green">053</FONT>        }<a name="line.53"></a>
+<FONT color="green">054</FONT>    }<a name="line.54"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

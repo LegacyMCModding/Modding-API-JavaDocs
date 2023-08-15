@@ -1,0 +1,469 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.Calendar;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    public class EntitySkeleton extends EntityMob implements IRangedAttackMob<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        private EntityAIArrowAttack field_85037_d = new EntityAIArrowAttack(this, 0.25F, 60, 10.0F);<a name="line.9"></a>
+<FONT color="green">010</FONT>        private EntityAIAttackOnCollide field_85038_e = new EntityAIAttackOnCollide(this, EntityPlayer.class, 0.31F, false);<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        public EntitySkeleton(World par1World)<a name="line.12"></a>
+<FONT color="green">013</FONT>        {<a name="line.13"></a>
+<FONT color="green">014</FONT>            super(par1World);<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.texture = "/mob/skeleton.png";<a name="line.15"></a>
+<FONT color="green">016</FONT>            this.moveSpeed = 0.25F;<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.tasks.addTask(1, new EntityAISwimming(this));<a name="line.17"></a>
+<FONT color="green">018</FONT>            this.tasks.addTask(2, new EntityAIRestrictSun(this));<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.tasks.addTask(3, new EntityAIFleeSun(this, this.moveSpeed));<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.tasks.addTask(5, new EntityAIWander(this, this.moveSpeed));<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.tasks.addTask(6, new EntityAILookIdle(this));<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 16.0F, 0, true));<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>            if (par1World != null &amp;&amp; !par1World.isRemote)<a name="line.26"></a>
+<FONT color="green">027</FONT>            {<a name="line.27"></a>
+<FONT color="green">028</FONT>                this.func_85036_m();<a name="line.28"></a>
+<FONT color="green">029</FONT>            }<a name="line.29"></a>
+<FONT color="green">030</FONT>        }<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        protected void entityInit()<a name="line.32"></a>
+<FONT color="green">033</FONT>        {<a name="line.33"></a>
+<FONT color="green">034</FONT>            super.entityInit();<a name="line.34"></a>
+<FONT color="green">035</FONT>            this.dataWatcher.addObject(13, new Byte((byte)0));<a name="line.35"></a>
+<FONT color="green">036</FONT>        }<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>        /**<a name="line.38"></a>
+<FONT color="green">039</FONT>         * Returns true if the newer Entity AI code should be run<a name="line.39"></a>
+<FONT color="green">040</FONT>         */<a name="line.40"></a>
+<FONT color="green">041</FONT>        public boolean isAIEnabled()<a name="line.41"></a>
+<FONT color="green">042</FONT>        {<a name="line.42"></a>
+<FONT color="green">043</FONT>            return true;<a name="line.43"></a>
+<FONT color="green">044</FONT>        }<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>        public int getMaxHealth()<a name="line.46"></a>
+<FONT color="green">047</FONT>        {<a name="line.47"></a>
+<FONT color="green">048</FONT>            return 20;<a name="line.48"></a>
+<FONT color="green">049</FONT>        }<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        /**<a name="line.51"></a>
+<FONT color="green">052</FONT>         * Returns the sound this mob makes while it's alive.<a name="line.52"></a>
+<FONT color="green">053</FONT>         */<a name="line.53"></a>
+<FONT color="green">054</FONT>        protected String getLivingSound()<a name="line.54"></a>
+<FONT color="green">055</FONT>        {<a name="line.55"></a>
+<FONT color="green">056</FONT>            return "mob.skeleton.say";<a name="line.56"></a>
+<FONT color="green">057</FONT>        }<a name="line.57"></a>
+<FONT color="green">058</FONT>    <a name="line.58"></a>
+<FONT color="green">059</FONT>        /**<a name="line.59"></a>
+<FONT color="green">060</FONT>         * Returns the sound this mob makes when it is hurt.<a name="line.60"></a>
+<FONT color="green">061</FONT>         */<a name="line.61"></a>
+<FONT color="green">062</FONT>        protected String getHurtSound()<a name="line.62"></a>
+<FONT color="green">063</FONT>        {<a name="line.63"></a>
+<FONT color="green">064</FONT>            return "mob.skeleton.hurt";<a name="line.64"></a>
+<FONT color="green">065</FONT>        }<a name="line.65"></a>
+<FONT color="green">066</FONT>    <a name="line.66"></a>
+<FONT color="green">067</FONT>        /**<a name="line.67"></a>
+<FONT color="green">068</FONT>         * Returns the sound this mob makes on death.<a name="line.68"></a>
+<FONT color="green">069</FONT>         */<a name="line.69"></a>
+<FONT color="green">070</FONT>        protected String getDeathSound()<a name="line.70"></a>
+<FONT color="green">071</FONT>        {<a name="line.71"></a>
+<FONT color="green">072</FONT>            return "mob.skeleton.death";<a name="line.72"></a>
+<FONT color="green">073</FONT>        }<a name="line.73"></a>
+<FONT color="green">074</FONT>    <a name="line.74"></a>
+<FONT color="green">075</FONT>        /**<a name="line.75"></a>
+<FONT color="green">076</FONT>         * Plays step sound at given x, y, z for the entity<a name="line.76"></a>
+<FONT color="green">077</FONT>         */<a name="line.77"></a>
+<FONT color="green">078</FONT>        protected void playStepSound(int par1, int par2, int par3, int par4)<a name="line.78"></a>
+<FONT color="green">079</FONT>        {<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.func_85030_a("mob.skeleton.step", 0.15F, 1.0F);<a name="line.80"></a>
+<FONT color="green">081</FONT>        }<a name="line.81"></a>
+<FONT color="green">082</FONT>    <a name="line.82"></a>
+<FONT color="green">083</FONT>        public boolean attackEntityAsMob(Entity par1Entity)<a name="line.83"></a>
+<FONT color="green">084</FONT>        {<a name="line.84"></a>
+<FONT color="green">085</FONT>            if (super.attackEntityAsMob(par1Entity))<a name="line.85"></a>
+<FONT color="green">086</FONT>            {<a name="line.86"></a>
+<FONT color="green">087</FONT>                if (this.getSkeletonType() == 1 &amp;&amp; par1Entity instanceof EntityLiving)<a name="line.87"></a>
+<FONT color="green">088</FONT>                {<a name="line.88"></a>
+<FONT color="green">089</FONT>                    ((EntityLiving)par1Entity).addPotionEffect(new PotionEffect(Potion.wither.id, 200));<a name="line.89"></a>
+<FONT color="green">090</FONT>                }<a name="line.90"></a>
+<FONT color="green">091</FONT>    <a name="line.91"></a>
+<FONT color="green">092</FONT>                return true;<a name="line.92"></a>
+<FONT color="green">093</FONT>            }<a name="line.93"></a>
+<FONT color="green">094</FONT>            else<a name="line.94"></a>
+<FONT color="green">095</FONT>            {<a name="line.95"></a>
+<FONT color="green">096</FONT>                return false;<a name="line.96"></a>
+<FONT color="green">097</FONT>            }<a name="line.97"></a>
+<FONT color="green">098</FONT>        }<a name="line.98"></a>
+<FONT color="green">099</FONT>    <a name="line.99"></a>
+<FONT color="green">100</FONT>        /**<a name="line.100"></a>
+<FONT color="green">101</FONT>         * Returns the amount of damage a mob should deal.<a name="line.101"></a>
+<FONT color="green">102</FONT>         */<a name="line.102"></a>
+<FONT color="green">103</FONT>        public int getAttackStrength(Entity par1Entity)<a name="line.103"></a>
+<FONT color="green">104</FONT>        {<a name="line.104"></a>
+<FONT color="green">105</FONT>            if (this.getSkeletonType() == 1)<a name="line.105"></a>
+<FONT color="green">106</FONT>            {<a name="line.106"></a>
+<FONT color="green">107</FONT>                ItemStack var2 = this.getHeldItem();<a name="line.107"></a>
+<FONT color="green">108</FONT>                int var3 = 4;<a name="line.108"></a>
+<FONT color="green">109</FONT>    <a name="line.109"></a>
+<FONT color="green">110</FONT>                if (var2 != null)<a name="line.110"></a>
+<FONT color="green">111</FONT>                {<a name="line.111"></a>
+<FONT color="green">112</FONT>                    var3 += var2.getDamageVsEntity(this);<a name="line.112"></a>
+<FONT color="green">113</FONT>                }<a name="line.113"></a>
+<FONT color="green">114</FONT>    <a name="line.114"></a>
+<FONT color="green">115</FONT>                return var3;<a name="line.115"></a>
+<FONT color="green">116</FONT>            }<a name="line.116"></a>
+<FONT color="green">117</FONT>            else<a name="line.117"></a>
+<FONT color="green">118</FONT>            {<a name="line.118"></a>
+<FONT color="green">119</FONT>                return super.getAttackStrength(par1Entity);<a name="line.119"></a>
+<FONT color="green">120</FONT>            }<a name="line.120"></a>
+<FONT color="green">121</FONT>        }<a name="line.121"></a>
+<FONT color="green">122</FONT>    <a name="line.122"></a>
+<FONT color="green">123</FONT>        /**<a name="line.123"></a>
+<FONT color="green">124</FONT>         * Get this Entity's EnumCreatureAttribute<a name="line.124"></a>
+<FONT color="green">125</FONT>         */<a name="line.125"></a>
+<FONT color="green">126</FONT>        public EnumCreatureAttribute getCreatureAttribute()<a name="line.126"></a>
+<FONT color="green">127</FONT>        {<a name="line.127"></a>
+<FONT color="green">128</FONT>            return EnumCreatureAttribute.UNDEAD;<a name="line.128"></a>
+<FONT color="green">129</FONT>        }<a name="line.129"></a>
+<FONT color="green">130</FONT>    <a name="line.130"></a>
+<FONT color="green">131</FONT>        /**<a name="line.131"></a>
+<FONT color="green">132</FONT>         * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons<a name="line.132"></a>
+<FONT color="green">133</FONT>         * use this to react to sunlight and start to burn.<a name="line.133"></a>
+<FONT color="green">134</FONT>         */<a name="line.134"></a>
+<FONT color="green">135</FONT>        public void onLivingUpdate()<a name="line.135"></a>
+<FONT color="green">136</FONT>        {<a name="line.136"></a>
+<FONT color="green">137</FONT>            if (this.worldObj.isDaytime() &amp;&amp; !this.worldObj.isRemote)<a name="line.137"></a>
+<FONT color="green">138</FONT>            {<a name="line.138"></a>
+<FONT color="green">139</FONT>                float var1 = this.getBrightness(1.0F);<a name="line.139"></a>
+<FONT color="green">140</FONT>    <a name="line.140"></a>
+<FONT color="green">141</FONT>                if (var1 &gt; 0.5F &amp;&amp; this.rand.nextFloat() * 30.0F &lt; (var1 - 0.4F) * 2.0F &amp;&amp; this.worldObj.canBlockSeeTheSky(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)))<a name="line.141"></a>
+<FONT color="green">142</FONT>                {<a name="line.142"></a>
+<FONT color="green">143</FONT>                    boolean var2 = true;<a name="line.143"></a>
+<FONT color="green">144</FONT>                    ItemStack var3 = this.getCurrentItemOrArmor(4);<a name="line.144"></a>
+<FONT color="green">145</FONT>    <a name="line.145"></a>
+<FONT color="green">146</FONT>                    if (var3 != null)<a name="line.146"></a>
+<FONT color="green">147</FONT>                    {<a name="line.147"></a>
+<FONT color="green">148</FONT>                        if (var3.isItemStackDamageable())<a name="line.148"></a>
+<FONT color="green">149</FONT>                        {<a name="line.149"></a>
+<FONT color="green">150</FONT>                            var3.setItemDamage(var3.getItemDamageForDisplay() + this.rand.nextInt(2));<a name="line.150"></a>
+<FONT color="green">151</FONT>    <a name="line.151"></a>
+<FONT color="green">152</FONT>                            if (var3.getItemDamageForDisplay() &gt;= var3.getMaxDamage())<a name="line.152"></a>
+<FONT color="green">153</FONT>                            {<a name="line.153"></a>
+<FONT color="green">154</FONT>                                this.renderBrokenItemStack(var3);<a name="line.154"></a>
+<FONT color="green">155</FONT>                                this.setCurrentItemOrArmor(4, (ItemStack)null);<a name="line.155"></a>
+<FONT color="green">156</FONT>                            }<a name="line.156"></a>
+<FONT color="green">157</FONT>                        }<a name="line.157"></a>
+<FONT color="green">158</FONT>    <a name="line.158"></a>
+<FONT color="green">159</FONT>                        var2 = false;<a name="line.159"></a>
+<FONT color="green">160</FONT>                    }<a name="line.160"></a>
+<FONT color="green">161</FONT>    <a name="line.161"></a>
+<FONT color="green">162</FONT>                    if (var2)<a name="line.162"></a>
+<FONT color="green">163</FONT>                    {<a name="line.163"></a>
+<FONT color="green">164</FONT>                        this.setFire(8);<a name="line.164"></a>
+<FONT color="green">165</FONT>                    }<a name="line.165"></a>
+<FONT color="green">166</FONT>                }<a name="line.166"></a>
+<FONT color="green">167</FONT>            }<a name="line.167"></a>
+<FONT color="green">168</FONT>    <a name="line.168"></a>
+<FONT color="green">169</FONT>            super.onLivingUpdate();<a name="line.169"></a>
+<FONT color="green">170</FONT>        }<a name="line.170"></a>
+<FONT color="green">171</FONT>    <a name="line.171"></a>
+<FONT color="green">172</FONT>        /**<a name="line.172"></a>
+<FONT color="green">173</FONT>         * Called when the mob's health reaches 0.<a name="line.173"></a>
+<FONT color="green">174</FONT>         */<a name="line.174"></a>
+<FONT color="green">175</FONT>        public void onDeath(DamageSource par1DamageSource)<a name="line.175"></a>
+<FONT color="green">176</FONT>        {<a name="line.176"></a>
+<FONT color="green">177</FONT>            super.onDeath(par1DamageSource);<a name="line.177"></a>
+<FONT color="green">178</FONT>    <a name="line.178"></a>
+<FONT color="green">179</FONT>            if (par1DamageSource.getSourceOfDamage() instanceof EntityArrow &amp;&amp; par1DamageSource.getEntity() instanceof EntityPlayer)<a name="line.179"></a>
+<FONT color="green">180</FONT>            {<a name="line.180"></a>
+<FONT color="green">181</FONT>                EntityPlayer var2 = (EntityPlayer)par1DamageSource.getEntity();<a name="line.181"></a>
+<FONT color="green">182</FONT>                double var3 = var2.posX - this.posX;<a name="line.182"></a>
+<FONT color="green">183</FONT>                double var5 = var2.posZ - this.posZ;<a name="line.183"></a>
+<FONT color="green">184</FONT>    <a name="line.184"></a>
+<FONT color="green">185</FONT>                if (var3 * var3 + var5 * var5 &gt;= 2500.0D)<a name="line.185"></a>
+<FONT color="green">186</FONT>                {<a name="line.186"></a>
+<FONT color="green">187</FONT>                    var2.triggerAchievement(AchievementList.snipeSkeleton);<a name="line.187"></a>
+<FONT color="green">188</FONT>                }<a name="line.188"></a>
+<FONT color="green">189</FONT>            }<a name="line.189"></a>
+<FONT color="green">190</FONT>        }<a name="line.190"></a>
+<FONT color="green">191</FONT>    <a name="line.191"></a>
+<FONT color="green">192</FONT>        /**<a name="line.192"></a>
+<FONT color="green">193</FONT>         * Returns the item ID for the item the mob drops on death.<a name="line.193"></a>
+<FONT color="green">194</FONT>         */<a name="line.194"></a>
+<FONT color="green">195</FONT>        protected int getDropItemId()<a name="line.195"></a>
+<FONT color="green">196</FONT>        {<a name="line.196"></a>
+<FONT color="green">197</FONT>            return Item.arrow.shiftedIndex;<a name="line.197"></a>
+<FONT color="green">198</FONT>        }<a name="line.198"></a>
+<FONT color="green">199</FONT>    <a name="line.199"></a>
+<FONT color="green">200</FONT>        /**<a name="line.200"></a>
+<FONT color="green">201</FONT>         * Drop 0-2 items of this living's type<a name="line.201"></a>
+<FONT color="green">202</FONT>         */<a name="line.202"></a>
+<FONT color="green">203</FONT>        protected void dropFewItems(boolean par1, int par2)<a name="line.203"></a>
+<FONT color="green">204</FONT>        {<a name="line.204"></a>
+<FONT color="green">205</FONT>            int var3;<a name="line.205"></a>
+<FONT color="green">206</FONT>            int var4;<a name="line.206"></a>
+<FONT color="green">207</FONT>    <a name="line.207"></a>
+<FONT color="green">208</FONT>            if (this.getSkeletonType() == 1)<a name="line.208"></a>
+<FONT color="green">209</FONT>            {<a name="line.209"></a>
+<FONT color="green">210</FONT>                var3 = this.rand.nextInt(3 + par2) - 1;<a name="line.210"></a>
+<FONT color="green">211</FONT>    <a name="line.211"></a>
+<FONT color="green">212</FONT>                for (var4 = 0; var4 &lt; var3; ++var4)<a name="line.212"></a>
+<FONT color="green">213</FONT>                {<a name="line.213"></a>
+<FONT color="green">214</FONT>                    this.dropItem(Item.coal.shiftedIndex, 1);<a name="line.214"></a>
+<FONT color="green">215</FONT>                }<a name="line.215"></a>
+<FONT color="green">216</FONT>            }<a name="line.216"></a>
+<FONT color="green">217</FONT>            else<a name="line.217"></a>
+<FONT color="green">218</FONT>            {<a name="line.218"></a>
+<FONT color="green">219</FONT>                var3 = this.rand.nextInt(3 + par2);<a name="line.219"></a>
+<FONT color="green">220</FONT>    <a name="line.220"></a>
+<FONT color="green">221</FONT>                for (var4 = 0; var4 &lt; var3; ++var4)<a name="line.221"></a>
+<FONT color="green">222</FONT>                {<a name="line.222"></a>
+<FONT color="green">223</FONT>                    this.dropItem(Item.arrow.shiftedIndex, 1);<a name="line.223"></a>
+<FONT color="green">224</FONT>                }<a name="line.224"></a>
+<FONT color="green">225</FONT>            }<a name="line.225"></a>
+<FONT color="green">226</FONT>    <a name="line.226"></a>
+<FONT color="green">227</FONT>            var3 = this.rand.nextInt(3 + par2);<a name="line.227"></a>
+<FONT color="green">228</FONT>    <a name="line.228"></a>
+<FONT color="green">229</FONT>            for (var4 = 0; var4 &lt; var3; ++var4)<a name="line.229"></a>
+<FONT color="green">230</FONT>            {<a name="line.230"></a>
+<FONT color="green">231</FONT>                this.dropItem(Item.bone.shiftedIndex, 1);<a name="line.231"></a>
+<FONT color="green">232</FONT>            }<a name="line.232"></a>
+<FONT color="green">233</FONT>        }<a name="line.233"></a>
+<FONT color="green">234</FONT>    <a name="line.234"></a>
+<FONT color="green">235</FONT>        protected void dropRareDrop(int par1)<a name="line.235"></a>
+<FONT color="green">236</FONT>        {<a name="line.236"></a>
+<FONT color="green">237</FONT>            if (this.getSkeletonType() == 1)<a name="line.237"></a>
+<FONT color="green">238</FONT>            {<a name="line.238"></a>
+<FONT color="green">239</FONT>                this.entityDropItem(new ItemStack(Item.skull.shiftedIndex, 1, 1), 0.0F);<a name="line.239"></a>
+<FONT color="green">240</FONT>            }<a name="line.240"></a>
+<FONT color="green">241</FONT>        }<a name="line.241"></a>
+<FONT color="green">242</FONT>    <a name="line.242"></a>
+<FONT color="green">243</FONT>        protected void func_82164_bB()<a name="line.243"></a>
+<FONT color="green">244</FONT>        {<a name="line.244"></a>
+<FONT color="green">245</FONT>            super.func_82164_bB();<a name="line.245"></a>
+<FONT color="green">246</FONT>            this.setCurrentItemOrArmor(0, new ItemStack(Item.bow));<a name="line.246"></a>
+<FONT color="green">247</FONT>        }<a name="line.247"></a>
+<FONT color="green">248</FONT>    <a name="line.248"></a>
+<FONT color="green">249</FONT>        @SideOnly(Side.CLIENT)<a name="line.249"></a>
+<FONT color="green">250</FONT>    <a name="line.250"></a>
+<FONT color="green">251</FONT>        /**<a name="line.251"></a>
+<FONT color="green">252</FONT>         * Returns the texture's file path as a String.<a name="line.252"></a>
+<FONT color="green">253</FONT>         */<a name="line.253"></a>
+<FONT color="green">254</FONT>        public String getTexture()<a name="line.254"></a>
+<FONT color="green">255</FONT>        {<a name="line.255"></a>
+<FONT color="green">256</FONT>            return this.getSkeletonType() == 1 ? "/mob/skeleton_wither.png" : super.getTexture();<a name="line.256"></a>
+<FONT color="green">257</FONT>        }<a name="line.257"></a>
+<FONT color="green">258</FONT>    <a name="line.258"></a>
+<FONT color="green">259</FONT>        /**<a name="line.259"></a>
+<FONT color="green">260</FONT>         * Initialize this creature.<a name="line.260"></a>
+<FONT color="green">261</FONT>         */<a name="line.261"></a>
+<FONT color="green">262</FONT>        public void initCreature()<a name="line.262"></a>
+<FONT color="green">263</FONT>        {<a name="line.263"></a>
+<FONT color="green">264</FONT>            if (this.worldObj.provider instanceof WorldProviderHell &amp;&amp; this.getRNG().nextInt(5) &gt; 0)<a name="line.264"></a>
+<FONT color="green">265</FONT>            {<a name="line.265"></a>
+<FONT color="green">266</FONT>                this.tasks.addTask(4, this.field_85038_e);<a name="line.266"></a>
+<FONT color="green">267</FONT>                this.setSkeletonType(1);<a name="line.267"></a>
+<FONT color="green">268</FONT>                this.setCurrentItemOrArmor(0, new ItemStack(Item.swordStone));<a name="line.268"></a>
+<FONT color="green">269</FONT>            }<a name="line.269"></a>
+<FONT color="green">270</FONT>            else<a name="line.270"></a>
+<FONT color="green">271</FONT>            {<a name="line.271"></a>
+<FONT color="green">272</FONT>                this.tasks.addTask(4, this.field_85037_d);<a name="line.272"></a>
+<FONT color="green">273</FONT>                this.func_82164_bB();<a name="line.273"></a>
+<FONT color="green">274</FONT>                this.func_82162_bC();<a name="line.274"></a>
+<FONT color="green">275</FONT>            }<a name="line.275"></a>
+<FONT color="green">276</FONT>    <a name="line.276"></a>
+<FONT color="green">277</FONT>            if (this.rand.nextFloat() &gt;= field_82181_as[this.worldObj.difficultySetting])<a name="line.277"></a>
+<FONT color="green">278</FONT>            {<a name="line.278"></a>
+<FONT color="green">279</FONT>                ;<a name="line.279"></a>
+<FONT color="green">280</FONT>            }<a name="line.280"></a>
+<FONT color="green">281</FONT>    <a name="line.281"></a>
+<FONT color="green">282</FONT>            this.canPickUpLoot = true;<a name="line.282"></a>
+<FONT color="green">283</FONT>    <a name="line.283"></a>
+<FONT color="green">284</FONT>            if (this.getCurrentItemOrArmor(4) == null)<a name="line.284"></a>
+<FONT color="green">285</FONT>            {<a name="line.285"></a>
+<FONT color="green">286</FONT>                Calendar var1 = this.worldObj.getCurrentDate();<a name="line.286"></a>
+<FONT color="green">287</FONT>    <a name="line.287"></a>
+<FONT color="green">288</FONT>                if (var1.get(2) + 1 == 10 &amp;&amp; var1.get(5) == 31 &amp;&amp; this.rand.nextFloat() &lt; 0.25F)<a name="line.288"></a>
+<FONT color="green">289</FONT>                {<a name="line.289"></a>
+<FONT color="green">290</FONT>                    this.setCurrentItemOrArmor(4, new ItemStack(this.rand.nextFloat() &lt; 0.1F ? Block.pumpkinLantern : Block.pumpkin));<a name="line.290"></a>
+<FONT color="green">291</FONT>                    this.equipmentDropChances[4] = 0.0F;<a name="line.291"></a>
+<FONT color="green">292</FONT>                }<a name="line.292"></a>
+<FONT color="green">293</FONT>            }<a name="line.293"></a>
+<FONT color="green">294</FONT>        }<a name="line.294"></a>
+<FONT color="green">295</FONT>    <a name="line.295"></a>
+<FONT color="green">296</FONT>        public void func_85036_m()<a name="line.296"></a>
+<FONT color="green">297</FONT>        {<a name="line.297"></a>
+<FONT color="green">298</FONT>            this.tasks.func_85156_a(this.field_85038_e);<a name="line.298"></a>
+<FONT color="green">299</FONT>            this.tasks.func_85156_a(this.field_85037_d);<a name="line.299"></a>
+<FONT color="green">300</FONT>            ItemStack var1 = this.getHeldItem();<a name="line.300"></a>
+<FONT color="green">301</FONT>    <a name="line.301"></a>
+<FONT color="green">302</FONT>            if (var1 != null &amp;&amp; var1.itemID == Item.bow.shiftedIndex)<a name="line.302"></a>
+<FONT color="green">303</FONT>            {<a name="line.303"></a>
+<FONT color="green">304</FONT>                this.tasks.addTask(4, this.field_85037_d);<a name="line.304"></a>
+<FONT color="green">305</FONT>            }<a name="line.305"></a>
+<FONT color="green">306</FONT>            else<a name="line.306"></a>
+<FONT color="green">307</FONT>            {<a name="line.307"></a>
+<FONT color="green">308</FONT>                this.tasks.addTask(4, this.field_85038_e);<a name="line.308"></a>
+<FONT color="green">309</FONT>            }<a name="line.309"></a>
+<FONT color="green">310</FONT>        }<a name="line.310"></a>
+<FONT color="green">311</FONT>    <a name="line.311"></a>
+<FONT color="green">312</FONT>        /**<a name="line.312"></a>
+<FONT color="green">313</FONT>         * Attack the specified entity using a ranged attack.<a name="line.313"></a>
+<FONT color="green">314</FONT>         */<a name="line.314"></a>
+<FONT color="green">315</FONT>        public void attackEntityWithRangedAttack(EntityLiving par1EntityLiving)<a name="line.315"></a>
+<FONT color="green">316</FONT>        {<a name="line.316"></a>
+<FONT color="green">317</FONT>            EntityArrow var2 = new EntityArrow(this.worldObj, this, par1EntityLiving, 1.6F, 12.0F);<a name="line.317"></a>
+<FONT color="green">318</FONT>            int var3 = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, this.getHeldItem());<a name="line.318"></a>
+<FONT color="green">319</FONT>            int var4 = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, this.getHeldItem());<a name="line.319"></a>
+<FONT color="green">320</FONT>    <a name="line.320"></a>
+<FONT color="green">321</FONT>            if (var3 &gt; 0)<a name="line.321"></a>
+<FONT color="green">322</FONT>            {<a name="line.322"></a>
+<FONT color="green">323</FONT>                var2.setDamage(var2.getDamage() + (double)var3 * 0.5D + 0.5D);<a name="line.323"></a>
+<FONT color="green">324</FONT>            }<a name="line.324"></a>
+<FONT color="green">325</FONT>    <a name="line.325"></a>
+<FONT color="green">326</FONT>            if (var4 &gt; 0)<a name="line.326"></a>
+<FONT color="green">327</FONT>            {<a name="line.327"></a>
+<FONT color="green">328</FONT>                var2.setKnockbackStrength(var4);<a name="line.328"></a>
+<FONT color="green">329</FONT>            }<a name="line.329"></a>
+<FONT color="green">330</FONT>    <a name="line.330"></a>
+<FONT color="green">331</FONT>            if (EnchantmentHelper.getEnchantmentLevel(Enchantment.flame.effectId, this.getHeldItem()) &gt; 0 || this.getSkeletonType() == 1)<a name="line.331"></a>
+<FONT color="green">332</FONT>            {<a name="line.332"></a>
+<FONT color="green">333</FONT>                var2.setFire(100);<a name="line.333"></a>
+<FONT color="green">334</FONT>            }<a name="line.334"></a>
+<FONT color="green">335</FONT>    <a name="line.335"></a>
+<FONT color="green">336</FONT>            this.func_85030_a("random.bow", 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));<a name="line.336"></a>
+<FONT color="green">337</FONT>            this.worldObj.spawnEntityInWorld(var2);<a name="line.337"></a>
+<FONT color="green">338</FONT>        }<a name="line.338"></a>
+<FONT color="green">339</FONT>    <a name="line.339"></a>
+<FONT color="green">340</FONT>        /**<a name="line.340"></a>
+<FONT color="green">341</FONT>         * Return this skeleton's type.<a name="line.341"></a>
+<FONT color="green">342</FONT>         */<a name="line.342"></a>
+<FONT color="green">343</FONT>        public int getSkeletonType()<a name="line.343"></a>
+<FONT color="green">344</FONT>        {<a name="line.344"></a>
+<FONT color="green">345</FONT>            return this.dataWatcher.getWatchableObjectByte(13);<a name="line.345"></a>
+<FONT color="green">346</FONT>        }<a name="line.346"></a>
+<FONT color="green">347</FONT>    <a name="line.347"></a>
+<FONT color="green">348</FONT>        /**<a name="line.348"></a>
+<FONT color="green">349</FONT>         * Set this skeleton's type.<a name="line.349"></a>
+<FONT color="green">350</FONT>         */<a name="line.350"></a>
+<FONT color="green">351</FONT>        public void setSkeletonType(int par1)<a name="line.351"></a>
+<FONT color="green">352</FONT>        {<a name="line.352"></a>
+<FONT color="green">353</FONT>            this.dataWatcher.updateObject(13, Byte.valueOf((byte)par1));<a name="line.353"></a>
+<FONT color="green">354</FONT>            this.isImmuneToFire = par1 == 1;<a name="line.354"></a>
+<FONT color="green">355</FONT>    <a name="line.355"></a>
+<FONT color="green">356</FONT>            if (par1 == 1)<a name="line.356"></a>
+<FONT color="green">357</FONT>            {<a name="line.357"></a>
+<FONT color="green">358</FONT>                this.setSize(0.72F, 2.16F);<a name="line.358"></a>
+<FONT color="green">359</FONT>            }<a name="line.359"></a>
+<FONT color="green">360</FONT>            else<a name="line.360"></a>
+<FONT color="green">361</FONT>            {<a name="line.361"></a>
+<FONT color="green">362</FONT>                this.setSize(0.6F, 1.8F);<a name="line.362"></a>
+<FONT color="green">363</FONT>            }<a name="line.363"></a>
+<FONT color="green">364</FONT>        }<a name="line.364"></a>
+<FONT color="green">365</FONT>    <a name="line.365"></a>
+<FONT color="green">366</FONT>        /**<a name="line.366"></a>
+<FONT color="green">367</FONT>         * (abstract) Protected helper method to read subclass entity data from NBT.<a name="line.367"></a>
+<FONT color="green">368</FONT>         */<a name="line.368"></a>
+<FONT color="green">369</FONT>        public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound)<a name="line.369"></a>
+<FONT color="green">370</FONT>        {<a name="line.370"></a>
+<FONT color="green">371</FONT>            super.readEntityFromNBT(par1NBTTagCompound);<a name="line.371"></a>
+<FONT color="green">372</FONT>    <a name="line.372"></a>
+<FONT color="green">373</FONT>            if (par1NBTTagCompound.hasKey("SkeletonType"))<a name="line.373"></a>
+<FONT color="green">374</FONT>            {<a name="line.374"></a>
+<FONT color="green">375</FONT>                byte var2 = par1NBTTagCompound.getByte("SkeletonType");<a name="line.375"></a>
+<FONT color="green">376</FONT>                this.setSkeletonType(var2);<a name="line.376"></a>
+<FONT color="green">377</FONT>            }<a name="line.377"></a>
+<FONT color="green">378</FONT>    <a name="line.378"></a>
+<FONT color="green">379</FONT>            this.func_85036_m();<a name="line.379"></a>
+<FONT color="green">380</FONT>        }<a name="line.380"></a>
+<FONT color="green">381</FONT>    <a name="line.381"></a>
+<FONT color="green">382</FONT>        /**<a name="line.382"></a>
+<FONT color="green">383</FONT>         * (abstract) Protected helper method to write subclass entity data to NBT.<a name="line.383"></a>
+<FONT color="green">384</FONT>         */<a name="line.384"></a>
+<FONT color="green">385</FONT>        public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound)<a name="line.385"></a>
+<FONT color="green">386</FONT>        {<a name="line.386"></a>
+<FONT color="green">387</FONT>            super.writeEntityToNBT(par1NBTTagCompound);<a name="line.387"></a>
+<FONT color="green">388</FONT>            par1NBTTagCompound.setByte("SkeletonType", (byte)this.getSkeletonType());<a name="line.388"></a>
+<FONT color="green">389</FONT>        }<a name="line.389"></a>
+<FONT color="green">390</FONT>    <a name="line.390"></a>
+<FONT color="green">391</FONT>        /**<a name="line.391"></a>
+<FONT color="green">392</FONT>         * Sets the held item, or an armor slot. Slot 0 is held item. Slot 1-4 is armor. Params: Item, slot<a name="line.392"></a>
+<FONT color="green">393</FONT>         */<a name="line.393"></a>
+<FONT color="green">394</FONT>        public void setCurrentItemOrArmor(int par1, ItemStack par2ItemStack)<a name="line.394"></a>
+<FONT color="green">395</FONT>        {<a name="line.395"></a>
+<FONT color="green">396</FONT>            super.setCurrentItemOrArmor(par1, par2ItemStack);<a name="line.396"></a>
+<FONT color="green">397</FONT>    <a name="line.397"></a>
+<FONT color="green">398</FONT>            if (!this.worldObj.isRemote &amp;&amp; par1 == 0)<a name="line.398"></a>
+<FONT color="green">399</FONT>            {<a name="line.399"></a>
+<FONT color="green">400</FONT>                this.func_85036_m();<a name="line.400"></a>
+<FONT color="green">401</FONT>            }<a name="line.401"></a>
+<FONT color="green">402</FONT>        }<a name="line.402"></a>
+<FONT color="green">403</FONT>    }<a name="line.403"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

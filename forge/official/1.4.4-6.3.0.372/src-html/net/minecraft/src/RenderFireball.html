@@ -1,0 +1,124 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import org.lwjgl.opengl.GL12;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    @SideOnly(Side.CLIENT)<a name="line.8"></a>
+<FONT color="green">009</FONT>    public class RenderFireball extends Render<a name="line.9"></a>
+<FONT color="green">010</FONT>    {<a name="line.10"></a>
+<FONT color="green">011</FONT>        private float field_77002_a;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        public RenderFireball(float par1)<a name="line.13"></a>
+<FONT color="green">014</FONT>        {<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.field_77002_a = par1;<a name="line.15"></a>
+<FONT color="green">016</FONT>        }<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        public void doRenderFireball(EntityFireball par1EntityFireball, double par2, double par4, double par6, float par8, float par9)<a name="line.18"></a>
+<FONT color="green">019</FONT>        {<a name="line.19"></a>
+<FONT color="green">020</FONT>            GL11.glPushMatrix();<a name="line.20"></a>
+<FONT color="green">021</FONT>            GL11.glTranslatef((float)par2, (float)par4, (float)par6);<a name="line.21"></a>
+<FONT color="green">022</FONT>            GL11.glEnable(GL12.GL_RESCALE_NORMAL);<a name="line.22"></a>
+<FONT color="green">023</FONT>            float var10 = this.field_77002_a;<a name="line.23"></a>
+<FONT color="green">024</FONT>            GL11.glScalef(var10 / 1.0F, var10 / 1.0F, var10 / 1.0F);<a name="line.24"></a>
+<FONT color="green">025</FONT>            byte var11 = 46;<a name="line.25"></a>
+<FONT color="green">026</FONT>            this.loadTexture("/gui/items.png");<a name="line.26"></a>
+<FONT color="green">027</FONT>            Tessellator var12 = Tessellator.instance;<a name="line.27"></a>
+<FONT color="green">028</FONT>            float var13 = (float)(var11 % 16 * 16 + 0) / 256.0F;<a name="line.28"></a>
+<FONT color="green">029</FONT>            float var14 = (float)(var11 % 16 * 16 + 16) / 256.0F;<a name="line.29"></a>
+<FONT color="green">030</FONT>            float var15 = (float)(var11 / 16 * 16 + 0) / 256.0F;<a name="line.30"></a>
+<FONT color="green">031</FONT>            float var16 = (float)(var11 / 16 * 16 + 16) / 256.0F;<a name="line.31"></a>
+<FONT color="green">032</FONT>            float var17 = 1.0F;<a name="line.32"></a>
+<FONT color="green">033</FONT>            float var18 = 0.5F;<a name="line.33"></a>
+<FONT color="green">034</FONT>            float var19 = 0.25F;<a name="line.34"></a>
+<FONT color="green">035</FONT>            GL11.glRotatef(180.0F - this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);<a name="line.35"></a>
+<FONT color="green">036</FONT>            GL11.glRotatef(-this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);<a name="line.36"></a>
+<FONT color="green">037</FONT>            var12.startDrawingQuads();<a name="line.37"></a>
+<FONT color="green">038</FONT>            var12.setNormal(0.0F, 1.0F, 0.0F);<a name="line.38"></a>
+<FONT color="green">039</FONT>            var12.addVertexWithUV((double)(0.0F - var18), (double)(0.0F - var19), 0.0D, (double)var13, (double)var16);<a name="line.39"></a>
+<FONT color="green">040</FONT>            var12.addVertexWithUV((double)(var17 - var18), (double)(0.0F - var19), 0.0D, (double)var14, (double)var16);<a name="line.40"></a>
+<FONT color="green">041</FONT>            var12.addVertexWithUV((double)(var17 - var18), (double)(1.0F - var19), 0.0D, (double)var14, (double)var15);<a name="line.41"></a>
+<FONT color="green">042</FONT>            var12.addVertexWithUV((double)(0.0F - var18), (double)(1.0F - var19), 0.0D, (double)var13, (double)var15);<a name="line.42"></a>
+<FONT color="green">043</FONT>            var12.draw();<a name="line.43"></a>
+<FONT color="green">044</FONT>            GL11.glDisable(GL12.GL_RESCALE_NORMAL);<a name="line.44"></a>
+<FONT color="green">045</FONT>            GL11.glPopMatrix();<a name="line.45"></a>
+<FONT color="green">046</FONT>        }<a name="line.46"></a>
+<FONT color="green">047</FONT>    <a name="line.47"></a>
+<FONT color="green">048</FONT>        /**<a name="line.48"></a>
+<FONT color="green">049</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.49"></a>
+<FONT color="green">050</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.50"></a>
+<FONT color="green">051</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.51"></a>
+<FONT color="green">052</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.52"></a>
+<FONT color="green">053</FONT>         */<a name="line.53"></a>
+<FONT color="green">054</FONT>        public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.54"></a>
+<FONT color="green">055</FONT>        {<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.doRenderFireball((EntityFireball)par1Entity, par2, par4, par6, par8, par9);<a name="line.56"></a>
+<FONT color="green">057</FONT>        }<a name="line.57"></a>
+<FONT color="green">058</FONT>    }<a name="line.58"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,512 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraftforge.common.ForgeHooks;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraftforge.common.MinecraftForge;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraftforge.event.Event;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraftforge.event.ForgeEventFactory;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraftforge.event.entity.player.PlayerInteractEvent;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraftforge.event.entity.player.PlayerInteractEvent.Action;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>    public class ItemInWorldManager<a name="line.11"></a>
+<FONT color="green">012</FONT>    {<a name="line.12"></a>
+<FONT color="green">013</FONT>        /** Forge reach distance */<a name="line.13"></a>
+<FONT color="green">014</FONT>        private double blockReachDistance = 5.0d;<a name="line.14"></a>
+<FONT color="green">015</FONT>        /** The world object that this object is connected to. */<a name="line.15"></a>
+<FONT color="green">016</FONT>        public World theWorld;<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        /** The EntityPlayerMP object that this object is connected to. */<a name="line.18"></a>
+<FONT color="green">019</FONT>        public EntityPlayerMP thisPlayerMP;<a name="line.19"></a>
+<FONT color="green">020</FONT>        private EnumGameType gameType;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /**<a name="line.22"></a>
+<FONT color="green">023</FONT>         * set to true on first call of destroyBlockInWorldPartially, false before any further calls<a name="line.23"></a>
+<FONT color="green">024</FONT>         */<a name="line.24"></a>
+<FONT color="green">025</FONT>        private boolean isPartiallyDestroyedBlockWhole;<a name="line.25"></a>
+<FONT color="green">026</FONT>        private int initialDamage;<a name="line.26"></a>
+<FONT color="green">027</FONT>        private int partiallyDestroyedBlockX;<a name="line.27"></a>
+<FONT color="green">028</FONT>        private int partiallyDestroyedBlockY;<a name="line.28"></a>
+<FONT color="green">029</FONT>        private int partiallyDestroyedBlockZ;<a name="line.29"></a>
+<FONT color="green">030</FONT>        private int curblockDamage;<a name="line.30"></a>
+<FONT color="green">031</FONT>        private boolean field_73097_j;<a name="line.31"></a>
+<FONT color="green">032</FONT>        private int posX;<a name="line.32"></a>
+<FONT color="green">033</FONT>        private int posY;<a name="line.33"></a>
+<FONT color="green">034</FONT>        private int posZ;<a name="line.34"></a>
+<FONT color="green">035</FONT>        private int field_73093_n;<a name="line.35"></a>
+<FONT color="green">036</FONT>        private int durabilityRemainingOnBlock;<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>        public ItemInWorldManager(World par1World)<a name="line.38"></a>
+<FONT color="green">039</FONT>        {<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.gameType = EnumGameType.NOT_SET;<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.durabilityRemainingOnBlock = -1;<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.theWorld = par1World;<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        public void setGameType(EnumGameType par1EnumGameType)<a name="line.45"></a>
+<FONT color="green">046</FONT>        {<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.gameType = par1EnumGameType;<a name="line.47"></a>
+<FONT color="green">048</FONT>            par1EnumGameType.configurePlayerCapabilities(this.thisPlayerMP.capabilities);<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.thisPlayerMP.sendPlayerAbilities();<a name="line.49"></a>
+<FONT color="green">050</FONT>        }<a name="line.50"></a>
+<FONT color="green">051</FONT>    <a name="line.51"></a>
+<FONT color="green">052</FONT>        public EnumGameType getGameType()<a name="line.52"></a>
+<FONT color="green">053</FONT>        {<a name="line.53"></a>
+<FONT color="green">054</FONT>            return this.gameType;<a name="line.54"></a>
+<FONT color="green">055</FONT>        }<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>        /**<a name="line.57"></a>
+<FONT color="green">058</FONT>         * Get if we are in creative game mode.<a name="line.58"></a>
+<FONT color="green">059</FONT>         */<a name="line.59"></a>
+<FONT color="green">060</FONT>        public boolean isCreative()<a name="line.60"></a>
+<FONT color="green">061</FONT>        {<a name="line.61"></a>
+<FONT color="green">062</FONT>            return this.gameType.isCreative();<a name="line.62"></a>
+<FONT color="green">063</FONT>        }<a name="line.63"></a>
+<FONT color="green">064</FONT>    <a name="line.64"></a>
+<FONT color="green">065</FONT>        /**<a name="line.65"></a>
+<FONT color="green">066</FONT>         * if the gameType is currently NOT_SET then change it to par1<a name="line.66"></a>
+<FONT color="green">067</FONT>         */<a name="line.67"></a>
+<FONT color="green">068</FONT>        public void initializeGameType(EnumGameType par1EnumGameType)<a name="line.68"></a>
+<FONT color="green">069</FONT>        {<a name="line.69"></a>
+<FONT color="green">070</FONT>            if (this.gameType == EnumGameType.NOT_SET)<a name="line.70"></a>
+<FONT color="green">071</FONT>            {<a name="line.71"></a>
+<FONT color="green">072</FONT>                this.gameType = par1EnumGameType;<a name="line.72"></a>
+<FONT color="green">073</FONT>            }<a name="line.73"></a>
+<FONT color="green">074</FONT>    <a name="line.74"></a>
+<FONT color="green">075</FONT>            this.setGameType(this.gameType);<a name="line.75"></a>
+<FONT color="green">076</FONT>        }<a name="line.76"></a>
+<FONT color="green">077</FONT>    <a name="line.77"></a>
+<FONT color="green">078</FONT>        public void updateBlockRemoving()<a name="line.78"></a>
+<FONT color="green">079</FONT>        {<a name="line.79"></a>
+<FONT color="green">080</FONT>            ++this.curblockDamage;<a name="line.80"></a>
+<FONT color="green">081</FONT>            int var1;<a name="line.81"></a>
+<FONT color="green">082</FONT>            float var4;<a name="line.82"></a>
+<FONT color="green">083</FONT>            int var5;<a name="line.83"></a>
+<FONT color="green">084</FONT>    <a name="line.84"></a>
+<FONT color="green">085</FONT>            if (this.field_73097_j)<a name="line.85"></a>
+<FONT color="green">086</FONT>            {<a name="line.86"></a>
+<FONT color="green">087</FONT>                var1 = this.curblockDamage - this.field_73093_n;<a name="line.87"></a>
+<FONT color="green">088</FONT>                int var2 = this.theWorld.getBlockId(this.posX, this.posY, this.posZ);<a name="line.88"></a>
+<FONT color="green">089</FONT>    <a name="line.89"></a>
+<FONT color="green">090</FONT>                if (var2 == 0)<a name="line.90"></a>
+<FONT color="green">091</FONT>                {<a name="line.91"></a>
+<FONT color="green">092</FONT>                    this.field_73097_j = false;<a name="line.92"></a>
+<FONT color="green">093</FONT>                }<a name="line.93"></a>
+<FONT color="green">094</FONT>                else<a name="line.94"></a>
+<FONT color="green">095</FONT>                {<a name="line.95"></a>
+<FONT color="green">096</FONT>                    Block var3 = Block.blocksList[var2];<a name="line.96"></a>
+<FONT color="green">097</FONT>                    var4 = var3.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.worldObj, this.posX, this.posY, this.posZ) * (float)(var1 + 1);<a name="line.97"></a>
+<FONT color="green">098</FONT>                    var5 = (int)(var4 * 10.0F);<a name="line.98"></a>
+<FONT color="green">099</FONT>    <a name="line.99"></a>
+<FONT color="green">100</FONT>                    if (var5 != this.durabilityRemainingOnBlock)<a name="line.100"></a>
+<FONT color="green">101</FONT>                    {<a name="line.101"></a>
+<FONT color="green">102</FONT>                        this.theWorld.destroyBlockInWorldPartially(this.thisPlayerMP.entityId, this.posX, this.posY, this.posZ, var5);<a name="line.102"></a>
+<FONT color="green">103</FONT>                        this.durabilityRemainingOnBlock = var5;<a name="line.103"></a>
+<FONT color="green">104</FONT>                    }<a name="line.104"></a>
+<FONT color="green">105</FONT>    <a name="line.105"></a>
+<FONT color="green">106</FONT>                    if (var4 &gt;= 1.0F)<a name="line.106"></a>
+<FONT color="green">107</FONT>                    {<a name="line.107"></a>
+<FONT color="green">108</FONT>                        this.field_73097_j = false;<a name="line.108"></a>
+<FONT color="green">109</FONT>                        this.tryHarvestBlock(this.posX, this.posY, this.posZ);<a name="line.109"></a>
+<FONT color="green">110</FONT>                    }<a name="line.110"></a>
+<FONT color="green">111</FONT>                }<a name="line.111"></a>
+<FONT color="green">112</FONT>            }<a name="line.112"></a>
+<FONT color="green">113</FONT>            else if (this.isPartiallyDestroyedBlockWhole)<a name="line.113"></a>
+<FONT color="green">114</FONT>            {<a name="line.114"></a>
+<FONT color="green">115</FONT>                var1 = this.theWorld.getBlockId(this.partiallyDestroyedBlockX, this.partiallyDestroyedBlockY, this.partiallyDestroyedBlockZ);<a name="line.115"></a>
+<FONT color="green">116</FONT>                Block var6 = Block.blocksList[var1];<a name="line.116"></a>
+<FONT color="green">117</FONT>    <a name="line.117"></a>
+<FONT color="green">118</FONT>                if (var6 == null)<a name="line.118"></a>
+<FONT color="green">119</FONT>                {<a name="line.119"></a>
+<FONT color="green">120</FONT>                    this.theWorld.destroyBlockInWorldPartially(this.thisPlayerMP.entityId, this.partiallyDestroyedBlockX, this.partiallyDestroyedBlockY, this.partiallyDestroyedBlockZ, -1);<a name="line.120"></a>
+<FONT color="green">121</FONT>                    this.durabilityRemainingOnBlock = -1;<a name="line.121"></a>
+<FONT color="green">122</FONT>                    this.isPartiallyDestroyedBlockWhole = false;<a name="line.122"></a>
+<FONT color="green">123</FONT>                }<a name="line.123"></a>
+<FONT color="green">124</FONT>                else<a name="line.124"></a>
+<FONT color="green">125</FONT>                {<a name="line.125"></a>
+<FONT color="green">126</FONT>                    int var7 = this.curblockDamage - this.initialDamage;<a name="line.126"></a>
+<FONT color="green">127</FONT>                    var4 = var6.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.worldObj, this.partiallyDestroyedBlockX, this.partiallyDestroyedBlockY, this.partiallyDestroyedBlockZ) * (float)(var7 + 1);<a name="line.127"></a>
+<FONT color="green">128</FONT>                    var5 = (int)(var4 * 10.0F);<a name="line.128"></a>
+<FONT color="green">129</FONT>    <a name="line.129"></a>
+<FONT color="green">130</FONT>                    if (var5 != this.durabilityRemainingOnBlock)<a name="line.130"></a>
+<FONT color="green">131</FONT>                    {<a name="line.131"></a>
+<FONT color="green">132</FONT>                        this.theWorld.destroyBlockInWorldPartially(this.thisPlayerMP.entityId, this.partiallyDestroyedBlockX, this.partiallyDestroyedBlockY, this.partiallyDestroyedBlockZ, var5);<a name="line.132"></a>
+<FONT color="green">133</FONT>                        this.durabilityRemainingOnBlock = var5;<a name="line.133"></a>
+<FONT color="green">134</FONT>                    }<a name="line.134"></a>
+<FONT color="green">135</FONT>                }<a name="line.135"></a>
+<FONT color="green">136</FONT>            }<a name="line.136"></a>
+<FONT color="green">137</FONT>        }<a name="line.137"></a>
+<FONT color="green">138</FONT>    <a name="line.138"></a>
+<FONT color="green">139</FONT>        /**<a name="line.139"></a>
+<FONT color="green">140</FONT>         * if not creative, it calls destroyBlockInWorldPartially untill the block is broken first. par4 is the specific<a name="line.140"></a>
+<FONT color="green">141</FONT>         * side. tryHarvestBlock can also be the result of this call<a name="line.141"></a>
+<FONT color="green">142</FONT>         */<a name="line.142"></a>
+<FONT color="green">143</FONT>        public void onBlockClicked(int par1, int par2, int par3, int par4)<a name="line.143"></a>
+<FONT color="green">144</FONT>        {<a name="line.144"></a>
+<FONT color="green">145</FONT>            if (!this.gameType.isAdventure() || this.thisPlayerMP.canCurrentToolHarvestBlock(par1, par2, par3))<a name="line.145"></a>
+<FONT color="green">146</FONT>            {<a name="line.146"></a>
+<FONT color="green">147</FONT>                PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(thisPlayerMP, Action.LEFT_CLICK_BLOCK, par1, par2, par3, par4);<a name="line.147"></a>
+<FONT color="green">148</FONT>                if (event.isCanceled())<a name="line.148"></a>
+<FONT color="green">149</FONT>                {<a name="line.149"></a>
+<FONT color="green">150</FONT>                    thisPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet53BlockChange(par1, par2, par3, theWorld));<a name="line.150"></a>
+<FONT color="green">151</FONT>                    return;<a name="line.151"></a>
+<FONT color="green">152</FONT>                }<a name="line.152"></a>
+<FONT color="green">153</FONT>    <a name="line.153"></a>
+<FONT color="green">154</FONT>                if (this.isCreative())<a name="line.154"></a>
+<FONT color="green">155</FONT>                {<a name="line.155"></a>
+<FONT color="green">156</FONT>                    if (!this.theWorld.extinguishFire((EntityPlayer)null, par1, par2, par3, par4))<a name="line.156"></a>
+<FONT color="green">157</FONT>                    {<a name="line.157"></a>
+<FONT color="green">158</FONT>                        this.tryHarvestBlock(par1, par2, par3);<a name="line.158"></a>
+<FONT color="green">159</FONT>                    }<a name="line.159"></a>
+<FONT color="green">160</FONT>                }<a name="line.160"></a>
+<FONT color="green">161</FONT>                else<a name="line.161"></a>
+<FONT color="green">162</FONT>                {<a name="line.162"></a>
+<FONT color="green">163</FONT>                    this.initialDamage = this.curblockDamage;<a name="line.163"></a>
+<FONT color="green">164</FONT>                    float var5 = 1.0F;<a name="line.164"></a>
+<FONT color="green">165</FONT>                    int var6 = this.theWorld.getBlockId(par1, par2, par3);<a name="line.165"></a>
+<FONT color="green">166</FONT>                    Block block = Block.blocksList[var6];<a name="line.166"></a>
+<FONT color="green">167</FONT>    <a name="line.167"></a>
+<FONT color="green">168</FONT>                    if (block != null)<a name="line.168"></a>
+<FONT color="green">169</FONT>                    {<a name="line.169"></a>
+<FONT color="green">170</FONT>                        if (event.useBlock != Event.Result.DENY)<a name="line.170"></a>
+<FONT color="green">171</FONT>                        {<a name="line.171"></a>
+<FONT color="green">172</FONT>                            block.onBlockClicked(theWorld, par1, par2, par3, thisPlayerMP);<a name="line.172"></a>
+<FONT color="green">173</FONT>                            theWorld.extinguishFire(thisPlayerMP, par1, par2, par3, par4);<a name="line.173"></a>
+<FONT color="green">174</FONT>                        }<a name="line.174"></a>
+<FONT color="green">175</FONT>                        else<a name="line.175"></a>
+<FONT color="green">176</FONT>                        {<a name="line.176"></a>
+<FONT color="green">177</FONT>                            thisPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet53BlockChange(par1, par2, par3, theWorld));<a name="line.177"></a>
+<FONT color="green">178</FONT>                        }<a name="line.178"></a>
+<FONT color="green">179</FONT>                        var5 = block.getPlayerRelativeBlockHardness(thisPlayerMP, thisPlayerMP.worldObj, par1, par2, par3);<a name="line.179"></a>
+<FONT color="green">180</FONT>                    }<a name="line.180"></a>
+<FONT color="green">181</FONT>    <a name="line.181"></a>
+<FONT color="green">182</FONT>                    if (event.useItem == Event.Result.DENY)<a name="line.182"></a>
+<FONT color="green">183</FONT>                    {<a name="line.183"></a>
+<FONT color="green">184</FONT>                        if (var5 &gt;= 1.0f)<a name="line.184"></a>
+<FONT color="green">185</FONT>                        {<a name="line.185"></a>
+<FONT color="green">186</FONT>                            thisPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet53BlockChange(par1, par2, par3, theWorld));<a name="line.186"></a>
+<FONT color="green">187</FONT>                        }<a name="line.187"></a>
+<FONT color="green">188</FONT>                        return;<a name="line.188"></a>
+<FONT color="green">189</FONT>                    }<a name="line.189"></a>
+<FONT color="green">190</FONT>    <a name="line.190"></a>
+<FONT color="green">191</FONT>                    if (var6 &gt; 0 &amp;&amp; var5 &gt;= 1.0F)<a name="line.191"></a>
+<FONT color="green">192</FONT>                    {<a name="line.192"></a>
+<FONT color="green">193</FONT>                        this.tryHarvestBlock(par1, par2, par3);<a name="line.193"></a>
+<FONT color="green">194</FONT>                    }<a name="line.194"></a>
+<FONT color="green">195</FONT>                    else<a name="line.195"></a>
+<FONT color="green">196</FONT>                    {<a name="line.196"></a>
+<FONT color="green">197</FONT>                        this.isPartiallyDestroyedBlockWhole = true;<a name="line.197"></a>
+<FONT color="green">198</FONT>                        this.partiallyDestroyedBlockX = par1;<a name="line.198"></a>
+<FONT color="green">199</FONT>                        this.partiallyDestroyedBlockY = par2;<a name="line.199"></a>
+<FONT color="green">200</FONT>                        this.partiallyDestroyedBlockZ = par3;<a name="line.200"></a>
+<FONT color="green">201</FONT>                        int var7 = (int)(var5 * 10.0F);<a name="line.201"></a>
+<FONT color="green">202</FONT>                        this.theWorld.destroyBlockInWorldPartially(this.thisPlayerMP.entityId, par1, par2, par3, var7);<a name="line.202"></a>
+<FONT color="green">203</FONT>                        this.durabilityRemainingOnBlock = var7;<a name="line.203"></a>
+<FONT color="green">204</FONT>                    }<a name="line.204"></a>
+<FONT color="green">205</FONT>                }<a name="line.205"></a>
+<FONT color="green">206</FONT>            }<a name="line.206"></a>
+<FONT color="green">207</FONT>        }<a name="line.207"></a>
+<FONT color="green">208</FONT>    <a name="line.208"></a>
+<FONT color="green">209</FONT>        public void uncheckedTryHarvestBlock(int par1, int par2, int par3)<a name="line.209"></a>
+<FONT color="green">210</FONT>        {<a name="line.210"></a>
+<FONT color="green">211</FONT>            if (par1 == this.partiallyDestroyedBlockX &amp;&amp; par2 == this.partiallyDestroyedBlockY &amp;&amp; par3 == this.partiallyDestroyedBlockZ)<a name="line.211"></a>
+<FONT color="green">212</FONT>            {<a name="line.212"></a>
+<FONT color="green">213</FONT>                int var4 = this.curblockDamage - this.initialDamage;<a name="line.213"></a>
+<FONT color="green">214</FONT>                int var5 = this.theWorld.getBlockId(par1, par2, par3);<a name="line.214"></a>
+<FONT color="green">215</FONT>    <a name="line.215"></a>
+<FONT color="green">216</FONT>                if (var5 != 0)<a name="line.216"></a>
+<FONT color="green">217</FONT>                {<a name="line.217"></a>
+<FONT color="green">218</FONT>                    Block var6 = Block.blocksList[var5];<a name="line.218"></a>
+<FONT color="green">219</FONT>                    float var7 = var6.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.worldObj, par1, par2, par3) * (float)(var4 + 1);<a name="line.219"></a>
+<FONT color="green">220</FONT>    <a name="line.220"></a>
+<FONT color="green">221</FONT>                    if (var7 &gt;= 0.7F)<a name="line.221"></a>
+<FONT color="green">222</FONT>                    {<a name="line.222"></a>
+<FONT color="green">223</FONT>                        this.isPartiallyDestroyedBlockWhole = false;<a name="line.223"></a>
+<FONT color="green">224</FONT>                        this.theWorld.destroyBlockInWorldPartially(this.thisPlayerMP.entityId, par1, par2, par3, -1);<a name="line.224"></a>
+<FONT color="green">225</FONT>                        this.tryHarvestBlock(par1, par2, par3);<a name="line.225"></a>
+<FONT color="green">226</FONT>                    }<a name="line.226"></a>
+<FONT color="green">227</FONT>                    else if (!this.field_73097_j)<a name="line.227"></a>
+<FONT color="green">228</FONT>                    {<a name="line.228"></a>
+<FONT color="green">229</FONT>                        this.isPartiallyDestroyedBlockWhole = false;<a name="line.229"></a>
+<FONT color="green">230</FONT>                        this.field_73097_j = true;<a name="line.230"></a>
+<FONT color="green">231</FONT>                        this.posX = par1;<a name="line.231"></a>
+<FONT color="green">232</FONT>                        this.posY = par2;<a name="line.232"></a>
+<FONT color="green">233</FONT>                        this.posZ = par3;<a name="line.233"></a>
+<FONT color="green">234</FONT>                        this.field_73093_n = this.initialDamage;<a name="line.234"></a>
+<FONT color="green">235</FONT>                    }<a name="line.235"></a>
+<FONT color="green">236</FONT>                }<a name="line.236"></a>
+<FONT color="green">237</FONT>            }<a name="line.237"></a>
+<FONT color="green">238</FONT>        }<a name="line.238"></a>
+<FONT color="green">239</FONT>    <a name="line.239"></a>
+<FONT color="green">240</FONT>        /**<a name="line.240"></a>
+<FONT color="green">241</FONT>         * note: this ignores the pars passed in and continues to destroy the onClickedBlock<a name="line.241"></a>
+<FONT color="green">242</FONT>         */<a name="line.242"></a>
+<FONT color="green">243</FONT>        public void destroyBlockInWorldPartially(int par1, int par2, int par3)<a name="line.243"></a>
+<FONT color="green">244</FONT>        {<a name="line.244"></a>
+<FONT color="green">245</FONT>            this.isPartiallyDestroyedBlockWhole = false;<a name="line.245"></a>
+<FONT color="green">246</FONT>            this.theWorld.destroyBlockInWorldPartially(this.thisPlayerMP.entityId, this.partiallyDestroyedBlockX, this.partiallyDestroyedBlockY, this.partiallyDestroyedBlockZ, -1);<a name="line.246"></a>
+<FONT color="green">247</FONT>        }<a name="line.247"></a>
+<FONT color="green">248</FONT>    <a name="line.248"></a>
+<FONT color="green">249</FONT>        /**<a name="line.249"></a>
+<FONT color="green">250</FONT>         * Removes a block and triggers the appropriate  events<a name="line.250"></a>
+<FONT color="green">251</FONT>         */<a name="line.251"></a>
+<FONT color="green">252</FONT>        private boolean removeBlock(int par1, int par2, int par3)<a name="line.252"></a>
+<FONT color="green">253</FONT>        {<a name="line.253"></a>
+<FONT color="green">254</FONT>            Block var4 = Block.blocksList[this.theWorld.getBlockId(par1, par2, par3)];<a name="line.254"></a>
+<FONT color="green">255</FONT>            int var5 = this.theWorld.getBlockMetadata(par1, par2, par3);<a name="line.255"></a>
+<FONT color="green">256</FONT>    <a name="line.256"></a>
+<FONT color="green">257</FONT>            if (var4 != null)<a name="line.257"></a>
+<FONT color="green">258</FONT>            {<a name="line.258"></a>
+<FONT color="green">259</FONT>                var4.onBlockHarvested(this.theWorld, par1, par2, par3, var5, this.thisPlayerMP);<a name="line.259"></a>
+<FONT color="green">260</FONT>            }<a name="line.260"></a>
+<FONT color="green">261</FONT>    <a name="line.261"></a>
+<FONT color="green">262</FONT>            boolean var6 = (var4 != null &amp;&amp; var4.removeBlockByPlayer(theWorld, thisPlayerMP, par1, par2, par3));<a name="line.262"></a>
+<FONT color="green">263</FONT>    <a name="line.263"></a>
+<FONT color="green">264</FONT>            if (var4 != null &amp;&amp; var6)<a name="line.264"></a>
+<FONT color="green">265</FONT>            {<a name="line.265"></a>
+<FONT color="green">266</FONT>                var4.onBlockDestroyedByPlayer(this.theWorld, par1, par2, par3, var5);<a name="line.266"></a>
+<FONT color="green">267</FONT>            }<a name="line.267"></a>
+<FONT color="green">268</FONT>    <a name="line.268"></a>
+<FONT color="green">269</FONT>            return var6;<a name="line.269"></a>
+<FONT color="green">270</FONT>        }<a name="line.270"></a>
+<FONT color="green">271</FONT>    <a name="line.271"></a>
+<FONT color="green">272</FONT>        /**<a name="line.272"></a>
+<FONT color="green">273</FONT>         * Attempts to harvest a block at the given coordinate<a name="line.273"></a>
+<FONT color="green">274</FONT>         */<a name="line.274"></a>
+<FONT color="green">275</FONT>        public boolean tryHarvestBlock(int par1, int par2, int par3)<a name="line.275"></a>
+<FONT color="green">276</FONT>        {<a name="line.276"></a>
+<FONT color="green">277</FONT>            if (this.gameType.isAdventure() &amp;&amp; !this.thisPlayerMP.canCurrentToolHarvestBlock(par1, par2, par3))<a name="line.277"></a>
+<FONT color="green">278</FONT>            {<a name="line.278"></a>
+<FONT color="green">279</FONT>                return false;<a name="line.279"></a>
+<FONT color="green">280</FONT>            }<a name="line.280"></a>
+<FONT color="green">281</FONT>            else<a name="line.281"></a>
+<FONT color="green">282</FONT>            {<a name="line.282"></a>
+<FONT color="green">283</FONT>                ItemStack stack = thisPlayerMP.getCurrentEquippedItem();<a name="line.283"></a>
+<FONT color="green">284</FONT>                if (stack != null &amp;&amp; stack.getItem().onBlockStartBreak(stack, par1, par2, par3, thisPlayerMP))<a name="line.284"></a>
+<FONT color="green">285</FONT>                {<a name="line.285"></a>
+<FONT color="green">286</FONT>                    return false;<a name="line.286"></a>
+<FONT color="green">287</FONT>                }<a name="line.287"></a>
+<FONT color="green">288</FONT>                int var4 = this.theWorld.getBlockId(par1, par2, par3);<a name="line.288"></a>
+<FONT color="green">289</FONT>                int var5 = this.theWorld.getBlockMetadata(par1, par2, par3);<a name="line.289"></a>
+<FONT color="green">290</FONT>                this.theWorld.playAuxSFXAtEntity(this.thisPlayerMP, 2001, par1, par2, par3, var4 + (this.theWorld.getBlockMetadata(par1, par2, par3) &lt;&lt; 12));<a name="line.290"></a>
+<FONT color="green">291</FONT>                boolean var6 = false;<a name="line.291"></a>
+<FONT color="green">292</FONT>    <a name="line.292"></a>
+<FONT color="green">293</FONT>                if (this.isCreative())<a name="line.293"></a>
+<FONT color="green">294</FONT>                {<a name="line.294"></a>
+<FONT color="green">295</FONT>                    var6 = this.removeBlock(par1, par2, par3);<a name="line.295"></a>
+<FONT color="green">296</FONT>                    this.thisPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet53BlockChange(par1, par2, par3, this.theWorld));<a name="line.296"></a>
+<FONT color="green">297</FONT>                }<a name="line.297"></a>
+<FONT color="green">298</FONT>                else<a name="line.298"></a>
+<FONT color="green">299</FONT>                {<a name="line.299"></a>
+<FONT color="green">300</FONT>                    ItemStack var7 = this.thisPlayerMP.getCurrentEquippedItem();<a name="line.300"></a>
+<FONT color="green">301</FONT>                    boolean var8 = false;<a name="line.301"></a>
+<FONT color="green">302</FONT>                    Block block = Block.blocksList[var4];<a name="line.302"></a>
+<FONT color="green">303</FONT>                    if (block != null)<a name="line.303"></a>
+<FONT color="green">304</FONT>                    {<a name="line.304"></a>
+<FONT color="green">305</FONT>                        var8 = block.canHarvestBlock(thisPlayerMP, var5);<a name="line.305"></a>
+<FONT color="green">306</FONT>                    }<a name="line.306"></a>
+<FONT color="green">307</FONT>    <a name="line.307"></a>
+<FONT color="green">308</FONT>                    if (var7 != null)<a name="line.308"></a>
+<FONT color="green">309</FONT>                    {<a name="line.309"></a>
+<FONT color="green">310</FONT>                        var7.onBlockDestroyed(this.theWorld, var4, par1, par2, par3, this.thisPlayerMP);<a name="line.310"></a>
+<FONT color="green">311</FONT>    <a name="line.311"></a>
+<FONT color="green">312</FONT>                        if (var7.stackSize == 0)<a name="line.312"></a>
+<FONT color="green">313</FONT>                        {<a name="line.313"></a>
+<FONT color="green">314</FONT>                            this.thisPlayerMP.destroyCurrentEquippedItem();<a name="line.314"></a>
+<FONT color="green">315</FONT>                            MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(thisPlayerMP, var7));<a name="line.315"></a>
+<FONT color="green">316</FONT>                        }<a name="line.316"></a>
+<FONT color="green">317</FONT>                    }<a name="line.317"></a>
+<FONT color="green">318</FONT>    <a name="line.318"></a>
+<FONT color="green">319</FONT>                    var6 = this.removeBlock(par1, par2, par3);<a name="line.319"></a>
+<FONT color="green">320</FONT>                    if (var6 &amp;&amp; var8)<a name="line.320"></a>
+<FONT color="green">321</FONT>                    {<a name="line.321"></a>
+<FONT color="green">322</FONT>                        Block.blocksList[var4].harvestBlock(this.theWorld, this.thisPlayerMP, par1, par2, par3, var5);<a name="line.322"></a>
+<FONT color="green">323</FONT>                    }<a name="line.323"></a>
+<FONT color="green">324</FONT>                }<a name="line.324"></a>
+<FONT color="green">325</FONT>    <a name="line.325"></a>
+<FONT color="green">326</FONT>                return var6;<a name="line.326"></a>
+<FONT color="green">327</FONT>            }<a name="line.327"></a>
+<FONT color="green">328</FONT>        }<a name="line.328"></a>
+<FONT color="green">329</FONT>    <a name="line.329"></a>
+<FONT color="green">330</FONT>        /**<a name="line.330"></a>
+<FONT color="green">331</FONT>         * Attempts to right-click use an item by the given EntityPlayer in the given World<a name="line.331"></a>
+<FONT color="green">332</FONT>         */<a name="line.332"></a>
+<FONT color="green">333</FONT>        public boolean tryUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack)<a name="line.333"></a>
+<FONT color="green">334</FONT>        {<a name="line.334"></a>
+<FONT color="green">335</FONT>            int var4 = par3ItemStack.stackSize;<a name="line.335"></a>
+<FONT color="green">336</FONT>            int var5 = par3ItemStack.getItemDamage();<a name="line.336"></a>
+<FONT color="green">337</FONT>            ItemStack var6 = par3ItemStack.useItemRightClick(par2World, par1EntityPlayer);<a name="line.337"></a>
+<FONT color="green">338</FONT>    <a name="line.338"></a>
+<FONT color="green">339</FONT>            if (var6 == par3ItemStack &amp;&amp; (var6 == null || var6.stackSize == var4 &amp;&amp; var6.getMaxItemUseDuration() &lt;= 0 &amp;&amp; var6.getItemDamage() == var5))<a name="line.339"></a>
+<FONT color="green">340</FONT>            {<a name="line.340"></a>
+<FONT color="green">341</FONT>                return false;<a name="line.341"></a>
+<FONT color="green">342</FONT>            }<a name="line.342"></a>
+<FONT color="green">343</FONT>            else<a name="line.343"></a>
+<FONT color="green">344</FONT>            {<a name="line.344"></a>
+<FONT color="green">345</FONT>                par1EntityPlayer.inventory.mainInventory[par1EntityPlayer.inventory.currentItem] = var6;<a name="line.345"></a>
+<FONT color="green">346</FONT>    <a name="line.346"></a>
+<FONT color="green">347</FONT>                if (this.isCreative())<a name="line.347"></a>
+<FONT color="green">348</FONT>                {<a name="line.348"></a>
+<FONT color="green">349</FONT>                    var6.stackSize = var4;<a name="line.349"></a>
+<FONT color="green">350</FONT>    <a name="line.350"></a>
+<FONT color="green">351</FONT>                    if (var6.isItemStackDamageable())<a name="line.351"></a>
+<FONT color="green">352</FONT>                    {<a name="line.352"></a>
+<FONT color="green">353</FONT>                        var6.setItemDamage(var5);<a name="line.353"></a>
+<FONT color="green">354</FONT>                    }<a name="line.354"></a>
+<FONT color="green">355</FONT>                }<a name="line.355"></a>
+<FONT color="green">356</FONT>    <a name="line.356"></a>
+<FONT color="green">357</FONT>                if (var6.stackSize == 0)<a name="line.357"></a>
+<FONT color="green">358</FONT>                {<a name="line.358"></a>
+<FONT color="green">359</FONT>                    par1EntityPlayer.inventory.mainInventory[par1EntityPlayer.inventory.currentItem] = null;<a name="line.359"></a>
+<FONT color="green">360</FONT>                    MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(thisPlayerMP, var6));<a name="line.360"></a>
+<FONT color="green">361</FONT>                }<a name="line.361"></a>
+<FONT color="green">362</FONT>    <a name="line.362"></a>
+<FONT color="green">363</FONT>                if (!par1EntityPlayer.isUsingItem())<a name="line.363"></a>
+<FONT color="green">364</FONT>                {<a name="line.364"></a>
+<FONT color="green">365</FONT>                    ((EntityPlayerMP)par1EntityPlayer).sendContainerToPlayer(par1EntityPlayer.inventorySlots);<a name="line.365"></a>
+<FONT color="green">366</FONT>                }<a name="line.366"></a>
+<FONT color="green">367</FONT>    <a name="line.367"></a>
+<FONT color="green">368</FONT>                return true;<a name="line.368"></a>
+<FONT color="green">369</FONT>            }<a name="line.369"></a>
+<FONT color="green">370</FONT>        }<a name="line.370"></a>
+<FONT color="green">371</FONT>    <a name="line.371"></a>
+<FONT color="green">372</FONT>        /**<a name="line.372"></a>
+<FONT color="green">373</FONT>         * Activate the clicked on block, otherwise use the held item. Args: player, world, itemStack, x, y, z, side,<a name="line.373"></a>
+<FONT color="green">374</FONT>         * xOffset, yOffset, zOffset<a name="line.374"></a>
+<FONT color="green">375</FONT>         */<a name="line.375"></a>
+<FONT color="green">376</FONT>        public boolean activateBlockOrUseItem(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4, int par5, int par6, int par7, float par8, float par9, float par10)<a name="line.376"></a>
+<FONT color="green">377</FONT>        {<a name="line.377"></a>
+<FONT color="green">378</FONT>            PlayerInteractEvent event = ForgeEventFactory.onPlayerInteract(par1EntityPlayer, Action.RIGHT_CLICK_BLOCK, par4, par5, par6, par7);<a name="line.378"></a>
+<FONT color="green">379</FONT>            if (event.isCanceled())<a name="line.379"></a>
+<FONT color="green">380</FONT>            {<a name="line.380"></a>
+<FONT color="green">381</FONT>                thisPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet53BlockChange(par4, par5, par6, theWorld));<a name="line.381"></a>
+<FONT color="green">382</FONT>                return false;<a name="line.382"></a>
+<FONT color="green">383</FONT>            }<a name="line.383"></a>
+<FONT color="green">384</FONT>    <a name="line.384"></a>
+<FONT color="green">385</FONT>            Item item = (par3ItemStack != null ? par3ItemStack.getItem() : null);<a name="line.385"></a>
+<FONT color="green">386</FONT>            if (item != null &amp;&amp; item.onItemUseFirst(par3ItemStack, par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10))<a name="line.386"></a>
+<FONT color="green">387</FONT>            {<a name="line.387"></a>
+<FONT color="green">388</FONT>                if (par3ItemStack.stackSize &lt;= 0) ForgeEventFactory.onPlayerDestroyItem(thisPlayerMP, par3ItemStack);<a name="line.388"></a>
+<FONT color="green">389</FONT>                return true;<a name="line.389"></a>
+<FONT color="green">390</FONT>            }<a name="line.390"></a>
+<FONT color="green">391</FONT>    <a name="line.391"></a>
+<FONT color="green">392</FONT>            int var11 = par2World.getBlockId(par4, par5, par6);<a name="line.392"></a>
+<FONT color="green">393</FONT>            Block block = Block.blocksList[var11];<a name="line.393"></a>
+<FONT color="green">394</FONT>            boolean result = false;<a name="line.394"></a>
+<FONT color="green">395</FONT>    <a name="line.395"></a>
+<FONT color="green">396</FONT>            if (block != null)<a name="line.396"></a>
+<FONT color="green">397</FONT>            {<a name="line.397"></a>
+<FONT color="green">398</FONT>                if (event.useBlock != Event.Result.DENY)<a name="line.398"></a>
+<FONT color="green">399</FONT>                {<a name="line.399"></a>
+<FONT color="green">400</FONT>                    result = block.onBlockActivated(par2World, par4, par5, par6, par1EntityPlayer, par7, par8, par9, par10);<a name="line.400"></a>
+<FONT color="green">401</FONT>                }<a name="line.401"></a>
+<FONT color="green">402</FONT>                else<a name="line.402"></a>
+<FONT color="green">403</FONT>                {<a name="line.403"></a>
+<FONT color="green">404</FONT>                    thisPlayerMP.playerNetServerHandler.sendPacketToPlayer(new Packet53BlockChange(par4, par5, par6, theWorld));<a name="line.404"></a>
+<FONT color="green">405</FONT>                    result = event.useItem != Event.Result.ALLOW;<a name="line.405"></a>
+<FONT color="green">406</FONT>                }<a name="line.406"></a>
+<FONT color="green">407</FONT>            }<a name="line.407"></a>
+<FONT color="green">408</FONT>    <a name="line.408"></a>
+<FONT color="green">409</FONT>            if (par3ItemStack != null &amp;&amp; !result)<a name="line.409"></a>
+<FONT color="green">410</FONT>            {<a name="line.410"></a>
+<FONT color="green">411</FONT>                int meta = par3ItemStack.getItemDamage();<a name="line.411"></a>
+<FONT color="green">412</FONT>                int size = par3ItemStack.stackSize;<a name="line.412"></a>
+<FONT color="green">413</FONT>                result = par3ItemStack.tryPlaceItemIntoWorld(par1EntityPlayer, par2World, par4, par5, par6, par7, par8, par9, par10);<a name="line.413"></a>
+<FONT color="green">414</FONT>                if (isCreative())<a name="line.414"></a>
+<FONT color="green">415</FONT>                {<a name="line.415"></a>
+<FONT color="green">416</FONT>                    par3ItemStack.setItemDamage(meta);<a name="line.416"></a>
+<FONT color="green">417</FONT>                    par3ItemStack.stackSize = size;<a name="line.417"></a>
+<FONT color="green">418</FONT>                }<a name="line.418"></a>
+<FONT color="green">419</FONT>                if (par3ItemStack.stackSize &lt;= 0) ForgeEventFactory.onPlayerDestroyItem(thisPlayerMP, par3ItemStack);<a name="line.419"></a>
+<FONT color="green">420</FONT>            }<a name="line.420"></a>
+<FONT color="green">421</FONT>    <a name="line.421"></a>
+<FONT color="green">422</FONT>            /* Re-enable if this causes bukkit incompatibility, or re-write client side to only send a single packet per right click.<a name="line.422"></a>
+<FONT color="green">423</FONT>            if (par3ItemStack != null &amp;&amp; ((!result &amp;&amp; event.useItem != Event.Result.DENY) || event.useItem == Event.Result.ALLOW))<a name="line.423"></a>
+<FONT color="green">424</FONT>            {<a name="line.424"></a>
+<FONT color="green">425</FONT>                this.tryUseItem(thisPlayerMP, par2World, par3ItemStack);<a name="line.425"></a>
+<FONT color="green">426</FONT>            }*/<a name="line.426"></a>
+<FONT color="green">427</FONT>            return result;<a name="line.427"></a>
+<FONT color="green">428</FONT>        }<a name="line.428"></a>
+<FONT color="green">429</FONT>    <a name="line.429"></a>
+<FONT color="green">430</FONT>        /**<a name="line.430"></a>
+<FONT color="green">431</FONT>         * Sets the world instance.<a name="line.431"></a>
+<FONT color="green">432</FONT>         */<a name="line.432"></a>
+<FONT color="green">433</FONT>        public void setWorld(WorldServer par1WorldServer)<a name="line.433"></a>
+<FONT color="green">434</FONT>        {<a name="line.434"></a>
+<FONT color="green">435</FONT>            this.theWorld = par1WorldServer;<a name="line.435"></a>
+<FONT color="green">436</FONT>        }<a name="line.436"></a>
+<FONT color="green">437</FONT>    <a name="line.437"></a>
+<FONT color="green">438</FONT>        public double getBlockReachDistance()<a name="line.438"></a>
+<FONT color="green">439</FONT>        {<a name="line.439"></a>
+<FONT color="green">440</FONT>            return blockReachDistance;<a name="line.440"></a>
+<FONT color="green">441</FONT>        }<a name="line.441"></a>
+<FONT color="green">442</FONT>        public void setBlockReachDistance(double distance)<a name="line.442"></a>
+<FONT color="green">443</FONT>        {<a name="line.443"></a>
+<FONT color="green">444</FONT>            blockReachDistance = distance;<a name="line.444"></a>
+<FONT color="green">445</FONT>        }<a name="line.445"></a>
+<FONT color="green">446</FONT>    }<a name="line.446"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

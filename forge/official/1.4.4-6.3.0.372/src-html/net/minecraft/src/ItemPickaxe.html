@@ -1,0 +1,95 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    public class ItemPickaxe extends ItemTool<a name="line.3"></a>
+<FONT color="green">004</FONT>    {<a name="line.4"></a>
+<FONT color="green">005</FONT>        /** an array of the blocks this pickaxe is effective against */<a name="line.5"></a>
+<FONT color="green">006</FONT>        public static final Block[] blocksEffectiveAgainst = new Block[] {Block.cobblestone, Block.stoneDoubleSlab, Block.stoneSingleSlab, Block.stone, Block.sandStone, Block.cobblestoneMossy, Block.oreIron, Block.blockSteel, Block.oreCoal, Block.blockGold, Block.oreGold, Block.oreDiamond, Block.blockDiamond, Block.ice, Block.netherrack, Block.oreLapis, Block.blockLapis, Block.oreRedstone, Block.oreRedstoneGlowing, Block.rail, Block.railDetector, Block.railPowered};<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>        public ItemPickaxe(int par1, EnumToolMaterial par2EnumToolMaterial)<a name="line.8"></a>
+<FONT color="green">009</FONT>        {<a name="line.9"></a>
+<FONT color="green">010</FONT>            super(par1, 2, par2EnumToolMaterial, blocksEffectiveAgainst);<a name="line.10"></a>
+<FONT color="green">011</FONT>        }<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        /**<a name="line.13"></a>
+<FONT color="green">014</FONT>         * Returns if the item (tool) can harvest results from the block type.<a name="line.14"></a>
+<FONT color="green">015</FONT>         */<a name="line.15"></a>
+<FONT color="green">016</FONT>        public boolean canHarvestBlock(Block par1Block)<a name="line.16"></a>
+<FONT color="green">017</FONT>        {<a name="line.17"></a>
+<FONT color="green">018</FONT>            return par1Block == Block.obsidian ? this.toolMaterial.getHarvestLevel() == 3 : (par1Block != Block.blockDiamond &amp;&amp; par1Block != Block.oreDiamond ? (par1Block != Block.oreEmerald &amp;&amp; par1Block != Block.blockEmerald ? (par1Block != Block.blockGold &amp;&amp; par1Block != Block.oreGold ? (par1Block != Block.blockSteel &amp;&amp; par1Block != Block.oreIron ? (par1Block != Block.blockLapis &amp;&amp; par1Block != Block.oreLapis ? (par1Block != Block.oreRedstone &amp;&amp; par1Block != Block.oreRedstoneGlowing ? (par1Block.blockMaterial == Material.rock ? true : (par1Block.blockMaterial == Material.iron ? true : par1Block.blockMaterial == Material.anvil)) : this.toolMaterial.getHarvestLevel() &gt;= 2) : this.toolMaterial.getHarvestLevel() &gt;= 1) : this.toolMaterial.getHarvestLevel() &gt;= 1) : this.toolMaterial.getHarvestLevel() &gt;= 2) : this.toolMaterial.getHarvestLevel() &gt;= 2) : this.toolMaterial.getHarvestLevel() &gt;= 2);<a name="line.18"></a>
+<FONT color="green">019</FONT>        }<a name="line.19"></a>
+<FONT color="green">020</FONT>    <a name="line.20"></a>
+<FONT color="green">021</FONT>        /**<a name="line.21"></a>
+<FONT color="green">022</FONT>         * Returns the strength of the stack against a given block. 1.0F base, (Quality+1)*2 if correct blocktype, 1.5F if<a name="line.22"></a>
+<FONT color="green">023</FONT>         * sword<a name="line.23"></a>
+<FONT color="green">024</FONT>         */<a name="line.24"></a>
+<FONT color="green">025</FONT>        public float getStrVsBlock(ItemStack par1ItemStack, Block par2Block)<a name="line.25"></a>
+<FONT color="green">026</FONT>        {<a name="line.26"></a>
+<FONT color="green">027</FONT>            return par2Block != null &amp;&amp; (par2Block.blockMaterial == Material.iron || par2Block.blockMaterial == Material.anvil || par2Block.blockMaterial == Material.rock) ? this.efficiencyOnProperMaterial : super.getStrVsBlock(par1ItemStack, par2Block);<a name="line.27"></a>
+<FONT color="green">028</FONT>        }<a name="line.28"></a>
+<FONT color="green">029</FONT>    }<a name="line.29"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

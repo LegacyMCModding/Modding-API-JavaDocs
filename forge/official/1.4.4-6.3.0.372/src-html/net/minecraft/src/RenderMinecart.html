@@ -1,0 +1,190 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class RenderMinecart extends Render<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        /** instance of ModelMinecart for rendering */<a name="line.10"></a>
+<FONT color="green">011</FONT>        protected ModelBase modelMinecart;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        public RenderMinecart()<a name="line.13"></a>
+<FONT color="green">014</FONT>        {<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.shadowSize = 0.5F;<a name="line.15"></a>
+<FONT color="green">016</FONT>            this.modelMinecart = new ModelMinecart();<a name="line.16"></a>
+<FONT color="green">017</FONT>        }<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        /**<a name="line.19"></a>
+<FONT color="green">020</FONT>         * Renders the Minecart.<a name="line.20"></a>
+<FONT color="green">021</FONT>         */<a name="line.21"></a>
+<FONT color="green">022</FONT>        public void renderTheMinecart(EntityMinecart par1EntityMinecart, double par2, double par4, double par6, float par8, float par9)<a name="line.22"></a>
+<FONT color="green">023</FONT>        {<a name="line.23"></a>
+<FONT color="green">024</FONT>            GL11.glPushMatrix();<a name="line.24"></a>
+<FONT color="green">025</FONT>            long var10 = (long)par1EntityMinecart.entityId * 493286711L;<a name="line.25"></a>
+<FONT color="green">026</FONT>            var10 = var10 * var10 * 4392167121L + var10 * 98761L;<a name="line.26"></a>
+<FONT color="green">027</FONT>            float var12 = (((float)(var10 &gt;&gt; 16 &amp; 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;<a name="line.27"></a>
+<FONT color="green">028</FONT>            float var13 = (((float)(var10 &gt;&gt; 20 &amp; 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;<a name="line.28"></a>
+<FONT color="green">029</FONT>            float var14 = (((float)(var10 &gt;&gt; 24 &amp; 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;<a name="line.29"></a>
+<FONT color="green">030</FONT>            GL11.glTranslatef(var12, var13, var14);<a name="line.30"></a>
+<FONT color="green">031</FONT>            double var15 = par1EntityMinecart.lastTickPosX + (par1EntityMinecart.posX - par1EntityMinecart.lastTickPosX) * (double)par9;<a name="line.31"></a>
+<FONT color="green">032</FONT>            double var17 = par1EntityMinecart.lastTickPosY + (par1EntityMinecart.posY - par1EntityMinecart.lastTickPosY) * (double)par9;<a name="line.32"></a>
+<FONT color="green">033</FONT>            double var19 = par1EntityMinecart.lastTickPosZ + (par1EntityMinecart.posZ - par1EntityMinecart.lastTickPosZ) * (double)par9;<a name="line.33"></a>
+<FONT color="green">034</FONT>            double var21 = 0.30000001192092896D;<a name="line.34"></a>
+<FONT color="green">035</FONT>            Vec3 var23 = par1EntityMinecart.func_70489_a(var15, var17, var19);<a name="line.35"></a>
+<FONT color="green">036</FONT>            float var24 = par1EntityMinecart.prevRotationPitch + (par1EntityMinecart.rotationPitch - par1EntityMinecart.prevRotationPitch) * par9;<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>            if (var23 != null)<a name="line.38"></a>
+<FONT color="green">039</FONT>            {<a name="line.39"></a>
+<FONT color="green">040</FONT>                Vec3 var25 = par1EntityMinecart.func_70495_a(var15, var17, var19, var21);<a name="line.40"></a>
+<FONT color="green">041</FONT>                Vec3 var26 = par1EntityMinecart.func_70495_a(var15, var17, var19, -var21);<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>                if (var25 == null)<a name="line.43"></a>
+<FONT color="green">044</FONT>                {<a name="line.44"></a>
+<FONT color="green">045</FONT>                    var25 = var23;<a name="line.45"></a>
+<FONT color="green">046</FONT>                }<a name="line.46"></a>
+<FONT color="green">047</FONT>    <a name="line.47"></a>
+<FONT color="green">048</FONT>                if (var26 == null)<a name="line.48"></a>
+<FONT color="green">049</FONT>                {<a name="line.49"></a>
+<FONT color="green">050</FONT>                    var26 = var23;<a name="line.50"></a>
+<FONT color="green">051</FONT>                }<a name="line.51"></a>
+<FONT color="green">052</FONT>    <a name="line.52"></a>
+<FONT color="green">053</FONT>                par2 += var23.xCoord - var15;<a name="line.53"></a>
+<FONT color="green">054</FONT>                par4 += (var25.yCoord + var26.yCoord) / 2.0D - var17;<a name="line.54"></a>
+<FONT color="green">055</FONT>                par6 += var23.zCoord - var19;<a name="line.55"></a>
+<FONT color="green">056</FONT>                Vec3 var27 = var26.addVector(-var25.xCoord, -var25.yCoord, -var25.zCoord);<a name="line.56"></a>
+<FONT color="green">057</FONT>    <a name="line.57"></a>
+<FONT color="green">058</FONT>                if (var27.lengthVector() != 0.0D)<a name="line.58"></a>
+<FONT color="green">059</FONT>                {<a name="line.59"></a>
+<FONT color="green">060</FONT>                    var27 = var27.normalize();<a name="line.60"></a>
+<FONT color="green">061</FONT>                    par8 = (float)(Math.atan2(var27.zCoord, var27.xCoord) * 180.0D / Math.PI);<a name="line.61"></a>
+<FONT color="green">062</FONT>                    var24 = (float)(Math.atan(var27.yCoord) * 73.0D);<a name="line.62"></a>
+<FONT color="green">063</FONT>                }<a name="line.63"></a>
+<FONT color="green">064</FONT>            }<a name="line.64"></a>
+<FONT color="green">065</FONT>    <a name="line.65"></a>
+<FONT color="green">066</FONT>            GL11.glTranslatef((float)par2, (float)par4, (float)par6);<a name="line.66"></a>
+<FONT color="green">067</FONT>            GL11.glRotatef(180.0F - par8, 0.0F, 1.0F, 0.0F);<a name="line.67"></a>
+<FONT color="green">068</FONT>            GL11.glRotatef(-var24, 0.0F, 0.0F, 1.0F);<a name="line.68"></a>
+<FONT color="green">069</FONT>            float var28 = (float)par1EntityMinecart.func_70496_j() - par9;<a name="line.69"></a>
+<FONT color="green">070</FONT>            float var30 = (float)par1EntityMinecart.getDamage() - par9;<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>            if (var30 &lt; 0.0F)<a name="line.72"></a>
+<FONT color="green">073</FONT>            {<a name="line.73"></a>
+<FONT color="green">074</FONT>                var30 = 0.0F;<a name="line.74"></a>
+<FONT color="green">075</FONT>            }<a name="line.75"></a>
+<FONT color="green">076</FONT>    <a name="line.76"></a>
+<FONT color="green">077</FONT>            if (var28 &gt; 0.0F)<a name="line.77"></a>
+<FONT color="green">078</FONT>            {<a name="line.78"></a>
+<FONT color="green">079</FONT>                GL11.glRotatef(MathHelper.sin(var28) * var28 * var30 / 10.0F * (float)par1EntityMinecart.func_70493_k(), 1.0F, 0.0F, 0.0F);<a name="line.79"></a>
+<FONT color="green">080</FONT>            }<a name="line.80"></a>
+<FONT color="green">081</FONT>    <a name="line.81"></a>
+<FONT color="green">082</FONT>            if (par1EntityMinecart.minecartType != 0)<a name="line.82"></a>
+<FONT color="green">083</FONT>            {<a name="line.83"></a>
+<FONT color="green">084</FONT>                this.loadTexture("/terrain.png");<a name="line.84"></a>
+<FONT color="green">085</FONT>                float var29 = 0.75F;<a name="line.85"></a>
+<FONT color="green">086</FONT>                GL11.glScalef(var29, var29, var29);<a name="line.86"></a>
+<FONT color="green">087</FONT>    <a name="line.87"></a>
+<FONT color="green">088</FONT>                if (par1EntityMinecart.minecartType == 1)<a name="line.88"></a>
+<FONT color="green">089</FONT>                {<a name="line.89"></a>
+<FONT color="green">090</FONT>                    GL11.glTranslatef(0.0F, 0.5F, 0.0F);<a name="line.90"></a>
+<FONT color="green">091</FONT>                    (new RenderBlocks()).renderBlockAsItem(Block.chest, 0, par1EntityMinecart.getBrightness(par9));<a name="line.91"></a>
+<FONT color="green">092</FONT>                    GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);<a name="line.92"></a>
+<FONT color="green">093</FONT>                    GL11.glTranslatef(0.5F, 0.0F, -0.5F);<a name="line.93"></a>
+<FONT color="green">094</FONT>                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.94"></a>
+<FONT color="green">095</FONT>                }<a name="line.95"></a>
+<FONT color="green">096</FONT>                else if (par1EntityMinecart.minecartType == 2)<a name="line.96"></a>
+<FONT color="green">097</FONT>                {<a name="line.97"></a>
+<FONT color="green">098</FONT>                    GL11.glTranslatef(0.0F, 0.3125F, 0.0F);<a name="line.98"></a>
+<FONT color="green">099</FONT>                    (new RenderBlocks()).renderBlockAsItem(Block.stoneOvenIdle, 0, par1EntityMinecart.getBrightness(par9));<a name="line.99"></a>
+<FONT color="green">100</FONT>                    GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);<a name="line.100"></a>
+<FONT color="green">101</FONT>                    GL11.glTranslatef(0.0F, -0.3125F, 0.0F);<a name="line.101"></a>
+<FONT color="green">102</FONT>                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.102"></a>
+<FONT color="green">103</FONT>                }<a name="line.103"></a>
+<FONT color="green">104</FONT>    <a name="line.104"></a>
+<FONT color="green">105</FONT>                GL11.glScalef(1.0F / var29, 1.0F / var29, 1.0F / var29);<a name="line.105"></a>
+<FONT color="green">106</FONT>            }<a name="line.106"></a>
+<FONT color="green">107</FONT>    <a name="line.107"></a>
+<FONT color="green">108</FONT>            this.loadTexture("/item/cart.png");<a name="line.108"></a>
+<FONT color="green">109</FONT>            GL11.glScalef(-1.0F, -1.0F, 1.0F);<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.modelMinecart.render(par1EntityMinecart, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);<a name="line.110"></a>
+<FONT color="green">111</FONT>            GL11.glPopMatrix();<a name="line.111"></a>
+<FONT color="green">112</FONT>        }<a name="line.112"></a>
+<FONT color="green">113</FONT>    <a name="line.113"></a>
+<FONT color="green">114</FONT>        /**<a name="line.114"></a>
+<FONT color="green">115</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.115"></a>
+<FONT color="green">116</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.116"></a>
+<FONT color="green">117</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.117"></a>
+<FONT color="green">118</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.118"></a>
+<FONT color="green">119</FONT>         */<a name="line.119"></a>
+<FONT color="green">120</FONT>        public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.120"></a>
+<FONT color="green">121</FONT>        {<a name="line.121"></a>
+<FONT color="green">122</FONT>            this.renderTheMinecart((EntityMinecart)par1Entity, par2, par4, par6, par8, par9);<a name="line.122"></a>
+<FONT color="green">123</FONT>        }<a name="line.123"></a>
+<FONT color="green">124</FONT>    }<a name="line.124"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,90 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraftforge.event.entity.living;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraft.src.EntityLiving;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import net.minecraft.src.World;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraftforge.event.Cancelable;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @Cancelable<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class LivingSpecialSpawnEvent extends LivingEvent<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        public final World world;<a name="line.10"></a>
+<FONT color="green">011</FONT>        public final float x;<a name="line.11"></a>
+<FONT color="green">012</FONT>        public final float y;<a name="line.12"></a>
+<FONT color="green">013</FONT>        public final float z;<a name="line.13"></a>
+<FONT color="green">014</FONT>        private boolean handeled = false;<a name="line.14"></a>
+<FONT color="green">015</FONT>        <a name="line.15"></a>
+<FONT color="green">016</FONT>        public LivingSpecialSpawnEvent(EntityLiving entity, World world, float x, float y, float z)<a name="line.16"></a>
+<FONT color="green">017</FONT>        {<a name="line.17"></a>
+<FONT color="green">018</FONT>            super(entity);<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.world = world;<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.x = x;<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.y = y;<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.z = z;<a name="line.22"></a>
+<FONT color="green">023</FONT>        }<a name="line.23"></a>
+<FONT color="green">024</FONT>    }<a name="line.24"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

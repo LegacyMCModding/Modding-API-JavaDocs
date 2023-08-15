@@ -1,0 +1,116 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.awt.Component;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import org.lwjgl.input.Mouse;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    @SideOnly(Side.CLIENT)<a name="line.8"></a>
+<FONT color="green">009</FONT>    public class MouseHelper<a name="line.9"></a>
+<FONT color="green">010</FONT>    {<a name="line.10"></a>
+<FONT color="green">011</FONT>        private final Component windowComponent;<a name="line.11"></a>
+<FONT color="green">012</FONT>        private final GameSettings field_85184_d;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        /** Mouse delta X this frame */<a name="line.14"></a>
+<FONT color="green">015</FONT>        public int deltaX;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        /** Mouse delta Y this frame */<a name="line.17"></a>
+<FONT color="green">018</FONT>        public int deltaY;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        public MouseHelper(Component par1Component, GameSettings par2GameSettings)<a name="line.20"></a>
+<FONT color="green">021</FONT>        {<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.windowComponent = par1Component;<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.field_85184_d = par2GameSettings;<a name="line.23"></a>
+<FONT color="green">024</FONT>        }<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        /**<a name="line.26"></a>
+<FONT color="green">027</FONT>         * Grabs the mouse cursor it doesn't move and isn't seen.<a name="line.27"></a>
+<FONT color="green">028</FONT>         */<a name="line.28"></a>
+<FONT color="green">029</FONT>        public void grabMouseCursor()<a name="line.29"></a>
+<FONT color="green">030</FONT>        {<a name="line.30"></a>
+<FONT color="green">031</FONT>            Mouse.setGrabbed(true);<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.deltaX = 0;<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.deltaY = 0;<a name="line.33"></a>
+<FONT color="green">034</FONT>        }<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>        /**<a name="line.36"></a>
+<FONT color="green">037</FONT>         * Ungrabs the mouse cursor so it can be moved and set it to the center of the screen<a name="line.37"></a>
+<FONT color="green">038</FONT>         */<a name="line.38"></a>
+<FONT color="green">039</FONT>        public void ungrabMouseCursor()<a name="line.39"></a>
+<FONT color="green">040</FONT>        {<a name="line.40"></a>
+<FONT color="green">041</FONT>            Mouse.setCursorPosition(this.windowComponent.getWidth() / 2, this.windowComponent.getHeight() / 2);<a name="line.41"></a>
+<FONT color="green">042</FONT>            Mouse.setGrabbed(false);<a name="line.42"></a>
+<FONT color="green">043</FONT>        }<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        public void mouseXYChange()<a name="line.45"></a>
+<FONT color="green">046</FONT>        {<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.deltaX = Mouse.getDX();<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.deltaY = Mouse.getDY();<a name="line.48"></a>
+<FONT color="green">049</FONT>        }<a name="line.49"></a>
+<FONT color="green">050</FONT>    }<a name="line.50"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

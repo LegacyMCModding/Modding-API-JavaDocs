@@ -1,0 +1,198 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /*<a name="line.1"></a>
+<FONT color="green">002</FONT>     * The FML Forge Mod Loader suite.<a name="line.2"></a>
+<FONT color="green">003</FONT>     * Copyright (C) 2012 cpw<a name="line.3"></a>
+<FONT color="green">004</FONT>     *<a name="line.4"></a>
+<FONT color="green">005</FONT>     * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free<a name="line.5"></a>
+<FONT color="green">006</FONT>     * Software Foundation; either version 2.1 of the License, or any later version.<a name="line.6"></a>
+<FONT color="green">007</FONT>     *<a name="line.7"></a>
+<FONT color="green">008</FONT>     * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR<a name="line.8"></a>
+<FONT color="green">009</FONT>     * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.<a name="line.9"></a>
+<FONT color="green">010</FONT>     *<a name="line.10"></a>
+<FONT color="green">011</FONT>     * You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51<a name="line.11"></a>
+<FONT color="green">012</FONT>     * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA<a name="line.12"></a>
+<FONT color="green">013</FONT>     */<a name="line.13"></a>
+<FONT color="green">014</FONT>    package cpw.mods.fml.common;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>    import java.io.File;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import java.util.List;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import java.util.Set;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>    import com.google.common.eventbus.EventBus;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>    import cpw.mods.fml.common.versioning.ArtifactVersion;<a name="line.22"></a>
+<FONT color="green">023</FONT>    import cpw.mods.fml.common.versioning.VersionRange;<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>    /**<a name="line.25"></a>
+<FONT color="green">026</FONT>     * The container that wraps around mods in the system.<a name="line.26"></a>
+<FONT color="green">027</FONT>     * &lt;p&gt;<a name="line.27"></a>
+<FONT color="green">028</FONT>     * The philosophy is that individual mod implementation technologies should not<a name="line.28"></a>
+<FONT color="green">029</FONT>     * impact the actual loading and management of mod code. This interface provides<a name="line.29"></a>
+<FONT color="green">030</FONT>     * a mechanism by which we can wrap actual mod code so that the loader and other<a name="line.30"></a>
+<FONT color="green">031</FONT>     * facilities can treat mods at arms length.<a name="line.31"></a>
+<FONT color="green">032</FONT>     * &lt;/p&gt;<a name="line.32"></a>
+<FONT color="green">033</FONT>     *<a name="line.33"></a>
+<FONT color="green">034</FONT>     * @author cpw<a name="line.34"></a>
+<FONT color="green">035</FONT>     *<a name="line.35"></a>
+<FONT color="green">036</FONT>     */<a name="line.36"></a>
+<FONT color="green">037</FONT>    <a name="line.37"></a>
+<FONT color="green">038</FONT>    public interface ModContainer<a name="line.38"></a>
+<FONT color="green">039</FONT>    {<a name="line.39"></a>
+<FONT color="green">040</FONT>        /**<a name="line.40"></a>
+<FONT color="green">041</FONT>         * The globally unique modid for this mod<a name="line.41"></a>
+<FONT color="green">042</FONT>         */<a name="line.42"></a>
+<FONT color="green">043</FONT>        String getModId();<a name="line.43"></a>
+<FONT color="green">044</FONT>    <a name="line.44"></a>
+<FONT color="green">045</FONT>        /**<a name="line.45"></a>
+<FONT color="green">046</FONT>         * A human readable name<a name="line.46"></a>
+<FONT color="green">047</FONT>         */<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>        String getName();<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        /**<a name="line.51"></a>
+<FONT color="green">052</FONT>         * A human readable version identifier<a name="line.52"></a>
+<FONT color="green">053</FONT>         */<a name="line.53"></a>
+<FONT color="green">054</FONT>        String getVersion();<a name="line.54"></a>
+<FONT color="green">055</FONT>    <a name="line.55"></a>
+<FONT color="green">056</FONT>        /**<a name="line.56"></a>
+<FONT color="green">057</FONT>         * The location on the file system which this mod came from<a name="line.57"></a>
+<FONT color="green">058</FONT>         */<a name="line.58"></a>
+<FONT color="green">059</FONT>        File getSource();<a name="line.59"></a>
+<FONT color="green">060</FONT>    <a name="line.60"></a>
+<FONT color="green">061</FONT>        /**<a name="line.61"></a>
+<FONT color="green">062</FONT>         * The metadata for this mod<a name="line.62"></a>
+<FONT color="green">063</FONT>         */<a name="line.63"></a>
+<FONT color="green">064</FONT>        ModMetadata getMetadata();<a name="line.64"></a>
+<FONT color="green">065</FONT>    <a name="line.65"></a>
+<FONT color="green">066</FONT>        /**<a name="line.66"></a>
+<FONT color="green">067</FONT>         * Attach this mod to it's metadata from the supplied metadata collection<a name="line.67"></a>
+<FONT color="green">068</FONT>         */<a name="line.68"></a>
+<FONT color="green">069</FONT>        void bindMetadata(MetadataCollection mc);<a name="line.69"></a>
+<FONT color="green">070</FONT>    <a name="line.70"></a>
+<FONT color="green">071</FONT>        /**<a name="line.71"></a>
+<FONT color="green">072</FONT>         * Set the enabled/disabled state of this mod<a name="line.72"></a>
+<FONT color="green">073</FONT>         */<a name="line.73"></a>
+<FONT color="green">074</FONT>        void setEnabledState(boolean enabled);<a name="line.74"></a>
+<FONT color="green">075</FONT>    <a name="line.75"></a>
+<FONT color="green">076</FONT>        /**<a name="line.76"></a>
+<FONT color="green">077</FONT>         * A list of the modids that this mod requires loaded prior to loading<a name="line.77"></a>
+<FONT color="green">078</FONT>         */<a name="line.78"></a>
+<FONT color="green">079</FONT>        Set&lt;ArtifactVersion&gt; getRequirements();<a name="line.79"></a>
+<FONT color="green">080</FONT>    <a name="line.80"></a>
+<FONT color="green">081</FONT>        /**<a name="line.81"></a>
+<FONT color="green">082</FONT>         * A list of modids that should be loaded prior to this one. The special<a name="line.82"></a>
+<FONT color="green">083</FONT>         * value &lt;strong&gt;*&lt;/strong&gt; indicates to load &lt;em&gt;before&lt;/em&gt; any other mod.<a name="line.83"></a>
+<FONT color="green">084</FONT>         */<a name="line.84"></a>
+<FONT color="green">085</FONT>        List&lt;ArtifactVersion&gt; getDependencies();<a name="line.85"></a>
+<FONT color="green">086</FONT>    <a name="line.86"></a>
+<FONT color="green">087</FONT>        /**<a name="line.87"></a>
+<FONT color="green">088</FONT>         * A list of modids that should be loaded &lt;em&gt;after&lt;/em&gt; this one. The<a name="line.88"></a>
+<FONT color="green">089</FONT>         * special value &lt;strong&gt;*&lt;/strong&gt; indicates to load &lt;em&gt;after&lt;/em&gt; any<a name="line.89"></a>
+<FONT color="green">090</FONT>         * other mod.<a name="line.90"></a>
+<FONT color="green">091</FONT>         */<a name="line.91"></a>
+<FONT color="green">092</FONT>        List&lt;ArtifactVersion&gt; getDependants();<a name="line.92"></a>
+<FONT color="green">093</FONT>    <a name="line.93"></a>
+<FONT color="green">094</FONT>        /**<a name="line.94"></a>
+<FONT color="green">095</FONT>         * A representative string encapsulating the sorting preferences for this<a name="line.95"></a>
+<FONT color="green">096</FONT>         * mod<a name="line.96"></a>
+<FONT color="green">097</FONT>         */<a name="line.97"></a>
+<FONT color="green">098</FONT>        String getSortingRules();<a name="line.98"></a>
+<FONT color="green">099</FONT>    <a name="line.99"></a>
+<FONT color="green">100</FONT>        /**<a name="line.100"></a>
+<FONT color="green">101</FONT>         * Register the event bus for the mod and the controller for error handling<a name="line.101"></a>
+<FONT color="green">102</FONT>         * Returns if this bus was successfully registered - disabled mods and other<a name="line.102"></a>
+<FONT color="green">103</FONT>         * mods that don't need real events should return false and avoid further<a name="line.103"></a>
+<FONT color="green">104</FONT>         * processing<a name="line.104"></a>
+<FONT color="green">105</FONT>         *<a name="line.105"></a>
+<FONT color="green">106</FONT>         * @param bus<a name="line.106"></a>
+<FONT color="green">107</FONT>         * @param controller<a name="line.107"></a>
+<FONT color="green">108</FONT>         */<a name="line.108"></a>
+<FONT color="green">109</FONT>        boolean registerBus(EventBus bus, LoadController controller);<a name="line.109"></a>
+<FONT color="green">110</FONT>    <a name="line.110"></a>
+<FONT color="green">111</FONT>        /**<a name="line.111"></a>
+<FONT color="green">112</FONT>         * Does this mod match the supplied mod<a name="line.112"></a>
+<FONT color="green">113</FONT>         *<a name="line.113"></a>
+<FONT color="green">114</FONT>         * @param mod<a name="line.114"></a>
+<FONT color="green">115</FONT>         */<a name="line.115"></a>
+<FONT color="green">116</FONT>        boolean matches(Object mod);<a name="line.116"></a>
+<FONT color="green">117</FONT>    <a name="line.117"></a>
+<FONT color="green">118</FONT>        /**<a name="line.118"></a>
+<FONT color="green">119</FONT>         * Get the actual mod object<a name="line.119"></a>
+<FONT color="green">120</FONT>         */<a name="line.120"></a>
+<FONT color="green">121</FONT>        Object getMod();<a name="line.121"></a>
+<FONT color="green">122</FONT>    <a name="line.122"></a>
+<FONT color="green">123</FONT>        ArtifactVersion getProcessedVersion();<a name="line.123"></a>
+<FONT color="green">124</FONT>    <a name="line.124"></a>
+<FONT color="green">125</FONT>        boolean isImmutable();<a name="line.125"></a>
+<FONT color="green">126</FONT>    <a name="line.126"></a>
+<FONT color="green">127</FONT>        boolean isNetworkMod();<a name="line.127"></a>
+<FONT color="green">128</FONT>    <a name="line.128"></a>
+<FONT color="green">129</FONT>        String getDisplayVersion();<a name="line.129"></a>
+<FONT color="green">130</FONT>    <a name="line.130"></a>
+<FONT color="green">131</FONT>        VersionRange acceptableMinecraftVersionRange();<a name="line.131"></a>
+<FONT color="green">132</FONT>    }<a name="line.132"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

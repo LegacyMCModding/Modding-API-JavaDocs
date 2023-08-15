@@ -16,7 +16,7 @@ This repository contains API reference for different Minecraft modding APIs that
 ## Changelog
 
 <div>
-  <b>Aug 15, 2023</b> - Added LiteLoader <code>1.7.10_04</code>; Forge <code>1.2.3 - 1.4.1.64</code>, <code>1.3.2 - 4.2.5.303</code>, <code>1.4.2 - 6.0.1.341</code>
+  <b>Aug 15, 2023</b> - Added LiteLoader <code>1.7.10_04</code>; Forge <code>1.2.3 - 1.4.1.64</code>, <code>1.3.2 - 4.2.5.303</code>, <code>1.4.2 - 6.0.1.341</code>, <code>1.4.4 - 6.3.0.372</code>, <code>1.4.5 - 6.4.1.436</code>, <code>1.4.6 - 6.5.0.467</code>, <code>1.4.7 - 6.6.0.497</code>, <code>1.5 - 7.7.0.582</code>, <code>1.5.1 - 7.7.2.678</code>
 </div>
 <br>
 <div>

@@ -1,0 +1,84 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package org.bouncycastle.asn1;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    public abstract class ASN1Primitive extends ASN1Object<a name="line.3"></a>
+<FONT color="green">004</FONT>    {<a name="line.4"></a>
+<FONT color="green">005</FONT>        public final boolean equals(Object par1Obj)<a name="line.5"></a>
+<FONT color="green">006</FONT>        {<a name="line.6"></a>
+<FONT color="green">007</FONT>            return this == par1Obj ? true : par1Obj instanceof ASN1Encodable &amp;&amp; this.asn1Equals(((ASN1Encodable)par1Obj).toASN1Primitive());<a name="line.7"></a>
+<FONT color="green">008</FONT>        }<a name="line.8"></a>
+<FONT color="green">009</FONT>    <a name="line.9"></a>
+<FONT color="green">010</FONT>        public ASN1Primitive toASN1Primitive()<a name="line.10"></a>
+<FONT color="green">011</FONT>        {<a name="line.11"></a>
+<FONT color="green">012</FONT>            return this;<a name="line.12"></a>
+<FONT color="green">013</FONT>        }<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        public abstract int hashCode();<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        abstract boolean asn1Equals(ASN1Primitive var1);<a name="line.17"></a>
+<FONT color="green">018</FONT>    }<a name="line.18"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

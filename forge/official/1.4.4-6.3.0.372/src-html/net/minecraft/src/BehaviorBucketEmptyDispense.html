@@ -1,0 +1,126 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import net.minecraft.server.MinecraftServer;<a name="line.3"></a>
+<FONT color="green">004</FONT>    <a name="line.4"></a>
+<FONT color="green">005</FONT>    public class BehaviorBucketEmptyDispense extends BehaviorDefaultDispenseItem<a name="line.5"></a>
+<FONT color="green">006</FONT>    {<a name="line.6"></a>
+<FONT color="green">007</FONT>        /** Reference to the BehaviorDefaultDispenseItem object. */<a name="line.7"></a>
+<FONT color="green">008</FONT>        private final BehaviorDefaultDispenseItem defaultItemDispenseBehavior;<a name="line.8"></a>
+<FONT color="green">009</FONT>    <a name="line.9"></a>
+<FONT color="green">010</FONT>        final MinecraftServer mcServer;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        public BehaviorBucketEmptyDispense(MinecraftServer par1)<a name="line.12"></a>
+<FONT color="green">013</FONT>        {<a name="line.13"></a>
+<FONT color="green">014</FONT>            this.mcServer = par1;<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.defaultItemDispenseBehavior = new BehaviorDefaultDispenseItem();<a name="line.15"></a>
+<FONT color="green">016</FONT>        }<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        /**<a name="line.18"></a>
+<FONT color="green">019</FONT>         * Dispense the specified stack, play the dispense sound and spawn particles.<a name="line.19"></a>
+<FONT color="green">020</FONT>         */<a name="line.20"></a>
+<FONT color="green">021</FONT>        public ItemStack dispenseStack(IBlockSource par1IBlockSource, ItemStack par2ItemStack)<a name="line.21"></a>
+<FONT color="green">022</FONT>        {<a name="line.22"></a>
+<FONT color="green">023</FONT>            EnumFacing var3 = EnumFacing.func_82600_a(par1IBlockSource.func_82620_h());<a name="line.23"></a>
+<FONT color="green">024</FONT>            World var4 = par1IBlockSource.getWorld();<a name="line.24"></a>
+<FONT color="green">025</FONT>            int var5 = par1IBlockSource.getXInt() + var3.func_82601_c();<a name="line.25"></a>
+<FONT color="green">026</FONT>            int var6 = par1IBlockSource.getYInt();<a name="line.26"></a>
+<FONT color="green">027</FONT>            int var7 = par1IBlockSource.getZInt() + var3.func_82599_e();<a name="line.27"></a>
+<FONT color="green">028</FONT>            Material var8 = var4.getBlockMaterial(var5, var6, var7);<a name="line.28"></a>
+<FONT color="green">029</FONT>            int var9 = var4.getBlockMetadata(var5, var6, var7);<a name="line.29"></a>
+<FONT color="green">030</FONT>            Item var10;<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>            if (Material.water.equals(var8) &amp;&amp; var9 == 0)<a name="line.32"></a>
+<FONT color="green">033</FONT>            {<a name="line.33"></a>
+<FONT color="green">034</FONT>                var10 = Item.bucketWater;<a name="line.34"></a>
+<FONT color="green">035</FONT>            }<a name="line.35"></a>
+<FONT color="green">036</FONT>            else<a name="line.36"></a>
+<FONT color="green">037</FONT>            {<a name="line.37"></a>
+<FONT color="green">038</FONT>                if (!Material.lava.equals(var8) || var9 != 0)<a name="line.38"></a>
+<FONT color="green">039</FONT>                {<a name="line.39"></a>
+<FONT color="green">040</FONT>                    return super.dispenseStack(par1IBlockSource, par2ItemStack);<a name="line.40"></a>
+<FONT color="green">041</FONT>                }<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>                var10 = Item.bucketLava;<a name="line.43"></a>
+<FONT color="green">044</FONT>            }<a name="line.44"></a>
+<FONT color="green">045</FONT>    <a name="line.45"></a>
+<FONT color="green">046</FONT>            var4.setBlockWithNotify(var5, var6, var7, 0);<a name="line.46"></a>
+<FONT color="green">047</FONT>    <a name="line.47"></a>
+<FONT color="green">048</FONT>            if (--par2ItemStack.stackSize == 0)<a name="line.48"></a>
+<FONT color="green">049</FONT>            {<a name="line.49"></a>
+<FONT color="green">050</FONT>                par2ItemStack.itemID = var10.shiftedIndex;<a name="line.50"></a>
+<FONT color="green">051</FONT>                par2ItemStack.stackSize = 1;<a name="line.51"></a>
+<FONT color="green">052</FONT>            }<a name="line.52"></a>
+<FONT color="green">053</FONT>            else if (((TileEntityDispenser)par1IBlockSource.func_82619_j()).func_70360_a(new ItemStack(var10)) &lt; 0)<a name="line.53"></a>
+<FONT color="green">054</FONT>            {<a name="line.54"></a>
+<FONT color="green">055</FONT>                this.defaultItemDispenseBehavior.dispense(par1IBlockSource, new ItemStack(var10));<a name="line.55"></a>
+<FONT color="green">056</FONT>            }<a name="line.56"></a>
+<FONT color="green">057</FONT>    <a name="line.57"></a>
+<FONT color="green">058</FONT>            return par2ItemStack;<a name="line.58"></a>
+<FONT color="green">059</FONT>        }<a name="line.59"></a>
+<FONT color="green">060</FONT>    }<a name="line.60"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

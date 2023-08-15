@@ -1,0 +1,617 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.client.Minecraft;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import static net.minecraftforge.client.IItemRenderer.ItemRenderType.*;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import static net.minecraftforge.client.IItemRenderer.ItemRendererHelper.*;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraftforge.client.IItemRenderer;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraftforge.client.MinecraftForgeClient;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import net.minecraftforge.client.ForgeHooksClient;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>    import org.lwjgl.opengl.GL11;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>    @SideOnly(Side.CLIENT)<a name="line.14"></a>
+<FONT color="green">015</FONT>    public class RenderPlayer extends RenderLiving<a name="line.15"></a>
+<FONT color="green">016</FONT>    {<a name="line.16"></a>
+<FONT color="green">017</FONT>        private ModelBiped modelBipedMain;<a name="line.17"></a>
+<FONT color="green">018</FONT>        private ModelBiped modelArmorChestplate;<a name="line.18"></a>
+<FONT color="green">019</FONT>        private ModelBiped modelArmor;<a name="line.19"></a>
+<FONT color="green">020</FONT>        public static String[] armorFilenamePrefix = new String[] {"cloth", "chain", "iron", "diamond", "gold"};<a name="line.20"></a>
+<FONT color="green">021</FONT>        public static float NAME_TAG_RANGE = 64.0f;<a name="line.21"></a>
+<FONT color="green">022</FONT>        public static float NAME_TAG_RANGE_SNEAK = 32.0f;<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        public RenderPlayer()<a name="line.24"></a>
+<FONT color="green">025</FONT>        {<a name="line.25"></a>
+<FONT color="green">026</FONT>            super(new ModelBiped(0.0F), 0.5F);<a name="line.26"></a>
+<FONT color="green">027</FONT>            this.modelBipedMain = (ModelBiped)this.mainModel;<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.modelArmorChestplate = new ModelBiped(1.0F);<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.modelArmor = new ModelBiped(0.5F);<a name="line.29"></a>
+<FONT color="green">030</FONT>        }<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /**<a name="line.32"></a>
+<FONT color="green">033</FONT>         * Set the specified armor model as the player model. Args: player, armorSlot, partialTick<a name="line.33"></a>
+<FONT color="green">034</FONT>         */<a name="line.34"></a>
+<FONT color="green">035</FONT>        protected int setArmorModel(EntityPlayer par1EntityPlayer, int par2, float par3)<a name="line.35"></a>
+<FONT color="green">036</FONT>        {<a name="line.36"></a>
+<FONT color="green">037</FONT>            ItemStack var4 = par1EntityPlayer.inventory.armorItemInSlot(3 - par2);<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>            if (var4 != null)<a name="line.39"></a>
+<FONT color="green">040</FONT>            {<a name="line.40"></a>
+<FONT color="green">041</FONT>                Item var5 = var4.getItem();<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>                if (var5 instanceof ItemArmor)<a name="line.43"></a>
+<FONT color="green">044</FONT>                {<a name="line.44"></a>
+<FONT color="green">045</FONT>                    ItemArmor var6 = (ItemArmor)var5;<a name="line.45"></a>
+<FONT color="green">046</FONT>                    this.loadTexture(ForgeHooksClient.getArmorTexture(var4, "/armor/" + armorFilenamePrefix[var6.renderIndex] + "_" + (par2 == 2 ? 2 : 1) + ".png"));<a name="line.46"></a>
+<FONT color="green">047</FONT>                    ModelBiped var7 = par2 == 2 ? this.modelArmor : this.modelArmorChestplate;<a name="line.47"></a>
+<FONT color="green">048</FONT>                    var7.bipedHead.showModel = par2 == 0;<a name="line.48"></a>
+<FONT color="green">049</FONT>                    var7.bipedHeadwear.showModel = par2 == 0;<a name="line.49"></a>
+<FONT color="green">050</FONT>                    var7.bipedBody.showModel = par2 == 1 || par2 == 2;<a name="line.50"></a>
+<FONT color="green">051</FONT>                    var7.bipedRightArm.showModel = par2 == 1;<a name="line.51"></a>
+<FONT color="green">052</FONT>                    var7.bipedLeftArm.showModel = par2 == 1;<a name="line.52"></a>
+<FONT color="green">053</FONT>                    var7.bipedRightLeg.showModel = par2 == 2 || par2 == 3;<a name="line.53"></a>
+<FONT color="green">054</FONT>                    var7.bipedLeftLeg.showModel = par2 == 2 || par2 == 3;<a name="line.54"></a>
+<FONT color="green">055</FONT>                    this.setRenderPassModel(var7);<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>                    if (var7 != null)<a name="line.57"></a>
+<FONT color="green">058</FONT>                    {<a name="line.58"></a>
+<FONT color="green">059</FONT>                        var7.onGround = this.mainModel.onGround;<a name="line.59"></a>
+<FONT color="green">060</FONT>                    }<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>                    if (var7 != null)<a name="line.62"></a>
+<FONT color="green">063</FONT>                    {<a name="line.63"></a>
+<FONT color="green">064</FONT>                        var7.isRiding = this.mainModel.isRiding;<a name="line.64"></a>
+<FONT color="green">065</FONT>                    }<a name="line.65"></a>
+<FONT color="green">066</FONT>    <a name="line.66"></a>
+<FONT color="green">067</FONT>                    if (var7 != null)<a name="line.67"></a>
+<FONT color="green">068</FONT>                    {<a name="line.68"></a>
+<FONT color="green">069</FONT>                        var7.isChild = this.mainModel.isChild;<a name="line.69"></a>
+<FONT color="green">070</FONT>                    }<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>                    float var8 = 1.0F;<a name="line.72"></a>
+<FONT color="green">073</FONT>    <a name="line.73"></a>
+<FONT color="green">074</FONT>                    if (var6.getArmorMaterial() == EnumArmorMaterial.CLOTH)<a name="line.74"></a>
+<FONT color="green">075</FONT>                    {<a name="line.75"></a>
+<FONT color="green">076</FONT>                        int var9 = var6.getColor(var4);<a name="line.76"></a>
+<FONT color="green">077</FONT>                        float var10 = (float)(var9 &gt;&gt; 16 &amp; 255) / 255.0F;<a name="line.77"></a>
+<FONT color="green">078</FONT>                        float var11 = (float)(var9 &gt;&gt; 8 &amp; 255) / 255.0F;<a name="line.78"></a>
+<FONT color="green">079</FONT>                        float var12 = (float)(var9 &amp; 255) / 255.0F;<a name="line.79"></a>
+<FONT color="green">080</FONT>                        GL11.glColor3f(var8 * var10, var8 * var11, var8 * var12);<a name="line.80"></a>
+<FONT color="green">081</FONT>    <a name="line.81"></a>
+<FONT color="green">082</FONT>                        if (var4.isItemEnchanted())<a name="line.82"></a>
+<FONT color="green">083</FONT>                        {<a name="line.83"></a>
+<FONT color="green">084</FONT>                            return 31;<a name="line.84"></a>
+<FONT color="green">085</FONT>                        }<a name="line.85"></a>
+<FONT color="green">086</FONT>    <a name="line.86"></a>
+<FONT color="green">087</FONT>                        return 16;<a name="line.87"></a>
+<FONT color="green">088</FONT>                    }<a name="line.88"></a>
+<FONT color="green">089</FONT>    <a name="line.89"></a>
+<FONT color="green">090</FONT>                    GL11.glColor3f(var8, var8, var8);<a name="line.90"></a>
+<FONT color="green">091</FONT>    <a name="line.91"></a>
+<FONT color="green">092</FONT>                    if (var4.isItemEnchanted())<a name="line.92"></a>
+<FONT color="green">093</FONT>                    {<a name="line.93"></a>
+<FONT color="green">094</FONT>                        return 15;<a name="line.94"></a>
+<FONT color="green">095</FONT>                    }<a name="line.95"></a>
+<FONT color="green">096</FONT>    <a name="line.96"></a>
+<FONT color="green">097</FONT>                    return 1;<a name="line.97"></a>
+<FONT color="green">098</FONT>                }<a name="line.98"></a>
+<FONT color="green">099</FONT>            }<a name="line.99"></a>
+<FONT color="green">100</FONT>    <a name="line.100"></a>
+<FONT color="green">101</FONT>            return -1;<a name="line.101"></a>
+<FONT color="green">102</FONT>        }<a name="line.102"></a>
+<FONT color="green">103</FONT>    <a name="line.103"></a>
+<FONT color="green">104</FONT>        protected void func_82439_b(EntityPlayer par1EntityPlayer, int par2, float par3)<a name="line.104"></a>
+<FONT color="green">105</FONT>        {<a name="line.105"></a>
+<FONT color="green">106</FONT>            ItemStack var4 = par1EntityPlayer.inventory.armorItemInSlot(3 - par2);<a name="line.106"></a>
+<FONT color="green">107</FONT>    <a name="line.107"></a>
+<FONT color="green">108</FONT>            if (var4 != null)<a name="line.108"></a>
+<FONT color="green">109</FONT>            {<a name="line.109"></a>
+<FONT color="green">110</FONT>                Item var5 = var4.getItem();<a name="line.110"></a>
+<FONT color="green">111</FONT>    <a name="line.111"></a>
+<FONT color="green">112</FONT>                if (var5 instanceof ItemArmor)<a name="line.112"></a>
+<FONT color="green">113</FONT>                {<a name="line.113"></a>
+<FONT color="green">114</FONT>                    ItemArmor var6 = (ItemArmor)var5;<a name="line.114"></a>
+<FONT color="green">115</FONT>                    this.loadTexture(ForgeHooksClient.getArmorTexture(var4, "/armor/" + armorFilenamePrefix[var6.renderIndex] + "_" + (par2 == 2 ? 2 : 1) + "_b.png"));<a name="line.115"></a>
+<FONT color="green">116</FONT>                    float var7 = 1.0F;<a name="line.116"></a>
+<FONT color="green">117</FONT>                    GL11.glColor3f(var7, var7, var7);<a name="line.117"></a>
+<FONT color="green">118</FONT>                }<a name="line.118"></a>
+<FONT color="green">119</FONT>            }<a name="line.119"></a>
+<FONT color="green">120</FONT>        }<a name="line.120"></a>
+<FONT color="green">121</FONT>    <a name="line.121"></a>
+<FONT color="green">122</FONT>        public void renderPlayer(EntityPlayer par1EntityPlayer, double par2, double par4, double par6, float par8, float par9)<a name="line.122"></a>
+<FONT color="green">123</FONT>        {<a name="line.123"></a>
+<FONT color="green">124</FONT>            float var10 = 1.0F;<a name="line.124"></a>
+<FONT color="green">125</FONT>            GL11.glColor3f(var10, var10, var10);<a name="line.125"></a>
+<FONT color="green">126</FONT>            ItemStack var11 = par1EntityPlayer.inventory.getCurrentItem();<a name="line.126"></a>
+<FONT color="green">127</FONT>            this.modelArmorChestplate.heldItemRight = this.modelArmor.heldItemRight = this.modelBipedMain.heldItemRight = var11 != null ? 1 : 0;<a name="line.127"></a>
+<FONT color="green">128</FONT>    <a name="line.128"></a>
+<FONT color="green">129</FONT>            if (var11 != null &amp;&amp; par1EntityPlayer.getItemInUseCount() &gt; 0)<a name="line.129"></a>
+<FONT color="green">130</FONT>            {<a name="line.130"></a>
+<FONT color="green">131</FONT>                EnumAction var12 = var11.getItemUseAction();<a name="line.131"></a>
+<FONT color="green">132</FONT>    <a name="line.132"></a>
+<FONT color="green">133</FONT>                if (var12 == EnumAction.block)<a name="line.133"></a>
+<FONT color="green">134</FONT>                {<a name="line.134"></a>
+<FONT color="green">135</FONT>                    this.modelArmorChestplate.heldItemRight = this.modelArmor.heldItemRight = this.modelBipedMain.heldItemRight = 3;<a name="line.135"></a>
+<FONT color="green">136</FONT>                }<a name="line.136"></a>
+<FONT color="green">137</FONT>                else if (var12 == EnumAction.bow)<a name="line.137"></a>
+<FONT color="green">138</FONT>                {<a name="line.138"></a>
+<FONT color="green">139</FONT>                    this.modelArmorChestplate.aimedBow = this.modelArmor.aimedBow = this.modelBipedMain.aimedBow = true;<a name="line.139"></a>
+<FONT color="green">140</FONT>                }<a name="line.140"></a>
+<FONT color="green">141</FONT>            }<a name="line.141"></a>
+<FONT color="green">142</FONT>    <a name="line.142"></a>
+<FONT color="green">143</FONT>            this.modelArmorChestplate.isSneak = this.modelArmor.isSneak = this.modelBipedMain.isSneak = par1EntityPlayer.isSneaking();<a name="line.143"></a>
+<FONT color="green">144</FONT>            double var14 = par4 - (double)par1EntityPlayer.yOffset;<a name="line.144"></a>
+<FONT color="green">145</FONT>    <a name="line.145"></a>
+<FONT color="green">146</FONT>            if (par1EntityPlayer.isSneaking() &amp;&amp; !(par1EntityPlayer instanceof EntityPlayerSP))<a name="line.146"></a>
+<FONT color="green">147</FONT>            {<a name="line.147"></a>
+<FONT color="green">148</FONT>                var14 -= 0.125D;<a name="line.148"></a>
+<FONT color="green">149</FONT>            }<a name="line.149"></a>
+<FONT color="green">150</FONT>    <a name="line.150"></a>
+<FONT color="green">151</FONT>            super.doRenderLiving(par1EntityPlayer, par2, var14, par6, par8, par9);<a name="line.151"></a>
+<FONT color="green">152</FONT>            this.modelArmorChestplate.aimedBow = this.modelArmor.aimedBow = this.modelBipedMain.aimedBow = false;<a name="line.152"></a>
+<FONT color="green">153</FONT>            this.modelArmorChestplate.isSneak = this.modelArmor.isSneak = this.modelBipedMain.isSneak = false;<a name="line.153"></a>
+<FONT color="green">154</FONT>            this.modelArmorChestplate.heldItemRight = this.modelArmor.heldItemRight = this.modelBipedMain.heldItemRight = 0;<a name="line.154"></a>
+<FONT color="green">155</FONT>        }<a name="line.155"></a>
+<FONT color="green">156</FONT>    <a name="line.156"></a>
+<FONT color="green">157</FONT>        /**<a name="line.157"></a>
+<FONT color="green">158</FONT>         * Used to render a player's name above their head<a name="line.158"></a>
+<FONT color="green">159</FONT>         */<a name="line.159"></a>
+<FONT color="green">160</FONT>        protected void renderName(EntityPlayer par1EntityPlayer, double par2, double par4, double par6)<a name="line.160"></a>
+<FONT color="green">161</FONT>        {<a name="line.161"></a>
+<FONT color="green">162</FONT>            if (Minecraft.isGuiEnabled() &amp;&amp; par1EntityPlayer != this.renderManager.livingPlayer &amp;&amp; !par1EntityPlayer.func_82150_aj())<a name="line.162"></a>
+<FONT color="green">163</FONT>            {<a name="line.163"></a>
+<FONT color="green">164</FONT>                float var8 = 1.6F;<a name="line.164"></a>
+<FONT color="green">165</FONT>                float var9 = 0.016666668F * var8;<a name="line.165"></a>
+<FONT color="green">166</FONT>                double var10 = par1EntityPlayer.getDistanceSqToEntity(this.renderManager.livingPlayer);<a name="line.166"></a>
+<FONT color="green">167</FONT>                float var12 = par1EntityPlayer.isSneaking() ? NAME_TAG_RANGE_SNEAK : NAME_TAG_RANGE;<a name="line.167"></a>
+<FONT color="green">168</FONT>    <a name="line.168"></a>
+<FONT color="green">169</FONT>                if (var10 &lt; (double)(var12 * var12))<a name="line.169"></a>
+<FONT color="green">170</FONT>                {<a name="line.170"></a>
+<FONT color="green">171</FONT>                    String var13 = par1EntityPlayer.username;<a name="line.171"></a>
+<FONT color="green">172</FONT>    <a name="line.172"></a>
+<FONT color="green">173</FONT>                    if (par1EntityPlayer.isSneaking())<a name="line.173"></a>
+<FONT color="green">174</FONT>                    {<a name="line.174"></a>
+<FONT color="green">175</FONT>                        FontRenderer var14 = this.getFontRendererFromRenderManager();<a name="line.175"></a>
+<FONT color="green">176</FONT>                        GL11.glPushMatrix();<a name="line.176"></a>
+<FONT color="green">177</FONT>                        GL11.glTranslatef((float)par2 + 0.0F, (float)par4 + 2.3F, (float)par6);<a name="line.177"></a>
+<FONT color="green">178</FONT>                        GL11.glNormal3f(0.0F, 1.0F, 0.0F);<a name="line.178"></a>
+<FONT color="green">179</FONT>                        GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);<a name="line.179"></a>
+<FONT color="green">180</FONT>                        GL11.glRotatef(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);<a name="line.180"></a>
+<FONT color="green">181</FONT>                        GL11.glScalef(-var9, -var9, var9);<a name="line.181"></a>
+<FONT color="green">182</FONT>                        GL11.glDisable(GL11.GL_LIGHTING);<a name="line.182"></a>
+<FONT color="green">183</FONT>                        GL11.glTranslatef(0.0F, 0.25F / var9, 0.0F);<a name="line.183"></a>
+<FONT color="green">184</FONT>                        GL11.glDepthMask(false);<a name="line.184"></a>
+<FONT color="green">185</FONT>                        GL11.glEnable(GL11.GL_BLEND);<a name="line.185"></a>
+<FONT color="green">186</FONT>                        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);<a name="line.186"></a>
+<FONT color="green">187</FONT>                        Tessellator var15 = Tessellator.instance;<a name="line.187"></a>
+<FONT color="green">188</FONT>                        GL11.glDisable(GL11.GL_TEXTURE_2D);<a name="line.188"></a>
+<FONT color="green">189</FONT>                        var15.startDrawingQuads();<a name="line.189"></a>
+<FONT color="green">190</FONT>                        int var16 = var14.getStringWidth(var13) / 2;<a name="line.190"></a>
+<FONT color="green">191</FONT>                        var15.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);<a name="line.191"></a>
+<FONT color="green">192</FONT>                        var15.addVertex((double)(-var16 - 1), -1.0D, 0.0D);<a name="line.192"></a>
+<FONT color="green">193</FONT>                        var15.addVertex((double)(-var16 - 1), 8.0D, 0.0D);<a name="line.193"></a>
+<FONT color="green">194</FONT>                        var15.addVertex((double)(var16 + 1), 8.0D, 0.0D);<a name="line.194"></a>
+<FONT color="green">195</FONT>                        var15.addVertex((double)(var16 + 1), -1.0D, 0.0D);<a name="line.195"></a>
+<FONT color="green">196</FONT>                        var15.draw();<a name="line.196"></a>
+<FONT color="green">197</FONT>                        GL11.glEnable(GL11.GL_TEXTURE_2D);<a name="line.197"></a>
+<FONT color="green">198</FONT>                        GL11.glDepthMask(true);<a name="line.198"></a>
+<FONT color="green">199</FONT>                        var14.drawString(var13, -var14.getStringWidth(var13) / 2, 0, 553648127);<a name="line.199"></a>
+<FONT color="green">200</FONT>                        GL11.glEnable(GL11.GL_LIGHTING);<a name="line.200"></a>
+<FONT color="green">201</FONT>                        GL11.glDisable(GL11.GL_BLEND);<a name="line.201"></a>
+<FONT color="green">202</FONT>                        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.202"></a>
+<FONT color="green">203</FONT>                        GL11.glPopMatrix();<a name="line.203"></a>
+<FONT color="green">204</FONT>                    }<a name="line.204"></a>
+<FONT color="green">205</FONT>                    else if (par1EntityPlayer.isPlayerSleeping())<a name="line.205"></a>
+<FONT color="green">206</FONT>                    {<a name="line.206"></a>
+<FONT color="green">207</FONT>                        this.renderLivingLabel(par1EntityPlayer, var13, par2, par4 - 1.5D, par6, 64);<a name="line.207"></a>
+<FONT color="green">208</FONT>                    }<a name="line.208"></a>
+<FONT color="green">209</FONT>                    else<a name="line.209"></a>
+<FONT color="green">210</FONT>                    {<a name="line.210"></a>
+<FONT color="green">211</FONT>                        this.renderLivingLabel(par1EntityPlayer, var13, par2, par4, par6, 64);<a name="line.211"></a>
+<FONT color="green">212</FONT>                    }<a name="line.212"></a>
+<FONT color="green">213</FONT>                }<a name="line.213"></a>
+<FONT color="green">214</FONT>            }<a name="line.214"></a>
+<FONT color="green">215</FONT>        }<a name="line.215"></a>
+<FONT color="green">216</FONT>    <a name="line.216"></a>
+<FONT color="green">217</FONT>        /**<a name="line.217"></a>
+<FONT color="green">218</FONT>         * Method for adding special render rules<a name="line.218"></a>
+<FONT color="green">219</FONT>         */<a name="line.219"></a>
+<FONT color="green">220</FONT>        protected void renderSpecials(EntityPlayer par1EntityPlayer, float par2)<a name="line.220"></a>
+<FONT color="green">221</FONT>        {<a name="line.221"></a>
+<FONT color="green">222</FONT>            float var3 = 1.0F;<a name="line.222"></a>
+<FONT color="green">223</FONT>            GL11.glColor3f(var3, var3, var3);<a name="line.223"></a>
+<FONT color="green">224</FONT>            super.renderEquippedItems(par1EntityPlayer, par2);<a name="line.224"></a>
+<FONT color="green">225</FONT>            super.func_85093_e(par1EntityPlayer, par2);<a name="line.225"></a>
+<FONT color="green">226</FONT>            ItemStack var4 = par1EntityPlayer.inventory.armorItemInSlot(3);<a name="line.226"></a>
+<FONT color="green">227</FONT>    <a name="line.227"></a>
+<FONT color="green">228</FONT>            if (var4 != null)<a name="line.228"></a>
+<FONT color="green">229</FONT>            {<a name="line.229"></a>
+<FONT color="green">230</FONT>                GL11.glPushMatrix();<a name="line.230"></a>
+<FONT color="green">231</FONT>                this.modelBipedMain.bipedHead.postRender(0.0625F);<a name="line.231"></a>
+<FONT color="green">232</FONT>                float var5;<a name="line.232"></a>
+<FONT color="green">233</FONT>    <a name="line.233"></a>
+<FONT color="green">234</FONT>                if (var4 != null &amp;&amp; var4.getItem() instanceof ItemBlock)<a name="line.234"></a>
+<FONT color="green">235</FONT>                {<a name="line.235"></a>
+<FONT color="green">236</FONT>                    IItemRenderer customRenderer = MinecraftForgeClient.getItemRenderer(var4, EQUIPPED);<a name="line.236"></a>
+<FONT color="green">237</FONT>                    boolean is3D = (customRenderer != null &amp;&amp; customRenderer.shouldUseRenderHelper(EQUIPPED, var4, BLOCK_3D));<a name="line.237"></a>
+<FONT color="green">238</FONT>    <a name="line.238"></a>
+<FONT color="green">239</FONT>                    if (is3D || RenderBlocks.renderItemIn3d(Block.blocksList[var4.itemID].getRenderType()))<a name="line.239"></a>
+<FONT color="green">240</FONT>                    {<a name="line.240"></a>
+<FONT color="green">241</FONT>                        var5 = 0.625F;<a name="line.241"></a>
+<FONT color="green">242</FONT>                        GL11.glTranslatef(0.0F, -0.25F, 0.0F);<a name="line.242"></a>
+<FONT color="green">243</FONT>                        GL11.glRotatef(90.0F, 0.0F, 1.0F, 0.0F);<a name="line.243"></a>
+<FONT color="green">244</FONT>                        GL11.glScalef(var5, -var5, -var5);<a name="line.244"></a>
+<FONT color="green">245</FONT>                    }<a name="line.245"></a>
+<FONT color="green">246</FONT>    <a name="line.246"></a>
+<FONT color="green">247</FONT>                    this.renderManager.itemRenderer.renderItem(par1EntityPlayer, var4, 0);<a name="line.247"></a>
+<FONT color="green">248</FONT>                }<a name="line.248"></a>
+<FONT color="green">249</FONT>                else if (var4.getItem().shiftedIndex == Item.skull.shiftedIndex)<a name="line.249"></a>
+<FONT color="green">250</FONT>                {<a name="line.250"></a>
+<FONT color="green">251</FONT>                    var5 = 1.0625F;<a name="line.251"></a>
+<FONT color="green">252</FONT>                    GL11.glScalef(var5, -var5, -var5);<a name="line.252"></a>
+<FONT color="green">253</FONT>                    String var6 = "";<a name="line.253"></a>
+<FONT color="green">254</FONT>    <a name="line.254"></a>
+<FONT color="green">255</FONT>                    if (var4.hasTagCompound() &amp;&amp; var4.getTagCompound().hasKey("SkullOwner"))<a name="line.255"></a>
+<FONT color="green">256</FONT>                    {<a name="line.256"></a>
+<FONT color="green">257</FONT>                        var6 = var4.getTagCompound().getString("SkullOwner");<a name="line.257"></a>
+<FONT color="green">258</FONT>                    }<a name="line.258"></a>
+<FONT color="green">259</FONT>    <a name="line.259"></a>
+<FONT color="green">260</FONT>                    TileEntitySkullRenderer.skullRenderer.func_82393_a(-0.5F, 0.0F, -0.5F, 1, 180.0F, var4.getItemDamage(), var6);<a name="line.260"></a>
+<FONT color="green">261</FONT>                }<a name="line.261"></a>
+<FONT color="green">262</FONT>    <a name="line.262"></a>
+<FONT color="green">263</FONT>                GL11.glPopMatrix();<a name="line.263"></a>
+<FONT color="green">264</FONT>            }<a name="line.264"></a>
+<FONT color="green">265</FONT>    <a name="line.265"></a>
+<FONT color="green">266</FONT>            float var7;<a name="line.266"></a>
+<FONT color="green">267</FONT>            float var8;<a name="line.267"></a>
+<FONT color="green">268</FONT>    <a name="line.268"></a>
+<FONT color="green">269</FONT>            if (par1EntityPlayer.username.equals("deadmau5") &amp;&amp; this.loadDownloadableImageTexture(par1EntityPlayer.skinUrl, (String)null))<a name="line.269"></a>
+<FONT color="green">270</FONT>            {<a name="line.270"></a>
+<FONT color="green">271</FONT>                for (int var20 = 0; var20 &lt; 2; ++var20)<a name="line.271"></a>
+<FONT color="green">272</FONT>                {<a name="line.272"></a>
+<FONT color="green">273</FONT>                    float var25 = par1EntityPlayer.prevRotationYaw + (par1EntityPlayer.rotationYaw - par1EntityPlayer.prevRotationYaw) * par2 - (par1EntityPlayer.prevRenderYawOffset + (par1EntityPlayer.renderYawOffset - par1EntityPlayer.prevRenderYawOffset) * par2);<a name="line.273"></a>
+<FONT color="green">274</FONT>                    var7 = par1EntityPlayer.prevRotationPitch + (par1EntityPlayer.rotationPitch - par1EntityPlayer.prevRotationPitch) * par2;<a name="line.274"></a>
+<FONT color="green">275</FONT>                    GL11.glPushMatrix();<a name="line.275"></a>
+<FONT color="green">276</FONT>                    GL11.glRotatef(var25, 0.0F, 1.0F, 0.0F);<a name="line.276"></a>
+<FONT color="green">277</FONT>                    GL11.glRotatef(var7, 1.0F, 0.0F, 0.0F);<a name="line.277"></a>
+<FONT color="green">278</FONT>                    GL11.glTranslatef(0.375F * (float)(var20 * 2 - 1), 0.0F, 0.0F);<a name="line.278"></a>
+<FONT color="green">279</FONT>                    GL11.glTranslatef(0.0F, -0.375F, 0.0F);<a name="line.279"></a>
+<FONT color="green">280</FONT>                    GL11.glRotatef(-var7, 1.0F, 0.0F, 0.0F);<a name="line.280"></a>
+<FONT color="green">281</FONT>                    GL11.glRotatef(-var25, 0.0F, 1.0F, 0.0F);<a name="line.281"></a>
+<FONT color="green">282</FONT>                    var8 = 1.3333334F;<a name="line.282"></a>
+<FONT color="green">283</FONT>                    GL11.glScalef(var8, var8, var8);<a name="line.283"></a>
+<FONT color="green">284</FONT>                    this.modelBipedMain.renderEars(0.0625F);<a name="line.284"></a>
+<FONT color="green">285</FONT>                    GL11.glPopMatrix();<a name="line.285"></a>
+<FONT color="green">286</FONT>                }<a name="line.286"></a>
+<FONT color="green">287</FONT>            }<a name="line.287"></a>
+<FONT color="green">288</FONT>    <a name="line.288"></a>
+<FONT color="green">289</FONT>            float var11;<a name="line.289"></a>
+<FONT color="green">290</FONT>    <a name="line.290"></a>
+<FONT color="green">291</FONT>            if (this.loadDownloadableImageTexture(par1EntityPlayer.playerCloakUrl, (String)null) &amp;&amp; !par1EntityPlayer.func_82150_aj() &amp;&amp; !par1EntityPlayer.func_82238_cc())<a name="line.291"></a>
+<FONT color="green">292</FONT>            {<a name="line.292"></a>
+<FONT color="green">293</FONT>                GL11.glPushMatrix();<a name="line.293"></a>
+<FONT color="green">294</FONT>                GL11.glTranslatef(0.0F, 0.0F, 0.125F);<a name="line.294"></a>
+<FONT color="green">295</FONT>                double var22 = par1EntityPlayer.field_71091_bM + (par1EntityPlayer.field_71094_bP - par1EntityPlayer.field_71091_bM) * (double)par2 - (par1EntityPlayer.prevPosX + (par1EntityPlayer.posX - par1EntityPlayer.prevPosX) * (double)par2);<a name="line.295"></a>
+<FONT color="green">296</FONT>                double var24 = par1EntityPlayer.field_71096_bN + (par1EntityPlayer.field_71095_bQ - par1EntityPlayer.field_71096_bN) * (double)par2 - (par1EntityPlayer.prevPosY + (par1EntityPlayer.posY - par1EntityPlayer.prevPosY) * (double)par2);<a name="line.296"></a>
+<FONT color="green">297</FONT>                double var9 = par1EntityPlayer.field_71097_bO + (par1EntityPlayer.field_71085_bR - par1EntityPlayer.field_71097_bO) * (double)par2 - (par1EntityPlayer.prevPosZ + (par1EntityPlayer.posZ - par1EntityPlayer.prevPosZ) * (double)par2);<a name="line.297"></a>
+<FONT color="green">298</FONT>                var11 = par1EntityPlayer.prevRenderYawOffset + (par1EntityPlayer.renderYawOffset - par1EntityPlayer.prevRenderYawOffset) * par2;<a name="line.298"></a>
+<FONT color="green">299</FONT>                double var12 = (double)MathHelper.sin(var11 * (float)Math.PI / 180.0F);<a name="line.299"></a>
+<FONT color="green">300</FONT>                double var14 = (double)(-MathHelper.cos(var11 * (float)Math.PI / 180.0F));<a name="line.300"></a>
+<FONT color="green">301</FONT>                float var16 = (float)var24 * 10.0F;<a name="line.301"></a>
+<FONT color="green">302</FONT>    <a name="line.302"></a>
+<FONT color="green">303</FONT>                if (var16 &lt; -6.0F)<a name="line.303"></a>
+<FONT color="green">304</FONT>                {<a name="line.304"></a>
+<FONT color="green">305</FONT>                    var16 = -6.0F;<a name="line.305"></a>
+<FONT color="green">306</FONT>                }<a name="line.306"></a>
+<FONT color="green">307</FONT>    <a name="line.307"></a>
+<FONT color="green">308</FONT>                if (var16 &gt; 32.0F)<a name="line.308"></a>
+<FONT color="green">309</FONT>                {<a name="line.309"></a>
+<FONT color="green">310</FONT>                    var16 = 32.0F;<a name="line.310"></a>
+<FONT color="green">311</FONT>                }<a name="line.311"></a>
+<FONT color="green">312</FONT>    <a name="line.312"></a>
+<FONT color="green">313</FONT>                float var17 = (float)(var22 * var12 + var9 * var14) * 100.0F;<a name="line.313"></a>
+<FONT color="green">314</FONT>                float var18 = (float)(var22 * var14 - var9 * var12) * 100.0F;<a name="line.314"></a>
+<FONT color="green">315</FONT>    <a name="line.315"></a>
+<FONT color="green">316</FONT>                if (var17 &lt; 0.0F)<a name="line.316"></a>
+<FONT color="green">317</FONT>                {<a name="line.317"></a>
+<FONT color="green">318</FONT>                    var17 = 0.0F;<a name="line.318"></a>
+<FONT color="green">319</FONT>                }<a name="line.319"></a>
+<FONT color="green">320</FONT>    <a name="line.320"></a>
+<FONT color="green">321</FONT>                float var19 = par1EntityPlayer.prevCameraYaw + (par1EntityPlayer.cameraYaw - par1EntityPlayer.prevCameraYaw) * par2;<a name="line.321"></a>
+<FONT color="green">322</FONT>                var16 += MathHelper.sin((par1EntityPlayer.prevDistanceWalkedModified + (par1EntityPlayer.distanceWalkedModified - par1EntityPlayer.prevDistanceWalkedModified) * par2) * 6.0F) * 32.0F * var19;<a name="line.322"></a>
+<FONT color="green">323</FONT>    <a name="line.323"></a>
+<FONT color="green">324</FONT>                if (par1EntityPlayer.isSneaking())<a name="line.324"></a>
+<FONT color="green">325</FONT>                {<a name="line.325"></a>
+<FONT color="green">326</FONT>                    var16 += 25.0F;<a name="line.326"></a>
+<FONT color="green">327</FONT>                }<a name="line.327"></a>
+<FONT color="green">328</FONT>    <a name="line.328"></a>
+<FONT color="green">329</FONT>                GL11.glRotatef(6.0F + var17 / 2.0F + var16, 1.0F, 0.0F, 0.0F);<a name="line.329"></a>
+<FONT color="green">330</FONT>                GL11.glRotatef(var18 / 2.0F, 0.0F, 0.0F, 1.0F);<a name="line.330"></a>
+<FONT color="green">331</FONT>                GL11.glRotatef(-var18 / 2.0F, 0.0F, 1.0F, 0.0F);<a name="line.331"></a>
+<FONT color="green">332</FONT>                GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);<a name="line.332"></a>
+<FONT color="green">333</FONT>                this.modelBipedMain.renderCloak(0.0625F);<a name="line.333"></a>
+<FONT color="green">334</FONT>                GL11.glPopMatrix();<a name="line.334"></a>
+<FONT color="green">335</FONT>            }<a name="line.335"></a>
+<FONT color="green">336</FONT>    <a name="line.336"></a>
+<FONT color="green">337</FONT>            ItemStack var21 = par1EntityPlayer.inventory.getCurrentItem();<a name="line.337"></a>
+<FONT color="green">338</FONT>    <a name="line.338"></a>
+<FONT color="green">339</FONT>            if (var21 != null)<a name="line.339"></a>
+<FONT color="green">340</FONT>            {<a name="line.340"></a>
+<FONT color="green">341</FONT>                GL11.glPushMatrix();<a name="line.341"></a>
+<FONT color="green">342</FONT>                this.modelBipedMain.bipedRightArm.postRender(0.0625F);<a name="line.342"></a>
+<FONT color="green">343</FONT>                GL11.glTranslatef(-0.0625F, 0.4375F, 0.0625F);<a name="line.343"></a>
+<FONT color="green">344</FONT>    <a name="line.344"></a>
+<FONT color="green">345</FONT>                if (par1EntityPlayer.fishEntity != null)<a name="line.345"></a>
+<FONT color="green">346</FONT>                {<a name="line.346"></a>
+<FONT color="green">347</FONT>                    var21 = new ItemStack(Item.stick);<a name="line.347"></a>
+<FONT color="green">348</FONT>                }<a name="line.348"></a>
+<FONT color="green">349</FONT>    <a name="line.349"></a>
+<FONT color="green">350</FONT>                EnumAction var23 = null;<a name="line.350"></a>
+<FONT color="green">351</FONT>    <a name="line.351"></a>
+<FONT color="green">352</FONT>                if (par1EntityPlayer.getItemInUseCount() &gt; 0)<a name="line.352"></a>
+<FONT color="green">353</FONT>                {<a name="line.353"></a>
+<FONT color="green">354</FONT>                    var23 = var21.getItemUseAction();<a name="line.354"></a>
+<FONT color="green">355</FONT>                }<a name="line.355"></a>
+<FONT color="green">356</FONT>    <a name="line.356"></a>
+<FONT color="green">357</FONT>                IItemRenderer customRenderer = MinecraftForgeClient.getItemRenderer(var21, EQUIPPED);<a name="line.357"></a>
+<FONT color="green">358</FONT>                boolean is3D = (customRenderer != null &amp;&amp; customRenderer.shouldUseRenderHelper(EQUIPPED, var21, BLOCK_3D));<a name="line.358"></a>
+<FONT color="green">359</FONT>    <a name="line.359"></a>
+<FONT color="green">360</FONT>                if (var21.getItem() instanceof ItemBlock &amp;&amp; (is3D || RenderBlocks.renderItemIn3d(Block.blocksList[var21.itemID].getRenderType())))<a name="line.360"></a>
+<FONT color="green">361</FONT>                {<a name="line.361"></a>
+<FONT color="green">362</FONT>                    var7 = 0.5F;<a name="line.362"></a>
+<FONT color="green">363</FONT>                    GL11.glTranslatef(0.0F, 0.1875F, -0.3125F);<a name="line.363"></a>
+<FONT color="green">364</FONT>                    var7 *= 0.75F;<a name="line.364"></a>
+<FONT color="green">365</FONT>                    GL11.glRotatef(20.0F, 1.0F, 0.0F, 0.0F);<a name="line.365"></a>
+<FONT color="green">366</FONT>                    GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);<a name="line.366"></a>
+<FONT color="green">367</FONT>                    GL11.glScalef(-var7, -var7, var7);<a name="line.367"></a>
+<FONT color="green">368</FONT>                }<a name="line.368"></a>
+<FONT color="green">369</FONT>                else if (var21.itemID == Item.bow.shiftedIndex)<a name="line.369"></a>
+<FONT color="green">370</FONT>                {<a name="line.370"></a>
+<FONT color="green">371</FONT>                    var7 = 0.625F;<a name="line.371"></a>
+<FONT color="green">372</FONT>                    GL11.glTranslatef(0.0F, 0.125F, 0.3125F);<a name="line.372"></a>
+<FONT color="green">373</FONT>                    GL11.glRotatef(-20.0F, 0.0F, 1.0F, 0.0F);<a name="line.373"></a>
+<FONT color="green">374</FONT>                    GL11.glScalef(var7, -var7, var7);<a name="line.374"></a>
+<FONT color="green">375</FONT>                    GL11.glRotatef(-100.0F, 1.0F, 0.0F, 0.0F);<a name="line.375"></a>
+<FONT color="green">376</FONT>                    GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);<a name="line.376"></a>
+<FONT color="green">377</FONT>                }<a name="line.377"></a>
+<FONT color="green">378</FONT>                else if (Item.itemsList[var21.itemID].isFull3D())<a name="line.378"></a>
+<FONT color="green">379</FONT>                {<a name="line.379"></a>
+<FONT color="green">380</FONT>                    var7 = 0.625F;<a name="line.380"></a>
+<FONT color="green">381</FONT>    <a name="line.381"></a>
+<FONT color="green">382</FONT>                    if (Item.itemsList[var21.itemID].shouldRotateAroundWhenRendering())<a name="line.382"></a>
+<FONT color="green">383</FONT>                    {<a name="line.383"></a>
+<FONT color="green">384</FONT>                        GL11.glRotatef(180.0F, 0.0F, 0.0F, 1.0F);<a name="line.384"></a>
+<FONT color="green">385</FONT>                        GL11.glTranslatef(0.0F, -0.125F, 0.0F);<a name="line.385"></a>
+<FONT color="green">386</FONT>                    }<a name="line.386"></a>
+<FONT color="green">387</FONT>    <a name="line.387"></a>
+<FONT color="green">388</FONT>                    if (par1EntityPlayer.getItemInUseCount() &gt; 0 &amp;&amp; var23 == EnumAction.block)<a name="line.388"></a>
+<FONT color="green">389</FONT>                    {<a name="line.389"></a>
+<FONT color="green">390</FONT>                        GL11.glTranslatef(0.05F, 0.0F, -0.1F);<a name="line.390"></a>
+<FONT color="green">391</FONT>                        GL11.glRotatef(-50.0F, 0.0F, 1.0F, 0.0F);<a name="line.391"></a>
+<FONT color="green">392</FONT>                        GL11.glRotatef(-10.0F, 1.0F, 0.0F, 0.0F);<a name="line.392"></a>
+<FONT color="green">393</FONT>                        GL11.glRotatef(-60.0F, 0.0F, 0.0F, 1.0F);<a name="line.393"></a>
+<FONT color="green">394</FONT>                    }<a name="line.394"></a>
+<FONT color="green">395</FONT>    <a name="line.395"></a>
+<FONT color="green">396</FONT>                    GL11.glTranslatef(0.0F, 0.1875F, 0.0F);<a name="line.396"></a>
+<FONT color="green">397</FONT>                    GL11.glScalef(var7, -var7, var7);<a name="line.397"></a>
+<FONT color="green">398</FONT>                    GL11.glRotatef(-100.0F, 1.0F, 0.0F, 0.0F);<a name="line.398"></a>
+<FONT color="green">399</FONT>                    GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);<a name="line.399"></a>
+<FONT color="green">400</FONT>                }<a name="line.400"></a>
+<FONT color="green">401</FONT>                else<a name="line.401"></a>
+<FONT color="green">402</FONT>                {<a name="line.402"></a>
+<FONT color="green">403</FONT>                    var7 = 0.375F;<a name="line.403"></a>
+<FONT color="green">404</FONT>                    GL11.glTranslatef(0.25F, 0.1875F, -0.1875F);<a name="line.404"></a>
+<FONT color="green">405</FONT>                    GL11.glScalef(var7, var7, var7);<a name="line.405"></a>
+<FONT color="green">406</FONT>                    GL11.glRotatef(60.0F, 0.0F, 0.0F, 1.0F);<a name="line.406"></a>
+<FONT color="green">407</FONT>                    GL11.glRotatef(-90.0F, 1.0F, 0.0F, 0.0F);<a name="line.407"></a>
+<FONT color="green">408</FONT>                    GL11.glRotatef(20.0F, 0.0F, 0.0F, 1.0F);<a name="line.408"></a>
+<FONT color="green">409</FONT>                }<a name="line.409"></a>
+<FONT color="green">410</FONT>    <a name="line.410"></a>
+<FONT color="green">411</FONT>                float var10;<a name="line.411"></a>
+<FONT color="green">412</FONT>                int var27;<a name="line.412"></a>
+<FONT color="green">413</FONT>                float var28;<a name="line.413"></a>
+<FONT color="green">414</FONT>    <a name="line.414"></a>
+<FONT color="green">415</FONT>                if (var21.getItem().requiresMultipleRenderPasses())<a name="line.415"></a>
+<FONT color="green">416</FONT>                {<a name="line.416"></a>
+<FONT color="green">417</FONT>                    for (var27 = 0; var27 &lt; var21.getItem().getRenderPasses(var21.getItemDamage()); ++var27)<a name="line.417"></a>
+<FONT color="green">418</FONT>                    {<a name="line.418"></a>
+<FONT color="green">419</FONT>                        int var26 = var21.getItem().getColorFromItemStack(var21, var27);<a name="line.419"></a>
+<FONT color="green">420</FONT>                        var28 = (float)(var26 &gt;&gt; 16 &amp; 255) / 255.0F;<a name="line.420"></a>
+<FONT color="green">421</FONT>                        var10 = (float)(var26 &gt;&gt; 8 &amp; 255) / 255.0F;<a name="line.421"></a>
+<FONT color="green">422</FONT>                        var11 = (float)(var26 &amp; 255) / 255.0F;<a name="line.422"></a>
+<FONT color="green">423</FONT>                        GL11.glColor4f(var28, var10, var11, 1.0F);<a name="line.423"></a>
+<FONT color="green">424</FONT>                        this.renderManager.itemRenderer.renderItem(par1EntityPlayer, var21, var27);<a name="line.424"></a>
+<FONT color="green">425</FONT>                    }<a name="line.425"></a>
+<FONT color="green">426</FONT>                }<a name="line.426"></a>
+<FONT color="green">427</FONT>                else<a name="line.427"></a>
+<FONT color="green">428</FONT>                {<a name="line.428"></a>
+<FONT color="green">429</FONT>                    var27 = var21.getItem().getColorFromItemStack(var21, 0);<a name="line.429"></a>
+<FONT color="green">430</FONT>                    var8 = (float)(var27 &gt;&gt; 16 &amp; 255) / 255.0F;<a name="line.430"></a>
+<FONT color="green">431</FONT>                    var28 = (float)(var27 &gt;&gt; 8 &amp; 255) / 255.0F;<a name="line.431"></a>
+<FONT color="green">432</FONT>                    var10 = (float)(var27 &amp; 255) / 255.0F;<a name="line.432"></a>
+<FONT color="green">433</FONT>                    GL11.glColor4f(var8, var28, var10, 1.0F);<a name="line.433"></a>
+<FONT color="green">434</FONT>                    this.renderManager.itemRenderer.renderItem(par1EntityPlayer, var21, 0);<a name="line.434"></a>
+<FONT color="green">435</FONT>                }<a name="line.435"></a>
+<FONT color="green">436</FONT>    <a name="line.436"></a>
+<FONT color="green">437</FONT>                GL11.glPopMatrix();<a name="line.437"></a>
+<FONT color="green">438</FONT>            }<a name="line.438"></a>
+<FONT color="green">439</FONT>        }<a name="line.439"></a>
+<FONT color="green">440</FONT>    <a name="line.440"></a>
+<FONT color="green">441</FONT>        protected void renderPlayerScale(EntityPlayer par1EntityPlayer, float par2)<a name="line.441"></a>
+<FONT color="green">442</FONT>        {<a name="line.442"></a>
+<FONT color="green">443</FONT>            float var3 = 0.9375F;<a name="line.443"></a>
+<FONT color="green">444</FONT>            GL11.glScalef(var3, var3, var3);<a name="line.444"></a>
+<FONT color="green">445</FONT>        }<a name="line.445"></a>
+<FONT color="green">446</FONT>    <a name="line.446"></a>
+<FONT color="green">447</FONT>        public void func_82441_a(EntityPlayer par1EntityPlayer)<a name="line.447"></a>
+<FONT color="green">448</FONT>        {<a name="line.448"></a>
+<FONT color="green">449</FONT>            float var2 = 1.0F;<a name="line.449"></a>
+<FONT color="green">450</FONT>            GL11.glColor3f(var2, var2, var2);<a name="line.450"></a>
+<FONT color="green">451</FONT>            this.modelBipedMain.onGround = 0.0F;<a name="line.451"></a>
+<FONT color="green">452</FONT>            this.modelBipedMain.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, par1EntityPlayer);<a name="line.452"></a>
+<FONT color="green">453</FONT>            this.modelBipedMain.bipedRightArm.render(0.0625F);<a name="line.453"></a>
+<FONT color="green">454</FONT>        }<a name="line.454"></a>
+<FONT color="green">455</FONT>    <a name="line.455"></a>
+<FONT color="green">456</FONT>        /**<a name="line.456"></a>
+<FONT color="green">457</FONT>         * Renders player with sleeping offset if sleeping<a name="line.457"></a>
+<FONT color="green">458</FONT>         */<a name="line.458"></a>
+<FONT color="green">459</FONT>        protected void renderPlayerSleep(EntityPlayer par1EntityPlayer, double par2, double par4, double par6)<a name="line.459"></a>
+<FONT color="green">460</FONT>        {<a name="line.460"></a>
+<FONT color="green">461</FONT>            if (par1EntityPlayer.isEntityAlive() &amp;&amp; par1EntityPlayer.isPlayerSleeping())<a name="line.461"></a>
+<FONT color="green">462</FONT>            {<a name="line.462"></a>
+<FONT color="green">463</FONT>                super.renderLivingAt(par1EntityPlayer, par2 + (double)par1EntityPlayer.field_71079_bU, par4 + (double)par1EntityPlayer.field_71082_cx, par6 + (double)par1EntityPlayer.field_71089_bV);<a name="line.463"></a>
+<FONT color="green">464</FONT>            }<a name="line.464"></a>
+<FONT color="green">465</FONT>            else<a name="line.465"></a>
+<FONT color="green">466</FONT>            {<a name="line.466"></a>
+<FONT color="green">467</FONT>                super.renderLivingAt(par1EntityPlayer, par2, par4, par6);<a name="line.467"></a>
+<FONT color="green">468</FONT>            }<a name="line.468"></a>
+<FONT color="green">469</FONT>        }<a name="line.469"></a>
+<FONT color="green">470</FONT>    <a name="line.470"></a>
+<FONT color="green">471</FONT>        /**<a name="line.471"></a>
+<FONT color="green">472</FONT>         * Rotates the player if the player is sleeping. This method is called in rotateCorpse.<a name="line.472"></a>
+<FONT color="green">473</FONT>         */<a name="line.473"></a>
+<FONT color="green">474</FONT>        protected void rotatePlayer(EntityPlayer par1EntityPlayer, float par2, float par3, float par4)<a name="line.474"></a>
+<FONT color="green">475</FONT>        {<a name="line.475"></a>
+<FONT color="green">476</FONT>            if (par1EntityPlayer.isEntityAlive() &amp;&amp; par1EntityPlayer.isPlayerSleeping())<a name="line.476"></a>
+<FONT color="green">477</FONT>            {<a name="line.477"></a>
+<FONT color="green">478</FONT>                GL11.glRotatef(par1EntityPlayer.getBedOrientationInDegrees(), 0.0F, 1.0F, 0.0F);<a name="line.478"></a>
+<FONT color="green">479</FONT>                GL11.glRotatef(this.getDeathMaxRotation(par1EntityPlayer), 0.0F, 0.0F, 1.0F);<a name="line.479"></a>
+<FONT color="green">480</FONT>                GL11.glRotatef(270.0F, 0.0F, 1.0F, 0.0F);<a name="line.480"></a>
+<FONT color="green">481</FONT>            }<a name="line.481"></a>
+<FONT color="green">482</FONT>            else<a name="line.482"></a>
+<FONT color="green">483</FONT>            {<a name="line.483"></a>
+<FONT color="green">484</FONT>                super.rotateCorpse(par1EntityPlayer, par2, par3, par4);<a name="line.484"></a>
+<FONT color="green">485</FONT>            }<a name="line.485"></a>
+<FONT color="green">486</FONT>        }<a name="line.486"></a>
+<FONT color="green">487</FONT>    <a name="line.487"></a>
+<FONT color="green">488</FONT>        /**<a name="line.488"></a>
+<FONT color="green">489</FONT>         * Passes the specialRender and renders it<a name="line.489"></a>
+<FONT color="green">490</FONT>         */<a name="line.490"></a>
+<FONT color="green">491</FONT>        protected void passSpecialRender(EntityLiving par1EntityLiving, double par2, double par4, double par6)<a name="line.491"></a>
+<FONT color="green">492</FONT>        {<a name="line.492"></a>
+<FONT color="green">493</FONT>            this.renderName((EntityPlayer)par1EntityLiving, par2, par4, par6);<a name="line.493"></a>
+<FONT color="green">494</FONT>        }<a name="line.494"></a>
+<FONT color="green">495</FONT>    <a name="line.495"></a>
+<FONT color="green">496</FONT>        /**<a name="line.496"></a>
+<FONT color="green">497</FONT>         * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:<a name="line.497"></a>
+<FONT color="green">498</FONT>         * entityLiving, partialTickTime<a name="line.498"></a>
+<FONT color="green">499</FONT>         */<a name="line.499"></a>
+<FONT color="green">500</FONT>        protected void preRenderCallback(EntityLiving par1EntityLiving, float par2)<a name="line.500"></a>
+<FONT color="green">501</FONT>        {<a name="line.501"></a>
+<FONT color="green">502</FONT>            this.renderPlayerScale((EntityPlayer)par1EntityLiving, par2);<a name="line.502"></a>
+<FONT color="green">503</FONT>        }<a name="line.503"></a>
+<FONT color="green">504</FONT>    <a name="line.504"></a>
+<FONT color="green">505</FONT>        protected void func_82408_c(EntityLiving par1EntityLiving, int par2, float par3)<a name="line.505"></a>
+<FONT color="green">506</FONT>        {<a name="line.506"></a>
+<FONT color="green">507</FONT>            this.func_82439_b((EntityPlayer)par1EntityLiving, par2, par3);<a name="line.507"></a>
+<FONT color="green">508</FONT>        }<a name="line.508"></a>
+<FONT color="green">509</FONT>    <a name="line.509"></a>
+<FONT color="green">510</FONT>        /**<a name="line.510"></a>
+<FONT color="green">511</FONT>         * Queries whether should render the specified pass or not.<a name="line.511"></a>
+<FONT color="green">512</FONT>         */<a name="line.512"></a>
+<FONT color="green">513</FONT>        protected int shouldRenderPass(EntityLiving par1EntityLiving, int par2, float par3)<a name="line.513"></a>
+<FONT color="green">514</FONT>        {<a name="line.514"></a>
+<FONT color="green">515</FONT>            return this.setArmorModel((EntityPlayer)par1EntityLiving, par2, par3);<a name="line.515"></a>
+<FONT color="green">516</FONT>        }<a name="line.516"></a>
+<FONT color="green">517</FONT>    <a name="line.517"></a>
+<FONT color="green">518</FONT>        protected void renderEquippedItems(EntityLiving par1EntityLiving, float par2)<a name="line.518"></a>
+<FONT color="green">519</FONT>        {<a name="line.519"></a>
+<FONT color="green">520</FONT>            this.renderSpecials((EntityPlayer)par1EntityLiving, par2);<a name="line.520"></a>
+<FONT color="green">521</FONT>        }<a name="line.521"></a>
+<FONT color="green">522</FONT>    <a name="line.522"></a>
+<FONT color="green">523</FONT>        protected void rotateCorpse(EntityLiving par1EntityLiving, float par2, float par3, float par4)<a name="line.523"></a>
+<FONT color="green">524</FONT>        {<a name="line.524"></a>
+<FONT color="green">525</FONT>            this.rotatePlayer((EntityPlayer)par1EntityLiving, par2, par3, par4);<a name="line.525"></a>
+<FONT color="green">526</FONT>        }<a name="line.526"></a>
+<FONT color="green">527</FONT>    <a name="line.527"></a>
+<FONT color="green">528</FONT>        /**<a name="line.528"></a>
+<FONT color="green">529</FONT>         * Sets a simple glTranslate on a LivingEntity.<a name="line.529"></a>
+<FONT color="green">530</FONT>         */<a name="line.530"></a>
+<FONT color="green">531</FONT>        protected void renderLivingAt(EntityLiving par1EntityLiving, double par2, double par4, double par6)<a name="line.531"></a>
+<FONT color="green">532</FONT>        {<a name="line.532"></a>
+<FONT color="green">533</FONT>            this.renderPlayerSleep((EntityPlayer)par1EntityLiving, par2, par4, par6);<a name="line.533"></a>
+<FONT color="green">534</FONT>        }<a name="line.534"></a>
+<FONT color="green">535</FONT>    <a name="line.535"></a>
+<FONT color="green">536</FONT>        public void doRenderLiving(EntityLiving par1EntityLiving, double par2, double par4, double par6, float par8, float par9)<a name="line.536"></a>
+<FONT color="green">537</FONT>        {<a name="line.537"></a>
+<FONT color="green">538</FONT>            this.renderPlayer((EntityPlayer)par1EntityLiving, par2, par4, par6, par8, par9);<a name="line.538"></a>
+<FONT color="green">539</FONT>        }<a name="line.539"></a>
+<FONT color="green">540</FONT>    <a name="line.540"></a>
+<FONT color="green">541</FONT>        /**<a name="line.541"></a>
+<FONT color="green">542</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.542"></a>
+<FONT color="green">543</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.543"></a>
+<FONT color="green">544</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.544"></a>
+<FONT color="green">545</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.545"></a>
+<FONT color="green">546</FONT>         */<a name="line.546"></a>
+<FONT color="green">547</FONT>        public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.547"></a>
+<FONT color="green">548</FONT>        {<a name="line.548"></a>
+<FONT color="green">549</FONT>            this.renderPlayer((EntityPlayer)par1Entity, par2, par4, par6, par8, par9);<a name="line.549"></a>
+<FONT color="green">550</FONT>        }<a name="line.550"></a>
+<FONT color="green">551</FONT>    }<a name="line.551"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

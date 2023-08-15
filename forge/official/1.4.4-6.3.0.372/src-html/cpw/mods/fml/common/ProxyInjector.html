@@ -1,0 +1,138 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /*<a name="line.1"></a>
+<FONT color="green">002</FONT>     * The FML Forge Mod Loader suite.<a name="line.2"></a>
+<FONT color="green">003</FONT>     * Copyright (C) 2012 cpw<a name="line.3"></a>
+<FONT color="green">004</FONT>     *<a name="line.4"></a>
+<FONT color="green">005</FONT>     * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free<a name="line.5"></a>
+<FONT color="green">006</FONT>     * Software Foundation; either version 2.1 of the License, or any later version.<a name="line.6"></a>
+<FONT color="green">007</FONT>     *<a name="line.7"></a>
+<FONT color="green">008</FONT>     * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR<a name="line.8"></a>
+<FONT color="green">009</FONT>     * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.<a name="line.9"></a>
+<FONT color="green">010</FONT>     *<a name="line.10"></a>
+<FONT color="green">011</FONT>     * You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51<a name="line.11"></a>
+<FONT color="green">012</FONT>     * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA<a name="line.12"></a>
+<FONT color="green">013</FONT>     */<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>    package cpw.mods.fml.common;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>    import java.lang.reflect.Field;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import java.lang.reflect.Modifier;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import java.util.Set;<a name="line.19"></a>
+<FONT color="green">020</FONT>    import java.util.logging.Level;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>    import cpw.mods.fml.common.discovery.ASMDataTable;<a name="line.22"></a>
+<FONT color="green">023</FONT>    import cpw.mods.fml.common.discovery.ASMDataTable.ASMData;<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>    /**<a name="line.25"></a>
+<FONT color="green">026</FONT>     * @author cpw<a name="line.26"></a>
+<FONT color="green">027</FONT>     *<a name="line.27"></a>
+<FONT color="green">028</FONT>     */<a name="line.28"></a>
+<FONT color="green">029</FONT>    public class ProxyInjector<a name="line.29"></a>
+<FONT color="green">030</FONT>    {<a name="line.30"></a>
+<FONT color="green">031</FONT>        public static void inject(ModContainer mod, ASMDataTable data, Side side)<a name="line.31"></a>
+<FONT color="green">032</FONT>        {<a name="line.32"></a>
+<FONT color="green">033</FONT>            FMLLog.fine("Attempting to inject @SidedProxy classes into %s", mod.getModId());<a name="line.33"></a>
+<FONT color="green">034</FONT>            Set&lt;ASMData&gt; targets = data.getAnnotationsFor(mod).get(SidedProxy.class.getName());<a name="line.34"></a>
+<FONT color="green">035</FONT>            ClassLoader mcl = Loader.instance().getModClassLoader();<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>            for (ASMData targ : targets)<a name="line.37"></a>
+<FONT color="green">038</FONT>            {<a name="line.38"></a>
+<FONT color="green">039</FONT>                try<a name="line.39"></a>
+<FONT color="green">040</FONT>                {<a name="line.40"></a>
+<FONT color="green">041</FONT>                    Class&lt;?&gt; proxyTarget = Class.forName(targ.getClassName(), true, mcl);<a name="line.41"></a>
+<FONT color="green">042</FONT>                    Field target = proxyTarget.getDeclaredField(targ.getObjectName());<a name="line.42"></a>
+<FONT color="green">043</FONT>                    if (target == null)<a name="line.43"></a>
+<FONT color="green">044</FONT>                    {<a name="line.44"></a>
+<FONT color="green">045</FONT>                        // Impossible?<a name="line.45"></a>
+<FONT color="green">046</FONT>                        FMLLog.severe("Attempted to load a proxy type into %s.%s but the field was not found", targ.getClassName(), targ.getObjectName());<a name="line.46"></a>
+<FONT color="green">047</FONT>                        throw new LoaderException();<a name="line.47"></a>
+<FONT color="green">048</FONT>                    }<a name="line.48"></a>
+<FONT color="green">049</FONT>    <a name="line.49"></a>
+<FONT color="green">050</FONT>                    String targetType = side.isClient() ? target.getAnnotation(SidedProxy.class).clientSide() : target.getAnnotation(SidedProxy.class).serverSide();<a name="line.50"></a>
+<FONT color="green">051</FONT>                    Object proxy=Class.forName(targetType, true, mcl).newInstance();<a name="line.51"></a>
+<FONT color="green">052</FONT>    <a name="line.52"></a>
+<FONT color="green">053</FONT>                    if ((target.getModifiers() &amp; Modifier.STATIC) == 0 )<a name="line.53"></a>
+<FONT color="green">054</FONT>                    {<a name="line.54"></a>
+<FONT color="green">055</FONT>                        FMLLog.severe("Attempted to load a proxy type %s into %s.%s, but the field is not static", targetType, targ.getClassName(), targ.getObjectName());<a name="line.55"></a>
+<FONT color="green">056</FONT>                        throw new LoaderException();<a name="line.56"></a>
+<FONT color="green">057</FONT>                    }<a name="line.57"></a>
+<FONT color="green">058</FONT>                    if (!target.getType().isAssignableFrom(proxy.getClass()))<a name="line.58"></a>
+<FONT color="green">059</FONT>                    {<a name="line.59"></a>
+<FONT color="green">060</FONT>                        FMLLog.severe("Attempted to load a proxy type %s into %s.%s, but the types don't match", targetType, targ.getClassName(), targ.getObjectName());<a name="line.60"></a>
+<FONT color="green">061</FONT>                        throw new LoaderException();<a name="line.61"></a>
+<FONT color="green">062</FONT>                    }<a name="line.62"></a>
+<FONT color="green">063</FONT>                    target.set(null, proxy);<a name="line.63"></a>
+<FONT color="green">064</FONT>                }<a name="line.64"></a>
+<FONT color="green">065</FONT>                catch (Exception e)<a name="line.65"></a>
+<FONT color="green">066</FONT>                {<a name="line.66"></a>
+<FONT color="green">067</FONT>                    FMLLog.log(Level.SEVERE, e, "An error occured trying to load a proxy into %s.%s", targ.getAnnotationInfo(), targ.getClassName(), targ.getObjectName());<a name="line.67"></a>
+<FONT color="green">068</FONT>                    throw new LoaderException(e);<a name="line.68"></a>
+<FONT color="green">069</FONT>                }<a name="line.69"></a>
+<FONT color="green">070</FONT>            }<a name="line.70"></a>
+<FONT color="green">071</FONT>        }<a name="line.71"></a>
+<FONT color="green">072</FONT>    }<a name="line.72"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

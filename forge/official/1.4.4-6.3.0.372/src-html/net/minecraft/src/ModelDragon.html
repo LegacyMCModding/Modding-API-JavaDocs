@@ -1,0 +1,329 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class ModelDragon extends ModelBase<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        /** The head Model renderer of the dragon */<a name="line.10"></a>
+<FONT color="green">011</FONT>        private ModelRenderer head;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        /** The neck Model renderer of the dragon */<a name="line.13"></a>
+<FONT color="green">014</FONT>        private ModelRenderer neck;<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /** The jaw Model renderer of the dragon */<a name="line.16"></a>
+<FONT color="green">017</FONT>        private ModelRenderer jaw;<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        /** The body Model renderer of the dragon */<a name="line.19"></a>
+<FONT color="green">020</FONT>        private ModelRenderer body;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        /** The rear leg Model renderer of the dragon */<a name="line.22"></a>
+<FONT color="green">023</FONT>        private ModelRenderer rearLeg;<a name="line.23"></a>
+<FONT color="green">024</FONT>    <a name="line.24"></a>
+<FONT color="green">025</FONT>        /** The front leg Model renderer of the dragon */<a name="line.25"></a>
+<FONT color="green">026</FONT>        private ModelRenderer frontLeg;<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        /** The rear leg tip Model renderer of the dragon */<a name="line.28"></a>
+<FONT color="green">029</FONT>        private ModelRenderer rearLegTip;<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>        /** The front leg tip Model renderer of the dragon */<a name="line.31"></a>
+<FONT color="green">032</FONT>        private ModelRenderer frontLegTip;<a name="line.32"></a>
+<FONT color="green">033</FONT>    <a name="line.33"></a>
+<FONT color="green">034</FONT>        /** The rear foot Model renderer of the dragon */<a name="line.34"></a>
+<FONT color="green">035</FONT>        private ModelRenderer rearFoot;<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>        /** The front foot Model renderer of the dragon */<a name="line.37"></a>
+<FONT color="green">038</FONT>        private ModelRenderer frontFoot;<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        /** The wing Model renderer of the dragon */<a name="line.40"></a>
+<FONT color="green">041</FONT>        private ModelRenderer wing;<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>        /** The wing tip Model renderer of the dragon */<a name="line.43"></a>
+<FONT color="green">044</FONT>        private ModelRenderer wingTip;<a name="line.44"></a>
+<FONT color="green">045</FONT>        private float partialTicks;<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>        public ModelDragon(float par1)<a name="line.47"></a>
+<FONT color="green">048</FONT>        {<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.textureWidth = 256;<a name="line.49"></a>
+<FONT color="green">050</FONT>            this.textureHeight = 256;<a name="line.50"></a>
+<FONT color="green">051</FONT>            this.setTextureOffset("body.body", 0, 0);<a name="line.51"></a>
+<FONT color="green">052</FONT>            this.setTextureOffset("wing.skin", -56, 88);<a name="line.52"></a>
+<FONT color="green">053</FONT>            this.setTextureOffset("wingtip.skin", -56, 144);<a name="line.53"></a>
+<FONT color="green">054</FONT>            this.setTextureOffset("rearleg.main", 0, 0);<a name="line.54"></a>
+<FONT color="green">055</FONT>            this.setTextureOffset("rearfoot.main", 112, 0);<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.setTextureOffset("rearlegtip.main", 196, 0);<a name="line.56"></a>
+<FONT color="green">057</FONT>            this.setTextureOffset("head.upperhead", 112, 30);<a name="line.57"></a>
+<FONT color="green">058</FONT>            this.setTextureOffset("wing.bone", 112, 88);<a name="line.58"></a>
+<FONT color="green">059</FONT>            this.setTextureOffset("head.upperlip", 176, 44);<a name="line.59"></a>
+<FONT color="green">060</FONT>            this.setTextureOffset("jaw.jaw", 176, 65);<a name="line.60"></a>
+<FONT color="green">061</FONT>            this.setTextureOffset("frontleg.main", 112, 104);<a name="line.61"></a>
+<FONT color="green">062</FONT>            this.setTextureOffset("wingtip.bone", 112, 136);<a name="line.62"></a>
+<FONT color="green">063</FONT>            this.setTextureOffset("frontfoot.main", 144, 104);<a name="line.63"></a>
+<FONT color="green">064</FONT>            this.setTextureOffset("neck.box", 192, 104);<a name="line.64"></a>
+<FONT color="green">065</FONT>            this.setTextureOffset("frontlegtip.main", 226, 138);<a name="line.65"></a>
+<FONT color="green">066</FONT>            this.setTextureOffset("body.scale", 220, 53);<a name="line.66"></a>
+<FONT color="green">067</FONT>            this.setTextureOffset("head.scale", 0, 0);<a name="line.67"></a>
+<FONT color="green">068</FONT>            this.setTextureOffset("neck.scale", 48, 0);<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.setTextureOffset("head.nostril", 112, 0);<a name="line.69"></a>
+<FONT color="green">070</FONT>            float var2 = -16.0F;<a name="line.70"></a>
+<FONT color="green">071</FONT>            this.head = new ModelRenderer(this, "head");<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.head.addBox("upperlip", -6.0F, -1.0F, -8.0F + var2, 12, 5, 16);<a name="line.72"></a>
+<FONT color="green">073</FONT>            this.head.addBox("upperhead", -8.0F, -8.0F, 6.0F + var2, 16, 16, 16);<a name="line.73"></a>
+<FONT color="green">074</FONT>            this.head.mirror = true;<a name="line.74"></a>
+<FONT color="green">075</FONT>            this.head.addBox("scale", -5.0F, -12.0F, 12.0F + var2, 2, 4, 6);<a name="line.75"></a>
+<FONT color="green">076</FONT>            this.head.addBox("nostril", -5.0F, -3.0F, -6.0F + var2, 2, 2, 4);<a name="line.76"></a>
+<FONT color="green">077</FONT>            this.head.mirror = false;<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.head.addBox("scale", 3.0F, -12.0F, 12.0F + var2, 2, 4, 6);<a name="line.78"></a>
+<FONT color="green">079</FONT>            this.head.addBox("nostril", 3.0F, -3.0F, -6.0F + var2, 2, 2, 4);<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.jaw = new ModelRenderer(this, "jaw");<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.jaw.setRotationPoint(0.0F, 4.0F, 8.0F + var2);<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.jaw.addBox("jaw", -6.0F, 0.0F, -16.0F, 12, 4, 16);<a name="line.82"></a>
+<FONT color="green">083</FONT>            this.head.addChild(this.jaw);<a name="line.83"></a>
+<FONT color="green">084</FONT>            this.neck = new ModelRenderer(this, "neck");<a name="line.84"></a>
+<FONT color="green">085</FONT>            this.neck.addBox("box", -5.0F, -5.0F, -5.0F, 10, 10, 10);<a name="line.85"></a>
+<FONT color="green">086</FONT>            this.neck.addBox("scale", -1.0F, -9.0F, -3.0F, 2, 4, 6);<a name="line.86"></a>
+<FONT color="green">087</FONT>            this.body = new ModelRenderer(this, "body");<a name="line.87"></a>
+<FONT color="green">088</FONT>            this.body.setRotationPoint(0.0F, 4.0F, 8.0F);<a name="line.88"></a>
+<FONT color="green">089</FONT>            this.body.addBox("body", -12.0F, 0.0F, -16.0F, 24, 24, 64);<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.body.addBox("scale", -1.0F, -6.0F, -10.0F, 2, 6, 12);<a name="line.90"></a>
+<FONT color="green">091</FONT>            this.body.addBox("scale", -1.0F, -6.0F, 10.0F, 2, 6, 12);<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.body.addBox("scale", -1.0F, -6.0F, 30.0F, 2, 6, 12);<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.wing = new ModelRenderer(this, "wing");<a name="line.93"></a>
+<FONT color="green">094</FONT>            this.wing.setRotationPoint(-12.0F, 5.0F, 2.0F);<a name="line.94"></a>
+<FONT color="green">095</FONT>            this.wing.addBox("bone", -56.0F, -4.0F, -4.0F, 56, 8, 8);<a name="line.95"></a>
+<FONT color="green">096</FONT>            this.wing.addBox("skin", -56.0F, 0.0F, 2.0F, 56, 0, 56);<a name="line.96"></a>
+<FONT color="green">097</FONT>            this.wingTip = new ModelRenderer(this, "wingtip");<a name="line.97"></a>
+<FONT color="green">098</FONT>            this.wingTip.setRotationPoint(-56.0F, 0.0F, 0.0F);<a name="line.98"></a>
+<FONT color="green">099</FONT>            this.wingTip.addBox("bone", -56.0F, -2.0F, -2.0F, 56, 4, 4);<a name="line.99"></a>
+<FONT color="green">100</FONT>            this.wingTip.addBox("skin", -56.0F, 0.0F, 2.0F, 56, 0, 56);<a name="line.100"></a>
+<FONT color="green">101</FONT>            this.wing.addChild(this.wingTip);<a name="line.101"></a>
+<FONT color="green">102</FONT>            this.frontLeg = new ModelRenderer(this, "frontleg");<a name="line.102"></a>
+<FONT color="green">103</FONT>            this.frontLeg.setRotationPoint(-12.0F, 20.0F, 2.0F);<a name="line.103"></a>
+<FONT color="green">104</FONT>            this.frontLeg.addBox("main", -4.0F, -4.0F, -4.0F, 8, 24, 8);<a name="line.104"></a>
+<FONT color="green">105</FONT>            this.frontLegTip = new ModelRenderer(this, "frontlegtip");<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.frontLegTip.setRotationPoint(0.0F, 20.0F, -1.0F);<a name="line.106"></a>
+<FONT color="green">107</FONT>            this.frontLegTip.addBox("main", -3.0F, -1.0F, -3.0F, 6, 24, 6);<a name="line.107"></a>
+<FONT color="green">108</FONT>            this.frontLeg.addChild(this.frontLegTip);<a name="line.108"></a>
+<FONT color="green">109</FONT>            this.frontFoot = new ModelRenderer(this, "frontfoot");<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.frontFoot.setRotationPoint(0.0F, 23.0F, 0.0F);<a name="line.110"></a>
+<FONT color="green">111</FONT>            this.frontFoot.addBox("main", -4.0F, 0.0F, -12.0F, 8, 4, 16);<a name="line.111"></a>
+<FONT color="green">112</FONT>            this.frontLegTip.addChild(this.frontFoot);<a name="line.112"></a>
+<FONT color="green">113</FONT>            this.rearLeg = new ModelRenderer(this, "rearleg");<a name="line.113"></a>
+<FONT color="green">114</FONT>            this.rearLeg.setRotationPoint(-16.0F, 16.0F, 42.0F);<a name="line.114"></a>
+<FONT color="green">115</FONT>            this.rearLeg.addBox("main", -8.0F, -4.0F, -8.0F, 16, 32, 16);<a name="line.115"></a>
+<FONT color="green">116</FONT>            this.rearLegTip = new ModelRenderer(this, "rearlegtip");<a name="line.116"></a>
+<FONT color="green">117</FONT>            this.rearLegTip.setRotationPoint(0.0F, 32.0F, -4.0F);<a name="line.117"></a>
+<FONT color="green">118</FONT>            this.rearLegTip.addBox("main", -6.0F, -2.0F, 0.0F, 12, 32, 12);<a name="line.118"></a>
+<FONT color="green">119</FONT>            this.rearLeg.addChild(this.rearLegTip);<a name="line.119"></a>
+<FONT color="green">120</FONT>            this.rearFoot = new ModelRenderer(this, "rearfoot");<a name="line.120"></a>
+<FONT color="green">121</FONT>            this.rearFoot.setRotationPoint(0.0F, 31.0F, 4.0F);<a name="line.121"></a>
+<FONT color="green">122</FONT>            this.rearFoot.addBox("main", -9.0F, 0.0F, -20.0F, 18, 6, 24);<a name="line.122"></a>
+<FONT color="green">123</FONT>            this.rearLegTip.addChild(this.rearFoot);<a name="line.123"></a>
+<FONT color="green">124</FONT>        }<a name="line.124"></a>
+<FONT color="green">125</FONT>    <a name="line.125"></a>
+<FONT color="green">126</FONT>        /**<a name="line.126"></a>
+<FONT color="green">127</FONT>         * Used for easily adding entity-dependent animations. The second and third float params here are the same second<a name="line.127"></a>
+<FONT color="green">128</FONT>         * and third as in the setRotationAngles method.<a name="line.128"></a>
+<FONT color="green">129</FONT>         */<a name="line.129"></a>
+<FONT color="green">130</FONT>        public void setLivingAnimations(EntityLiving par1EntityLiving, float par2, float par3, float par4)<a name="line.130"></a>
+<FONT color="green">131</FONT>        {<a name="line.131"></a>
+<FONT color="green">132</FONT>            this.partialTicks = par4;<a name="line.132"></a>
+<FONT color="green">133</FONT>        }<a name="line.133"></a>
+<FONT color="green">134</FONT>    <a name="line.134"></a>
+<FONT color="green">135</FONT>        /**<a name="line.135"></a>
+<FONT color="green">136</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.136"></a>
+<FONT color="green">137</FONT>         */<a name="line.137"></a>
+<FONT color="green">138</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.138"></a>
+<FONT color="green">139</FONT>        {<a name="line.139"></a>
+<FONT color="green">140</FONT>            GL11.glPushMatrix();<a name="line.140"></a>
+<FONT color="green">141</FONT>            EntityDragon var8 = (EntityDragon)par1Entity;<a name="line.141"></a>
+<FONT color="green">142</FONT>            float var9 = var8.prevAnimTime + (var8.animTime - var8.prevAnimTime) * this.partialTicks;<a name="line.142"></a>
+<FONT color="green">143</FONT>            this.jaw.rotateAngleX = (float)(Math.sin((double)(var9 * (float)Math.PI * 2.0F)) + 1.0D) * 0.2F;<a name="line.143"></a>
+<FONT color="green">144</FONT>            float var10 = (float)(Math.sin((double)(var9 * (float)Math.PI * 2.0F - 1.0F)) + 1.0D);<a name="line.144"></a>
+<FONT color="green">145</FONT>            var10 = (var10 * var10 * 1.0F + var10 * 2.0F) * 0.05F;<a name="line.145"></a>
+<FONT color="green">146</FONT>            GL11.glTranslatef(0.0F, var10 - 2.0F, -3.0F);<a name="line.146"></a>
+<FONT color="green">147</FONT>            GL11.glRotatef(var10 * 2.0F, 1.0F, 0.0F, 0.0F);<a name="line.147"></a>
+<FONT color="green">148</FONT>            float var11 = -30.0F;<a name="line.148"></a>
+<FONT color="green">149</FONT>            float var13 = 0.0F;<a name="line.149"></a>
+<FONT color="green">150</FONT>            float var14 = 1.5F;<a name="line.150"></a>
+<FONT color="green">151</FONT>            double[] var15 = var8.getMovementOffsets(6, this.partialTicks);<a name="line.151"></a>
+<FONT color="green">152</FONT>            float var16 = this.updateRotations(var8.getMovementOffsets(5, this.partialTicks)[0] - var8.getMovementOffsets(10, this.partialTicks)[0]);<a name="line.152"></a>
+<FONT color="green">153</FONT>            float var17 = this.updateRotations(var8.getMovementOffsets(5, this.partialTicks)[0] + (double)(var16 / 2.0F));<a name="line.153"></a>
+<FONT color="green">154</FONT>            var11 += 2.0F;<a name="line.154"></a>
+<FONT color="green">155</FONT>            float var18 = var9 * (float)Math.PI * 2.0F;<a name="line.155"></a>
+<FONT color="green">156</FONT>            var11 = 20.0F;<a name="line.156"></a>
+<FONT color="green">157</FONT>            float var12 = -12.0F;<a name="line.157"></a>
+<FONT color="green">158</FONT>            float var21;<a name="line.158"></a>
+<FONT color="green">159</FONT>    <a name="line.159"></a>
+<FONT color="green">160</FONT>            for (int var19 = 0; var19 &lt; 5; ++var19)<a name="line.160"></a>
+<FONT color="green">161</FONT>            {<a name="line.161"></a>
+<FONT color="green">162</FONT>                double[] var20 = var8.getMovementOffsets(5 - var19, this.partialTicks);<a name="line.162"></a>
+<FONT color="green">163</FONT>                var21 = (float)Math.cos((double)((float)var19 * 0.45F + var18)) * 0.15F;<a name="line.163"></a>
+<FONT color="green">164</FONT>                this.neck.rotateAngleY = this.updateRotations(var20[0] - var15[0]) * (float)Math.PI / 180.0F * var14;<a name="line.164"></a>
+<FONT color="green">165</FONT>                this.neck.rotateAngleX = var21 + (float)(var20[1] - var15[1]) * (float)Math.PI / 180.0F * var14 * 5.0F;<a name="line.165"></a>
+<FONT color="green">166</FONT>                this.neck.rotateAngleZ = -this.updateRotations(var20[0] - (double)var17) * (float)Math.PI / 180.0F * var14;<a name="line.166"></a>
+<FONT color="green">167</FONT>                this.neck.rotationPointY = var11;<a name="line.167"></a>
+<FONT color="green">168</FONT>                this.neck.rotationPointZ = var12;<a name="line.168"></a>
+<FONT color="green">169</FONT>                this.neck.rotationPointX = var13;<a name="line.169"></a>
+<FONT color="green">170</FONT>                var11 = (float)((double)var11 + Math.sin((double)this.neck.rotateAngleX) * 10.0D);<a name="line.170"></a>
+<FONT color="green">171</FONT>                var12 = (float)((double)var12 - Math.cos((double)this.neck.rotateAngleY) * Math.cos((double)this.neck.rotateAngleX) * 10.0D);<a name="line.171"></a>
+<FONT color="green">172</FONT>                var13 = (float)((double)var13 - Math.sin((double)this.neck.rotateAngleY) * Math.cos((double)this.neck.rotateAngleX) * 10.0D);<a name="line.172"></a>
+<FONT color="green">173</FONT>                this.neck.render(par7);<a name="line.173"></a>
+<FONT color="green">174</FONT>            }<a name="line.174"></a>
+<FONT color="green">175</FONT>    <a name="line.175"></a>
+<FONT color="green">176</FONT>            this.head.rotationPointY = var11;<a name="line.176"></a>
+<FONT color="green">177</FONT>            this.head.rotationPointZ = var12;<a name="line.177"></a>
+<FONT color="green">178</FONT>            this.head.rotationPointX = var13;<a name="line.178"></a>
+<FONT color="green">179</FONT>            double[] var23 = var8.getMovementOffsets(0, this.partialTicks);<a name="line.179"></a>
+<FONT color="green">180</FONT>            this.head.rotateAngleY = this.updateRotations(var23[0] - var15[0]) * (float)Math.PI / 180.0F * 1.0F;<a name="line.180"></a>
+<FONT color="green">181</FONT>            this.head.rotateAngleZ = -this.updateRotations(var23[0] - (double)var17) * (float)Math.PI / 180.0F * 1.0F;<a name="line.181"></a>
+<FONT color="green">182</FONT>            this.head.render(par7);<a name="line.182"></a>
+<FONT color="green">183</FONT>            GL11.glPushMatrix();<a name="line.183"></a>
+<FONT color="green">184</FONT>            GL11.glTranslatef(0.0F, 1.0F, 0.0F);<a name="line.184"></a>
+<FONT color="green">185</FONT>            GL11.glRotatef(-var16 * var14 * 1.0F, 0.0F, 0.0F, 1.0F);<a name="line.185"></a>
+<FONT color="green">186</FONT>            GL11.glTranslatef(0.0F, -1.0F, 0.0F);<a name="line.186"></a>
+<FONT color="green">187</FONT>            this.body.rotateAngleZ = 0.0F;<a name="line.187"></a>
+<FONT color="green">188</FONT>            this.body.render(par7);<a name="line.188"></a>
+<FONT color="green">189</FONT>    <a name="line.189"></a>
+<FONT color="green">190</FONT>            for (int var22 = 0; var22 &lt; 2; ++var22)<a name="line.190"></a>
+<FONT color="green">191</FONT>            {<a name="line.191"></a>
+<FONT color="green">192</FONT>                GL11.glEnable(GL11.GL_CULL_FACE);<a name="line.192"></a>
+<FONT color="green">193</FONT>                var21 = var9 * (float)Math.PI * 2.0F;<a name="line.193"></a>
+<FONT color="green">194</FONT>                this.wing.rotateAngleX = 0.125F - (float)Math.cos((double)var21) * 0.2F;<a name="line.194"></a>
+<FONT color="green">195</FONT>                this.wing.rotateAngleY = 0.25F;<a name="line.195"></a>
+<FONT color="green">196</FONT>                this.wing.rotateAngleZ = (float)(Math.sin((double)var21) + 0.125D) * 0.8F;<a name="line.196"></a>
+<FONT color="green">197</FONT>                this.wingTip.rotateAngleZ = -((float)(Math.sin((double)(var21 + 2.0F)) + 0.5D)) * 0.75F;<a name="line.197"></a>
+<FONT color="green">198</FONT>                this.rearLeg.rotateAngleX = 1.0F + var10 * 0.1F;<a name="line.198"></a>
+<FONT color="green">199</FONT>                this.rearLegTip.rotateAngleX = 0.5F + var10 * 0.1F;<a name="line.199"></a>
+<FONT color="green">200</FONT>                this.rearFoot.rotateAngleX = 0.75F + var10 * 0.1F;<a name="line.200"></a>
+<FONT color="green">201</FONT>                this.frontLeg.rotateAngleX = 1.3F + var10 * 0.1F;<a name="line.201"></a>
+<FONT color="green">202</FONT>                this.frontLegTip.rotateAngleX = -0.5F - var10 * 0.1F;<a name="line.202"></a>
+<FONT color="green">203</FONT>                this.frontFoot.rotateAngleX = 0.75F + var10 * 0.1F;<a name="line.203"></a>
+<FONT color="green">204</FONT>                this.wing.render(par7);<a name="line.204"></a>
+<FONT color="green">205</FONT>                this.frontLeg.render(par7);<a name="line.205"></a>
+<FONT color="green">206</FONT>                this.rearLeg.render(par7);<a name="line.206"></a>
+<FONT color="green">207</FONT>                GL11.glScalef(-1.0F, 1.0F, 1.0F);<a name="line.207"></a>
+<FONT color="green">208</FONT>    <a name="line.208"></a>
+<FONT color="green">209</FONT>                if (var22 == 0)<a name="line.209"></a>
+<FONT color="green">210</FONT>                {<a name="line.210"></a>
+<FONT color="green">211</FONT>                    GL11.glCullFace(GL11.GL_FRONT);<a name="line.211"></a>
+<FONT color="green">212</FONT>                }<a name="line.212"></a>
+<FONT color="green">213</FONT>            }<a name="line.213"></a>
+<FONT color="green">214</FONT>    <a name="line.214"></a>
+<FONT color="green">215</FONT>            GL11.glPopMatrix();<a name="line.215"></a>
+<FONT color="green">216</FONT>            GL11.glCullFace(GL11.GL_BACK);<a name="line.216"></a>
+<FONT color="green">217</FONT>            GL11.glDisable(GL11.GL_CULL_FACE);<a name="line.217"></a>
+<FONT color="green">218</FONT>            float var24 = -((float)Math.sin((double)(var9 * (float)Math.PI * 2.0F))) * 0.0F;<a name="line.218"></a>
+<FONT color="green">219</FONT>            var18 = var9 * (float)Math.PI * 2.0F;<a name="line.219"></a>
+<FONT color="green">220</FONT>            var11 = 10.0F;<a name="line.220"></a>
+<FONT color="green">221</FONT>            var12 = 60.0F;<a name="line.221"></a>
+<FONT color="green">222</FONT>            var13 = 0.0F;<a name="line.222"></a>
+<FONT color="green">223</FONT>            var15 = var8.getMovementOffsets(11, this.partialTicks);<a name="line.223"></a>
+<FONT color="green">224</FONT>    <a name="line.224"></a>
+<FONT color="green">225</FONT>            for (int var25 = 0; var25 &lt; 12; ++var25)<a name="line.225"></a>
+<FONT color="green">226</FONT>            {<a name="line.226"></a>
+<FONT color="green">227</FONT>                var23 = var8.getMovementOffsets(12 + var25, this.partialTicks);<a name="line.227"></a>
+<FONT color="green">228</FONT>                var24 = (float)((double)var24 + Math.sin((double)((float)var25 * 0.45F + var18)) * 0.05000000074505806D);<a name="line.228"></a>
+<FONT color="green">229</FONT>                this.neck.rotateAngleY = (this.updateRotations(var23[0] - var15[0]) * var14 + 180.0F) * (float)Math.PI / 180.0F;<a name="line.229"></a>
+<FONT color="green">230</FONT>                this.neck.rotateAngleX = var24 + (float)(var23[1] - var15[1]) * (float)Math.PI / 180.0F * var14 * 5.0F;<a name="line.230"></a>
+<FONT color="green">231</FONT>                this.neck.rotateAngleZ = this.updateRotations(var23[0] - (double)var17) * (float)Math.PI / 180.0F * var14;<a name="line.231"></a>
+<FONT color="green">232</FONT>                this.neck.rotationPointY = var11;<a name="line.232"></a>
+<FONT color="green">233</FONT>                this.neck.rotationPointZ = var12;<a name="line.233"></a>
+<FONT color="green">234</FONT>                this.neck.rotationPointX = var13;<a name="line.234"></a>
+<FONT color="green">235</FONT>                var11 = (float)((double)var11 + Math.sin((double)this.neck.rotateAngleX) * 10.0D);<a name="line.235"></a>
+<FONT color="green">236</FONT>                var12 = (float)((double)var12 - Math.cos((double)this.neck.rotateAngleY) * Math.cos((double)this.neck.rotateAngleX) * 10.0D);<a name="line.236"></a>
+<FONT color="green">237</FONT>                var13 = (float)((double)var13 - Math.sin((double)this.neck.rotateAngleY) * Math.cos((double)this.neck.rotateAngleX) * 10.0D);<a name="line.237"></a>
+<FONT color="green">238</FONT>                this.neck.render(par7);<a name="line.238"></a>
+<FONT color="green">239</FONT>            }<a name="line.239"></a>
+<FONT color="green">240</FONT>    <a name="line.240"></a>
+<FONT color="green">241</FONT>            GL11.glPopMatrix();<a name="line.241"></a>
+<FONT color="green">242</FONT>        }<a name="line.242"></a>
+<FONT color="green">243</FONT>    <a name="line.243"></a>
+<FONT color="green">244</FONT>        /**<a name="line.244"></a>
+<FONT color="green">245</FONT>         * Updates the rotations in the parameters for rotations greater than 180 degrees or less than -180 degrees. It adds<a name="line.245"></a>
+<FONT color="green">246</FONT>         * or subtracts 360 degrees, so that the appearance is the same, although the numbers are then simplified to range<a name="line.246"></a>
+<FONT color="green">247</FONT>         * -180 to 180<a name="line.247"></a>
+<FONT color="green">248</FONT>         */<a name="line.248"></a>
+<FONT color="green">249</FONT>        private float updateRotations(double par1)<a name="line.249"></a>
+<FONT color="green">250</FONT>        {<a name="line.250"></a>
+<FONT color="green">251</FONT>            while (par1 &gt;= 180.0D)<a name="line.251"></a>
+<FONT color="green">252</FONT>            {<a name="line.252"></a>
+<FONT color="green">253</FONT>                par1 -= 360.0D;<a name="line.253"></a>
+<FONT color="green">254</FONT>            }<a name="line.254"></a>
+<FONT color="green">255</FONT>    <a name="line.255"></a>
+<FONT color="green">256</FONT>            while (par1 &lt; -180.0D)<a name="line.256"></a>
+<FONT color="green">257</FONT>            {<a name="line.257"></a>
+<FONT color="green">258</FONT>                par1 += 360.0D;<a name="line.258"></a>
+<FONT color="green">259</FONT>            }<a name="line.259"></a>
+<FONT color="green">260</FONT>    <a name="line.260"></a>
+<FONT color="green">261</FONT>            return (float)par1;<a name="line.261"></a>
+<FONT color="green">262</FONT>        }<a name="line.262"></a>
+<FONT color="green">263</FONT>    }<a name="line.263"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
