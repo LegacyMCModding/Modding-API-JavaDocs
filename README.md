@@ -1,12 +1,13 @@
-# Modding-API-docs
+JavaDocs for legacy Minecraft modding APIs.  
 
-JavaDoc for various Minecraft modding APIs.  
-
+### Mod loaders  
 * [Minecraft Forge](forge/index.md)
-* [Hey0 Admin Mod (aka hMod)](hMod/index.md)
 * [LiteLoader](liteloader/index.md)
 * [ModLoader](modloader/index.md)
-<!--* [ModLoaderMP (b1.4_01 - 1.5.2)](modloadermp/index.md)-->
+<!--* [ModLoaderMP](modloadermp/index.md)-->
+
+### Plugin loaders  
+* [Hey0 Admin Mod (aka hMod)](hMod/index.md)
 
 ## About
 
@@ -15,7 +16,7 @@ This repository contains API reference for different Minecraft modding APIs that
 ## Changelog
 
 <div>
-  <b>Aug 15, 2023</b> - Added LiteLoader <code>1.7.10_04</code>
+  <b>Aug 15, 2023</b> - Added LiteLoader <code>1.7.10_04</code>; Forge <code>1.2.3-1.4.1.64</code>
 </div>
 <br>
 <div>
