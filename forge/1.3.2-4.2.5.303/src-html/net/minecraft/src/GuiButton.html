@@ -1,0 +1,188 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.client.Minecraft;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import org.lwjgl.opengl.GL11;<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>    @SideOnly(Side.CLIENT)<a name="line.8"></a>
+<FONT color="green">009</FONT>    public class GuiButton extends Gui<a name="line.9"></a>
+<FONT color="green">010</FONT>    {<a name="line.10"></a>
+<FONT color="green">011</FONT>        /** Button width in pixels */<a name="line.11"></a>
+<FONT color="green">012</FONT>        protected int width;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        /** Button height in pixels */<a name="line.14"></a>
+<FONT color="green">015</FONT>        protected int height;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        /** The x position of this control. */<a name="line.17"></a>
+<FONT color="green">018</FONT>        public int xPosition;<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        /** The y position of this control. */<a name="line.20"></a>
+<FONT color="green">021</FONT>        public int yPosition;<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>        /** The string displayed on this control. */<a name="line.23"></a>
+<FONT color="green">024</FONT>        public String displayString;<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>        /** ID for this control. */<a name="line.26"></a>
+<FONT color="green">027</FONT>        public int id;<a name="line.27"></a>
+<FONT color="green">028</FONT>    <a name="line.28"></a>
+<FONT color="green">029</FONT>        /** True if this control is enabled, false to disable. */<a name="line.29"></a>
+<FONT color="green">030</FONT>        public boolean enabled;<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        /** Hides the button completely if false. */<a name="line.32"></a>
+<FONT color="green">033</FONT>        public boolean drawButton;<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>        public GuiButton(int par1, int par2, int par3, String par4Str)<a name="line.35"></a>
+<FONT color="green">036</FONT>        {<a name="line.36"></a>
+<FONT color="green">037</FONT>            this(par1, par2, par3, 200, 20, par4Str);<a name="line.37"></a>
+<FONT color="green">038</FONT>        }<a name="line.38"></a>
+<FONT color="green">039</FONT>    <a name="line.39"></a>
+<FONT color="green">040</FONT>        public GuiButton(int par1, int par2, int par3, int par4, int par5, String par6Str)<a name="line.40"></a>
+<FONT color="green">041</FONT>        {<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.width = 200;<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.height = 20;<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.enabled = true;<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.drawButton = true;<a name="line.45"></a>
+<FONT color="green">046</FONT>            this.id = par1;<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.xPosition = par2;<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.yPosition = par3;<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.width = par4;<a name="line.49"></a>
+<FONT color="green">050</FONT>            this.height = par5;<a name="line.50"></a>
+<FONT color="green">051</FONT>            this.displayString = par6Str;<a name="line.51"></a>
+<FONT color="green">052</FONT>        }<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        /**<a name="line.54"></a>
+<FONT color="green">055</FONT>         * Returns 0 if the button is disabled, 1 if the mouse is NOT hovering over this button and 2 if it IS hovering over<a name="line.55"></a>
+<FONT color="green">056</FONT>         * this button.<a name="line.56"></a>
+<FONT color="green">057</FONT>         */<a name="line.57"></a>
+<FONT color="green">058</FONT>        protected int getHoverState(boolean par1)<a name="line.58"></a>
+<FONT color="green">059</FONT>        {<a name="line.59"></a>
+<FONT color="green">060</FONT>            byte var2 = 1;<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>            if (!this.enabled)<a name="line.62"></a>
+<FONT color="green">063</FONT>            {<a name="line.63"></a>
+<FONT color="green">064</FONT>                var2 = 0;<a name="line.64"></a>
+<FONT color="green">065</FONT>            }<a name="line.65"></a>
+<FONT color="green">066</FONT>            else if (par1)<a name="line.66"></a>
+<FONT color="green">067</FONT>            {<a name="line.67"></a>
+<FONT color="green">068</FONT>                var2 = 2;<a name="line.68"></a>
+<FONT color="green">069</FONT>            }<a name="line.69"></a>
+<FONT color="green">070</FONT>    <a name="line.70"></a>
+<FONT color="green">071</FONT>            return var2;<a name="line.71"></a>
+<FONT color="green">072</FONT>        }<a name="line.72"></a>
+<FONT color="green">073</FONT>    <a name="line.73"></a>
+<FONT color="green">074</FONT>        /**<a name="line.74"></a>
+<FONT color="green">075</FONT>         * Draws this button to the screen.<a name="line.75"></a>
+<FONT color="green">076</FONT>         */<a name="line.76"></a>
+<FONT color="green">077</FONT>        public void drawButton(Minecraft par1Minecraft, int par2, int par3)<a name="line.77"></a>
+<FONT color="green">078</FONT>        {<a name="line.78"></a>
+<FONT color="green">079</FONT>            if (this.drawButton)<a name="line.79"></a>
+<FONT color="green">080</FONT>            {<a name="line.80"></a>
+<FONT color="green">081</FONT>                FontRenderer var4 = par1Minecraft.fontRenderer;<a name="line.81"></a>
+<FONT color="green">082</FONT>                GL11.glBindTexture(GL11.GL_TEXTURE_2D, par1Minecraft.renderEngine.getTexture("/gui/gui.png"));<a name="line.82"></a>
+<FONT color="green">083</FONT>                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);<a name="line.83"></a>
+<FONT color="green">084</FONT>                boolean var5 = par2 &gt;= this.xPosition &amp;&amp; par3 &gt;= this.yPosition &amp;&amp; par2 &lt; this.xPosition + this.width &amp;&amp; par3 &lt; this.yPosition + this.height;<a name="line.84"></a>
+<FONT color="green">085</FONT>                int var6 = this.getHoverState(var5);<a name="line.85"></a>
+<FONT color="green">086</FONT>                this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + var6 * 20, this.width / 2, this.height);<a name="line.86"></a>
+<FONT color="green">087</FONT>                this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + var6 * 20, this.width / 2, this.height);<a name="line.87"></a>
+<FONT color="green">088</FONT>                this.mouseDragged(par1Minecraft, par2, par3);<a name="line.88"></a>
+<FONT color="green">089</FONT>                int var7 = 14737632;<a name="line.89"></a>
+<FONT color="green">090</FONT>    <a name="line.90"></a>
+<FONT color="green">091</FONT>                if (!this.enabled)<a name="line.91"></a>
+<FONT color="green">092</FONT>                {<a name="line.92"></a>
+<FONT color="green">093</FONT>                    var7 = -6250336;<a name="line.93"></a>
+<FONT color="green">094</FONT>                }<a name="line.94"></a>
+<FONT color="green">095</FONT>                else if (var5)<a name="line.95"></a>
+<FONT color="green">096</FONT>                {<a name="line.96"></a>
+<FONT color="green">097</FONT>                    var7 = 16777120;<a name="line.97"></a>
+<FONT color="green">098</FONT>                }<a name="line.98"></a>
+<FONT color="green">099</FONT>    <a name="line.99"></a>
+<FONT color="green">100</FONT>                this.drawCenteredString(var4, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, var7);<a name="line.100"></a>
+<FONT color="green">101</FONT>            }<a name="line.101"></a>
+<FONT color="green">102</FONT>        }<a name="line.102"></a>
+<FONT color="green">103</FONT>    <a name="line.103"></a>
+<FONT color="green">104</FONT>        /**<a name="line.104"></a>
+<FONT color="green">105</FONT>         * Fired when the mouse button is dragged. Equivalent of MouseListener.mouseDragged(MouseEvent e).<a name="line.105"></a>
+<FONT color="green">106</FONT>         */<a name="line.106"></a>
+<FONT color="green">107</FONT>        protected void mouseDragged(Minecraft par1Minecraft, int par2, int par3) {}<a name="line.107"></a>
+<FONT color="green">108</FONT>    <a name="line.108"></a>
+<FONT color="green">109</FONT>        /**<a name="line.109"></a>
+<FONT color="green">110</FONT>         * Fired when the mouse button is released. Equivalent of MouseListener.mouseReleased(MouseEvent e).<a name="line.110"></a>
+<FONT color="green">111</FONT>         */<a name="line.111"></a>
+<FONT color="green">112</FONT>        public void mouseReleased(int par1, int par2) {}<a name="line.112"></a>
+<FONT color="green">113</FONT>    <a name="line.113"></a>
+<FONT color="green">114</FONT>        /**<a name="line.114"></a>
+<FONT color="green">115</FONT>         * Returns true if the mouse has been pressed on this control. Equivalent of MouseListener.mousePressed(MouseEvent<a name="line.115"></a>
+<FONT color="green">116</FONT>         * e).<a name="line.116"></a>
+<FONT color="green">117</FONT>         */<a name="line.117"></a>
+<FONT color="green">118</FONT>        public boolean mousePressed(Minecraft par1Minecraft, int par2, int par3)<a name="line.118"></a>
+<FONT color="green">119</FONT>        {<a name="line.119"></a>
+<FONT color="green">120</FONT>            return this.enabled &amp;&amp; this.drawButton &amp;&amp; par2 &gt;= this.xPosition &amp;&amp; par3 &gt;= this.yPosition &amp;&amp; par2 &lt; this.xPosition + this.width &amp;&amp; par3 &lt; this.yPosition + this.height;<a name="line.120"></a>
+<FONT color="green">121</FONT>        }<a name="line.121"></a>
+<FONT color="green">122</FONT>    }<a name="line.122"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

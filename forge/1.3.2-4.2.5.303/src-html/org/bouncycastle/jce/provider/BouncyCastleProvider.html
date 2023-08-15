@@ -1,0 +1,380 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package org.bouncycastle.jce.provider;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.security.AccessController;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.security.Provider;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.util.HashMap;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.util.Map;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import org.bouncycastle.asn1.bc.BCObjectIdentifiers;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import org.bouncycastle.jcajce.provider.config.ConfigurableProvider;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import org.bouncycastle.jcajce.provider.config.ProviderConfiguration;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import org.bouncycastle.jcajce.provider.util.AlgorithmProvider;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>    public final class BouncyCastleProvider extends Provider implements ConfigurableProvider<a name="line.13"></a>
+<FONT color="green">014</FONT>    {<a name="line.14"></a>
+<FONT color="green">015</FONT>        private static String info = "BouncyCastle Security Provider v1.47";<a name="line.15"></a>
+<FONT color="green">016</FONT>        public static String PROVIDER_NAME = "BC";<a name="line.16"></a>
+<FONT color="green">017</FONT>        public static final ProviderConfiguration CONFIGURATION = new BouncyCastleProviderConfiguration();<a name="line.17"></a>
+<FONT color="green">018</FONT>        private static final Map keyInfoConverters = new HashMap();<a name="line.18"></a>
+<FONT color="green">019</FONT>        private static final String[] field_74825_e = new String[] {"AES", "ARC4", "Blowfish", "Camellia", "CAST5", "CAST6", "DES", "DESede", "GOST28147", "Grainv1", "Grain128", "HC128", "HC256", "IDEA", "Noekeon", "RC2", "RC5", "RC6", "Rijndael", "Salsa20", "SEED", "Serpent", "Skipjack", "TEA", "Twofish", "VMPC", "VMPCKSA3", "XTEA"};<a name="line.19"></a>
+<FONT color="green">020</FONT>        private static final String[] field_74822_f = new String[] {"X509"};<a name="line.20"></a>
+<FONT color="green">021</FONT>        private static final String[] field_74823_g = new String[] {"DSA", "DH", "EC", "RSA", "GOST", "ECGOST", "ElGamal"};<a name="line.21"></a>
+<FONT color="green">022</FONT>        private static final String[] field_74829_h = new String[] {"GOST3411", "MD2", "MD4", "MD5", "SHA1", "RIPEMD128", "RIPEMD160", "RIPEMD256", "RIPEMD320", "SHA224", "SHA256", "SHA384", "SHA512", "Tiger", "Whirlpool"};<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        public BouncyCastleProvider()<a name="line.24"></a>
+<FONT color="green">025</FONT>        {<a name="line.25"></a>
+<FONT color="green">026</FONT>            super(PROVIDER_NAME, 1.47D, info);<a name="line.26"></a>
+<FONT color="green">027</FONT>            AccessController.doPrivileged(new BouncyCastleProviderAction(this));<a name="line.27"></a>
+<FONT color="green">028</FONT>        }<a name="line.28"></a>
+<FONT color="green">029</FONT>    <a name="line.29"></a>
+<FONT color="green">030</FONT>        private void func_74818_a()<a name="line.30"></a>
+<FONT color="green">031</FONT>        {<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.func_74819_a("org.bouncycastle.jcajce.provider.digest.", field_74829_h);<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.func_74819_a("org.bouncycastle.jcajce.provider.symmetric.", field_74825_e);<a name="line.33"></a>
+<FONT color="green">034</FONT>            this.func_74819_a("org.bouncycastle.jcajce.provider.asymmetric.", field_74822_f);<a name="line.34"></a>
+<FONT color="green">035</FONT>            this.func_74819_a("org.bouncycastle.jcajce.provider.asymmetric.", field_74823_g);<a name="line.35"></a>
+<FONT color="green">036</FONT>            this.put("X509Store.CERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCertCollection");<a name="line.36"></a>
+<FONT color="green">037</FONT>            this.put("X509Store.ATTRIBUTECERTIFICATE/COLLECTION", "org.bouncycastle.jce.provider.X509StoreAttrCertCollection");<a name="line.37"></a>
+<FONT color="green">038</FONT>            this.put("X509Store.CRL/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCRLCollection");<a name="line.38"></a>
+<FONT color="green">039</FONT>            this.put("X509Store.CERTIFICATEPAIR/COLLECTION", "org.bouncycastle.jce.provider.X509StoreCertPairCollection");<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.put("X509Store.CERTIFICATE/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPCerts");<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.put("X509Store.CRL/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPCRLs");<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.put("X509Store.ATTRIBUTECERTIFICATE/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPAttrCerts");<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.put("X509Store.CERTIFICATEPAIR/LDAP", "org.bouncycastle.jce.provider.X509StoreLDAPCertPairs");<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.put("X509StreamParser.CERTIFICATE", "org.bouncycastle.jce.provider.X509CertParser");<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.put("X509StreamParser.ATTRIBUTECERTIFICATE", "org.bouncycastle.jce.provider.X509AttrCertParser");<a name="line.45"></a>
+<FONT color="green">046</FONT>            this.put("X509StreamParser.CRL", "org.bouncycastle.jce.provider.X509CRLParser");<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.put("X509StreamParser.CERTIFICATEPAIR", "org.bouncycastle.jce.provider.X509CertPairParser");<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.put("KeyStore.BKS", "org.bouncycastle.jce.provider.JDKKeyStore");<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.put("KeyStore.BouncyCastle", "org.bouncycastle.jce.provider.JDKKeyStore$BouncyCastleStore");<a name="line.49"></a>
+<FONT color="green">050</FONT>            this.put("KeyStore.PKCS12", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");<a name="line.50"></a>
+<FONT color="green">051</FONT>            this.put("KeyStore.BCPKCS12", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");<a name="line.51"></a>
+<FONT color="green">052</FONT>            this.put("KeyStore.PKCS12-DEF", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore");<a name="line.52"></a>
+<FONT color="green">053</FONT>            this.put("KeyStore.PKCS12-3DES-40RC2", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore");<a name="line.53"></a>
+<FONT color="green">054</FONT>            this.put("KeyStore.PKCS12-3DES-3DES", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$BCPKCS12KeyStore3DES");<a name="line.54"></a>
+<FONT color="green">055</FONT>            this.put("KeyStore.PKCS12-DEF-3DES-40RC2", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore");<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.put("KeyStore.PKCS12-DEF-3DES-3DES", "org.bouncycastle.jce.provider.JDKPKCS12KeyStore$DefPKCS12KeyStore3DES");<a name="line.56"></a>
+<FONT color="green">057</FONT>            this.put("Alg.Alias.KeyStore.UBER", "BouncyCastle");<a name="line.57"></a>
+<FONT color="green">058</FONT>            this.put("Alg.Alias.KeyStore.BOUNCYCASTLE", "BouncyCastle");<a name="line.58"></a>
+<FONT color="green">059</FONT>            this.put("Alg.Alias.KeyStore.bouncycastle", "BouncyCastle");<a name="line.59"></a>
+<FONT color="green">060</FONT>            this.put("AlgorithmParameters.IES", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$IES");<a name="line.60"></a>
+<FONT color="green">061</FONT>            this.put("AlgorithmParameters.PKCS12PBE", "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PKCS12PBE");<a name="line.61"></a>
+<FONT color="green">062</FONT>            this.put("AlgorithmParameters." + PKCSObjectIdentifiers.field_71662_z, "org.bouncycastle.jce.provider.JDKAlgorithmParameters$PBKDF2");<a name="line.62"></a>
+<FONT color="green">063</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2", "PKCS12PBE");<a name="line.63"></a>
+<FONT color="green">064</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND3-KEYTRIPLEDES", "PKCS12PBE");<a name="line.64"></a>
+<FONT color="green">065</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND2-KEYTRIPLEDES", "PKCS12PBE");<a name="line.65"></a>
+<FONT color="green">066</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDRC2", "PKCS12PBE");<a name="line.66"></a>
+<FONT color="green">067</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDRC4", "PKCS12PBE");<a name="line.67"></a>
+<FONT color="green">068</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDTWOFISH", "PKCS12PBE");<a name="line.68"></a>
+<FONT color="green">069</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1ANDRC2-CBC", "PKCS12PBE");<a name="line.69"></a>
+<FONT color="green">070</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "PKCS12PBE");<a name="line.70"></a>
+<FONT color="green">071</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "PKCS12PBE");<a name="line.71"></a>
+<FONT color="green">072</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDDES3KEY-CBC", "PKCS12PBE");<a name="line.72"></a>
+<FONT color="green">073</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDDES2KEY-CBC", "PKCS12PBE");<a name="line.73"></a>
+<FONT color="green">074</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND40BITRC2-CBC", "PKCS12PBE");<a name="line.74"></a>
+<FONT color="green">075</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND40BITRC4", "PKCS12PBE");<a name="line.75"></a>
+<FONT color="green">076</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITRC2-CBC", "PKCS12PBE");<a name="line.76"></a>
+<FONT color="green">077</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITRC4", "PKCS12PBE");<a name="line.77"></a>
+<FONT color="green">078</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDTWOFISH", "PKCS12PBE");<a name="line.78"></a>
+<FONT color="green">079</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAANDTWOFISH-CBC", "PKCS12PBE");<a name="line.79"></a>
+<FONT color="green">080</FONT>            this.put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.1", "PKCS12PBE");<a name="line.80"></a>
+<FONT color="green">081</FONT>            this.put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.2", "PKCS12PBE");<a name="line.81"></a>
+<FONT color="green">082</FONT>            this.put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.3", "PKCS12PBE");<a name="line.82"></a>
+<FONT color="green">083</FONT>            this.put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.4", "PKCS12PBE");<a name="line.83"></a>
+<FONT color="green">084</FONT>            this.put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.5", "PKCS12PBE");<a name="line.84"></a>
+<FONT color="green">085</FONT>            this.put("Alg.Alias.AlgorithmParameters.1.2.840.113549.1.12.1.6", "PKCS12PBE");<a name="line.85"></a>
+<FONT color="green">086</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWithSHAAnd3KeyTripleDES", "PKCS12PBE");<a name="line.86"></a>
+<FONT color="green">087</FONT>            this.put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.field_71598_l.func_71609_b(), "PKCS12PBE");<a name="line.87"></a>
+<FONT color="green">088</FONT>            this.put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.field_71599_m.func_71609_b(), "PKCS12PBE");<a name="line.88"></a>
+<FONT color="green">089</FONT>            this.put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.field_71596_n.func_71609_b(), "PKCS12PBE");<a name="line.89"></a>
+<FONT color="green">090</FONT>            this.put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.field_71597_o.func_71609_b(), "PKCS12PBE");<a name="line.90"></a>
+<FONT color="green">091</FONT>            this.put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.field_71605_p.func_71609_b(), "PKCS12PBE");<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.put("Alg.Alias.AlgorithmParameters." + BCObjectIdentifiers.field_71604_q.func_71609_b(), "PKCS12PBE");<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND128BITAES-CBC-BC", "PKCS12PBE");<a name="line.93"></a>
+<FONT color="green">094</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND192BITAES-CBC-BC", "PKCS12PBE");<a name="line.94"></a>
+<FONT color="green">095</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHAAND256BITAES-CBC-BC", "PKCS12PBE");<a name="line.95"></a>
+<FONT color="green">096</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA256AND128BITAES-CBC-BC", "PKCS12PBE");<a name="line.96"></a>
+<FONT color="green">097</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA256AND192BITAES-CBC-BC", "PKCS12PBE");<a name="line.97"></a>
+<FONT color="green">098</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA256AND256BITAES-CBC-BC", "PKCS12PBE");<a name="line.98"></a>
+<FONT color="green">099</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1AND128BITAES-CBC-BC", "PKCS12PBE");<a name="line.99"></a>
+<FONT color="green">100</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1AND192BITAES-CBC-BC", "PKCS12PBE");<a name="line.100"></a>
+<FONT color="green">101</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA1AND256BITAES-CBC-BC", "PKCS12PBE");<a name="line.101"></a>
+<FONT color="green">102</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-1AND128BITAES-CBC-BC", "PKCS12PBE");<a name="line.102"></a>
+<FONT color="green">103</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-1AND192BITAES-CBC-BC", "PKCS12PBE");<a name="line.103"></a>
+<FONT color="green">104</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-1AND256BITAES-CBC-BC", "PKCS12PBE");<a name="line.104"></a>
+<FONT color="green">105</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND128BITAES-CBC-BC", "PKCS12PBE");<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND192BITAES-CBC-BC", "PKCS12PBE");<a name="line.106"></a>
+<FONT color="green">107</FONT>            this.put("Alg.Alias.AlgorithmParameters.PBEWITHSHA-256AND256BITAES-CBC-BC", "PKCS12PBE");<a name="line.107"></a>
+<FONT color="green">108</FONT>            this.put("AlgorithmParameters.SHA1WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");<a name="line.108"></a>
+<FONT color="green">109</FONT>            this.put("AlgorithmParameters.SHA224WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.put("AlgorithmParameters.SHA256WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");<a name="line.110"></a>
+<FONT color="green">111</FONT>            this.put("AlgorithmParameters.SHA384WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");<a name="line.111"></a>
+<FONT color="green">112</FONT>            this.put("AlgorithmParameters.SHA512WITHECDSA", "org.bouncycastle.jce.provider.JDKECDSAAlgParameters$SigAlgParameters");<a name="line.112"></a>
+<FONT color="green">113</FONT>            this.put("Alg.Alias.Cipher.PBEWithSHAAnd3KeyTripleDES", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");<a name="line.113"></a>
+<FONT color="green">114</FONT>            this.put("Cipher.ECIES", "org.bouncycastle.jce.provider.JCEIESCipher$ECIES");<a name="line.114"></a>
+<FONT color="green">115</FONT>            this.put("Cipher.BrokenECIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenECIES");<a name="line.115"></a>
+<FONT color="green">116</FONT>            this.put("Cipher.IES", "org.bouncycastle.jce.provider.JCEIESCipher$IES");<a name="line.116"></a>
+<FONT color="green">117</FONT>            this.put("Cipher.BrokenIES", "org.bouncycastle.jce.provider.JCEIESCipher$BrokenIES");<a name="line.117"></a>
+<FONT color="green">118</FONT>            this.put("Cipher.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndDES");<a name="line.118"></a>
+<FONT color="green">119</FONT>            this.put("Cipher.BROKENPBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithMD5AndDES");<a name="line.119"></a>
+<FONT color="green">120</FONT>            this.put("Cipher.PBEWITHMD5ANDRC2", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithMD5AndRC2");<a name="line.120"></a>
+<FONT color="green">121</FONT>            this.put("Cipher.PBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHA1AndDES");<a name="line.121"></a>
+<FONT color="green">122</FONT>            this.put("Cipher.BROKENPBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$BrokePBEWithSHA1AndDES");<a name="line.122"></a>
+<FONT color="green">123</FONT>            this.put("Cipher.PBEWITHSHA1ANDRC2", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHA1AndRC2");<a name="line.123"></a>
+<FONT color="green">124</FONT>            this.put("Cipher.PBEWITHSHAAND128BITRC2-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd128BitRC2");<a name="line.124"></a>
+<FONT color="green">125</FONT>            this.put("Cipher.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAnd40BitRC2");<a name="line.125"></a>
+<FONT color="green">126</FONT>            this.put("Cipher.PBEWITHSHAAND128BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd128BitRC4");<a name="line.126"></a>
+<FONT color="green">127</FONT>            this.put("Cipher.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCEStreamCipher$PBEWithSHAAnd40BitRC4");<a name="line.127"></a>
+<FONT color="green">128</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC2-CBC", "PBEWITHSHAAND128BITRC2-CBC");<a name="line.128"></a>
+<FONT color="green">129</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC2-CBC", "PBEWITHSHAAND40BITRC2-CBC");<a name="line.129"></a>
+<FONT color="green">130</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITRC4", "PBEWITHSHAAND128BITRC4");<a name="line.130"></a>
+<FONT color="green">131</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND40BITRC4", "PBEWITHSHAAND40BITRC4");<a name="line.131"></a>
+<FONT color="green">132</FONT>            this.put("Alg.Alias.Cipher." + BCObjectIdentifiers.field_71598_l.func_71609_b(), "PBEWITHSHAAND128BITAES-CBC-BC");<a name="line.132"></a>
+<FONT color="green">133</FONT>            this.put("Alg.Alias.Cipher." + BCObjectIdentifiers.field_71599_m.func_71609_b(), "PBEWITHSHAAND192BITAES-CBC-BC");<a name="line.133"></a>
+<FONT color="green">134</FONT>            this.put("Alg.Alias.Cipher." + BCObjectIdentifiers.field_71596_n.func_71609_b(), "PBEWITHSHAAND256BITAES-CBC-BC");<a name="line.134"></a>
+<FONT color="green">135</FONT>            this.put("Alg.Alias.Cipher." + BCObjectIdentifiers.field_71597_o.func_71609_b(), "PBEWITHSHA256AND128BITAES-CBC-BC");<a name="line.135"></a>
+<FONT color="green">136</FONT>            this.put("Alg.Alias.Cipher." + BCObjectIdentifiers.field_71605_p.func_71609_b(), "PBEWITHSHA256AND192BITAES-CBC-BC");<a name="line.136"></a>
+<FONT color="green">137</FONT>            this.put("Alg.Alias.Cipher." + BCObjectIdentifiers.field_71604_q.func_71609_b(), "PBEWITHSHA256AND256BITAES-CBC-BC");<a name="line.137"></a>
+<FONT color="green">138</FONT>            this.put("Cipher.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.138"></a>
+<FONT color="green">139</FONT>            this.put("Cipher.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.139"></a>
+<FONT color="green">140</FONT>            this.put("Cipher.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.140"></a>
+<FONT color="green">141</FONT>            this.put("Cipher.PBEWITHSHA256AND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.141"></a>
+<FONT color="green">142</FONT>            this.put("Cipher.PBEWITHSHA256AND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.142"></a>
+<FONT color="green">143</FONT>            this.put("Cipher.PBEWITHSHA256AND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.143"></a>
+<FONT color="green">144</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND128BITAES-CBC-BC", "PBEWITHSHAAND128BITAES-CBC-BC");<a name="line.144"></a>
+<FONT color="green">145</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND192BITAES-CBC-BC", "PBEWITHSHAAND192BITAES-CBC-BC");<a name="line.145"></a>
+<FONT color="green">146</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA1AND256BITAES-CBC-BC", "PBEWITHSHAAND256BITAES-CBC-BC");<a name="line.146"></a>
+<FONT color="green">147</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA-1AND128BITAES-CBC-BC", "PBEWITHSHAAND128BITAES-CBC-BC");<a name="line.147"></a>
+<FONT color="green">148</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA-1AND192BITAES-CBC-BC", "PBEWITHSHAAND192BITAES-CBC-BC");<a name="line.148"></a>
+<FONT color="green">149</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA-1AND256BITAES-CBC-BC", "PBEWITHSHAAND256BITAES-CBC-BC");<a name="line.149"></a>
+<FONT color="green">150</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA-256AND128BITAES-CBC-BC", "PBEWITHSHA256AND128BITAES-CBC-BC");<a name="line.150"></a>
+<FONT color="green">151</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA-256AND192BITAES-CBC-BC", "PBEWITHSHA256AND192BITAES-CBC-BC");<a name="line.151"></a>
+<FONT color="green">152</FONT>            this.put("Alg.Alias.Cipher.PBEWITHSHA-256AND256BITAES-CBC-BC", "PBEWITHSHA256AND256BITAES-CBC-BC");<a name="line.152"></a>
+<FONT color="green">153</FONT>            this.put("Cipher.PBEWITHMD5AND128BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.153"></a>
+<FONT color="green">154</FONT>            this.put("Cipher.PBEWITHMD5AND192BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.154"></a>
+<FONT color="green">155</FONT>            this.put("Cipher.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithAESCBC");<a name="line.155"></a>
+<FONT color="green">156</FONT>            this.put("Cipher.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCEBlockCipher$PBEWithSHAAndTwofish");<a name="line.156"></a>
+<FONT color="green">157</FONT>            this.put("Cipher.OLDPBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.BrokenJCEBlockCipher$OldPBEWithSHAAndTwofish");<a name="line.157"></a>
+<FONT color="green">158</FONT>            this.put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.field_71658_s, "PBEWITHMD2ANDDES");<a name="line.158"></a>
+<FONT color="green">159</FONT>            this.put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.field_71657_t, "PBEWITHMD2ANDRC2");<a name="line.159"></a>
+<FONT color="green">160</FONT>            this.put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.field_71656_u, "PBEWITHMD5ANDDES");<a name="line.160"></a>
+<FONT color="green">161</FONT>            this.put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.field_71655_v, "PBEWITHMD5ANDDES");<a name="line.161"></a>
+<FONT color="green">162</FONT>            this.put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.field_71654_w, "PBEWITHSHA1ANDDES");<a name="line.162"></a>
+<FONT color="green">163</FONT>            this.put("Alg.Alias.Cipher." + PKCSObjectIdentifiers.field_71664_x, "PBEWITHSHA1ANDRC2");<a name="line.163"></a>
+<FONT color="green">164</FONT>            this.put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.1", "PBEWITHSHAAND128BITRC4");<a name="line.164"></a>
+<FONT color="green">165</FONT>            this.put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.2", "PBEWITHSHAAND40BITRC4");<a name="line.165"></a>
+<FONT color="green">166</FONT>            this.put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.5", "PBEWITHSHAAND128BITRC2-CBC");<a name="line.166"></a>
+<FONT color="green">167</FONT>            this.put("Alg.Alias.Cipher.1.2.840.113549.1.12.1.6", "PBEWITHSHAAND40BITRC2-CBC");<a name="line.167"></a>
+<FONT color="green">168</FONT>            this.put("SecretKeyFactory.PBEWITHMD2ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndDES");<a name="line.168"></a>
+<FONT color="green">169</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71658_s, "PBEWITHMD2ANDDES");<a name="line.169"></a>
+<FONT color="green">170</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71657_t, "PBEWITHMD2ANDRC2");<a name="line.170"></a>
+<FONT color="green">171</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71656_u, "PBEWITHMD5ANDDES");<a name="line.171"></a>
+<FONT color="green">172</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71655_v, "PBEWITHMD5ANDDES");<a name="line.172"></a>
+<FONT color="green">173</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71654_w, "PBEWITHSHA1ANDDES");<a name="line.173"></a>
+<FONT color="green">174</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71664_x, "PBEWITHSHA1ANDRC2");<a name="line.174"></a>
+<FONT color="green">175</FONT>            this.put("SecretKeyFactory.PBEWITHMD2ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD2AndRC2");<a name="line.175"></a>
+<FONT color="green">176</FONT>            this.put("SecretKeyFactory.PBEWITHMD5ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndDES");<a name="line.176"></a>
+<FONT color="green">177</FONT>            this.put("SecretKeyFactory.PBEWITHMD5ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5AndRC2");<a name="line.177"></a>
+<FONT color="green">178</FONT>            this.put("SecretKeyFactory.PBEWITHSHA1ANDDES", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndDES");<a name="line.178"></a>
+<FONT color="green">179</FONT>            this.put("SecretKeyFactory.PBEWITHSHA1ANDRC2", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA1AndRC2");<a name="line.179"></a>
+<FONT color="green">180</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND3-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndDES3Key");<a name="line.180"></a>
+<FONT color="green">181</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND2-KEYTRIPLEDES-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndDES2Key");<a name="line.181"></a>
+<FONT color="green">182</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND128BITRC4", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC4");<a name="line.182"></a>
+<FONT color="green">183</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND40BITRC4", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC4");<a name="line.183"></a>
+<FONT color="green">184</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND128BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitRC2");<a name="line.184"></a>
+<FONT color="green">185</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND40BITRC2-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd40BitRC2");<a name="line.185"></a>
+<FONT color="green">186</FONT>            this.put("SecretKeyFactory.PBEWITHSHAANDTWOFISH-CBC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAndTwofish");<a name="line.186"></a>
+<FONT color="green">187</FONT>            this.put("SecretKeyFactory.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithRIPEMD160");<a name="line.187"></a>
+<FONT color="green">188</FONT>            this.put("SecretKeyFactory.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA");<a name="line.188"></a>
+<FONT color="green">189</FONT>            this.put("SecretKeyFactory.PBEWITHHMACTIGER", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithTiger");<a name="line.189"></a>
+<FONT color="green">190</FONT>            this.put("SecretKeyFactory.PBEWITHMD5AND128BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And128BitAESCBCOpenSSL");<a name="line.190"></a>
+<FONT color="green">191</FONT>            this.put("SecretKeyFactory.PBEWITHMD5AND192BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And192BitAESCBCOpenSSL");<a name="line.191"></a>
+<FONT color="green">192</FONT>            this.put("SecretKeyFactory.PBEWITHMD5AND256BITAES-CBC-OPENSSL", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithMD5And256BitAESCBCOpenSSL");<a name="line.192"></a>
+<FONT color="green">193</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBE", "PBE/PKCS5");<a name="line.193"></a>
+<FONT color="green">194</FONT>            this.put("Alg.Alias.SecretKeyFactory.BROKENPBEWITHMD5ANDDES", "PBE/PKCS5");<a name="line.194"></a>
+<FONT color="green">195</FONT>            this.put("Alg.Alias.SecretKeyFactory.BROKENPBEWITHSHA1ANDDES", "PBE/PKCS5");<a name="line.195"></a>
+<FONT color="green">196</FONT>            this.put("Alg.Alias.SecretKeyFactory.OLDPBEWITHSHAAND3-KEYTRIPLEDES-CBC", "PBE/PKCS12");<a name="line.196"></a>
+<FONT color="green">197</FONT>            this.put("Alg.Alias.SecretKeyFactory.BROKENPBEWITHSHAAND3-KEYTRIPLEDES-CBC", "PBE/PKCS12");<a name="line.197"></a>
+<FONT color="green">198</FONT>            this.put("Alg.Alias.SecretKeyFactory.BROKENPBEWITHSHAAND2-KEYTRIPLEDES-CBC", "PBE/PKCS12");<a name="line.198"></a>
+<FONT color="green">199</FONT>            this.put("Alg.Alias.SecretKeyFactory.OLDPBEWITHSHAANDTWOFISH-CBC", "PBE/PKCS12");<a name="line.199"></a>
+<FONT color="green">200</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHMD2ANDDES-CBC", "PBEWITHMD2ANDDES");<a name="line.200"></a>
+<FONT color="green">201</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHMD2ANDRC2-CBC", "PBEWITHMD2ANDRC2");<a name="line.201"></a>
+<FONT color="green">202</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHMD5ANDDES-CBC", "PBEWITHMD5ANDDES");<a name="line.202"></a>
+<FONT color="green">203</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHMD5ANDRC2-CBC", "PBEWITHMD5ANDRC2");<a name="line.203"></a>
+<FONT color="green">204</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1ANDDES-CBC", "PBEWITHSHA1ANDDES");<a name="line.204"></a>
+<FONT color="green">205</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1ANDRC2-CBC", "PBEWITHSHA1ANDRC2");<a name="line.205"></a>
+<FONT color="green">206</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71658_s, "PBEWITHMD2ANDDES");<a name="line.206"></a>
+<FONT color="green">207</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71657_t, "PBEWITHMD2ANDRC2");<a name="line.207"></a>
+<FONT color="green">208</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71656_u, "PBEWITHMD5ANDDES");<a name="line.208"></a>
+<FONT color="green">209</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71655_v, "PBEWITHMD5ANDRC2");<a name="line.209"></a>
+<FONT color="green">210</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71654_w, "PBEWITHSHA1ANDDES");<a name="line.210"></a>
+<FONT color="green">211</FONT>            this.put("Alg.Alias.SecretKeyFactory." + PKCSObjectIdentifiers.field_71664_x, "PBEWITHSHA1ANDRC2");<a name="line.211"></a>
+<FONT color="green">212</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.1", "PBEWITHSHAAND128BITRC4");<a name="line.212"></a>
+<FONT color="green">213</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.2", "PBEWITHSHAAND40BITRC4");<a name="line.213"></a>
+<FONT color="green">214</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.3", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");<a name="line.214"></a>
+<FONT color="green">215</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.4", "PBEWITHSHAAND2-KEYTRIPLEDES-CBC");<a name="line.215"></a>
+<FONT color="green">216</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.5", "PBEWITHSHAAND128BITRC2-CBC");<a name="line.216"></a>
+<FONT color="green">217</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.2.840.113549.1.12.1.6", "PBEWITHSHAAND40BITRC2-CBC");<a name="line.217"></a>
+<FONT color="green">218</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHHMACSHA", "PBEWITHHMACSHA1");<a name="line.218"></a>
+<FONT color="green">219</FONT>            this.put("Alg.Alias.SecretKeyFactory.1.3.14.3.2.26", "PBEWITHHMACSHA1");<a name="line.219"></a>
+<FONT color="green">220</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWithSHAAnd3KeyTripleDES", "PBEWITHSHAAND3-KEYTRIPLEDES-CBC");<a name="line.220"></a>
+<FONT color="green">221</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd128BitAESBC");<a name="line.221"></a>
+<FONT color="green">222</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd192BitAESBC");<a name="line.222"></a>
+<FONT color="green">223</FONT>            this.put("SecretKeyFactory.PBEWITHSHAAND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHAAnd256BitAESBC");<a name="line.223"></a>
+<FONT color="green">224</FONT>            this.put("SecretKeyFactory.PBEWITHSHA256AND128BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And128BitAESBC");<a name="line.224"></a>
+<FONT color="green">225</FONT>            this.put("SecretKeyFactory.PBEWITHSHA256AND192BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And192BitAESBC");<a name="line.225"></a>
+<FONT color="green">226</FONT>            this.put("SecretKeyFactory.PBEWITHSHA256AND256BITAES-CBC-BC", "org.bouncycastle.jce.provider.JCESecretKeyFactory$PBEWithSHA256And256BitAESBC");<a name="line.226"></a>
+<FONT color="green">227</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1AND128BITAES-CBC-BC", "PBEWITHSHAAND128BITAES-CBC-BC");<a name="line.227"></a>
+<FONT color="green">228</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1AND192BITAES-CBC-BC", "PBEWITHSHAAND192BITAES-CBC-BC");<a name="line.228"></a>
+<FONT color="green">229</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA1AND256BITAES-CBC-BC", "PBEWITHSHAAND256BITAES-CBC-BC");<a name="line.229"></a>
+<FONT color="green">230</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-1AND128BITAES-CBC-BC", "PBEWITHSHAAND128BITAES-CBC-BC");<a name="line.230"></a>
+<FONT color="green">231</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-1AND192BITAES-CBC-BC", "PBEWITHSHAAND192BITAES-CBC-BC");<a name="line.231"></a>
+<FONT color="green">232</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-1AND256BITAES-CBC-BC", "PBEWITHSHAAND256BITAES-CBC-BC");<a name="line.232"></a>
+<FONT color="green">233</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-256AND128BITAES-CBC-BC", "PBEWITHSHA256AND128BITAES-CBC-BC");<a name="line.233"></a>
+<FONT color="green">234</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-256AND192BITAES-CBC-BC", "PBEWITHSHA256AND192BITAES-CBC-BC");<a name="line.234"></a>
+<FONT color="green">235</FONT>            this.put("Alg.Alias.SecretKeyFactory.PBEWITHSHA-256AND256BITAES-CBC-BC", "PBEWITHSHA256AND256BITAES-CBC-BC");<a name="line.235"></a>
+<FONT color="green">236</FONT>            this.put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.field_71598_l.func_71609_b(), "PBEWITHSHAAND128BITAES-CBC-BC");<a name="line.236"></a>
+<FONT color="green">237</FONT>            this.put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.field_71599_m.func_71609_b(), "PBEWITHSHAAND192BITAES-CBC-BC");<a name="line.237"></a>
+<FONT color="green">238</FONT>            this.put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.field_71596_n.func_71609_b(), "PBEWITHSHAAND256BITAES-CBC-BC");<a name="line.238"></a>
+<FONT color="green">239</FONT>            this.put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.field_71597_o.func_71609_b(), "PBEWITHSHA256AND128BITAES-CBC-BC");<a name="line.239"></a>
+<FONT color="green">240</FONT>            this.put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.field_71605_p.func_71609_b(), "PBEWITHSHA256AND192BITAES-CBC-BC");<a name="line.240"></a>
+<FONT color="green">241</FONT>            this.put("Alg.Alias.SecretKeyFactory." + BCObjectIdentifiers.field_71604_q.func_71609_b(), "PBEWITHSHA256AND256BITAES-CBC-BC");<a name="line.241"></a>
+<FONT color="green">242</FONT>            this.func_74820_b();<a name="line.242"></a>
+<FONT color="green">243</FONT>            this.put("CertPathValidator.RFC3281", "org.bouncycastle.jce.provider.PKIXAttrCertPathValidatorSpi");<a name="line.243"></a>
+<FONT color="green">244</FONT>            this.put("CertPathBuilder.RFC3281", "org.bouncycastle.jce.provider.PKIXAttrCertPathBuilderSpi");<a name="line.244"></a>
+<FONT color="green">245</FONT>            this.put("CertPathValidator.RFC3280", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");<a name="line.245"></a>
+<FONT color="green">246</FONT>            this.put("CertPathBuilder.RFC3280", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");<a name="line.246"></a>
+<FONT color="green">247</FONT>            this.put("CertPathValidator.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathValidatorSpi");<a name="line.247"></a>
+<FONT color="green">248</FONT>            this.put("CertPathBuilder.PKIX", "org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi");<a name="line.248"></a>
+<FONT color="green">249</FONT>            this.put("CertStore.Collection", "org.bouncycastle.jce.provider.CertStoreCollectionSpi");<a name="line.249"></a>
+<FONT color="green">250</FONT>            this.put("CertStore.LDAP", "org.bouncycastle.jce.provider.X509LDAPCertStoreSpi");<a name="line.250"></a>
+<FONT color="green">251</FONT>            this.put("CertStore.Multi", "org.bouncycastle.jce.provider.MultiCertStoreSpi");<a name="line.251"></a>
+<FONT color="green">252</FONT>            this.put("Alg.Alias.CertStore.X509LDAP", "LDAP");<a name="line.252"></a>
+<FONT color="green">253</FONT>        }<a name="line.253"></a>
+<FONT color="green">254</FONT>    <a name="line.254"></a>
+<FONT color="green">255</FONT>        private void func_74819_a(String par1Str, String[] par2ArrayOfStr)<a name="line.255"></a>
+<FONT color="green">256</FONT>        {<a name="line.256"></a>
+<FONT color="green">257</FONT>            for (int var3 = 0; var3 != par2ArrayOfStr.length; ++var3)<a name="line.257"></a>
+<FONT color="green">258</FONT>            {<a name="line.258"></a>
+<FONT color="green">259</FONT>                Class var4 = null;<a name="line.259"></a>
+<FONT color="green">260</FONT>    <a name="line.260"></a>
+<FONT color="green">261</FONT>                try<a name="line.261"></a>
+<FONT color="green">262</FONT>                {<a name="line.262"></a>
+<FONT color="green">263</FONT>                    ClassLoader var5 = this.getClass().getClassLoader();<a name="line.263"></a>
+<FONT color="green">264</FONT>    <a name="line.264"></a>
+<FONT color="green">265</FONT>                    if (var5 != null)<a name="line.265"></a>
+<FONT color="green">266</FONT>                    {<a name="line.266"></a>
+<FONT color="green">267</FONT>                        var4 = var5.loadClass(par1Str + par2ArrayOfStr[var3] + "$Mappings");<a name="line.267"></a>
+<FONT color="green">268</FONT>                    }<a name="line.268"></a>
+<FONT color="green">269</FONT>                    else<a name="line.269"></a>
+<FONT color="green">270</FONT>                    {<a name="line.270"></a>
+<FONT color="green">271</FONT>                        var4 = Class.forName(par1Str + par2ArrayOfStr[var3] + "$Mappings");<a name="line.271"></a>
+<FONT color="green">272</FONT>                    }<a name="line.272"></a>
+<FONT color="green">273</FONT>                }<a name="line.273"></a>
+<FONT color="green">274</FONT>                catch (ClassNotFoundException var7)<a name="line.274"></a>
+<FONT color="green">275</FONT>                {<a name="line.275"></a>
+<FONT color="green">276</FONT>                    ;<a name="line.276"></a>
+<FONT color="green">277</FONT>                }<a name="line.277"></a>
+<FONT color="green">278</FONT>    <a name="line.278"></a>
+<FONT color="green">279</FONT>                if (var4 != null)<a name="line.279"></a>
+<FONT color="green">280</FONT>                {<a name="line.280"></a>
+<FONT color="green">281</FONT>                    try<a name="line.281"></a>
+<FONT color="green">282</FONT>                    {<a name="line.282"></a>
+<FONT color="green">283</FONT>                        ((AlgorithmProvider)var4.newInstance()).configure(this);<a name="line.283"></a>
+<FONT color="green">284</FONT>                    }<a name="line.284"></a>
+<FONT color="green">285</FONT>                    catch (Exception var6)<a name="line.285"></a>
+<FONT color="green">286</FONT>                    {<a name="line.286"></a>
+<FONT color="green">287</FONT>                        var6.printStackTrace();<a name="line.287"></a>
+<FONT color="green">288</FONT>                        throw new InternalError("cannot create instance of " + par1Str + par2ArrayOfStr[var3] + "$Mappings : " + var6);<a name="line.288"></a>
+<FONT color="green">289</FONT>                    }<a name="line.289"></a>
+<FONT color="green">290</FONT>                }<a name="line.290"></a>
+<FONT color="green">291</FONT>            }<a name="line.291"></a>
+<FONT color="green">292</FONT>        }<a name="line.292"></a>
+<FONT color="green">293</FONT>    <a name="line.293"></a>
+<FONT color="green">294</FONT>        private void func_74820_b()<a name="line.294"></a>
+<FONT color="green">295</FONT>        {<a name="line.295"></a>
+<FONT color="green">296</FONT>            this.put("Mac.DESWITHISO9797", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");<a name="line.296"></a>
+<FONT color="green">297</FONT>            this.put("Alg.Alias.Mac.DESISO9797MAC", "DESWITHISO9797");<a name="line.297"></a>
+<FONT color="green">298</FONT>            this.put("Mac.ISO9797ALG3MAC", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3");<a name="line.298"></a>
+<FONT color="green">299</FONT>            this.put("Alg.Alias.Mac.ISO9797ALG3", "ISO9797ALG3MAC");<a name="line.299"></a>
+<FONT color="green">300</FONT>            this.put("Mac.ISO9797ALG3WITHISO7816-4PADDING", "org.bouncycastle.jce.provider.JCEMac$DES9797Alg3with7816d4");<a name="line.300"></a>
+<FONT color="green">301</FONT>            this.put("Alg.Alias.Mac.ISO9797ALG3MACWITHISO7816-4PADDING", "ISO9797ALG3WITHISO7816-4PADDING");<a name="line.301"></a>
+<FONT color="green">302</FONT>            this.put("Mac.OLDHMACSHA384", "org.bouncycastle.jce.provider.JCEMac$OldSHA384");<a name="line.302"></a>
+<FONT color="green">303</FONT>            this.put("Mac.OLDHMACSHA512", "org.bouncycastle.jce.provider.JCEMac$OldSHA512");<a name="line.303"></a>
+<FONT color="green">304</FONT>            this.put("Mac.PBEWITHHMACSHA", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");<a name="line.304"></a>
+<FONT color="green">305</FONT>            this.put("Mac.PBEWITHHMACSHA1", "org.bouncycastle.jce.provider.JCEMac$PBEWithSHA");<a name="line.305"></a>
+<FONT color="green">306</FONT>            this.put("Mac.PBEWITHHMACRIPEMD160", "org.bouncycastle.jce.provider.JCEMac$PBEWithRIPEMD160");<a name="line.306"></a>
+<FONT color="green">307</FONT>            this.put("Alg.Alias.Mac.1.3.14.3.2.26", "PBEWITHHMACSHA");<a name="line.307"></a>
+<FONT color="green">308</FONT>        }<a name="line.308"></a>
+<FONT color="green">309</FONT>    <a name="line.309"></a>
+<FONT color="green">310</FONT>        static void func_74821_a(BouncyCastleProvider par0BouncyCastleProvider)<a name="line.310"></a>
+<FONT color="green">311</FONT>        {<a name="line.311"></a>
+<FONT color="green">312</FONT>            par0BouncyCastleProvider.func_74818_a();<a name="line.312"></a>
+<FONT color="green">313</FONT>        }<a name="line.313"></a>
+<FONT color="green">314</FONT>    }<a name="line.314"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

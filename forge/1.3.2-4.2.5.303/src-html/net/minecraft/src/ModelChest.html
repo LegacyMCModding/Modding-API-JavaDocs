@@ -1,0 +1,112 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelChest extends ModelBase<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** The chest lid in the chest's model. */<a name="line.9"></a>
+<FONT color="green">010</FONT>        public ModelRenderer chestLid = (new ModelRenderer(this, 0, 0)).setTextureSize(64, 64);<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** The model of the bottom of the chest. */<a name="line.12"></a>
+<FONT color="green">013</FONT>        public ModelRenderer chestBelow;<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        /** The chest's knob in the chest model. */<a name="line.15"></a>
+<FONT color="green">016</FONT>        public ModelRenderer chestKnob;<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        public ModelChest()<a name="line.18"></a>
+<FONT color="green">019</FONT>        {<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.chestLid.addBox(0.0F, -5.0F, -14.0F, 14, 5, 14, 0.0F);<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.chestLid.rotationPointX = 1.0F;<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.chestLid.rotationPointY = 7.0F;<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.chestLid.rotationPointZ = 15.0F;<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.chestKnob = (new ModelRenderer(this, 0, 0)).setTextureSize(64, 64);<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.chestKnob.addBox(-1.0F, -2.0F, -15.0F, 2, 4, 1, 0.0F);<a name="line.25"></a>
+<FONT color="green">026</FONT>            this.chestKnob.rotationPointX = 8.0F;<a name="line.26"></a>
+<FONT color="green">027</FONT>            this.chestKnob.rotationPointY = 7.0F;<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.chestKnob.rotationPointZ = 15.0F;<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.chestBelow = (new ModelRenderer(this, 0, 19)).setTextureSize(64, 64);<a name="line.29"></a>
+<FONT color="green">030</FONT>            this.chestBelow.addBox(0.0F, 0.0F, 0.0F, 14, 10, 14, 0.0F);<a name="line.30"></a>
+<FONT color="green">031</FONT>            this.chestBelow.rotationPointX = 1.0F;<a name="line.31"></a>
+<FONT color="green">032</FONT>            this.chestBelow.rotationPointY = 6.0F;<a name="line.32"></a>
+<FONT color="green">033</FONT>            this.chestBelow.rotationPointZ = 1.0F;<a name="line.33"></a>
+<FONT color="green">034</FONT>        }<a name="line.34"></a>
+<FONT color="green">035</FONT>    <a name="line.35"></a>
+<FONT color="green">036</FONT>        /**<a name="line.36"></a>
+<FONT color="green">037</FONT>         * This method renders out all parts of the chest model.<a name="line.37"></a>
+<FONT color="green">038</FONT>         */<a name="line.38"></a>
+<FONT color="green">039</FONT>        public void renderAll()<a name="line.39"></a>
+<FONT color="green">040</FONT>        {<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.chestKnob.rotateAngleX = this.chestLid.rotateAngleX;<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.chestLid.render(0.0625F);<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.chestKnob.render(0.0625F);<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.chestBelow.render(0.0625F);<a name="line.44"></a>
+<FONT color="green">045</FONT>        }<a name="line.45"></a>
+<FONT color="green">046</FONT>    }<a name="line.46"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

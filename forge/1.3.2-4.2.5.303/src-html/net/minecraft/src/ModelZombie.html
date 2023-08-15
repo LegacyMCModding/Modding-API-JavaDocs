@@ -1,0 +1,98 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelZombie extends ModelBiped<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /**<a name="line.9"></a>
+<FONT color="green">010</FONT>         * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.10"></a>
+<FONT color="green">011</FONT>         * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.11"></a>
+<FONT color="green">012</FONT>         * "far" arms and legs can swing at most.<a name="line.12"></a>
+<FONT color="green">013</FONT>         */<a name="line.13"></a>
+<FONT color="green">014</FONT>        public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6)<a name="line.14"></a>
+<FONT color="green">015</FONT>        {<a name="line.15"></a>
+<FONT color="green">016</FONT>            super.setRotationAngles(par1, par2, par3, par4, par5, par6);<a name="line.16"></a>
+<FONT color="green">017</FONT>            float var7 = MathHelper.sin(this.onGround * (float)Math.PI);<a name="line.17"></a>
+<FONT color="green">018</FONT>            float var8 = MathHelper.sin((1.0F - (1.0F - this.onGround) * (1.0F - this.onGround)) * (float)Math.PI);<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.bipedRightArm.rotateAngleZ = 0.0F;<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.bipedLeftArm.rotateAngleZ = 0.0F;<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.bipedRightArm.rotateAngleY = -(0.1F - var7 * 0.6F);<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.bipedLeftArm.rotateAngleY = 0.1F - var7 * 0.6F;<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.bipedRightArm.rotateAngleX = -((float)Math.PI / 2F);<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.bipedLeftArm.rotateAngleX = -((float)Math.PI / 2F);<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.bipedRightArm.rotateAngleX -= var7 * 1.2F - var8 * 0.4F;<a name="line.25"></a>
+<FONT color="green">026</FONT>            this.bipedLeftArm.rotateAngleX -= var7 * 1.2F - var8 * 0.4F;<a name="line.26"></a>
+<FONT color="green">027</FONT>            this.bipedRightArm.rotateAngleZ += MathHelper.cos(par3 * 0.09F) * 0.05F + 0.05F;<a name="line.27"></a>
+<FONT color="green">028</FONT>            this.bipedLeftArm.rotateAngleZ -= MathHelper.cos(par3 * 0.09F) * 0.05F + 0.05F;<a name="line.28"></a>
+<FONT color="green">029</FONT>            this.bipedRightArm.rotateAngleX += MathHelper.sin(par3 * 0.067F) * 0.05F;<a name="line.29"></a>
+<FONT color="green">030</FONT>            this.bipedLeftArm.rotateAngleX -= MathHelper.sin(par3 * 0.067F) * 0.05F;<a name="line.30"></a>
+<FONT color="green">031</FONT>        }<a name="line.31"></a>
+<FONT color="green">032</FONT>    }<a name="line.32"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

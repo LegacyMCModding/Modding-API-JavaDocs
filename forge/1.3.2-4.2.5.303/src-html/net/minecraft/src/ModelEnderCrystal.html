@@ -1,0 +1,118 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import org.lwjgl.opengl.GL11;<a name="line.5"></a>
+<FONT color="green">006</FONT>    <a name="line.6"></a>
+<FONT color="green">007</FONT>    @SideOnly(Side.CLIENT)<a name="line.7"></a>
+<FONT color="green">008</FONT>    public class ModelEnderCrystal extends ModelBase<a name="line.8"></a>
+<FONT color="green">009</FONT>    {<a name="line.9"></a>
+<FONT color="green">010</FONT>        /** The cube model for the Ender Crystal. */<a name="line.10"></a>
+<FONT color="green">011</FONT>        private ModelRenderer cube;<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        /** The glass model for the Ender Crystal. */<a name="line.13"></a>
+<FONT color="green">014</FONT>        private ModelRenderer glass = new ModelRenderer(this, "glass");<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /** The base model for the Ender Crystal. */<a name="line.16"></a>
+<FONT color="green">017</FONT>        private ModelRenderer base;<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        public ModelEnderCrystal(float par1)<a name="line.19"></a>
+<FONT color="green">020</FONT>        {<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.glass.setTextureOffset(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.cube = new ModelRenderer(this, "cube");<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.cube.setTextureOffset(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.base = new ModelRenderer(this, "base");<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.base.setTextureOffset(0, 16).addBox(-6.0F, 0.0F, -6.0F, 12, 4, 12);<a name="line.25"></a>
+<FONT color="green">026</FONT>        }<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        /**<a name="line.28"></a>
+<FONT color="green">029</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.29"></a>
+<FONT color="green">030</FONT>         */<a name="line.30"></a>
+<FONT color="green">031</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.31"></a>
+<FONT color="green">032</FONT>        {<a name="line.32"></a>
+<FONT color="green">033</FONT>            GL11.glPushMatrix();<a name="line.33"></a>
+<FONT color="green">034</FONT>            GL11.glScalef(2.0F, 2.0F, 2.0F);<a name="line.34"></a>
+<FONT color="green">035</FONT>            GL11.glTranslatef(0.0F, -0.5F, 0.0F);<a name="line.35"></a>
+<FONT color="green">036</FONT>            this.base.render(par7);<a name="line.36"></a>
+<FONT color="green">037</FONT>            GL11.glRotatef(par3, 0.0F, 1.0F, 0.0F);<a name="line.37"></a>
+<FONT color="green">038</FONT>            GL11.glTranslatef(0.0F, 0.8F + par4, 0.0F);<a name="line.38"></a>
+<FONT color="green">039</FONT>            GL11.glRotatef(60.0F, 0.7071F, 0.0F, 0.7071F);<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.glass.render(par7);<a name="line.40"></a>
+<FONT color="green">041</FONT>            float var8 = 0.875F;<a name="line.41"></a>
+<FONT color="green">042</FONT>            GL11.glScalef(var8, var8, var8);<a name="line.42"></a>
+<FONT color="green">043</FONT>            GL11.glRotatef(60.0F, 0.7071F, 0.0F, 0.7071F);<a name="line.43"></a>
+<FONT color="green">044</FONT>            GL11.glRotatef(par3, 0.0F, 1.0F, 0.0F);<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.glass.render(par7);<a name="line.45"></a>
+<FONT color="green">046</FONT>            GL11.glScalef(var8, var8, var8);<a name="line.46"></a>
+<FONT color="green">047</FONT>            GL11.glRotatef(60.0F, 0.7071F, 0.0F, 0.7071F);<a name="line.47"></a>
+<FONT color="green">048</FONT>            GL11.glRotatef(par3, 0.0F, 1.0F, 0.0F);<a name="line.48"></a>
+<FONT color="green">049</FONT>            this.cube.render(par7);<a name="line.49"></a>
+<FONT color="green">050</FONT>            GL11.glPopMatrix();<a name="line.50"></a>
+<FONT color="green">051</FONT>        }<a name="line.51"></a>
+<FONT color="green">052</FONT>    }<a name="line.52"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

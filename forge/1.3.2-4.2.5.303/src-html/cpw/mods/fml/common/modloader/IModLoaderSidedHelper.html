@@ -1,0 +1,92 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package cpw.mods.fml.common.modloader;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.network.EntitySpawnPacket;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.registry.EntityRegistry.EntityRegistration;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import net.minecraft.src.Entity;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.src.EntityPlayer;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.src.NetHandler;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.src.NetworkManager;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.src.Packet250CustomPayload;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>    public interface IModLoaderSidedHelper<a name="line.11"></a>
+<FONT color="green">012</FONT>    {<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        void finishModLoading(ModLoaderModContainer mc);<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        Object getClientGui(BaseModProxy mod, EntityPlayer player, int iD, int x, int y, int z);<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        Entity spawnEntity(BaseModProxy mod, EntitySpawnPacket input, EntityRegistration registration);<a name="line.18"></a>
+<FONT color="green">019</FONT>    <a name="line.19"></a>
+<FONT color="green">020</FONT>        void sendClientPacket(BaseModProxy mod, Packet250CustomPayload packet);<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        void clientConnectionOpened(NetHandler netClientHandler, NetworkManager manager, BaseModProxy mod);<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        boolean clientConnectionClosed(NetworkManager manager, BaseModProxy mod);<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>    }<a name="line.26"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,555 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    <a name="line.1"></a>
+<FONT color="green">002</FONT>    package ibxm;<a name="line.2"></a>
+<FONT color="green">003</FONT>    <a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.io.*;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public class ScreamTracker3 {<a name="line.6"></a>
+<FONT color="green">007</FONT>        private static final int[] effect_map = new int[] {<a name="line.7"></a>
+<FONT color="green">008</FONT>            0xFF,<a name="line.8"></a>
+<FONT color="green">009</FONT>            0x25, /* A: Set Speed.*/<a name="line.9"></a>
+<FONT color="green">010</FONT>            0x0B, /* B: Pattern Jump.*/<a name="line.10"></a>
+<FONT color="green">011</FONT>            0x0D, /* C: Pattern Break.*/<a name="line.11"></a>
+<FONT color="green">012</FONT>            0x0A, /* D: Volume Slide.*/<a name="line.12"></a>
+<FONT color="green">013</FONT>            0x02, /* E: Portamento Down.*/<a name="line.13"></a>
+<FONT color="green">014</FONT>            0x01, /* F: Portamento Up.*/<a name="line.14"></a>
+<FONT color="green">015</FONT>            0x03, /* G: Tone Portamento.*/<a name="line.15"></a>
+<FONT color="green">016</FONT>            0x04, /* H: Vibrato.*/<a name="line.16"></a>
+<FONT color="green">017</FONT>            0x1D, /* I: Tremor.*/<a name="line.17"></a>
+<FONT color="green">018</FONT>            0x00, /* J: Arpeggio.*/<a name="line.18"></a>
+<FONT color="green">019</FONT>            0x06, /* K: Vibrato + Volume Slide.*/<a name="line.19"></a>
+<FONT color="green">020</FONT>            0x05, /* L: Tone Portamento + Volume Slide.*/<a name="line.20"></a>
+<FONT color="green">021</FONT>            0xFF, /* M: */<a name="line.21"></a>
+<FONT color="green">022</FONT>            0xFF, /* N: */<a name="line.22"></a>
+<FONT color="green">023</FONT>            0x09, /* O: Sample Offset.*/<a name="line.23"></a>
+<FONT color="green">024</FONT>            0xFF, /* P: */<a name="line.24"></a>
+<FONT color="green">025</FONT>            0x1B, /* Q: Retrig + Volume Slide.*/<a name="line.25"></a>
+<FONT color="green">026</FONT>            0x07, /* R: Tremolo.*/<a name="line.26"></a>
+<FONT color="green">027</FONT>            0x0E, /* S: Extended Effects.*/<a name="line.27"></a>
+<FONT color="green">028</FONT>            0x0F, /* T: Set Tempo.*/<a name="line.28"></a>
+<FONT color="green">029</FONT>            0x24, /* U: Fine Vibrato.*/<a name="line.29"></a>
+<FONT color="green">030</FONT>            0x10, /* V: Set Global Volume. */<a name="line.30"></a>
+<FONT color="green">031</FONT>            0xFF, 0xFF, 0xFF, 0xFF, 0xFF,<a name="line.31"></a>
+<FONT color="green">032</FONT>            0xFF, 0xFF, 0xFF, 0xFF<a name="line.32"></a>
+<FONT color="green">033</FONT>        };<a name="line.33"></a>
+<FONT color="green">034</FONT>    <a name="line.34"></a>
+<FONT color="green">035</FONT>        private static final int[] effect_s_map = new int[] {<a name="line.35"></a>
+<FONT color="green">036</FONT>            0x00, /* 0: Set Filter.*/<a name="line.36"></a>
+<FONT color="green">037</FONT>            0x03, /* 1: Glissando.*/<a name="line.37"></a>
+<FONT color="green">038</FONT>            0x05, /* 2: Set Fine Tune.*/<a name="line.38"></a>
+<FONT color="green">039</FONT>            0x04, /* 3: Set Vibrato Waveform.*/<a name="line.39"></a>
+<FONT color="green">040</FONT>            0x07, /* 4: Set Tremolo Waveform.*/<a name="line.40"></a>
+<FONT color="green">041</FONT>            0xFF, /* 5: */<a name="line.41"></a>
+<FONT color="green">042</FONT>            0xFF, /* 6: */<a name="line.42"></a>
+<FONT color="green">043</FONT>            0xFF, /* 7: */<a name="line.43"></a>
+<FONT color="green">044</FONT>            0x08, /* 8: Set Panning.*/<a name="line.44"></a>
+<FONT color="green">045</FONT>            0xFF, /* 9: */<a name="line.45"></a>
+<FONT color="green">046</FONT>            0x09, /* A: Stereo Control.*/<a name="line.46"></a>
+<FONT color="green">047</FONT>            0x06, /* B: Pattern Loop.*/<a name="line.47"></a>
+<FONT color="green">048</FONT>            0x0C, /* C: Note Cut.*/<a name="line.48"></a>
+<FONT color="green">049</FONT>            0x0D, /* D: Note Delay.*/<a name="line.49"></a>
+<FONT color="green">050</FONT>            0x0E, /* E: Pattern Delay.*/<a name="line.50"></a>
+<FONT color="green">051</FONT>            0x0F  /* F: Invert Loop.*/<a name="line.51"></a>
+<FONT color="green">052</FONT>        };<a name="line.52"></a>
+<FONT color="green">053</FONT>    <a name="line.53"></a>
+<FONT color="green">054</FONT>        public static boolean is_s3m( byte[] header_96_bytes ) {<a name="line.54"></a>
+<FONT color="green">055</FONT>            String s3m_identifier;<a name="line.55"></a>
+<FONT color="green">056</FONT>            s3m_identifier = ascii_text( header_96_bytes, 44, 4 );<a name="line.56"></a>
+<FONT color="green">057</FONT>            return s3m_identifier.equals( "SCRM" );<a name="line.57"></a>
+<FONT color="green">058</FONT>        }<a name="line.58"></a>
+<FONT color="green">059</FONT>    <a name="line.59"></a>
+<FONT color="green">060</FONT>        public static Module load_s3m( byte[] header_96_bytes, DataInput data_input ) throws IOException {<a name="line.60"></a>
+<FONT color="green">061</FONT>            int num_pattern_orders, num_instruments, num_patterns, num_channels;<a name="line.61"></a>
+<FONT color="green">062</FONT>            int flags, tracker_version, master_volume, panning, channel_config, sequence_length;<a name="line.62"></a>
+<FONT color="green">063</FONT>            int instrument_idx, pattern_idx, channel_idx, order_idx, panning_offset;<a name="line.63"></a>
+<FONT color="green">064</FONT>            boolean signed_samples, stereo_mode, default_panning;<a name="line.64"></a>
+<FONT color="green">065</FONT>            int[] channel_map, sequence;<a name="line.65"></a>
+<FONT color="green">066</FONT>            byte[] s3m_file;<a name="line.66"></a>
+<FONT color="green">067</FONT>            Module module;<a name="line.67"></a>
+<FONT color="green">068</FONT>            Instrument instrument;<a name="line.68"></a>
+<FONT color="green">069</FONT>            s3m_file = read_s3m_file( header_96_bytes, data_input );<a name="line.69"></a>
+<FONT color="green">070</FONT>            module = new Module();<a name="line.70"></a>
+<FONT color="green">071</FONT>            module.song_title = ascii_text( s3m_file, 0, 28 );<a name="line.71"></a>
+<FONT color="green">072</FONT>            num_pattern_orders = get_num_pattern_orders( s3m_file );<a name="line.72"></a>
+<FONT color="green">073</FONT>            num_instruments = get_num_instruments( s3m_file );<a name="line.73"></a>
+<FONT color="green">074</FONT>            num_patterns = get_num_patterns( s3m_file );<a name="line.74"></a>
+<FONT color="green">075</FONT>            flags = unsigned_short_le( s3m_file, 38 );<a name="line.75"></a>
+<FONT color="green">076</FONT>            tracker_version = unsigned_short_le( s3m_file, 40 );<a name="line.76"></a>
+<FONT color="green">077</FONT>            if( ( flags &amp; 0x40 ) == 0x40 || tracker_version == 0x1300 ) {<a name="line.77"></a>
+<FONT color="green">078</FONT>                module.fast_volume_slides = true;<a name="line.78"></a>
+<FONT color="green">079</FONT>            }<a name="line.79"></a>
+<FONT color="green">080</FONT>            signed_samples = false;<a name="line.80"></a>
+<FONT color="green">081</FONT>            if( unsigned_short_le( s3m_file, 42 ) == 0x01 ) {<a name="line.81"></a>
+<FONT color="green">082</FONT>                signed_samples = true;<a name="line.82"></a>
+<FONT color="green">083</FONT>            }<a name="line.83"></a>
+<FONT color="green">084</FONT>            module.global_volume = s3m_file[ 48 ] &amp; 0xFF;<a name="line.84"></a>
+<FONT color="green">085</FONT>            module.default_speed = s3m_file[ 49 ] &amp; 0xFF;<a name="line.85"></a>
+<FONT color="green">086</FONT>            module.default_tempo = s3m_file[ 50 ] &amp; 0xFF;<a name="line.86"></a>
+<FONT color="green">087</FONT>            master_volume = s3m_file[ 51 ] &amp; 0x7F;<a name="line.87"></a>
+<FONT color="green">088</FONT>            module.channel_gain = ( master_volume &lt;&lt; IBXM.FP_SHIFT ) &gt;&gt; 7;<a name="line.88"></a>
+<FONT color="green">089</FONT>            stereo_mode = ( s3m_file[ 51 ] &amp; 0x80 ) == 0x80;<a name="line.89"></a>
+<FONT color="green">090</FONT>            default_panning = ( s3m_file[ 53 ] &amp; 0xFF ) == 0xFC;<a name="line.90"></a>
+<FONT color="green">091</FONT>            channel_map = new int[ 32 ];<a name="line.91"></a>
+<FONT color="green">092</FONT>            num_channels = 0;<a name="line.92"></a>
+<FONT color="green">093</FONT>            for( channel_idx = 0; channel_idx &lt; 32; channel_idx++ ) {<a name="line.93"></a>
+<FONT color="green">094</FONT>                channel_config = s3m_file[ 64 + channel_idx ] &amp; 0xFF;<a name="line.94"></a>
+<FONT color="green">095</FONT>                channel_map[ channel_idx ] = -1;<a name="line.95"></a>
+<FONT color="green">096</FONT>                if( channel_config &lt; 16 ) {<a name="line.96"></a>
+<FONT color="green">097</FONT>                    channel_map[ channel_idx ] = num_channels;<a name="line.97"></a>
+<FONT color="green">098</FONT>                    num_channels += 1;<a name="line.98"></a>
+<FONT color="green">099</FONT>                }<a name="line.99"></a>
+<FONT color="green">100</FONT>            }<a name="line.100"></a>
+<FONT color="green">101</FONT>            module.set_num_channels( num_channels );<a name="line.101"></a>
+<FONT color="green">102</FONT>            panning_offset = 96 + num_pattern_orders + num_instruments * 2 + num_patterns * 2;<a name="line.102"></a>
+<FONT color="green">103</FONT>            for( channel_idx = 0; channel_idx &lt; 32; channel_idx++ ) {<a name="line.103"></a>
+<FONT color="green">104</FONT>                if( channel_map[ channel_idx ] &lt; 0 ) continue;<a name="line.104"></a>
+<FONT color="green">105</FONT>                panning = 7;<a name="line.105"></a>
+<FONT color="green">106</FONT>                if( stereo_mode ) {<a name="line.106"></a>
+<FONT color="green">107</FONT>                    panning = 12;<a name="line.107"></a>
+<FONT color="green">108</FONT>                    if( ( s3m_file[ 64 + channel_idx ] &amp; 0xFF ) &lt; 8 ) {<a name="line.108"></a>
+<FONT color="green">109</FONT>                        panning = 3;<a name="line.109"></a>
+<FONT color="green">110</FONT>                    }<a name="line.110"></a>
+<FONT color="green">111</FONT>                }<a name="line.111"></a>
+<FONT color="green">112</FONT>                if( default_panning ) {<a name="line.112"></a>
+<FONT color="green">113</FONT>                    flags = s3m_file[ panning_offset + channel_idx ] &amp; 0xFF;<a name="line.113"></a>
+<FONT color="green">114</FONT>                    if( ( flags &amp; 0x20 ) == 0x20 ) {<a name="line.114"></a>
+<FONT color="green">115</FONT>                        panning = flags &amp; 0xF;<a name="line.115"></a>
+<FONT color="green">116</FONT>                    }<a name="line.116"></a>
+<FONT color="green">117</FONT>                }<a name="line.117"></a>
+<FONT color="green">118</FONT>                module.set_initial_panning( channel_map[ channel_idx ], panning * 17 );<a name="line.118"></a>
+<FONT color="green">119</FONT>            }<a name="line.119"></a>
+<FONT color="green">120</FONT>            sequence = read_s3m_sequence( s3m_file );<a name="line.120"></a>
+<FONT color="green">121</FONT>            module.set_sequence_length( sequence.length );<a name="line.121"></a>
+<FONT color="green">122</FONT>            for( order_idx = 0; order_idx &lt; sequence.length; order_idx++ ) {<a name="line.122"></a>
+<FONT color="green">123</FONT>                module.set_sequence( order_idx, sequence[ order_idx ] );<a name="line.123"></a>
+<FONT color="green">124</FONT>            }<a name="line.124"></a>
+<FONT color="green">125</FONT>            module.set_num_instruments( num_instruments );<a name="line.125"></a>
+<FONT color="green">126</FONT>            for( instrument_idx = 0; instrument_idx &lt; num_instruments; instrument_idx++ ) {<a name="line.126"></a>
+<FONT color="green">127</FONT>                instrument = read_s3m_instrument( s3m_file, instrument_idx, signed_samples );<a name="line.127"></a>
+<FONT color="green">128</FONT>                module.set_instrument( instrument_idx + 1, instrument );<a name="line.128"></a>
+<FONT color="green">129</FONT>            }<a name="line.129"></a>
+<FONT color="green">130</FONT>            module.set_num_patterns( num_patterns );<a name="line.130"></a>
+<FONT color="green">131</FONT>            for( pattern_idx = 0; pattern_idx &lt; num_patterns; pattern_idx++ ) {<a name="line.131"></a>
+<FONT color="green">132</FONT>                module.set_pattern( pattern_idx, read_s3m_pattern( s3m_file, pattern_idx, channel_map ) );<a name="line.132"></a>
+<FONT color="green">133</FONT>            }<a name="line.133"></a>
+<FONT color="green">134</FONT>            return module;<a name="line.134"></a>
+<FONT color="green">135</FONT>        }<a name="line.135"></a>
+<FONT color="green">136</FONT>    <a name="line.136"></a>
+<FONT color="green">137</FONT>        private static int[] read_s3m_sequence( byte[] s3m_file ) {<a name="line.137"></a>
+<FONT color="green">138</FONT>            int num_pattern_orders, sequence_length;<a name="line.138"></a>
+<FONT color="green">139</FONT>            int sequence_idx, order_idx, pattern_order;<a name="line.139"></a>
+<FONT color="green">140</FONT>            int[] sequence;<a name="line.140"></a>
+<FONT color="green">141</FONT>            num_pattern_orders = get_num_pattern_orders( s3m_file );<a name="line.141"></a>
+<FONT color="green">142</FONT>            sequence_length = 0;<a name="line.142"></a>
+<FONT color="green">143</FONT>            for( order_idx = 0; order_idx &lt; num_pattern_orders; order_idx++ ) {<a name="line.143"></a>
+<FONT color="green">144</FONT>                pattern_order = s3m_file[ 96 + order_idx ] &amp; 0xFF;<a name="line.144"></a>
+<FONT color="green">145</FONT>                if( pattern_order == 255 ) {<a name="line.145"></a>
+<FONT color="green">146</FONT>                    break;<a name="line.146"></a>
+<FONT color="green">147</FONT>                } else if( pattern_order &lt; 254 ) {<a name="line.147"></a>
+<FONT color="green">148</FONT>                    sequence_length += 1;<a name="line.148"></a>
+<FONT color="green">149</FONT>                }<a name="line.149"></a>
+<FONT color="green">150</FONT>            }<a name="line.150"></a>
+<FONT color="green">151</FONT>            sequence = new int[ sequence_length ];<a name="line.151"></a>
+<FONT color="green">152</FONT>            sequence_idx = 0;<a name="line.152"></a>
+<FONT color="green">153</FONT>            for( order_idx = 0; order_idx &lt; num_pattern_orders; order_idx++ ) {<a name="line.153"></a>
+<FONT color="green">154</FONT>                pattern_order = s3m_file[ 96 + order_idx ] &amp; 0xFF;<a name="line.154"></a>
+<FONT color="green">155</FONT>                if( pattern_order == 255 ) {<a name="line.155"></a>
+<FONT color="green">156</FONT>                    break;<a name="line.156"></a>
+<FONT color="green">157</FONT>                } else if( pattern_order &lt; 254 ) {<a name="line.157"></a>
+<FONT color="green">158</FONT>                    sequence[ sequence_idx ] = pattern_order;<a name="line.158"></a>
+<FONT color="green">159</FONT>                    sequence_idx += 1;<a name="line.159"></a>
+<FONT color="green">160</FONT>                }<a name="line.160"></a>
+<FONT color="green">161</FONT>            }<a name="line.161"></a>
+<FONT color="green">162</FONT>            return sequence;<a name="line.162"></a>
+<FONT color="green">163</FONT>        }<a name="line.163"></a>
+<FONT color="green">164</FONT>    <a name="line.164"></a>
+<FONT color="green">165</FONT>        private static Instrument read_s3m_instrument( byte[] s3m_file, int instrument_idx, boolean signed_samples ) {<a name="line.165"></a>
+<FONT color="green">166</FONT>            int instrument_offset;<a name="line.166"></a>
+<FONT color="green">167</FONT>            int sample_data_offset, sample_data_length;<a name="line.167"></a>
+<FONT color="green">168</FONT>            int loop_start, loop_length, c2_rate, sample_idx, amplitude;<a name="line.168"></a>
+<FONT color="green">169</FONT>            boolean sixteen_bit;<a name="line.169"></a>
+<FONT color="green">170</FONT>            Instrument instrument;<a name="line.170"></a>
+<FONT color="green">171</FONT>            Sample sample;<a name="line.171"></a>
+<FONT color="green">172</FONT>            short[] sample_data;<a name="line.172"></a>
+<FONT color="green">173</FONT>            instrument_offset = get_instrument_offset( s3m_file, instrument_idx );<a name="line.173"></a>
+<FONT color="green">174</FONT>            instrument = new Instrument();<a name="line.174"></a>
+<FONT color="green">175</FONT>            instrument.name = ascii_text( s3m_file, instrument_offset + 48, 28 );<a name="line.175"></a>
+<FONT color="green">176</FONT>            sample = new Sample();<a name="line.176"></a>
+<FONT color="green">177</FONT>            if( s3m_file[ instrument_offset ] == 1 ) {<a name="line.177"></a>
+<FONT color="green">178</FONT>                sample_data_length = get_sample_data_length( s3m_file, instrument_offset );<a name="line.178"></a>
+<FONT color="green">179</FONT>                loop_start = unsigned_short_le( s3m_file, instrument_offset + 20 );<a name="line.179"></a>
+<FONT color="green">180</FONT>                loop_length = unsigned_short_le( s3m_file, instrument_offset + 24 ) - loop_start;<a name="line.180"></a>
+<FONT color="green">181</FONT>                sample.volume = s3m_file[ instrument_offset + 28 ] &amp; 0xFF;<a name="line.181"></a>
+<FONT color="green">182</FONT>                if( s3m_file[ instrument_offset + 30 ] != 0 ) {<a name="line.182"></a>
+<FONT color="green">183</FONT>                    throw new IllegalArgumentException( "ScreamTracker3: Packed samples not supported!" );<a name="line.183"></a>
+<FONT color="green">184</FONT>                }<a name="line.184"></a>
+<FONT color="green">185</FONT>                if( ( s3m_file[ instrument_offset + 31 ] &amp; 0x01 ) == 0 ) {<a name="line.185"></a>
+<FONT color="green">186</FONT>                    loop_length = 0;<a name="line.186"></a>
+<FONT color="green">187</FONT>                }<a name="line.187"></a>
+<FONT color="green">188</FONT>                if( ( s3m_file[ instrument_offset + 31 ] &amp; 0x02 ) != 0 ) {<a name="line.188"></a>
+<FONT color="green">189</FONT>                    throw new IllegalArgumentException( "ScreamTracker3: Stereo samples not supported!" );<a name="line.189"></a>
+<FONT color="green">190</FONT>                }<a name="line.190"></a>
+<FONT color="green">191</FONT>                sixteen_bit = ( s3m_file[ instrument_offset + 31 ] &amp; 0x04 ) != 0;<a name="line.191"></a>
+<FONT color="green">192</FONT>                c2_rate = unsigned_short_le( s3m_file, instrument_offset + 32 );<a name="line.192"></a>
+<FONT color="green">193</FONT>                sample.transpose = LogTable.log_2( c2_rate ) - LogTable.log_2( 8363 );<a name="line.193"></a>
+<FONT color="green">194</FONT>                sample_data_offset = get_sample_data_offset( s3m_file, instrument_offset );<a name="line.194"></a>
+<FONT color="green">195</FONT>                if( sixteen_bit ) {<a name="line.195"></a>
+<FONT color="green">196</FONT>                    if( signed_samples ) {<a name="line.196"></a>
+<FONT color="green">197</FONT>                        throw new IllegalArgumentException( "ScreamTracker3: Signed 16-bit samples not supported!" );<a name="line.197"></a>
+<FONT color="green">198</FONT>                    }<a name="line.198"></a>
+<FONT color="green">199</FONT>                    sample_data_length &gt;&gt;= 1;<a name="line.199"></a>
+<FONT color="green">200</FONT>                    sample_data = new short[ sample_data_length ];<a name="line.200"></a>
+<FONT color="green">201</FONT>                    for( sample_idx = 0; sample_idx &lt; sample_data_length; sample_idx++ ) {<a name="line.201"></a>
+<FONT color="green">202</FONT>                        amplitude  = s3m_file[ sample_data_offset + sample_idx * 2 ] &amp; 0xFF;<a name="line.202"></a>
+<FONT color="green">203</FONT>                        amplitude |= ( s3m_file[ sample_data_offset + sample_idx * 2 + 1 ] &amp; 0xFF ) &lt;&lt; 8;<a name="line.203"></a>
+<FONT color="green">204</FONT>                        sample_data[ sample_idx ] = ( short ) ( amplitude - 32768 );<a name="line.204"></a>
+<FONT color="green">205</FONT>                    }<a name="line.205"></a>
+<FONT color="green">206</FONT>                } else {<a name="line.206"></a>
+<FONT color="green">207</FONT>                    sample_data = new short[ sample_data_length ];<a name="line.207"></a>
+<FONT color="green">208</FONT>                    if( signed_samples ) {<a name="line.208"></a>
+<FONT color="green">209</FONT>                        for( sample_idx = 0; sample_idx &lt; sample_data_length; sample_idx++ ) {<a name="line.209"></a>
+<FONT color="green">210</FONT>                            amplitude = s3m_file[ sample_data_offset + sample_idx ] &lt;&lt; 8;<a name="line.210"></a>
+<FONT color="green">211</FONT>                            sample_data[ sample_idx ] = ( short ) amplitude;<a name="line.211"></a>
+<FONT color="green">212</FONT>                        }<a name="line.212"></a>
+<FONT color="green">213</FONT>                    } else {<a name="line.213"></a>
+<FONT color="green">214</FONT>                        for( sample_idx = 0; sample_idx &lt; sample_data_length; sample_idx++ ) {<a name="line.214"></a>
+<FONT color="green">215</FONT>                            amplitude = ( s3m_file[ sample_data_offset + sample_idx ] &amp; 0xFF ) &lt;&lt; 8;<a name="line.215"></a>
+<FONT color="green">216</FONT>                            sample_data[ sample_idx ] = ( short ) ( amplitude - 32768 );<a name="line.216"></a>
+<FONT color="green">217</FONT>                        }<a name="line.217"></a>
+<FONT color="green">218</FONT>                    }<a name="line.218"></a>
+<FONT color="green">219</FONT>                }<a name="line.219"></a>
+<FONT color="green">220</FONT>                sample.set_sample_data( sample_data, loop_start, loop_length, false );<a name="line.220"></a>
+<FONT color="green">221</FONT>            }<a name="line.221"></a>
+<FONT color="green">222</FONT>            instrument.set_num_samples( 1 );<a name="line.222"></a>
+<FONT color="green">223</FONT>            instrument.set_sample( 0, sample );<a name="line.223"></a>
+<FONT color="green">224</FONT>            return instrument;<a name="line.224"></a>
+<FONT color="green">225</FONT>        }<a name="line.225"></a>
+<FONT color="green">226</FONT>        <a name="line.226"></a>
+<FONT color="green">227</FONT>        private static Pattern read_s3m_pattern( byte[] s3m_file, int pattern_idx, int[] channel_map ) {<a name="line.227"></a>
+<FONT color="green">228</FONT>            int pattern_offset;<a name="line.228"></a>
+<FONT color="green">229</FONT>            int num_channels, num_notes;<a name="line.229"></a>
+<FONT color="green">230</FONT>            int row_idx, channel_idx, note_idx;<a name="line.230"></a>
+<FONT color="green">231</FONT>            int token, key, volume_column, effect, effect_param;<a name="line.231"></a>
+<FONT color="green">232</FONT>            byte[] pattern_data;<a name="line.232"></a>
+<FONT color="green">233</FONT>            Pattern pattern;<a name="line.233"></a>
+<FONT color="green">234</FONT>            num_channels = 0;<a name="line.234"></a>
+<FONT color="green">235</FONT>            for( channel_idx = 0; channel_idx &lt; 32; channel_idx++ ) {<a name="line.235"></a>
+<FONT color="green">236</FONT>                if( channel_map[ channel_idx ] &gt;= num_channels ) {<a name="line.236"></a>
+<FONT color="green">237</FONT>                    num_channels = channel_idx + 1;<a name="line.237"></a>
+<FONT color="green">238</FONT>                }<a name="line.238"></a>
+<FONT color="green">239</FONT>            }<a name="line.239"></a>
+<FONT color="green">240</FONT>            num_notes = num_channels * 64;<a name="line.240"></a>
+<FONT color="green">241</FONT>            pattern_data = new byte[ num_notes * 5 ];<a name="line.241"></a>
+<FONT color="green">242</FONT>            row_idx = 0;<a name="line.242"></a>
+<FONT color="green">243</FONT>            pattern_offset = get_pattern_offset( s3m_file, pattern_idx ) + 2;<a name="line.243"></a>
+<FONT color="green">244</FONT>            while( row_idx &lt; 64 ) {<a name="line.244"></a>
+<FONT color="green">245</FONT>                token = s3m_file[ pattern_offset ] &amp; 0xFF;<a name="line.245"></a>
+<FONT color="green">246</FONT>                pattern_offset += 1;<a name="line.246"></a>
+<FONT color="green">247</FONT>                if( token &gt; 0 ) {<a name="line.247"></a>
+<FONT color="green">248</FONT>                    channel_idx = channel_map[ token &amp; 0x1F ];<a name="line.248"></a>
+<FONT color="green">249</FONT>                    note_idx = ( num_channels * row_idx + channel_idx ) * 5;<a name="line.249"></a>
+<FONT color="green">250</FONT>                    if( ( token &amp; 0x20 ) == 0x20 ) {<a name="line.250"></a>
+<FONT color="green">251</FONT>                        /* Key + Instrument.*/<a name="line.251"></a>
+<FONT color="green">252</FONT>                        if( channel_idx &gt;= 0 ) {<a name="line.252"></a>
+<FONT color="green">253</FONT>                            key = s3m_file[ pattern_offset ] &amp; 0xFF;<a name="line.253"></a>
+<FONT color="green">254</FONT>                            if( key == 255 ) {<a name="line.254"></a>
+<FONT color="green">255</FONT>                                key = 0;<a name="line.255"></a>
+<FONT color="green">256</FONT>                            } else if( key == 254 ) {<a name="line.256"></a>
+<FONT color="green">257</FONT>                                key = 97;<a name="line.257"></a>
+<FONT color="green">258</FONT>                            } else {<a name="line.258"></a>
+<FONT color="green">259</FONT>                                key = ( ( key &amp; 0xF0 ) &gt;&gt; 4 ) * 12 + ( key &amp; 0x0F ) + 1;<a name="line.259"></a>
+<FONT color="green">260</FONT>                                while( key &gt; 96 ) {<a name="line.260"></a>
+<FONT color="green">261</FONT>                                    key = key - 12;<a name="line.261"></a>
+<FONT color="green">262</FONT>                                }<a name="line.262"></a>
+<FONT color="green">263</FONT>                            }<a name="line.263"></a>
+<FONT color="green">264</FONT>                            pattern_data[ note_idx ] = ( byte ) key;<a name="line.264"></a>
+<FONT color="green">265</FONT>                            pattern_data[ note_idx + 1 ] = s3m_file[ pattern_offset + 1 ];<a name="line.265"></a>
+<FONT color="green">266</FONT>                        }<a name="line.266"></a>
+<FONT color="green">267</FONT>                        pattern_offset += 2;<a name="line.267"></a>
+<FONT color="green">268</FONT>                    }<a name="line.268"></a>
+<FONT color="green">269</FONT>                    if( ( token &amp; 0x40 ) == 0x40 ) {<a name="line.269"></a>
+<FONT color="green">270</FONT>                        /* Volume.*/<a name="line.270"></a>
+<FONT color="green">271</FONT>                        if( channel_idx &gt;= 0 ) {<a name="line.271"></a>
+<FONT color="green">272</FONT>                            volume_column = ( s3m_file[ pattern_offset ] &amp; 0xFF ) + 0x10;<a name="line.272"></a>
+<FONT color="green">273</FONT>                            pattern_data[ note_idx + 2 ] = ( byte ) volume_column;<a name="line.273"></a>
+<FONT color="green">274</FONT>                        }<a name="line.274"></a>
+<FONT color="green">275</FONT>                        pattern_offset += 1;<a name="line.275"></a>
+<FONT color="green">276</FONT>                    }<a name="line.276"></a>
+<FONT color="green">277</FONT>                    if( ( token &amp; 0x80 ) == 0x80 ) {<a name="line.277"></a>
+<FONT color="green">278</FONT>                        /* Effect + Param.*/<a name="line.278"></a>
+<FONT color="green">279</FONT>                        if( channel_idx &gt;= 0 ) {<a name="line.279"></a>
+<FONT color="green">280</FONT>                            effect = s3m_file[ pattern_offset ] &amp; 0xFF;<a name="line.280"></a>
+<FONT color="green">281</FONT>                            effect_param = s3m_file[ pattern_offset + 1 ] &amp; 0xFF;<a name="line.281"></a>
+<FONT color="green">282</FONT>                            effect = effect_map[ effect &amp; 0x1F ];<a name="line.282"></a>
+<FONT color="green">283</FONT>                            if( effect == 0xFF ) {<a name="line.283"></a>
+<FONT color="green">284</FONT>                                effect = 0;<a name="line.284"></a>
+<FONT color="green">285</FONT>                                effect_param = 0;<a name="line.285"></a>
+<FONT color="green">286</FONT>                            }<a name="line.286"></a>
+<FONT color="green">287</FONT>                            if( effect == 0x0E ) {<a name="line.287"></a>
+<FONT color="green">288</FONT>                                effect = effect_s_map[ ( effect_param &amp; 0xF0 ) &gt;&gt; 4 ];<a name="line.288"></a>
+<FONT color="green">289</FONT>                                effect_param = effect_param &amp; 0x0F;<a name="line.289"></a>
+<FONT color="green">290</FONT>                                switch( effect ) {<a name="line.290"></a>
+<FONT color="green">291</FONT>                                    case 0x08:<a name="line.291"></a>
+<FONT color="green">292</FONT>                                        effect = 0x08;<a name="line.292"></a>
+<FONT color="green">293</FONT>                                        effect_param = effect_param * 17;<a name="line.293"></a>
+<FONT color="green">294</FONT>                                        break;<a name="line.294"></a>
+<FONT color="green">295</FONT>                                    case 0x09:<a name="line.295"></a>
+<FONT color="green">296</FONT>                                        effect = 0x08;<a name="line.296"></a>
+<FONT color="green">297</FONT>                                        if( effect_param &gt; 7 ) {<a name="line.297"></a>
+<FONT color="green">298</FONT>                                            effect_param -= 8;<a name="line.298"></a>
+<FONT color="green">299</FONT>                                        } else {<a name="line.299"></a>
+<FONT color="green">300</FONT>                                            effect_param += 8;<a name="line.300"></a>
+<FONT color="green">301</FONT>                                        }<a name="line.301"></a>
+<FONT color="green">302</FONT>                                        effect_param = effect_param * 17;<a name="line.302"></a>
+<FONT color="green">303</FONT>                                        break;<a name="line.303"></a>
+<FONT color="green">304</FONT>                                    case 0xFF:<a name="line.304"></a>
+<FONT color="green">305</FONT>                                        effect = 0;<a name="line.305"></a>
+<FONT color="green">306</FONT>                                        effect_param = 0;<a name="line.306"></a>
+<FONT color="green">307</FONT>                                        break;<a name="line.307"></a>
+<FONT color="green">308</FONT>                                    default:<a name="line.308"></a>
+<FONT color="green">309</FONT>                                        effect_param = ( ( effect &amp; 0x0F ) &lt;&lt; 4 ) | ( effect_param &amp; 0x0F );<a name="line.309"></a>
+<FONT color="green">310</FONT>                                        effect = 0x0E;<a name="line.310"></a>
+<FONT color="green">311</FONT>                                        break;<a name="line.311"></a>
+<FONT color="green">312</FONT>                                }<a name="line.312"></a>
+<FONT color="green">313</FONT>                            }<a name="line.313"></a>
+<FONT color="green">314</FONT>                            pattern_data[ note_idx + 3 ] = ( byte ) effect;<a name="line.314"></a>
+<FONT color="green">315</FONT>                            pattern_data[ note_idx + 4 ] = ( byte ) effect_param;<a name="line.315"></a>
+<FONT color="green">316</FONT>                        }<a name="line.316"></a>
+<FONT color="green">317</FONT>                        pattern_offset += 2;<a name="line.317"></a>
+<FONT color="green">318</FONT>                    }<a name="line.318"></a>
+<FONT color="green">319</FONT>                } else {<a name="line.319"></a>
+<FONT color="green">320</FONT>                    row_idx += 1;<a name="line.320"></a>
+<FONT color="green">321</FONT>                }<a name="line.321"></a>
+<FONT color="green">322</FONT>            }<a name="line.322"></a>
+<FONT color="green">323</FONT>            pattern = new Pattern();<a name="line.323"></a>
+<FONT color="green">324</FONT>            pattern.num_rows = 64;<a name="line.324"></a>
+<FONT color="green">325</FONT>            pattern.set_pattern_data( pattern_data );<a name="line.325"></a>
+<FONT color="green">326</FONT>            return pattern;<a name="line.326"></a>
+<FONT color="green">327</FONT>        }<a name="line.327"></a>
+<FONT color="green">328</FONT>    <a name="line.328"></a>
+<FONT color="green">329</FONT>        private static byte[] read_s3m_file( byte[] header_96_bytes, DataInput data_input ) throws IOException {<a name="line.329"></a>
+<FONT color="green">330</FONT>            int s3m_file_length;<a name="line.330"></a>
+<FONT color="green">331</FONT>            int num_pattern_orders, num_instruments, num_patterns;<a name="line.331"></a>
+<FONT color="green">332</FONT>            int instrument_idx, pattern_idx;<a name="line.332"></a>
+<FONT color="green">333</FONT>            int instrument_offset, sample_data_offset, pattern_offset;<a name="line.333"></a>
+<FONT color="green">334</FONT>            byte[] s3m_file;<a name="line.334"></a>
+<FONT color="green">335</FONT>            if( !is_s3m( header_96_bytes ) ) {<a name="line.335"></a>
+<FONT color="green">336</FONT>                throw new IllegalArgumentException( "ScreamTracker3: Not an S3M file!" );<a name="line.336"></a>
+<FONT color="green">337</FONT>            }<a name="line.337"></a>
+<FONT color="green">338</FONT>            s3m_file = header_96_bytes;<a name="line.338"></a>
+<FONT color="green">339</FONT>            s3m_file_length = header_96_bytes.length;<a name="line.339"></a>
+<FONT color="green">340</FONT>            num_pattern_orders = get_num_pattern_orders( s3m_file );<a name="line.340"></a>
+<FONT color="green">341</FONT>            num_instruments = get_num_instruments( s3m_file );<a name="line.341"></a>
+<FONT color="green">342</FONT>            num_patterns = get_num_patterns( s3m_file );<a name="line.342"></a>
+<FONT color="green">343</FONT>            s3m_file_length += num_pattern_orders;<a name="line.343"></a>
+<FONT color="green">344</FONT>            s3m_file_length += num_instruments * 2;<a name="line.344"></a>
+<FONT color="green">345</FONT>            s3m_file_length += num_patterns * 2;<a name="line.345"></a>
+<FONT color="green">346</FONT>            /* Read enough of file to calculate the length.*/<a name="line.346"></a>
+<FONT color="green">347</FONT>            s3m_file = read_more( s3m_file, s3m_file_length, data_input );<a name="line.347"></a>
+<FONT color="green">348</FONT>            for( instrument_idx = 0; instrument_idx &lt; num_instruments; instrument_idx++ ) {<a name="line.348"></a>
+<FONT color="green">349</FONT>                instrument_offset = get_instrument_offset( s3m_file, instrument_idx );<a name="line.349"></a>
+<FONT color="green">350</FONT>                instrument_offset += 80;<a name="line.350"></a>
+<FONT color="green">351</FONT>                if( instrument_offset &gt; s3m_file_length ) {<a name="line.351"></a>
+<FONT color="green">352</FONT>                    s3m_file_length = instrument_offset;<a name="line.352"></a>
+<FONT color="green">353</FONT>                }<a name="line.353"></a>
+<FONT color="green">354</FONT>            }<a name="line.354"></a>
+<FONT color="green">355</FONT>            for( pattern_idx = 0; pattern_idx &lt; num_patterns; pattern_idx++ ) {<a name="line.355"></a>
+<FONT color="green">356</FONT>                pattern_offset = get_pattern_offset( s3m_file, pattern_idx );<a name="line.356"></a>
+<FONT color="green">357</FONT>                pattern_offset += 2;<a name="line.357"></a>
+<FONT color="green">358</FONT>                if( pattern_offset &gt; s3m_file_length ) {<a name="line.358"></a>
+<FONT color="green">359</FONT>                    s3m_file_length = pattern_offset;<a name="line.359"></a>
+<FONT color="green">360</FONT>                }<a name="line.360"></a>
+<FONT color="green">361</FONT>            }<a name="line.361"></a>
+<FONT color="green">362</FONT>            s3m_file = read_more( s3m_file, s3m_file_length, data_input );<a name="line.362"></a>
+<FONT color="green">363</FONT>            /* Read rest of file.*/<a name="line.363"></a>
+<FONT color="green">364</FONT>            for( instrument_idx = 0; instrument_idx &lt; num_instruments; instrument_idx++ ) {<a name="line.364"></a>
+<FONT color="green">365</FONT>                instrument_offset = get_instrument_offset( s3m_file, instrument_idx );<a name="line.365"></a>
+<FONT color="green">366</FONT>                sample_data_offset = get_sample_data_offset( s3m_file, instrument_offset );<a name="line.366"></a>
+<FONT color="green">367</FONT>                sample_data_offset += get_sample_data_length( s3m_file, instrument_offset );<a name="line.367"></a>
+<FONT color="green">368</FONT>                if( sample_data_offset &gt; s3m_file_length ) {<a name="line.368"></a>
+<FONT color="green">369</FONT>                    s3m_file_length = sample_data_offset;<a name="line.369"></a>
+<FONT color="green">370</FONT>                }<a name="line.370"></a>
+<FONT color="green">371</FONT>            }<a name="line.371"></a>
+<FONT color="green">372</FONT>            for( pattern_idx = 0; pattern_idx &lt; num_patterns; pattern_idx++ ) {<a name="line.372"></a>
+<FONT color="green">373</FONT>                pattern_offset = get_pattern_offset( s3m_file, pattern_idx );<a name="line.373"></a>
+<FONT color="green">374</FONT>                pattern_offset += get_pattern_length( s3m_file, pattern_offset );<a name="line.374"></a>
+<FONT color="green">375</FONT>                pattern_offset += 2;<a name="line.375"></a>
+<FONT color="green">376</FONT>                if( pattern_offset &gt; s3m_file_length ) {<a name="line.376"></a>
+<FONT color="green">377</FONT>                    s3m_file_length = pattern_offset;<a name="line.377"></a>
+<FONT color="green">378</FONT>                }<a name="line.378"></a>
+<FONT color="green">379</FONT>            }<a name="line.379"></a>
+<FONT color="green">380</FONT>            s3m_file = read_more( s3m_file, s3m_file_length, data_input );<a name="line.380"></a>
+<FONT color="green">381</FONT>            return s3m_file;<a name="line.381"></a>
+<FONT color="green">382</FONT>        }<a name="line.382"></a>
+<FONT color="green">383</FONT>    <a name="line.383"></a>
+<FONT color="green">384</FONT>        private static int get_num_pattern_orders( byte[] s3m_file ) {<a name="line.384"></a>
+<FONT color="green">385</FONT>            int num_pattern_orders;<a name="line.385"></a>
+<FONT color="green">386</FONT>            num_pattern_orders = unsigned_short_le( s3m_file, 32 );<a name="line.386"></a>
+<FONT color="green">387</FONT>            return num_pattern_orders;<a name="line.387"></a>
+<FONT color="green">388</FONT>        }<a name="line.388"></a>
+<FONT color="green">389</FONT>    <a name="line.389"></a>
+<FONT color="green">390</FONT>        private static int get_num_instruments( byte[] s3m_file ) {<a name="line.390"></a>
+<FONT color="green">391</FONT>            int num_instruments;<a name="line.391"></a>
+<FONT color="green">392</FONT>            num_instruments = unsigned_short_le( s3m_file, 34 );<a name="line.392"></a>
+<FONT color="green">393</FONT>            return num_instruments;<a name="line.393"></a>
+<FONT color="green">394</FONT>        }<a name="line.394"></a>
+<FONT color="green">395</FONT>        <a name="line.395"></a>
+<FONT color="green">396</FONT>        private static int get_num_patterns( byte[] s3m_file ) {<a name="line.396"></a>
+<FONT color="green">397</FONT>            int num_patterns;<a name="line.397"></a>
+<FONT color="green">398</FONT>            num_patterns = unsigned_short_le( s3m_file, 36 );<a name="line.398"></a>
+<FONT color="green">399</FONT>            return num_patterns;<a name="line.399"></a>
+<FONT color="green">400</FONT>        }<a name="line.400"></a>
+<FONT color="green">401</FONT>    <a name="line.401"></a>
+<FONT color="green">402</FONT>        private static int get_instrument_offset( byte[] s3m_file, int instrument_idx ) {<a name="line.402"></a>
+<FONT color="green">403</FONT>            int instrument_offset, pointer_offset;<a name="line.403"></a>
+<FONT color="green">404</FONT>            pointer_offset = 96 + get_num_pattern_orders( s3m_file );<a name="line.404"></a>
+<FONT color="green">405</FONT>            instrument_offset = unsigned_short_le( s3m_file, pointer_offset + instrument_idx * 2 ) &lt;&lt; 4;<a name="line.405"></a>
+<FONT color="green">406</FONT>            return instrument_offset;<a name="line.406"></a>
+<FONT color="green">407</FONT>        }<a name="line.407"></a>
+<FONT color="green">408</FONT>    <a name="line.408"></a>
+<FONT color="green">409</FONT>        private static int get_sample_data_offset( byte[] s3m_file, int instrument_offset ) {<a name="line.409"></a>
+<FONT color="green">410</FONT>            int sample_data_offset;<a name="line.410"></a>
+<FONT color="green">411</FONT>            sample_data_offset = 0;<a name="line.411"></a>
+<FONT color="green">412</FONT>            if( s3m_file[ instrument_offset ] == 1 ) {<a name="line.412"></a>
+<FONT color="green">413</FONT>                sample_data_offset = ( s3m_file[ instrument_offset + 13 ] &amp; 0xFF ) &lt;&lt; 20;<a name="line.413"></a>
+<FONT color="green">414</FONT>                sample_data_offset |= unsigned_short_le( s3m_file, instrument_offset + 14 ) &lt;&lt; 4;<a name="line.414"></a>
+<FONT color="green">415</FONT>            }<a name="line.415"></a>
+<FONT color="green">416</FONT>            return sample_data_offset;<a name="line.416"></a>
+<FONT color="green">417</FONT>        }<a name="line.417"></a>
+<FONT color="green">418</FONT>    <a name="line.418"></a>
+<FONT color="green">419</FONT>        private static int get_sample_data_length( byte[] s3m_file, int instrument_offset ) {<a name="line.419"></a>
+<FONT color="green">420</FONT>            int sample_data_length;<a name="line.420"></a>
+<FONT color="green">421</FONT>            boolean sixteen_bit;<a name="line.421"></a>
+<FONT color="green">422</FONT>            sample_data_length = 0;<a name="line.422"></a>
+<FONT color="green">423</FONT>            if( s3m_file[ instrument_offset ] == 1 ) {<a name="line.423"></a>
+<FONT color="green">424</FONT>                sample_data_length = unsigned_short_le( s3m_file, instrument_offset + 16 );<a name="line.424"></a>
+<FONT color="green">425</FONT>                sixteen_bit = ( s3m_file[ instrument_offset + 31 ] &amp; 0x04 ) != 0;<a name="line.425"></a>
+<FONT color="green">426</FONT>                if( sixteen_bit ) {<a name="line.426"></a>
+<FONT color="green">427</FONT>                    sample_data_length &lt;&lt;= 1;<a name="line.427"></a>
+<FONT color="green">428</FONT>                }<a name="line.428"></a>
+<FONT color="green">429</FONT>            }<a name="line.429"></a>
+<FONT color="green">430</FONT>            return sample_data_length;<a name="line.430"></a>
+<FONT color="green">431</FONT>        }<a name="line.431"></a>
+<FONT color="green">432</FONT>    <a name="line.432"></a>
+<FONT color="green">433</FONT>        private static int get_pattern_offset( byte[] s3m_file, int pattern_idx ) {<a name="line.433"></a>
+<FONT color="green">434</FONT>            int pattern_offset, pointer_offset;<a name="line.434"></a>
+<FONT color="green">435</FONT>            pointer_offset = 96 + get_num_pattern_orders( s3m_file );<a name="line.435"></a>
+<FONT color="green">436</FONT>            pointer_offset += get_num_instruments( s3m_file ) * 2;<a name="line.436"></a>
+<FONT color="green">437</FONT>            pattern_offset = unsigned_short_le( s3m_file, pointer_offset + pattern_idx * 2 ) &lt;&lt; 4;<a name="line.437"></a>
+<FONT color="green">438</FONT>            return pattern_offset;<a name="line.438"></a>
+<FONT color="green">439</FONT>        }<a name="line.439"></a>
+<FONT color="green">440</FONT>    <a name="line.440"></a>
+<FONT color="green">441</FONT>        private static int get_pattern_length( byte[] s3m_file, int pattern_offset ) {<a name="line.441"></a>
+<FONT color="green">442</FONT>            int pattern_length;<a name="line.442"></a>
+<FONT color="green">443</FONT>            pattern_length = unsigned_short_le( s3m_file, pattern_offset );<a name="line.443"></a>
+<FONT color="green">444</FONT>            return pattern_length;<a name="line.444"></a>
+<FONT color="green">445</FONT>        }<a name="line.445"></a>
+<FONT color="green">446</FONT>    <a name="line.446"></a>
+<FONT color="green">447</FONT>        private static byte[] read_more( byte[] old_data, int new_length, DataInput data_input ) throws IOException {<a name="line.447"></a>
+<FONT color="green">448</FONT>            byte[] new_data;<a name="line.448"></a>
+<FONT color="green">449</FONT>            new_data = old_data;<a name="line.449"></a>
+<FONT color="green">450</FONT>            if( new_length &gt; old_data.length ) {<a name="line.450"></a>
+<FONT color="green">451</FONT>                new_data = new byte[ new_length ];<a name="line.451"></a>
+<FONT color="green">452</FONT>                System.arraycopy( old_data, 0, new_data, 0, old_data.length );<a name="line.452"></a>
+<FONT color="green">453</FONT>                try {<a name="line.453"></a>
+<FONT color="green">454</FONT>                    data_input.readFully( new_data, old_data.length, new_data.length - old_data.length );<a name="line.454"></a>
+<FONT color="green">455</FONT>                } catch( EOFException e ) {<a name="line.455"></a>
+<FONT color="green">456</FONT>                    System.out.println( "ScreamTracker3: Module has been truncated!" );<a name="line.456"></a>
+<FONT color="green">457</FONT>                }<a name="line.457"></a>
+<FONT color="green">458</FONT>            }<a name="line.458"></a>
+<FONT color="green">459</FONT>            return new_data;<a name="line.459"></a>
+<FONT color="green">460</FONT>        }<a name="line.460"></a>
+<FONT color="green">461</FONT>    <a name="line.461"></a>
+<FONT color="green">462</FONT>        private static int unsigned_short_le( byte[] buffer, int offset ) {<a name="line.462"></a>
+<FONT color="green">463</FONT>            int value;<a name="line.463"></a>
+<FONT color="green">464</FONT>            value = buffer[ offset ] &amp; 0xFF;<a name="line.464"></a>
+<FONT color="green">465</FONT>            value = value | ( ( buffer[ offset + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.465"></a>
+<FONT color="green">466</FONT>            return value;<a name="line.466"></a>
+<FONT color="green">467</FONT>        }<a name="line.467"></a>
+<FONT color="green">468</FONT>    <a name="line.468"></a>
+<FONT color="green">469</FONT>        private static String ascii_text( byte[] buffer, int offset, int length ) {<a name="line.469"></a>
+<FONT color="green">470</FONT>            int idx, chr;<a name="line.470"></a>
+<FONT color="green">471</FONT>            byte[] string_buffer;<a name="line.471"></a>
+<FONT color="green">472</FONT>            String string;<a name="line.472"></a>
+<FONT color="green">473</FONT>            string_buffer = new byte[ length ];<a name="line.473"></a>
+<FONT color="green">474</FONT>            for( idx = 0; idx &lt; length; idx++ ) {<a name="line.474"></a>
+<FONT color="green">475</FONT>                chr = buffer[ offset + idx ];<a name="line.475"></a>
+<FONT color="green">476</FONT>                if( chr &lt; 32 ) {<a name="line.476"></a>
+<FONT color="green">477</FONT>                    chr = 32;<a name="line.477"></a>
+<FONT color="green">478</FONT>                }<a name="line.478"></a>
+<FONT color="green">479</FONT>                string_buffer[ idx ] = ( byte ) chr;<a name="line.479"></a>
+<FONT color="green">480</FONT>            }<a name="line.480"></a>
+<FONT color="green">481</FONT>            try {<a name="line.481"></a>
+<FONT color="green">482</FONT>                string = new String( string_buffer, 0, length, "ISO-8859-1" );<a name="line.482"></a>
+<FONT color="green">483</FONT>            } catch( UnsupportedEncodingException e ) {<a name="line.483"></a>
+<FONT color="green">484</FONT>                string = "";<a name="line.484"></a>
+<FONT color="green">485</FONT>            }<a name="line.485"></a>
+<FONT color="green">486</FONT>            return string;<a name="line.486"></a>
+<FONT color="green">487</FONT>        }<a name="line.487"></a>
+<FONT color="green">488</FONT>    }<a name="line.488"></a>
+<FONT color="green">489</FONT>    <a name="line.489"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

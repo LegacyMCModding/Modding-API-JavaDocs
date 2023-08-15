@@ -1,0 +1,163 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelSilverfish extends ModelBase<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** The body parts of the silverfish's model. */<a name="line.9"></a>
+<FONT color="green">010</FONT>        private ModelRenderer[] silverfishBodyParts = new ModelRenderer[7];<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** The wings (dust-looking sprites) on the silverfish's model. */<a name="line.12"></a>
+<FONT color="green">013</FONT>        private ModelRenderer[] silverfishWings;<a name="line.13"></a>
+<FONT color="green">014</FONT>        private float[] field_78170_c = new float[7];<a name="line.14"></a>
+<FONT color="green">015</FONT>    <a name="line.15"></a>
+<FONT color="green">016</FONT>        /** The widths, heights, and lengths for the silverfish model boxes. */<a name="line.16"></a>
+<FONT color="green">017</FONT>        private static final int[][] silverfishBoxLength = new int[][] {{3, 2, 2}, {4, 3, 2}, {6, 4, 3}, {3, 3, 3}, {2, 2, 3}, {2, 1, 2}, {1, 1, 2}};<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        /** The texture positions for the silverfish's model's boxes. */<a name="line.19"></a>
+<FONT color="green">020</FONT>        private static final int[][] silverfishTexturePositions = new int[][] {{0, 0}, {0, 4}, {0, 9}, {0, 16}, {0, 22}, {11, 0}, {13, 4}};<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>        public ModelSilverfish()<a name="line.22"></a>
+<FONT color="green">023</FONT>        {<a name="line.23"></a>
+<FONT color="green">024</FONT>            float var1 = -3.5F;<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>            for (int var2 = 0; var2 &lt; this.silverfishBodyParts.length; ++var2)<a name="line.26"></a>
+<FONT color="green">027</FONT>            {<a name="line.27"></a>
+<FONT color="green">028</FONT>                this.silverfishBodyParts[var2] = new ModelRenderer(this, silverfishTexturePositions[var2][0], silverfishTexturePositions[var2][1]);<a name="line.28"></a>
+<FONT color="green">029</FONT>                this.silverfishBodyParts[var2].addBox((float)silverfishBoxLength[var2][0] * -0.5F, 0.0F, (float)silverfishBoxLength[var2][2] * -0.5F, silverfishBoxLength[var2][0], silverfishBoxLength[var2][1], silverfishBoxLength[var2][2]);<a name="line.29"></a>
+<FONT color="green">030</FONT>                this.silverfishBodyParts[var2].setRotationPoint(0.0F, (float)(24 - silverfishBoxLength[var2][1]), var1);<a name="line.30"></a>
+<FONT color="green">031</FONT>                this.field_78170_c[var2] = var1;<a name="line.31"></a>
+<FONT color="green">032</FONT>    <a name="line.32"></a>
+<FONT color="green">033</FONT>                if (var2 &lt; this.silverfishBodyParts.length - 1)<a name="line.33"></a>
+<FONT color="green">034</FONT>                {<a name="line.34"></a>
+<FONT color="green">035</FONT>                    var1 += (float)(silverfishBoxLength[var2][2] + silverfishBoxLength[var2 + 1][2]) * 0.5F;<a name="line.35"></a>
+<FONT color="green">036</FONT>                }<a name="line.36"></a>
+<FONT color="green">037</FONT>            }<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>            this.silverfishWings = new ModelRenderer[3];<a name="line.39"></a>
+<FONT color="green">040</FONT>            this.silverfishWings[0] = new ModelRenderer(this, 20, 0);<a name="line.40"></a>
+<FONT color="green">041</FONT>            this.silverfishWings[0].addBox(-5.0F, 0.0F, (float)silverfishBoxLength[2][2] * -0.5F, 10, 8, silverfishBoxLength[2][2]);<a name="line.41"></a>
+<FONT color="green">042</FONT>            this.silverfishWings[0].setRotationPoint(0.0F, 16.0F, this.field_78170_c[2]);<a name="line.42"></a>
+<FONT color="green">043</FONT>            this.silverfishWings[1] = new ModelRenderer(this, 20, 11);<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.silverfishWings[1].addBox(-3.0F, 0.0F, (float)silverfishBoxLength[4][2] * -0.5F, 6, 4, silverfishBoxLength[4][2]);<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.silverfishWings[1].setRotationPoint(0.0F, 20.0F, this.field_78170_c[4]);<a name="line.45"></a>
+<FONT color="green">046</FONT>            this.silverfishWings[2] = new ModelRenderer(this, 20, 18);<a name="line.46"></a>
+<FONT color="green">047</FONT>            this.silverfishWings[2].addBox(-3.0F, 0.0F, (float)silverfishBoxLength[4][2] * -0.5F, 6, 5, silverfishBoxLength[1][2]);<a name="line.47"></a>
+<FONT color="green">048</FONT>            this.silverfishWings[2].setRotationPoint(0.0F, 19.0F, this.field_78170_c[1]);<a name="line.48"></a>
+<FONT color="green">049</FONT>        }<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        /**<a name="line.51"></a>
+<FONT color="green">052</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.52"></a>
+<FONT color="green">053</FONT>         */<a name="line.53"></a>
+<FONT color="green">054</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.54"></a>
+<FONT color="green">055</FONT>        {<a name="line.55"></a>
+<FONT color="green">056</FONT>            this.setRotationAngles(par2, par3, par4, par5, par6, par7);<a name="line.56"></a>
+<FONT color="green">057</FONT>            ModelRenderer[] var8 = this.silverfishBodyParts;<a name="line.57"></a>
+<FONT color="green">058</FONT>            int var9 = var8.length;<a name="line.58"></a>
+<FONT color="green">059</FONT>            int var10;<a name="line.59"></a>
+<FONT color="green">060</FONT>            ModelRenderer var11;<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>            for (var10 = 0; var10 &lt; var9; ++var10)<a name="line.62"></a>
+<FONT color="green">063</FONT>            {<a name="line.63"></a>
+<FONT color="green">064</FONT>                var11 = var8[var10];<a name="line.64"></a>
+<FONT color="green">065</FONT>                var11.render(par7);<a name="line.65"></a>
+<FONT color="green">066</FONT>            }<a name="line.66"></a>
+<FONT color="green">067</FONT>    <a name="line.67"></a>
+<FONT color="green">068</FONT>            var8 = this.silverfishWings;<a name="line.68"></a>
+<FONT color="green">069</FONT>            var9 = var8.length;<a name="line.69"></a>
+<FONT color="green">070</FONT>    <a name="line.70"></a>
+<FONT color="green">071</FONT>            for (var10 = 0; var10 &lt; var9; ++var10)<a name="line.71"></a>
+<FONT color="green">072</FONT>            {<a name="line.72"></a>
+<FONT color="green">073</FONT>                var11 = var8[var10];<a name="line.73"></a>
+<FONT color="green">074</FONT>                var11.render(par7);<a name="line.74"></a>
+<FONT color="green">075</FONT>            }<a name="line.75"></a>
+<FONT color="green">076</FONT>        }<a name="line.76"></a>
+<FONT color="green">077</FONT>    <a name="line.77"></a>
+<FONT color="green">078</FONT>        /**<a name="line.78"></a>
+<FONT color="green">079</FONT>         * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.79"></a>
+<FONT color="green">080</FONT>         * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.80"></a>
+<FONT color="green">081</FONT>         * "far" arms and legs can swing at most.<a name="line.81"></a>
+<FONT color="green">082</FONT>         */<a name="line.82"></a>
+<FONT color="green">083</FONT>        public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6)<a name="line.83"></a>
+<FONT color="green">084</FONT>        {<a name="line.84"></a>
+<FONT color="green">085</FONT>            for (int var7 = 0; var7 &lt; this.silverfishBodyParts.length; ++var7)<a name="line.85"></a>
+<FONT color="green">086</FONT>            {<a name="line.86"></a>
+<FONT color="green">087</FONT>                this.silverfishBodyParts[var7].rotateAngleY = MathHelper.cos(par3 * 0.9F + (float)var7 * 0.15F * (float)Math.PI) * (float)Math.PI * 0.05F * (float)(1 + Math.abs(var7 - 2));<a name="line.87"></a>
+<FONT color="green">088</FONT>                this.silverfishBodyParts[var7].rotationPointX = MathHelper.sin(par3 * 0.9F + (float)var7 * 0.15F * (float)Math.PI) * (float)Math.PI * 0.2F * (float)Math.abs(var7 - 2);<a name="line.88"></a>
+<FONT color="green">089</FONT>            }<a name="line.89"></a>
+<FONT color="green">090</FONT>    <a name="line.90"></a>
+<FONT color="green">091</FONT>            this.silverfishWings[0].rotateAngleY = this.silverfishBodyParts[2].rotateAngleY;<a name="line.91"></a>
+<FONT color="green">092</FONT>            this.silverfishWings[1].rotateAngleY = this.silverfishBodyParts[4].rotateAngleY;<a name="line.92"></a>
+<FONT color="green">093</FONT>            this.silverfishWings[1].rotationPointX = this.silverfishBodyParts[4].rotationPointX;<a name="line.93"></a>
+<FONT color="green">094</FONT>            this.silverfishWings[2].rotateAngleY = this.silverfishBodyParts[1].rotateAngleY;<a name="line.94"></a>
+<FONT color="green">095</FONT>            this.silverfishWings[2].rotationPointX = this.silverfishBodyParts[1].rotationPointX;<a name="line.95"></a>
+<FONT color="green">096</FONT>        }<a name="line.96"></a>
+<FONT color="green">097</FONT>    }<a name="line.97"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

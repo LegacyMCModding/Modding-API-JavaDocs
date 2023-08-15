@@ -1,0 +1,178 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    import java.awt.BorderLayout;<a name="line.5"></a>
+<FONT color="green">006</FONT>    import java.awt.Color;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import java.awt.Font;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import java.awt.Panel;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import java.awt.TextArea;<a name="line.9"></a>
+<FONT color="green">010</FONT>    import java.io.File;<a name="line.10"></a>
+<FONT color="green">011</FONT>    import java.io.PrintWriter;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import java.io.StringWriter;<a name="line.12"></a>
+<FONT color="green">013</FONT>    import java.text.SimpleDateFormat;<a name="line.13"></a>
+<FONT color="green">014</FONT>    import java.util.Date;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import net.minecraft.client.Minecraft;<a name="line.15"></a>
+<FONT color="green">016</FONT>    import org.lwjgl.opengl.GL11;<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>    @SideOnly(Side.CLIENT)<a name="line.18"></a>
+<FONT color="green">019</FONT>    public class PanelCrashReport extends Panel<a name="line.19"></a>
+<FONT color="green">020</FONT>    {<a name="line.20"></a>
+<FONT color="green">021</FONT>        public PanelCrashReport(CrashReport par1CrashReport)<a name="line.21"></a>
+<FONT color="green">022</FONT>        {<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.setBackground(new Color(3028036));<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.setLayout(new BorderLayout());<a name="line.24"></a>
+<FONT color="green">025</FONT>            StringWriter var2 = new StringWriter();<a name="line.25"></a>
+<FONT color="green">026</FONT>            par1CrashReport.getCrashCause().printStackTrace(new PrintWriter(var2));<a name="line.26"></a>
+<FONT color="green">027</FONT>            String var3 = var2.toString();<a name="line.27"></a>
+<FONT color="green">028</FONT>            String var4 = "";<a name="line.28"></a>
+<FONT color="green">029</FONT>            String var5 = "";<a name="line.29"></a>
+<FONT color="green">030</FONT>    <a name="line.30"></a>
+<FONT color="green">031</FONT>            try<a name="line.31"></a>
+<FONT color="green">032</FONT>            {<a name="line.32"></a>
+<FONT color="green">033</FONT>                var5 = var5 + "Generated " + (new SimpleDateFormat()).format(new Date()) + "\n";<a name="line.33"></a>
+<FONT color="green">034</FONT>                var5 = var5 + "\n";<a name="line.34"></a>
+<FONT color="green">035</FONT>                var5 = var5 + par1CrashReport.getSections();<a name="line.35"></a>
+<FONT color="green">036</FONT>                var4 = GL11.glGetString(GL11.GL_VENDOR);<a name="line.36"></a>
+<FONT color="green">037</FONT>            }<a name="line.37"></a>
+<FONT color="green">038</FONT>            catch (Throwable var8)<a name="line.38"></a>
+<FONT color="green">039</FONT>            {<a name="line.39"></a>
+<FONT color="green">040</FONT>                var5 = var5 + "[failed to get system properties (" + var8 + ")]\n";<a name="line.40"></a>
+<FONT color="green">041</FONT>            }<a name="line.41"></a>
+<FONT color="green">042</FONT>    <a name="line.42"></a>
+<FONT color="green">043</FONT>            var5 = var5 + "\n\n";<a name="line.43"></a>
+<FONT color="green">044</FONT>            var5 = var5 + var3;<a name="line.44"></a>
+<FONT color="green">045</FONT>            String var6 = "";<a name="line.45"></a>
+<FONT color="green">046</FONT>            var6 = var6 + "\n";<a name="line.46"></a>
+<FONT color="green">047</FONT>            var6 = var6 + "\n";<a name="line.47"></a>
+<FONT color="green">048</FONT>    <a name="line.48"></a>
+<FONT color="green">049</FONT>            if (var3.contains("Pixel format not accelerated"))<a name="line.49"></a>
+<FONT color="green">050</FONT>            {<a name="line.50"></a>
+<FONT color="green">051</FONT>                var6 = var6 + "      Bad video card drivers!      \n";<a name="line.51"></a>
+<FONT color="green">052</FONT>                var6 = var6 + "      -----------------------      \n";<a name="line.52"></a>
+<FONT color="green">053</FONT>                var6 = var6 + "\n";<a name="line.53"></a>
+<FONT color="green">054</FONT>                var6 = var6 + "Minecraft was unable to start because it failed to find an accelerated OpenGL mode.\n";<a name="line.54"></a>
+<FONT color="green">055</FONT>                var6 = var6 + "This can usually be fixed by updating the video card drivers.\n";<a name="line.55"></a>
+<FONT color="green">056</FONT>    <a name="line.56"></a>
+<FONT color="green">057</FONT>                if (var4.toLowerCase().contains("nvidia"))<a name="line.57"></a>
+<FONT color="green">058</FONT>                {<a name="line.58"></a>
+<FONT color="green">059</FONT>                    var6 = var6 + "\n";<a name="line.59"></a>
+<FONT color="green">060</FONT>                    var6 = var6 + "You might be able to find drivers for your video card here:\n";<a name="line.60"></a>
+<FONT color="green">061</FONT>                    var6 = var6 + "  http://www.nvidia.com/\n";<a name="line.61"></a>
+<FONT color="green">062</FONT>                }<a name="line.62"></a>
+<FONT color="green">063</FONT>                else if (var4.toLowerCase().contains("ati"))<a name="line.63"></a>
+<FONT color="green">064</FONT>                {<a name="line.64"></a>
+<FONT color="green">065</FONT>                    var6 = var6 + "\n";<a name="line.65"></a>
+<FONT color="green">066</FONT>                    var6 = var6 + "You might be able to find drivers for your video card here:\n";<a name="line.66"></a>
+<FONT color="green">067</FONT>                    var6 = var6 + "  http://www.amd.com/\n";<a name="line.67"></a>
+<FONT color="green">068</FONT>                }<a name="line.68"></a>
+<FONT color="green">069</FONT>            }<a name="line.69"></a>
+<FONT color="green">070</FONT>            else<a name="line.70"></a>
+<FONT color="green">071</FONT>            {<a name="line.71"></a>
+<FONT color="green">072</FONT>                var6 = var6 + "      Minecraft has crashed!      \n";<a name="line.72"></a>
+<FONT color="green">073</FONT>                var6 = var6 + "      ----------------------      \n";<a name="line.73"></a>
+<FONT color="green">074</FONT>                var6 = var6 + "\n";<a name="line.74"></a>
+<FONT color="green">075</FONT>                var6 = var6 + "Minecraft has stopped running because it encountered a problem; " + par1CrashReport.getDescription() + "\n";<a name="line.75"></a>
+<FONT color="green">076</FONT>                File var7 = par1CrashReport.getFile();<a name="line.76"></a>
+<FONT color="green">077</FONT>    <a name="line.77"></a>
+<FONT color="green">078</FONT>                if (var7 == null)<a name="line.78"></a>
+<FONT color="green">079</FONT>                {<a name="line.79"></a>
+<FONT color="green">080</FONT>                    par1CrashReport.saveToFile(new File(new File(Minecraft.getMinecraftDir(), "crash-reports"), "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-client.txt"));<a name="line.80"></a>
+<FONT color="green">081</FONT>                    var7 = par1CrashReport.getFile();<a name="line.81"></a>
+<FONT color="green">082</FONT>                }<a name="line.82"></a>
+<FONT color="green">083</FONT>    <a name="line.83"></a>
+<FONT color="green">084</FONT>                if (var7 != null)<a name="line.84"></a>
+<FONT color="green">085</FONT>                {<a name="line.85"></a>
+<FONT color="green">086</FONT>                    var6 = var6 + "This error has been saved to " + var7.getAbsolutePath() + " for your convenience. Please include a copy of this file if you report this crash to anyone.";<a name="line.86"></a>
+<FONT color="green">087</FONT>                }<a name="line.87"></a>
+<FONT color="green">088</FONT>                else<a name="line.88"></a>
+<FONT color="green">089</FONT>                {<a name="line.89"></a>
+<FONT color="green">090</FONT>                    var6 = var6 + "We were unable to save this report to a file.";<a name="line.90"></a>
+<FONT color="green">091</FONT>                }<a name="line.91"></a>
+<FONT color="green">092</FONT>    <a name="line.92"></a>
+<FONT color="green">093</FONT>                var6 = var6 + "\n";<a name="line.93"></a>
+<FONT color="green">094</FONT>            }<a name="line.94"></a>
+<FONT color="green">095</FONT>    <a name="line.95"></a>
+<FONT color="green">096</FONT>            var6 = var6 + "\n";<a name="line.96"></a>
+<FONT color="green">097</FONT>            var6 = var6 + "\n";<a name="line.97"></a>
+<FONT color="green">098</FONT>            var6 = var6 + "\n";<a name="line.98"></a>
+<FONT color="green">099</FONT>            var6 = var6 + "--- BEGIN ERROR REPORT " + Integer.toHexString(var6.hashCode()) + " --------\n";<a name="line.99"></a>
+<FONT color="green">100</FONT>            var6 = var6 + var5;<a name="line.100"></a>
+<FONT color="green">101</FONT>            var6 = var6 + "--- END ERROR REPORT " + Integer.toHexString(var6.hashCode()) + " ----------\n";<a name="line.101"></a>
+<FONT color="green">102</FONT>            var6 = var6 + "\n";<a name="line.102"></a>
+<FONT color="green">103</FONT>            var6 = var6 + "\n";<a name="line.103"></a>
+<FONT color="green">104</FONT>            TextArea var9 = new TextArea(var6, 0, 0, 1);<a name="line.104"></a>
+<FONT color="green">105</FONT>            var9.setFont(new Font("Monospaced", 0, 12));<a name="line.105"></a>
+<FONT color="green">106</FONT>            this.add(new CanvasMojangLogo(), "North");<a name="line.106"></a>
+<FONT color="green">107</FONT>            this.add(new CanvasCrashReport(80), "East");<a name="line.107"></a>
+<FONT color="green">108</FONT>            this.add(new CanvasCrashReport(80), "West");<a name="line.108"></a>
+<FONT color="green">109</FONT>            this.add(new CanvasCrashReport(100), "South");<a name="line.109"></a>
+<FONT color="green">110</FONT>            this.add(var9, "Center");<a name="line.110"></a>
+<FONT color="green">111</FONT>        }<a name="line.111"></a>
+<FONT color="green">112</FONT>    }<a name="line.112"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

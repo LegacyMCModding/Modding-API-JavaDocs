@@ -1,0 +1,145 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraftforge.common;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Arrays;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.util.Map;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    import net.minecraft.src.NBTBase;<a name="line.6"></a>
+<FONT color="green">007</FONT>    import net.minecraft.src.NBTTagCompound;<a name="line.7"></a>
+<FONT color="green">008</FONT>    import net.minecraft.src.SaveHandler;<a name="line.8"></a>
+<FONT color="green">009</FONT>    import net.minecraft.src.WorldInfo;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>    import com.google.common.eventbus.EventBus;<a name="line.11"></a>
+<FONT color="green">012</FONT>    import com.google.common.eventbus.Subscribe;<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>    import cpw.mods.fml.common.DummyModContainer;<a name="line.14"></a>
+<FONT color="green">015</FONT>    import cpw.mods.fml.common.LoadController;<a name="line.15"></a>
+<FONT color="green">016</FONT>    import cpw.mods.fml.common.Loader;<a name="line.16"></a>
+<FONT color="green">017</FONT>    import cpw.mods.fml.common.ModMetadata;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import cpw.mods.fml.common.WorldAccessContainer;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import cpw.mods.fml.common.event.FMLPostInitializationEvent;<a name="line.19"></a>
+<FONT color="green">020</FONT>    import cpw.mods.fml.common.event.FMLPreInitializationEvent;<a name="line.20"></a>
+<FONT color="green">021</FONT>    <a name="line.21"></a>
+<FONT color="green">022</FONT>    import static net.minecraftforge.common.ForgeVersion.*;<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>    public class ForgeDummyContainer extends DummyModContainer implements WorldAccessContainer<a name="line.24"></a>
+<FONT color="green">025</FONT>    {<a name="line.25"></a>
+<FONT color="green">026</FONT>        public ForgeDummyContainer()<a name="line.26"></a>
+<FONT color="green">027</FONT>        {<a name="line.27"></a>
+<FONT color="green">028</FONT>            super(new ModMetadata());<a name="line.28"></a>
+<FONT color="green">029</FONT>            ModMetadata meta = getMetadata();<a name="line.29"></a>
+<FONT color="green">030</FONT>            meta.modId       = "Forge";<a name="line.30"></a>
+<FONT color="green">031</FONT>            meta.name        = "Minecraft Forge";<a name="line.31"></a>
+<FONT color="green">032</FONT>            meta.version     = String.format("%d.%d.%d.%d", majorVersion, minorVersion, revisionVersion, buildVersion);<a name="line.32"></a>
+<FONT color="green">033</FONT>            meta.credits     = "Made possible with help from many people";<a name="line.33"></a>
+<FONT color="green">034</FONT>            meta.authorList  = Arrays.asList("LexManos", "Eloraam", "Spacetoad");<a name="line.34"></a>
+<FONT color="green">035</FONT>            meta.description = "Minecraft Forge is a common open source API allowing a broad range of mods " +<a name="line.35"></a>
+<FONT color="green">036</FONT>                               "to work cooperatively together. It allows many mods to be created without " +<a name="line.36"></a>
+<FONT color="green">037</FONT>                               "them editing the main Minecraft code.";<a name="line.37"></a>
+<FONT color="green">038</FONT>            meta.url         = "http://MinecraftForge.net";<a name="line.38"></a>
+<FONT color="green">039</FONT>            meta.updateUrl   = "http://MinecraftForge.net/forum/index.php/topic,5.0.html";<a name="line.39"></a>
+<FONT color="green">040</FONT>            meta.screenshots = new String[0];<a name="line.40"></a>
+<FONT color="green">041</FONT>            meta.logoFile    = "/forge_logo.png";<a name="line.41"></a>
+<FONT color="green">042</FONT>        }<a name="line.42"></a>
+<FONT color="green">043</FONT>    <a name="line.43"></a>
+<FONT color="green">044</FONT>        @Override<a name="line.44"></a>
+<FONT color="green">045</FONT>        public boolean registerBus(EventBus bus, LoadController controller)<a name="line.45"></a>
+<FONT color="green">046</FONT>        {<a name="line.46"></a>
+<FONT color="green">047</FONT>            bus.register(this);<a name="line.47"></a>
+<FONT color="green">048</FONT>            return true;<a name="line.48"></a>
+<FONT color="green">049</FONT>        }<a name="line.49"></a>
+<FONT color="green">050</FONT>    <a name="line.50"></a>
+<FONT color="green">051</FONT>        @Subscribe<a name="line.51"></a>
+<FONT color="green">052</FONT>        public void preInit(FMLPreInitializationEvent evt)<a name="line.52"></a>
+<FONT color="green">053</FONT>        {<a name="line.53"></a>
+<FONT color="green">054</FONT>            ForgeChunkManager.captureConfig(evt.getModConfigurationDirectory());<a name="line.54"></a>
+<FONT color="green">055</FONT>        }<a name="line.55"></a>
+<FONT color="green">056</FONT>        @Subscribe<a name="line.56"></a>
+<FONT color="green">057</FONT>        public void postInit(FMLPostInitializationEvent evt)<a name="line.57"></a>
+<FONT color="green">058</FONT>        {<a name="line.58"></a>
+<FONT color="green">059</FONT>            ForgeChunkManager.loadConfiguration();<a name="line.59"></a>
+<FONT color="green">060</FONT>        }<a name="line.60"></a>
+<FONT color="green">061</FONT>    <a name="line.61"></a>
+<FONT color="green">062</FONT>        @Override<a name="line.62"></a>
+<FONT color="green">063</FONT>        public NBTTagCompound getDataForWriting(SaveHandler handler, WorldInfo info)<a name="line.63"></a>
+<FONT color="green">064</FONT>        {<a name="line.64"></a>
+<FONT color="green">065</FONT>            NBTTagCompound forgeData = new NBTTagCompound();<a name="line.65"></a>
+<FONT color="green">066</FONT>            NBTTagCompound dimData = DimensionManager.saveDimensionDataMap();<a name="line.66"></a>
+<FONT color="green">067</FONT>            forgeData.setCompoundTag("DimensionData", dimData);<a name="line.67"></a>
+<FONT color="green">068</FONT>            return forgeData;<a name="line.68"></a>
+<FONT color="green">069</FONT>        }<a name="line.69"></a>
+<FONT color="green">070</FONT>    <a name="line.70"></a>
+<FONT color="green">071</FONT>        @Override<a name="line.71"></a>
+<FONT color="green">072</FONT>        public void readData(SaveHandler handler, WorldInfo info, Map&lt;String, NBTBase&gt; propertyMap, NBTTagCompound tag)<a name="line.72"></a>
+<FONT color="green">073</FONT>        {<a name="line.73"></a>
+<FONT color="green">074</FONT>            if (tag.hasKey("DimensionData"))<a name="line.74"></a>
+<FONT color="green">075</FONT>            {<a name="line.75"></a>
+<FONT color="green">076</FONT>                DimensionManager.loadDimensionDataMap(tag.hasKey("DimensionData") ? tag.getCompoundTag("DimensionData") : null);<a name="line.76"></a>
+<FONT color="green">077</FONT>            }<a name="line.77"></a>
+<FONT color="green">078</FONT>        }<a name="line.78"></a>
+<FONT color="green">079</FONT>    }<a name="line.79"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

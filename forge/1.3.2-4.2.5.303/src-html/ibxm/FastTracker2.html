@@ -1,0 +1,322 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    <a name="line.1"></a>
+<FONT color="green">002</FONT>    package ibxm;<a name="line.2"></a>
+<FONT color="green">003</FONT>    <a name="line.3"></a>
+<FONT color="green">004</FONT>    import java.io.*;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public class FastTracker2 {<a name="line.6"></a>
+<FONT color="green">007</FONT>        public static boolean is_xm( byte[] header_60_bytes ) {<a name="line.7"></a>
+<FONT color="green">008</FONT>            String xm_identifier;<a name="line.8"></a>
+<FONT color="green">009</FONT>            xm_identifier = ascii_text( header_60_bytes, 0, 17 );<a name="line.9"></a>
+<FONT color="green">010</FONT>            return xm_identifier.equals( "Extended Module: " );<a name="line.10"></a>
+<FONT color="green">011</FONT>        }<a name="line.11"></a>
+<FONT color="green">012</FONT>    <a name="line.12"></a>
+<FONT color="green">013</FONT>        public static Module load_xm( byte[] header_60_bytes, DataInput data_input ) throws IOException {<a name="line.13"></a>
+<FONT color="green">014</FONT>            int xm_version, song_header_length, sequence_length;<a name="line.14"></a>
+<FONT color="green">015</FONT>            int num_channels, num_patterns, num_instruments, xm_flags, idx;<a name="line.15"></a>
+<FONT color="green">016</FONT>            byte[] structure_header, song_header;<a name="line.16"></a>
+<FONT color="green">017</FONT>            boolean delta_env;<a name="line.17"></a>
+<FONT color="green">018</FONT>            String tracker_name;<a name="line.18"></a>
+<FONT color="green">019</FONT>            Instrument instrument;<a name="line.19"></a>
+<FONT color="green">020</FONT>            Module module;<a name="line.20"></a>
+<FONT color="green">021</FONT>            if( !is_xm( header_60_bytes ) ) {<a name="line.21"></a>
+<FONT color="green">022</FONT>                throw new IllegalArgumentException( "Not an XM file!" );<a name="line.22"></a>
+<FONT color="green">023</FONT>            }<a name="line.23"></a>
+<FONT color="green">024</FONT>            xm_version = unsigned_short_le( header_60_bytes, 58 );<a name="line.24"></a>
+<FONT color="green">025</FONT>            if( xm_version != 0x0104 ) {<a name="line.25"></a>
+<FONT color="green">026</FONT>                throw new IllegalArgumentException( "Sorry, XM version " + xm_version + " is not supported!" );<a name="line.26"></a>
+<FONT color="green">027</FONT>            }<a name="line.27"></a>
+<FONT color="green">028</FONT>            module = new Module();<a name="line.28"></a>
+<FONT color="green">029</FONT>            module.song_title = ascii_text( header_60_bytes, 17, 20 );<a name="line.29"></a>
+<FONT color="green">030</FONT>            tracker_name = ascii_text( header_60_bytes, 38, 20 );<a name="line.30"></a>
+<FONT color="green">031</FONT>            delta_env = tracker_name.startsWith( "DigiBooster Pro" );<a name="line.31"></a>
+<FONT color="green">032</FONT>            structure_header = new byte[ 4 ];<a name="line.32"></a>
+<FONT color="green">033</FONT>            data_input.readFully( structure_header );<a name="line.33"></a>
+<FONT color="green">034</FONT>            song_header_length = int_le( structure_header, 0 );<a name="line.34"></a>
+<FONT color="green">035</FONT>            song_header = new byte[ song_header_length ];<a name="line.35"></a>
+<FONT color="green">036</FONT>            data_input.readFully( song_header, 4, song_header_length - 4 );<a name="line.36"></a>
+<FONT color="green">037</FONT>            sequence_length = unsigned_short_le( song_header, 4 );<a name="line.37"></a>
+<FONT color="green">038</FONT>            module.restart_sequence_index = unsigned_short_le( song_header, 6 );<a name="line.38"></a>
+<FONT color="green">039</FONT>            num_channels = unsigned_short_le( song_header, 8 );<a name="line.39"></a>
+<FONT color="green">040</FONT>            num_patterns = unsigned_short_le( song_header, 10 );<a name="line.40"></a>
+<FONT color="green">041</FONT>            num_instruments = unsigned_short_le( song_header, 12 );<a name="line.41"></a>
+<FONT color="green">042</FONT>            xm_flags = unsigned_short_le( song_header, 14 );<a name="line.42"></a>
+<FONT color="green">043</FONT>            module.linear_periods = ( xm_flags &amp; 0x1 ) == 0x1;<a name="line.43"></a>
+<FONT color="green">044</FONT>            module.global_volume = 64;<a name="line.44"></a>
+<FONT color="green">045</FONT>            module.channel_gain = IBXM.FP_ONE * 3 / 8;<a name="line.45"></a>
+<FONT color="green">046</FONT>            module.default_speed = unsigned_short_le( song_header, 16 );<a name="line.46"></a>
+<FONT color="green">047</FONT>            module.default_tempo = unsigned_short_le( song_header, 18 );<a name="line.47"></a>
+<FONT color="green">048</FONT>            module.set_num_channels( num_channels );<a name="line.48"></a>
+<FONT color="green">049</FONT>            for( idx = 0; idx &lt; num_channels; idx++ ) {<a name="line.49"></a>
+<FONT color="green">050</FONT>                module.set_initial_panning( idx, 128 );<a name="line.50"></a>
+<FONT color="green">051</FONT>            }<a name="line.51"></a>
+<FONT color="green">052</FONT>            module.set_sequence_length( sequence_length );      <a name="line.52"></a>
+<FONT color="green">053</FONT>            for( idx = 0; idx &lt; sequence_length; idx++ ) {<a name="line.53"></a>
+<FONT color="green">054</FONT>                module.set_sequence( idx, song_header[ 20 + idx ] &amp; 0xFF );<a name="line.54"></a>
+<FONT color="green">055</FONT>            }<a name="line.55"></a>
+<FONT color="green">056</FONT>            module.set_num_patterns( num_patterns );<a name="line.56"></a>
+<FONT color="green">057</FONT>            for( idx = 0; idx &lt; num_patterns; idx++ ) {<a name="line.57"></a>
+<FONT color="green">058</FONT>                module.set_pattern( idx, read_xm_pattern( data_input, num_channels ) );<a name="line.58"></a>
+<FONT color="green">059</FONT>            }<a name="line.59"></a>
+<FONT color="green">060</FONT>            module.set_num_instruments( num_instruments );<a name="line.60"></a>
+<FONT color="green">061</FONT>            for( idx = 1; idx &lt;= num_instruments; idx++ ) {<a name="line.61"></a>
+<FONT color="green">062</FONT>                try {<a name="line.62"></a>
+<FONT color="green">063</FONT>                    instrument = read_xm_instrument( data_input, delta_env );<a name="line.63"></a>
+<FONT color="green">064</FONT>                    module.set_instrument( idx, instrument );<a name="line.64"></a>
+<FONT color="green">065</FONT>                } catch( EOFException e ) {<a name="line.65"></a>
+<FONT color="green">066</FONT>                    System.out.println( "Instrument " + idx + " is missing!" );<a name="line.66"></a>
+<FONT color="green">067</FONT>                }<a name="line.67"></a>
+<FONT color="green">068</FONT>            }<a name="line.68"></a>
+<FONT color="green">069</FONT>            return module;<a name="line.69"></a>
+<FONT color="green">070</FONT>        }<a name="line.70"></a>
+<FONT color="green">071</FONT>    <a name="line.71"></a>
+<FONT color="green">072</FONT>        private static Pattern read_xm_pattern( DataInput data_input, int num_channels ) throws IOException {<a name="line.72"></a>
+<FONT color="green">073</FONT>            int pattern_header_length, packing_type, num_rows, pattern_data_length;<a name="line.73"></a>
+<FONT color="green">074</FONT>            byte[] structure_header, pattern_header, pattern_data;<a name="line.74"></a>
+<FONT color="green">075</FONT>            Pattern pattern;<a name="line.75"></a>
+<FONT color="green">076</FONT>            structure_header = new byte[ 4 ];<a name="line.76"></a>
+<FONT color="green">077</FONT>            data_input.readFully( structure_header );<a name="line.77"></a>
+<FONT color="green">078</FONT>            pattern_header_length = int_le( structure_header, 0 );<a name="line.78"></a>
+<FONT color="green">079</FONT>            pattern_header = new byte[ pattern_header_length ];<a name="line.79"></a>
+<FONT color="green">080</FONT>            data_input.readFully( pattern_header, 4, pattern_header_length - 4 );<a name="line.80"></a>
+<FONT color="green">081</FONT>            packing_type = pattern_header[ 4 ];<a name="line.81"></a>
+<FONT color="green">082</FONT>            if( packing_type != 0 ) {<a name="line.82"></a>
+<FONT color="green">083</FONT>                throw new IllegalArgumentException( "Pattern packing type " + packing_type + " is not supported!" );<a name="line.83"></a>
+<FONT color="green">084</FONT>            }<a name="line.84"></a>
+<FONT color="green">085</FONT>            pattern = new Pattern();<a name="line.85"></a>
+<FONT color="green">086</FONT>            pattern.num_rows = unsigned_short_le( pattern_header, 5 );<a name="line.86"></a>
+<FONT color="green">087</FONT>            pattern_data_length = unsigned_short_le( pattern_header, 7 );<a name="line.87"></a>
+<FONT color="green">088</FONT>            pattern_data = new byte[ pattern_data_length ];<a name="line.88"></a>
+<FONT color="green">089</FONT>            data_input.readFully( pattern_data );       <a name="line.89"></a>
+<FONT color="green">090</FONT>            pattern.set_pattern_data( pattern_data );<a name="line.90"></a>
+<FONT color="green">091</FONT>            return pattern;<a name="line.91"></a>
+<FONT color="green">092</FONT>        }<a name="line.92"></a>
+<FONT color="green">093</FONT>        <a name="line.93"></a>
+<FONT color="green">094</FONT>        private static Instrument read_xm_instrument( DataInput data_input, boolean delta_env ) throws IOException {<a name="line.94"></a>
+<FONT color="green">095</FONT>            int instrument_header_length, num_samples, idx;<a name="line.95"></a>
+<FONT color="green">096</FONT>            int env_tick, env_ampl, env_num_points, flags;<a name="line.96"></a>
+<FONT color="green">097</FONT>            byte[] structure_header, instrument_header, sample_headers;<a name="line.97"></a>
+<FONT color="green">098</FONT>            Instrument instrument;<a name="line.98"></a>
+<FONT color="green">099</FONT>            Envelope envelope;<a name="line.99"></a>
+<FONT color="green">100</FONT>            structure_header = new byte[ 4 ];<a name="line.100"></a>
+<FONT color="green">101</FONT>            data_input.readFully( structure_header );<a name="line.101"></a>
+<FONT color="green">102</FONT>            instrument_header_length = int_le( structure_header, 0 );<a name="line.102"></a>
+<FONT color="green">103</FONT>            instrument_header = new byte[ instrument_header_length ];<a name="line.103"></a>
+<FONT color="green">104</FONT>            data_input.readFully( instrument_header, 4, instrument_header_length - 4 );<a name="line.104"></a>
+<FONT color="green">105</FONT>            instrument = new Instrument();<a name="line.105"></a>
+<FONT color="green">106</FONT>            instrument.name = ascii_text( instrument_header, 4, 22 );<a name="line.106"></a>
+<FONT color="green">107</FONT>            num_samples = unsigned_short_le( instrument_header, 27 );<a name="line.107"></a>
+<FONT color="green">108</FONT>            if( num_samples &gt; 0 ) {<a name="line.108"></a>
+<FONT color="green">109</FONT>                instrument.set_num_samples( num_samples );<a name="line.109"></a>
+<FONT color="green">110</FONT>                for( idx = 0; idx &lt; 96; idx++ ) {<a name="line.110"></a>
+<FONT color="green">111</FONT>                    instrument.set_key_to_sample( idx + 1, instrument_header[ 33 + idx ] &amp; 0xFF );<a name="line.111"></a>
+<FONT color="green">112</FONT>                }<a name="line.112"></a>
+<FONT color="green">113</FONT>                envelope = new Envelope();<a name="line.113"></a>
+<FONT color="green">114</FONT>                env_num_points = instrument_header[ 225 ] &amp; 0xFF;<a name="line.114"></a>
+<FONT color="green">115</FONT>                envelope.set_num_points( env_num_points );<a name="line.115"></a>
+<FONT color="green">116</FONT>                for( idx = 0; idx &lt; env_num_points; idx++ ) {<a name="line.116"></a>
+<FONT color="green">117</FONT>                    env_tick = unsigned_short_le( instrument_header, 129 + idx * 4 );<a name="line.117"></a>
+<FONT color="green">118</FONT>                    env_ampl = unsigned_short_le( instrument_header, 131 + idx * 4 );<a name="line.118"></a>
+<FONT color="green">119</FONT>                    envelope.set_point( idx, env_tick, env_ampl, delta_env );<a name="line.119"></a>
+<FONT color="green">120</FONT>                }<a name="line.120"></a>
+<FONT color="green">121</FONT>                envelope.set_sustain_point( instrument_header[ 227 ] &amp; 0xFF );<a name="line.121"></a>
+<FONT color="green">122</FONT>                envelope.set_loop_points( instrument_header[ 228 ] &amp; 0xFF, instrument_header[ 229 ] &amp; 0xFF );<a name="line.122"></a>
+<FONT color="green">123</FONT>                flags = instrument_header[ 233 ] &amp; 0xFF;<a name="line.123"></a>
+<FONT color="green">124</FONT>                instrument.volume_envelope_active = ( flags &amp; 0x1 ) == 0x1;<a name="line.124"></a>
+<FONT color="green">125</FONT>                envelope.sustain = ( flags &amp; 0x2 ) == 0x2;<a name="line.125"></a>
+<FONT color="green">126</FONT>                envelope.looped = ( flags &amp; 0x4 ) == 0x4;<a name="line.126"></a>
+<FONT color="green">127</FONT>                instrument.set_volume_envelope( envelope );<a name="line.127"></a>
+<FONT color="green">128</FONT>                envelope = new Envelope();<a name="line.128"></a>
+<FONT color="green">129</FONT>                env_num_points = instrument_header[ 226 ] &amp; 0xFF;<a name="line.129"></a>
+<FONT color="green">130</FONT>                envelope.set_num_points( env_num_points );<a name="line.130"></a>
+<FONT color="green">131</FONT>                for( idx = 0; idx &lt; env_num_points; idx++ ) {<a name="line.131"></a>
+<FONT color="green">132</FONT>                    env_tick = unsigned_short_le( instrument_header, 177 + idx * 4 );<a name="line.132"></a>
+<FONT color="green">133</FONT>                    env_ampl = unsigned_short_le( instrument_header, 179 + idx * 4 );<a name="line.133"></a>
+<FONT color="green">134</FONT>                    envelope.set_point( idx, env_tick, env_ampl, delta_env );<a name="line.134"></a>
+<FONT color="green">135</FONT>                }<a name="line.135"></a>
+<FONT color="green">136</FONT>                envelope.set_sustain_point( instrument_header[ 230 ] &amp; 0xFF );<a name="line.136"></a>
+<FONT color="green">137</FONT>                envelope.set_loop_points( instrument_header[ 231 ] &amp; 0xFF, instrument_header[ 232 ] &amp; 0xFF );<a name="line.137"></a>
+<FONT color="green">138</FONT>                flags = instrument_header[ 234 ] &amp; 0xFF;<a name="line.138"></a>
+<FONT color="green">139</FONT>                instrument.panning_envelope_active = ( flags &amp; 0x1 ) == 0x1;<a name="line.139"></a>
+<FONT color="green">140</FONT>                envelope.sustain = ( flags &amp; 0x2 ) == 0x2;<a name="line.140"></a>
+<FONT color="green">141</FONT>                envelope.looped = ( flags &amp; 0x4 ) == 0x4;<a name="line.141"></a>
+<FONT color="green">142</FONT>                instrument.set_panning_envelope( envelope );<a name="line.142"></a>
+<FONT color="green">143</FONT>                instrument.vibrato_type = instrument_header[ 235 ] &amp; 0xFF;<a name="line.143"></a>
+<FONT color="green">144</FONT>                instrument.vibrato_sweep = instrument_header[ 236 ] &amp; 0xFF;<a name="line.144"></a>
+<FONT color="green">145</FONT>                instrument.vibrato_depth = instrument_header[ 237 ] &amp; 0xFF;<a name="line.145"></a>
+<FONT color="green">146</FONT>                instrument.vibrato_rate = instrument_header[ 238 ] &amp; 0xFF;<a name="line.146"></a>
+<FONT color="green">147</FONT>                instrument.volume_fade_out = unsigned_short_le( instrument_header, 239 );<a name="line.147"></a>
+<FONT color="green">148</FONT>                sample_headers = new byte[ num_samples * 40 ];<a name="line.148"></a>
+<FONT color="green">149</FONT>                data_input.readFully( sample_headers );<a name="line.149"></a>
+<FONT color="green">150</FONT>                for( idx = 0; idx &lt; num_samples; idx++ ) {<a name="line.150"></a>
+<FONT color="green">151</FONT>                    instrument.set_sample( idx, read_xm_sample( sample_headers, idx, data_input ) );<a name="line.151"></a>
+<FONT color="green">152</FONT>                }<a name="line.152"></a>
+<FONT color="green">153</FONT>            }<a name="line.153"></a>
+<FONT color="green">154</FONT>            return instrument;<a name="line.154"></a>
+<FONT color="green">155</FONT>        }<a name="line.155"></a>
+<FONT color="green">156</FONT>    <a name="line.156"></a>
+<FONT color="green">157</FONT>        private static Sample read_xm_sample( byte[] sample_headers, int sample_idx, DataInput data_input ) throws IOException {<a name="line.157"></a>
+<FONT color="green">158</FONT>            int header_offset, sample_length, loop_start, loop_length;<a name="line.158"></a>
+<FONT color="green">159</FONT>            int flags, in_idx, out_idx, sam, last_sam;<a name="line.159"></a>
+<FONT color="green">160</FONT>            int fine_tune, relative_note;<a name="line.160"></a>
+<FONT color="green">161</FONT>            boolean sixteen_bit, ping_pong;<a name="line.161"></a>
+<FONT color="green">162</FONT>            byte[] raw_sample_data;<a name="line.162"></a>
+<FONT color="green">163</FONT>            short[] decoded_sample_data;<a name="line.163"></a>
+<FONT color="green">164</FONT>            Sample sample;<a name="line.164"></a>
+<FONT color="green">165</FONT>            header_offset = sample_idx * 40;<a name="line.165"></a>
+<FONT color="green">166</FONT>            sample = new Sample();<a name="line.166"></a>
+<FONT color="green">167</FONT>            sample_length = int_le( sample_headers, header_offset );        <a name="line.167"></a>
+<FONT color="green">168</FONT>            loop_start = int_le( sample_headers, header_offset + 4 );<a name="line.168"></a>
+<FONT color="green">169</FONT>            loop_length = int_le( sample_headers, header_offset + 8 );<a name="line.169"></a>
+<FONT color="green">170</FONT>            sample.volume = sample_headers[ header_offset + 12 ] &amp; 0xFF;<a name="line.170"></a>
+<FONT color="green">171</FONT>            fine_tune = sample_headers[ header_offset + 13 ];<a name="line.171"></a>
+<FONT color="green">172</FONT>            fine_tune = ( fine_tune &lt;&lt; IBXM.FP_SHIFT ) / 1536;<a name="line.172"></a>
+<FONT color="green">173</FONT>            sample.set_panning = true;<a name="line.173"></a>
+<FONT color="green">174</FONT>            flags = sample_headers[ header_offset + 14 ] &amp; 0xFF;<a name="line.174"></a>
+<FONT color="green">175</FONT>            if( ( flags &amp; 0x03 ) == 0 ) {<a name="line.175"></a>
+<FONT color="green">176</FONT>                loop_length = 0;<a name="line.176"></a>
+<FONT color="green">177</FONT>            }<a name="line.177"></a>
+<FONT color="green">178</FONT>            ping_pong = ( flags &amp; 0x02 ) == 0x02;<a name="line.178"></a>
+<FONT color="green">179</FONT>            sixteen_bit = ( flags &amp; 0x10 ) == 0x10;<a name="line.179"></a>
+<FONT color="green">180</FONT>            sample.panning = sample_headers[ header_offset + 15 ] &amp; 0xFF;<a name="line.180"></a>
+<FONT color="green">181</FONT>            relative_note = sample_headers[ header_offset + 16 ];<a name="line.181"></a>
+<FONT color="green">182</FONT>            relative_note = ( relative_note &lt;&lt; IBXM.FP_SHIFT ) / 12;<a name="line.182"></a>
+<FONT color="green">183</FONT>            sample.transpose = relative_note + fine_tune;<a name="line.183"></a>
+<FONT color="green">184</FONT>            sample.name = ascii_text( sample_headers, header_offset + 18, 22 );<a name="line.184"></a>
+<FONT color="green">185</FONT>            raw_sample_data = new byte[ sample_length ];<a name="line.185"></a>
+<FONT color="green">186</FONT>            try {<a name="line.186"></a>
+<FONT color="green">187</FONT>                data_input.readFully( raw_sample_data );<a name="line.187"></a>
+<FONT color="green">188</FONT>            } catch( EOFException e ) {<a name="line.188"></a>
+<FONT color="green">189</FONT>                System.out.println( "Sample has been truncated!" );<a name="line.189"></a>
+<FONT color="green">190</FONT>            }<a name="line.190"></a>
+<FONT color="green">191</FONT>            in_idx = 0;<a name="line.191"></a>
+<FONT color="green">192</FONT>            out_idx = 0;<a name="line.192"></a>
+<FONT color="green">193</FONT>            sam = 0;<a name="line.193"></a>
+<FONT color="green">194</FONT>            last_sam = 0;<a name="line.194"></a>
+<FONT color="green">195</FONT>            if( sixteen_bit ) {<a name="line.195"></a>
+<FONT color="green">196</FONT>                decoded_sample_data = new short[ sample_length &gt;&gt; 1 ];<a name="line.196"></a>
+<FONT color="green">197</FONT>                while( in_idx &lt; raw_sample_data.length ) {<a name="line.197"></a>
+<FONT color="green">198</FONT>                    sam = raw_sample_data[ in_idx ] &amp; 0xFF;<a name="line.198"></a>
+<FONT color="green">199</FONT>                    sam = sam | ( ( raw_sample_data[ in_idx + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.199"></a>
+<FONT color="green">200</FONT>                    last_sam = last_sam + sam;<a name="line.200"></a>
+<FONT color="green">201</FONT>                    decoded_sample_data[ out_idx ] = ( short ) last_sam;<a name="line.201"></a>
+<FONT color="green">202</FONT>                    in_idx += 2;<a name="line.202"></a>
+<FONT color="green">203</FONT>                    out_idx += 1;<a name="line.203"></a>
+<FONT color="green">204</FONT>                }<a name="line.204"></a>
+<FONT color="green">205</FONT>                sample.set_sample_data( decoded_sample_data, loop_start &gt;&gt; 1, loop_length &gt;&gt; 1, ping_pong );<a name="line.205"></a>
+<FONT color="green">206</FONT>            } else {<a name="line.206"></a>
+<FONT color="green">207</FONT>                decoded_sample_data = new short[ sample_length ];<a name="line.207"></a>
+<FONT color="green">208</FONT>                while( in_idx &lt; raw_sample_data.length ) {<a name="line.208"></a>
+<FONT color="green">209</FONT>                    sam = raw_sample_data[ in_idx ] &amp; 0xFF;<a name="line.209"></a>
+<FONT color="green">210</FONT>                    last_sam = last_sam + sam;<a name="line.210"></a>
+<FONT color="green">211</FONT>                    decoded_sample_data[ out_idx ] = ( short ) ( last_sam &lt;&lt; 8 );<a name="line.211"></a>
+<FONT color="green">212</FONT>                    in_idx += 1;<a name="line.212"></a>
+<FONT color="green">213</FONT>                    out_idx += 1;<a name="line.213"></a>
+<FONT color="green">214</FONT>                }<a name="line.214"></a>
+<FONT color="green">215</FONT>                sample.set_sample_data( decoded_sample_data, loop_start, loop_length, ping_pong );<a name="line.215"></a>
+<FONT color="green">216</FONT>            }<a name="line.216"></a>
+<FONT color="green">217</FONT>            return sample;<a name="line.217"></a>
+<FONT color="green">218</FONT>        }<a name="line.218"></a>
+<FONT color="green">219</FONT>    <a name="line.219"></a>
+<FONT color="green">220</FONT>        private static int unsigned_short_le( byte[] buffer, int offset ) {<a name="line.220"></a>
+<FONT color="green">221</FONT>            int value;<a name="line.221"></a>
+<FONT color="green">222</FONT>            value = buffer[ offset ] &amp; 0xFF;<a name="line.222"></a>
+<FONT color="green">223</FONT>            value = value | ( ( buffer[ offset + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.223"></a>
+<FONT color="green">224</FONT>            return value;<a name="line.224"></a>
+<FONT color="green">225</FONT>        }<a name="line.225"></a>
+<FONT color="green">226</FONT>    <a name="line.226"></a>
+<FONT color="green">227</FONT>        private static int int_le( byte[] buffer, int offset ) {<a name="line.227"></a>
+<FONT color="green">228</FONT>            int value;<a name="line.228"></a>
+<FONT color="green">229</FONT>            value = buffer[ offset ] &amp; 0xFF;<a name="line.229"></a>
+<FONT color="green">230</FONT>            value = value | ( ( buffer[ offset + 1 ] &amp; 0xFF ) &lt;&lt; 8 );<a name="line.230"></a>
+<FONT color="green">231</FONT>            value = value | ( ( buffer[ offset + 2 ] &amp; 0xFF ) &lt;&lt; 16 );<a name="line.231"></a>
+<FONT color="green">232</FONT>            value = value | ( ( buffer[ offset + 3 ] &amp; 0x7F ) &lt;&lt; 24 );<a name="line.232"></a>
+<FONT color="green">233</FONT>            return value;<a name="line.233"></a>
+<FONT color="green">234</FONT>        }<a name="line.234"></a>
+<FONT color="green">235</FONT>        <a name="line.235"></a>
+<FONT color="green">236</FONT>        private static String ascii_text( byte[] buffer, int offset, int length ) {<a name="line.236"></a>
+<FONT color="green">237</FONT>            int idx, chr;<a name="line.237"></a>
+<FONT color="green">238</FONT>            byte[] string_buffer;<a name="line.238"></a>
+<FONT color="green">239</FONT>            String string;<a name="line.239"></a>
+<FONT color="green">240</FONT>            string_buffer = new byte[ length ];<a name="line.240"></a>
+<FONT color="green">241</FONT>            for( idx = 0; idx &lt; length; idx++ ) {<a name="line.241"></a>
+<FONT color="green">242</FONT>                chr = buffer[ offset + idx ];<a name="line.242"></a>
+<FONT color="green">243</FONT>                if( chr &lt; 32 ) {<a name="line.243"></a>
+<FONT color="green">244</FONT>                    chr = 32;<a name="line.244"></a>
+<FONT color="green">245</FONT>                }<a name="line.245"></a>
+<FONT color="green">246</FONT>                string_buffer[ idx ] = ( byte ) chr;<a name="line.246"></a>
+<FONT color="green">247</FONT>            }<a name="line.247"></a>
+<FONT color="green">248</FONT>            try {<a name="line.248"></a>
+<FONT color="green">249</FONT>                string = new String( string_buffer, 0, length, "ISO-8859-1" );<a name="line.249"></a>
+<FONT color="green">250</FONT>            } catch( UnsupportedEncodingException e ) {<a name="line.250"></a>
+<FONT color="green">251</FONT>                string = "";<a name="line.251"></a>
+<FONT color="green">252</FONT>            }<a name="line.252"></a>
+<FONT color="green">253</FONT>            return string;<a name="line.253"></a>
+<FONT color="green">254</FONT>        }<a name="line.254"></a>
+<FONT color="green">255</FONT>    }<a name="line.255"></a>
+<FONT color="green">256</FONT>    <a name="line.256"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

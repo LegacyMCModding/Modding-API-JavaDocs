@@ -1,0 +1,949 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    /*<a name="line.1"></a>
+<FONT color="green">002</FONT>     * The FML Forge Mod Loader suite. Copyright (C) 2012 cpw<a name="line.2"></a>
+<FONT color="green">003</FONT>     *<a name="line.3"></a>
+<FONT color="green">004</FONT>     * This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free<a name="line.4"></a>
+<FONT color="green">005</FONT>     * Software Foundation; either version 2.1 of the License, or any later version.<a name="line.5"></a>
+<FONT color="green">006</FONT>     *<a name="line.6"></a>
+<FONT color="green">007</FONT>     * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR<a name="line.7"></a>
+<FONT color="green">008</FONT>     * A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.<a name="line.8"></a>
+<FONT color="green">009</FONT>     *<a name="line.9"></a>
+<FONT color="green">010</FONT>     * You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51<a name="line.10"></a>
+<FONT color="green">011</FONT>     * Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA<a name="line.11"></a>
+<FONT color="green">012</FONT>     */<a name="line.12"></a>
+<FONT color="green">013</FONT>    package net.minecraft.src;<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>    import static cpw.mods.fml.common.Side.CLIENT;<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>    import java.awt.image.BufferedImage;<a name="line.17"></a>
+<FONT color="green">018</FONT>    import java.util.Collections;<a name="line.18"></a>
+<FONT color="green">019</FONT>    import java.util.List;<a name="line.19"></a>
+<FONT color="green">020</FONT>    import java.util.Map;<a name="line.20"></a>
+<FONT color="green">021</FONT>    import java.util.logging.Logger;<a name="line.21"></a>
+<FONT color="green">022</FONT>    <a name="line.22"></a>
+<FONT color="green">023</FONT>    import net.minecraft.client.Minecraft;<a name="line.23"></a>
+<FONT color="green">024</FONT>    import net.minecraft.server.MinecraftServer;<a name="line.24"></a>
+<FONT color="green">025</FONT>    import cpw.mods.fml.client.FMLClientHandler;<a name="line.25"></a>
+<FONT color="green">026</FONT>    import cpw.mods.fml.client.SpriteHelper;<a name="line.26"></a>
+<FONT color="green">027</FONT>    import cpw.mods.fml.client.TextureFXManager;<a name="line.27"></a>
+<FONT color="green">028</FONT>    import cpw.mods.fml.client.modloader.ModLoaderClientHelper;<a name="line.28"></a>
+<FONT color="green">029</FONT>    import cpw.mods.fml.client.modloader.ModLoaderKeyBindingHandler;<a name="line.29"></a>
+<FONT color="green">030</FONT>    import cpw.mods.fml.client.registry.ClientRegistry;<a name="line.30"></a>
+<FONT color="green">031</FONT>    import cpw.mods.fml.client.registry.KeyBindingRegistry;<a name="line.31"></a>
+<FONT color="green">032</FONT>    import cpw.mods.fml.client.registry.RenderingRegistry;<a name="line.32"></a>
+<FONT color="green">033</FONT>    import cpw.mods.fml.common.FMLCommonHandler;<a name="line.33"></a>
+<FONT color="green">034</FONT>    import cpw.mods.fml.common.FMLLog;<a name="line.34"></a>
+<FONT color="green">035</FONT>    import cpw.mods.fml.common.Loader;<a name="line.35"></a>
+<FONT color="green">036</FONT>    import cpw.mods.fml.common.ObfuscationReflectionHelper;<a name="line.36"></a>
+<FONT color="green">037</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.37"></a>
+<FONT color="green">038</FONT>    import cpw.mods.fml.common.modloader.ModLoaderHelper;<a name="line.38"></a>
+<FONT color="green">039</FONT>    import cpw.mods.fml.common.modloader.ModLoaderModContainer;<a name="line.39"></a>
+<FONT color="green">040</FONT>    import cpw.mods.fml.common.network.NetworkRegistry;<a name="line.40"></a>
+<FONT color="green">041</FONT>    import cpw.mods.fml.common.network.PacketDispatcher;<a name="line.41"></a>
+<FONT color="green">042</FONT>    import cpw.mods.fml.common.network.Player;<a name="line.42"></a>
+<FONT color="green">043</FONT>    import cpw.mods.fml.common.registry.EntityRegistry;<a name="line.43"></a>
+<FONT color="green">044</FONT>    import cpw.mods.fml.common.registry.GameRegistry;<a name="line.44"></a>
+<FONT color="green">045</FONT>    import cpw.mods.fml.common.registry.LanguageRegistry;<a name="line.45"></a>
+<FONT color="green">046</FONT>    import cpw.mods.fml.server.FMLServerHandler;<a name="line.46"></a>
+<FONT color="green">047</FONT>    <a name="line.47"></a>
+<FONT color="green">048</FONT>    public class ModLoader<a name="line.48"></a>
+<FONT color="green">049</FONT>    {<a name="line.49"></a>
+<FONT color="green">050</FONT>        public static final String fmlMarker = "This is an FML marker";<a name="line.50"></a>
+<FONT color="green">051</FONT>        // TODO dirty workaround for millinaire<a name="line.51"></a>
+<FONT color="green">052</FONT>        @Deprecated<a name="line.52"></a>
+<FONT color="green">053</FONT>        public static final Map&lt;String,Map&lt;String,String&gt;&gt; localizedStrings=Collections.emptyMap();<a name="line.53"></a>
+<FONT color="green">054</FONT>    <a name="line.54"></a>
+<FONT color="green">055</FONT>        /**<a name="line.55"></a>
+<FONT color="green">056</FONT>         * Adds localization info for an achievement, Not used on the server.<a name="line.56"></a>
+<FONT color="green">057</FONT>         *<a name="line.57"></a>
+<FONT color="green">058</FONT>         * @param achievement The achievement to name<a name="line.58"></a>
+<FONT color="green">059</FONT>         * @param name The name<a name="line.59"></a>
+<FONT color="green">060</FONT>         * @param description The description<a name="line.60"></a>
+<FONT color="green">061</FONT>         */<a name="line.61"></a>
+<FONT color="green">062</FONT>        public static void addAchievementDesc(Achievement achievement, String name, String description)<a name="line.62"></a>
+<FONT color="green">063</FONT>        {<a name="line.63"></a>
+<FONT color="green">064</FONT>            String achName=achievement.getName();<a name="line.64"></a>
+<FONT color="green">065</FONT>            addLocalization(achName, name);<a name="line.65"></a>
+<FONT color="green">066</FONT>            addLocalization(achName+".desc", description);<a name="line.66"></a>
+<FONT color="green">067</FONT>        }<a name="line.67"></a>
+<FONT color="green">068</FONT>    <a name="line.68"></a>
+<FONT color="green">069</FONT>        /**<a name="line.69"></a>
+<FONT color="green">070</FONT>         * This method is a call in hook from modified external code. Implemented elsewhere.<a name="line.70"></a>
+<FONT color="green">071</FONT>         *<a name="line.71"></a>
+<FONT color="green">072</FONT>         * {@link GameRegistry#getFuelValue(ItemStack))}<a name="line.72"></a>
+<FONT color="green">073</FONT>         *<a name="line.73"></a>
+<FONT color="green">074</FONT>         * @param id The Item ID<a name="line.74"></a>
+<FONT color="green">075</FONT>         * @param metadata The Item Metadata<a name="line.75"></a>
+<FONT color="green">076</FONT>         * @return The fuel strength, in ticks, 0 if unhandled<a name="line.76"></a>
+<FONT color="green">077</FONT>         */<a name="line.77"></a>
+<FONT color="green">078</FONT>        @Deprecated<a name="line.78"></a>
+<FONT color="green">079</FONT>        public static int addAllFuel(int id, int metadata)<a name="line.79"></a>
+<FONT color="green">080</FONT>        {<a name="line.80"></a>
+<FONT color="green">081</FONT>            return 0;<a name="line.81"></a>
+<FONT color="green">082</FONT>        }<a name="line.82"></a>
+<FONT color="green">083</FONT>    <a name="line.83"></a>
+<FONT color="green">084</FONT>        @Deprecated<a name="line.84"></a>
+<FONT color="green">085</FONT>        @SideOnly(CLIENT)<a name="line.85"></a>
+<FONT color="green">086</FONT>        public static void addAllRenderers(Map&lt;Class&lt;? extends Entity&gt;, Render&gt; renderers)<a name="line.86"></a>
+<FONT color="green">087</FONT>        {<a name="line.87"></a>
+<FONT color="green">088</FONT>        }<a name="line.88"></a>
+<FONT color="green">089</FONT>    <a name="line.89"></a>
+<FONT color="green">090</FONT>        @SideOnly(CLIENT)<a name="line.90"></a>
+<FONT color="green">091</FONT>        public static void addAnimation(TextureFX anim)<a name="line.91"></a>
+<FONT color="green">092</FONT>        {<a name="line.92"></a>
+<FONT color="green">093</FONT>            TextureFXManager.instance().addAnimation(anim);<a name="line.93"></a>
+<FONT color="green">094</FONT>        }<a name="line.94"></a>
+<FONT color="green">095</FONT>    <a name="line.95"></a>
+<FONT color="green">096</FONT>        /**<a name="line.96"></a>
+<FONT color="green">097</FONT>         * Adds a new prefix to the armor texture list<a name="line.97"></a>
+<FONT color="green">098</FONT>         * <a name="line.98"></a>
+<FONT color="green">099</FONT>         * {@link RenderingRegistry#addNewArmourRendererPrefix(String))}<a name="line.99"></a>
+<FONT color="green">100</FONT>         * <a name="line.100"></a>
+<FONT color="green">101</FONT>         * @param armor The new armor prefix<a name="line.101"></a>
+<FONT color="green">102</FONT>         * @return The new armor index<a name="line.102"></a>
+<FONT color="green">103</FONT>         */<a name="line.103"></a>
+<FONT color="green">104</FONT>        @SideOnly(CLIENT)<a name="line.104"></a>
+<FONT color="green">105</FONT>        public static int addArmor(String armor)<a name="line.105"></a>
+<FONT color="green">106</FONT>        {<a name="line.106"></a>
+<FONT color="green">107</FONT>            return RenderingRegistry.addNewArmourRendererPrefix(armor);<a name="line.107"></a>
+<FONT color="green">108</FONT>        }<a name="line.108"></a>
+<FONT color="green">109</FONT>    <a name="line.109"></a>
+<FONT color="green">110</FONT>        /**<a name="line.110"></a>
+<FONT color="green">111</FONT>         * This method adds the supplied biome to the set of candidate biomes for the default world generator type.<a name="line.111"></a>
+<FONT color="green">112</FONT>         *<a name="line.112"></a>
+<FONT color="green">113</FONT>         * @param biome The biome to add<a name="line.113"></a>
+<FONT color="green">114</FONT>         */<a name="line.114"></a>
+<FONT color="green">115</FONT>        public static void addBiome(BiomeGenBase biome)<a name="line.115"></a>
+<FONT color="green">116</FONT>        {<a name="line.116"></a>
+<FONT color="green">117</FONT>            GameRegistry.addBiome(biome);<a name="line.117"></a>
+<FONT color="green">118</FONT>        }<a name="line.118"></a>
+<FONT color="green">119</FONT>    <a name="line.119"></a>
+<FONT color="green">120</FONT>        public static void addEntityTracker(BaseMod mod, Class&lt;? extends Entity&gt; entityClass, int entityTypeId, int updateRange, int updateInterval, boolean sendVelocityInfo)<a name="line.120"></a>
+<FONT color="green">121</FONT>        {<a name="line.121"></a>
+<FONT color="green">122</FONT>            ModLoaderHelper.buildEntityTracker(mod, entityClass, entityTypeId, updateRange, updateInterval, sendVelocityInfo);<a name="line.122"></a>
+<FONT color="green">123</FONT>        }<a name="line.123"></a>
+<FONT color="green">124</FONT>    <a name="line.124"></a>
+<FONT color="green">125</FONT>        public static void addCommand(ICommand command)<a name="line.125"></a>
+<FONT color="green">126</FONT>        {<a name="line.126"></a>
+<FONT color="green">127</FONT>            ModLoaderHelper.addCommand(command);<a name="line.127"></a>
+<FONT color="green">128</FONT>        }<a name="line.128"></a>
+<FONT color="green">129</FONT>        /**<a name="line.129"></a>
+<FONT color="green">130</FONT>         * Add localization for the specified string<a name="line.130"></a>
+<FONT color="green">131</FONT>         *<a name="line.131"></a>
+<FONT color="green">132</FONT>         * @param key Key<a name="line.132"></a>
+<FONT color="green">133</FONT>         * @param value Value<a name="line.133"></a>
+<FONT color="green">134</FONT>         */<a name="line.134"></a>
+<FONT color="green">135</FONT>        public static void addLocalization(String key, String value)<a name="line.135"></a>
+<FONT color="green">136</FONT>        {<a name="line.136"></a>
+<FONT color="green">137</FONT>            addLocalization(key, "en_US", value);<a name="line.137"></a>
+<FONT color="green">138</FONT>        }<a name="line.138"></a>
+<FONT color="green">139</FONT>    <a name="line.139"></a>
+<FONT color="green">140</FONT>        /**<a name="line.140"></a>
+<FONT color="green">141</FONT>         * Add localization for the specified string<a name="line.141"></a>
+<FONT color="green">142</FONT>         *<a name="line.142"></a>
+<FONT color="green">143</FONT>         * @param key Key<a name="line.143"></a>
+<FONT color="green">144</FONT>         * @param lang Language identifier<a name="line.144"></a>
+<FONT color="green">145</FONT>         * @param value Value<a name="line.145"></a>
+<FONT color="green">146</FONT>         */<a name="line.146"></a>
+<FONT color="green">147</FONT>        public static void addLocalization(String key, String lang, String value)<a name="line.147"></a>
+<FONT color="green">148</FONT>        {<a name="line.148"></a>
+<FONT color="green">149</FONT>            LanguageRegistry.instance().addStringLocalization(key, lang, value);<a name="line.149"></a>
+<FONT color="green">150</FONT>        }<a name="line.150"></a>
+<FONT color="green">151</FONT>    <a name="line.151"></a>
+<FONT color="green">152</FONT>        /**<a name="line.152"></a>
+<FONT color="green">153</FONT>         * Name the specified minecraft object with the supplied name<a name="line.153"></a>
+<FONT color="green">154</FONT>         *<a name="line.154"></a>
+<FONT color="green">155</FONT>         * @param instance Item to name<a name="line.155"></a>
+<FONT color="green">156</FONT>         * @param name The name to give it<a name="line.156"></a>
+<FONT color="green">157</FONT>         */<a name="line.157"></a>
+<FONT color="green">158</FONT>        public static void addName(Object instance, String name)<a name="line.158"></a>
+<FONT color="green">159</FONT>        {<a name="line.159"></a>
+<FONT color="green">160</FONT>            addName(instance,"en_US",name);<a name="line.160"></a>
+<FONT color="green">161</FONT>        }<a name="line.161"></a>
+<FONT color="green">162</FONT>    <a name="line.162"></a>
+<FONT color="green">163</FONT>        /**<a name="line.163"></a>
+<FONT color="green">164</FONT>         * Unimplemented on the server as it does not generate names<a name="line.164"></a>
+<FONT color="green">165</FONT>         *<a name="line.165"></a>
+<FONT color="green">166</FONT>         * @param instance Item to name<a name="line.166"></a>
+<FONT color="green">167</FONT>         * @param lang Languge identifier<a name="line.167"></a>
+<FONT color="green">168</FONT>         * @param name Name to give it<a name="line.168"></a>
+<FONT color="green">169</FONT>         */<a name="line.169"></a>
+<FONT color="green">170</FONT>        public static void addName(Object instance, String lang, String name)<a name="line.170"></a>
+<FONT color="green">171</FONT>        {<a name="line.171"></a>
+<FONT color="green">172</FONT>            LanguageRegistry.instance().addNameForObject(instance, lang, name);<a name="line.172"></a>
+<FONT color="green">173</FONT>        }<a name="line.173"></a>
+<FONT color="green">174</FONT>    <a name="line.174"></a>
+<FONT color="green">175</FONT>        /**<a name="line.175"></a>
+<FONT color="green">176</FONT>         * Attempts to register a small image to be applied to a larger texture image, <a name="line.176"></a>
+<FONT color="green">177</FONT>         * typically how old ModLoader mods add custom Item/Block textures.<a name="line.177"></a>
+<FONT color="green">178</FONT>         * <a name="line.178"></a>
+<FONT color="green">179</FONT>         * Forge mods should use setTextureFile in Item/Block<a name="line.179"></a>
+<FONT color="green">180</FONT>         * <a name="line.180"></a>
+<FONT color="green">181</FONT>         * Will return the icon index it was applied to.<a name="line.181"></a>
+<FONT color="green">182</FONT>         * <a name="line.182"></a>
+<FONT color="green">183</FONT>         * Unimplemented on the server as it does not render textures<a name="line.183"></a>
+<FONT color="green">184</FONT>         *<a name="line.184"></a>
+<FONT color="green">185</FONT>         * @param fileToOverride The texture to apply the new image to<a name="line.185"></a>
+<FONT color="green">186</FONT>         * @param fileToAdd The new image<a name="line.186"></a>
+<FONT color="green">187</FONT>         * @return The 'icon index' in the main image that the new image will be applied to<a name="line.187"></a>
+<FONT color="green">188</FONT>         */<a name="line.188"></a>
+<FONT color="green">189</FONT>        @SideOnly(CLIENT)<a name="line.189"></a>
+<FONT color="green">190</FONT>        public static int addOverride(String fileToOverride, String fileToAdd)<a name="line.190"></a>
+<FONT color="green">191</FONT>        {<a name="line.191"></a>
+<FONT color="green">192</FONT>            return RenderingRegistry.addTextureOverride(fileToOverride, fileToAdd);<a name="line.192"></a>
+<FONT color="green">193</FONT>        }<a name="line.193"></a>
+<FONT color="green">194</FONT>    <a name="line.194"></a>
+<FONT color="green">195</FONT>        /**<a name="line.195"></a>
+<FONT color="green">196</FONT>         * Attempts to register a small image to be applied to a larger texture image, <a name="line.196"></a>
+<FONT color="green">197</FONT>         * typically how old ModLoader mods add custom Item/Block textures.<a name="line.197"></a>
+<FONT color="green">198</FONT>         * <a name="line.198"></a>
+<FONT color="green">199</FONT>         * Forge mods should use setTextureFile in Item/Block<a name="line.199"></a>
+<FONT color="green">200</FONT>         * <a name="line.200"></a>
+<FONT color="green">201</FONT>         * Unimplemented on the server as it does not render textures<a name="line.201"></a>
+<FONT color="green">202</FONT>         *<a name="line.202"></a>
+<FONT color="green">203</FONT>         * @param path The texture to apply the new image to<a name="line.203"></a>
+<FONT color="green">204</FONT>         * @param overlayPath The new image<a name="line.204"></a>
+<FONT color="green">205</FONT>         * @param index Where on the texture to apply it<a name="line.205"></a>
+<FONT color="green">206</FONT>         */<a name="line.206"></a>
+<FONT color="green">207</FONT>        @SideOnly(CLIENT)<a name="line.207"></a>
+<FONT color="green">208</FONT>        public static void addOverride(String path, String overlayPath, int index)<a name="line.208"></a>
+<FONT color="green">209</FONT>        {<a name="line.209"></a>
+<FONT color="green">210</FONT>            RenderingRegistry.addTextureOverride(path, overlayPath, index);<a name="line.210"></a>
+<FONT color="green">211</FONT>        }<a name="line.211"></a>
+<FONT color="green">212</FONT>    <a name="line.212"></a>
+<FONT color="green">213</FONT>        /**<a name="line.213"></a>
+<FONT color="green">214</FONT>         * Add a Shaped Recipe<a name="line.214"></a>
+<FONT color="green">215</FONT>         *<a name="line.215"></a>
+<FONT color="green">216</FONT>         * @param output The result<a name="line.216"></a>
+<FONT color="green">217</FONT>         * @param params The input<a name="line.217"></a>
+<FONT color="green">218</FONT>         */<a name="line.218"></a>
+<FONT color="green">219</FONT>        public static void addRecipe(ItemStack output, Object... params)<a name="line.219"></a>
+<FONT color="green">220</FONT>        {<a name="line.220"></a>
+<FONT color="green">221</FONT>            GameRegistry.addRecipe(output, params);<a name="line.221"></a>
+<FONT color="green">222</FONT>        }<a name="line.222"></a>
+<FONT color="green">223</FONT>    <a name="line.223"></a>
+<FONT color="green">224</FONT>        /**<a name="line.224"></a>
+<FONT color="green">225</FONT>         * Add a shapeless recipe<a name="line.225"></a>
+<FONT color="green">226</FONT>         *<a name="line.226"></a>
+<FONT color="green">227</FONT>         * @param output The result<a name="line.227"></a>
+<FONT color="green">228</FONT>         * @param params The input<a name="line.228"></a>
+<FONT color="green">229</FONT>         */<a name="line.229"></a>
+<FONT color="green">230</FONT>        public static void addShapelessRecipe(ItemStack output, Object... params)<a name="line.230"></a>
+<FONT color="green">231</FONT>        {<a name="line.231"></a>
+<FONT color="green">232</FONT>            GameRegistry.addShapelessRecipe(output, params);<a name="line.232"></a>
+<FONT color="green">233</FONT>        }<a name="line.233"></a>
+<FONT color="green">234</FONT>    <a name="line.234"></a>
+<FONT color="green">235</FONT>        /**<a name="line.235"></a>
+<FONT color="green">236</FONT>         * Add a new product to be smelted<a name="line.236"></a>
+<FONT color="green">237</FONT>         *<a name="line.237"></a>
+<FONT color="green">238</FONT>         * @param input<a name="line.238"></a>
+<FONT color="green">239</FONT>         * @param output<a name="line.239"></a>
+<FONT color="green">240</FONT>         */<a name="line.240"></a>
+<FONT color="green">241</FONT>        public static void addSmelting(int input, ItemStack output)<a name="line.241"></a>
+<FONT color="green">242</FONT>        {<a name="line.242"></a>
+<FONT color="green">243</FONT>            GameRegistry.addSmelting(input, output, 1.0f);<a name="line.243"></a>
+<FONT color="green">244</FONT>        }<a name="line.244"></a>
+<FONT color="green">245</FONT>    <a name="line.245"></a>
+<FONT color="green">246</FONT>        /**<a name="line.246"></a>
+<FONT color="green">247</FONT>         * Add a new product to be smelted<a name="line.247"></a>
+<FONT color="green">248</FONT>         *<a name="line.248"></a>
+<FONT color="green">249</FONT>         * @param input<a name="line.249"></a>
+<FONT color="green">250</FONT>         * @param output<a name="line.250"></a>
+<FONT color="green">251</FONT>         */<a name="line.251"></a>
+<FONT color="green">252</FONT>        public static void addSmelting(int input, ItemStack output, float experience)<a name="line.252"></a>
+<FONT color="green">253</FONT>        {<a name="line.253"></a>
+<FONT color="green">254</FONT>            GameRegistry.addSmelting(input, output, experience);<a name="line.254"></a>
+<FONT color="green">255</FONT>        }<a name="line.255"></a>
+<FONT color="green">256</FONT>        /**<a name="line.256"></a>
+<FONT color="green">257</FONT>         * Add a mob to the spawn list<a name="line.257"></a>
+<FONT color="green">258</FONT>         *<a name="line.258"></a>
+<FONT color="green">259</FONT>         * @param entityClass<a name="line.259"></a>
+<FONT color="green">260</FONT>         * @param weightedProb<a name="line.260"></a>
+<FONT color="green">261</FONT>         * @param min<a name="line.261"></a>
+<FONT color="green">262</FONT>         * @param max<a name="line.262"></a>
+<FONT color="green">263</FONT>         * @param spawnList<a name="line.263"></a>
+<FONT color="green">264</FONT>         */<a name="line.264"></a>
+<FONT color="green">265</FONT>        public static void addSpawn(Class&lt;? extends EntityLiving&gt; entityClass, int weightedProb, int min, int max, EnumCreatureType spawnList)<a name="line.265"></a>
+<FONT color="green">266</FONT>        {<a name="line.266"></a>
+<FONT color="green">267</FONT>            EntityRegistry.addSpawn(entityClass, weightedProb, min, max, spawnList, WorldType.base12Biomes);<a name="line.267"></a>
+<FONT color="green">268</FONT>        }<a name="line.268"></a>
+<FONT color="green">269</FONT>    <a name="line.269"></a>
+<FONT color="green">270</FONT>        /**<a name="line.270"></a>
+<FONT color="green">271</FONT>         * Add a mob to the spawn list<a name="line.271"></a>
+<FONT color="green">272</FONT>         *<a name="line.272"></a>
+<FONT color="green">273</FONT>         * @param entityClass<a name="line.273"></a>
+<FONT color="green">274</FONT>         * @param weightedProb<a name="line.274"></a>
+<FONT color="green">275</FONT>         * @param min<a name="line.275"></a>
+<FONT color="green">276</FONT>         * @param max<a name="line.276"></a>
+<FONT color="green">277</FONT>         * @param spawnList<a name="line.277"></a>
+<FONT color="green">278</FONT>         * @param biomes<a name="line.278"></a>
+<FONT color="green">279</FONT>         */<a name="line.279"></a>
+<FONT color="green">280</FONT>        public static void addSpawn(Class&lt;? extends EntityLiving&gt; entityClass, int weightedProb, int min, int max, EnumCreatureType spawnList, BiomeGenBase... biomes)<a name="line.280"></a>
+<FONT color="green">281</FONT>        {<a name="line.281"></a>
+<FONT color="green">282</FONT>            EntityRegistry.addSpawn(entityClass, weightedProb, min, max, spawnList, biomes);<a name="line.282"></a>
+<FONT color="green">283</FONT>        }<a name="line.283"></a>
+<FONT color="green">284</FONT>    <a name="line.284"></a>
+<FONT color="green">285</FONT>        /**<a name="line.285"></a>
+<FONT color="green">286</FONT>         * Add a mob to the spawn list<a name="line.286"></a>
+<FONT color="green">287</FONT>         *<a name="line.287"></a>
+<FONT color="green">288</FONT>         * @param entityName<a name="line.288"></a>
+<FONT color="green">289</FONT>         * @param weightedProb<a name="line.289"></a>
+<FONT color="green">290</FONT>         * @param min<a name="line.290"></a>
+<FONT color="green">291</FONT>         * @param max<a name="line.291"></a>
+<FONT color="green">292</FONT>         * @param spawnList<a name="line.292"></a>
+<FONT color="green">293</FONT>         */<a name="line.293"></a>
+<FONT color="green">294</FONT>        public static void addSpawn(String entityName, int weightedProb, int min, int max, EnumCreatureType spawnList)<a name="line.294"></a>
+<FONT color="green">295</FONT>        {<a name="line.295"></a>
+<FONT color="green">296</FONT>            EntityRegistry.addSpawn(entityName, weightedProb, min, max, spawnList, WorldType.base12Biomes);<a name="line.296"></a>
+<FONT color="green">297</FONT>        }<a name="line.297"></a>
+<FONT color="green">298</FONT>    <a name="line.298"></a>
+<FONT color="green">299</FONT>        /**<a name="line.299"></a>
+<FONT color="green">300</FONT>         * Add a mob to the spawn list<a name="line.300"></a>
+<FONT color="green">301</FONT>         *<a name="line.301"></a>
+<FONT color="green">302</FONT>         * @param entityName<a name="line.302"></a>
+<FONT color="green">303</FONT>         * @param weightedProb<a name="line.303"></a>
+<FONT color="green">304</FONT>         * @param min<a name="line.304"></a>
+<FONT color="green">305</FONT>         * @param max<a name="line.305"></a>
+<FONT color="green">306</FONT>         * @param spawnList<a name="line.306"></a>
+<FONT color="green">307</FONT>         * @param biomes<a name="line.307"></a>
+<FONT color="green">308</FONT>         */<a name="line.308"></a>
+<FONT color="green">309</FONT>        public static void addSpawn(String entityName, int weightedProb, int min, int max, EnumCreatureType spawnList, BiomeGenBase... biomes)<a name="line.309"></a>
+<FONT color="green">310</FONT>        {<a name="line.310"></a>
+<FONT color="green">311</FONT>            EntityRegistry.addSpawn(entityName, weightedProb, min, max, spawnList, biomes);<a name="line.311"></a>
+<FONT color="green">312</FONT>        }<a name="line.312"></a>
+<FONT color="green">313</FONT>    <a name="line.313"></a>
+<FONT color="green">314</FONT>        public static void addTrade(int profession, TradeEntry entry)<a name="line.314"></a>
+<FONT color="green">315</FONT>        {<a name="line.315"></a>
+<FONT color="green">316</FONT>            ModLoaderHelper.registerTrade(profession, entry);<a name="line.316"></a>
+<FONT color="green">317</FONT>        }<a name="line.317"></a>
+<FONT color="green">318</FONT>        /**<a name="line.318"></a>
+<FONT color="green">319</FONT>         * Send a packet from the client<a name="line.319"></a>
+<FONT color="green">320</FONT>         * @param packet<a name="line.320"></a>
+<FONT color="green">321</FONT>         */<a name="line.321"></a>
+<FONT color="green">322</FONT>        public static void clientSendPacket(Packet packet)<a name="line.322"></a>
+<FONT color="green">323</FONT>        {<a name="line.323"></a>
+<FONT color="green">324</FONT>            PacketDispatcher.sendPacketToServer(packet);<a name="line.324"></a>
+<FONT color="green">325</FONT>        }<a name="line.325"></a>
+<FONT color="green">326</FONT>    <a name="line.326"></a>
+<FONT color="green">327</FONT>        /**<a name="line.327"></a>
+<FONT color="green">328</FONT>         * This method is a call in hook from modified external code. Implemented elsewhere.<a name="line.328"></a>
+<FONT color="green">329</FONT>         *<a name="line.329"></a>
+<FONT color="green">330</FONT>         * @param world<a name="line.330"></a>
+<FONT color="green">331</FONT>         * @param x<a name="line.331"></a>
+<FONT color="green">332</FONT>         * @param y<a name="line.332"></a>
+<FONT color="green">333</FONT>         * @param z<a name="line.333"></a>
+<FONT color="green">334</FONT>         * @param xVel<a name="line.334"></a>
+<FONT color="green">335</FONT>         * @param zVel<a name="line.335"></a>
+<FONT color="green">336</FONT>         * @param item<a name="line.336"></a>
+<FONT color="green">337</FONT>         * @return Always false, not implemented here<a name="line.337"></a>
+<FONT color="green">338</FONT>         */<a name="line.338"></a>
+<FONT color="green">339</FONT>        @Deprecated<a name="line.339"></a>
+<FONT color="green">340</FONT>        public static boolean dispenseEntity(World world, double x, double y, double z, int xVel, int zVel, ItemStack item)<a name="line.340"></a>
+<FONT color="green">341</FONT>        {<a name="line.341"></a>
+<FONT color="green">342</FONT>            return false;<a name="line.342"></a>
+<FONT color="green">343</FONT>        }<a name="line.343"></a>
+<FONT color="green">344</FONT>    <a name="line.344"></a>
+<FONT color="green">345</FONT>        /**<a name="line.345"></a>
+<FONT color="green">346</FONT>         * Remove a container and drop all the items in it on the ground around<a name="line.346"></a>
+<FONT color="green">347</FONT>         *<a name="line.347"></a>
+<FONT color="green">348</FONT>         * @param world<a name="line.348"></a>
+<FONT color="green">349</FONT>         * @param x<a name="line.349"></a>
+<FONT color="green">350</FONT>         * @param y<a name="line.350"></a>
+<FONT color="green">351</FONT>         * @param z<a name="line.351"></a>
+<FONT color="green">352</FONT>         */<a name="line.352"></a>
+<FONT color="green">353</FONT>        public static void genericContainerRemoval(World world, int x, int y, int z)<a name="line.353"></a>
+<FONT color="green">354</FONT>        {<a name="line.354"></a>
+<FONT color="green">355</FONT>    /*        TileEntity te = world.func_603_b(x, y, z);<a name="line.355"></a>
+<FONT color="green">356</FONT>    <a name="line.356"></a>
+<FONT color="green">357</FONT>            if (!(te instanceof IInventory))<a name="line.357"></a>
+<FONT color="green">358</FONT>            {<a name="line.358"></a>
+<FONT color="green">359</FONT>                return;<a name="line.359"></a>
+<FONT color="green">360</FONT>            }<a name="line.360"></a>
+<FONT color="green">361</FONT>    <a name="line.361"></a>
+<FONT color="green">362</FONT>            IInventory inv = (IInventory)te;<a name="line.362"></a>
+<FONT color="green">363</FONT>    <a name="line.363"></a>
+<FONT color="green">364</FONT>            for (int l = 0; l &lt; inv.func_469_c(); l++)<a name="line.364"></a>
+<FONT color="green">365</FONT>            {<a name="line.365"></a>
+<FONT color="green">366</FONT>                ItemStack itemstack = inv.func_468_c(l);<a name="line.366"></a>
+<FONT color="green">367</FONT>    <a name="line.367"></a>
+<FONT color="green">368</FONT>                if (itemstack == null)<a name="line.368"></a>
+<FONT color="green">369</FONT>                {<a name="line.369"></a>
+<FONT color="green">370</FONT>                    continue;<a name="line.370"></a>
+<FONT color="green">371</FONT>                }<a name="line.371"></a>
+<FONT color="green">372</FONT>    <a name="line.372"></a>
+<FONT color="green">373</FONT>                float f = world.field_1037_n.nextFloat() * 0.8F + 0.1F;<a name="line.373"></a>
+<FONT color="green">374</FONT>                float f1 = world.field_1037_n.nextFloat() * 0.8F + 0.1F;<a name="line.374"></a>
+<FONT color="green">375</FONT>                float f2 = world.field_1037_n.nextFloat() * 0.8F + 0.1F;<a name="line.375"></a>
+<FONT color="green">376</FONT>    <a name="line.376"></a>
+<FONT color="green">377</FONT>                while (itemstack.field_1615_a &gt; 0)<a name="line.377"></a>
+<FONT color="green">378</FONT>                {<a name="line.378"></a>
+<FONT color="green">379</FONT>                    int i1 = world.field_1037_n.nextInt(21) + 10;<a name="line.379"></a>
+<FONT color="green">380</FONT>    <a name="line.380"></a>
+<FONT color="green">381</FONT>                    if (i1 &gt; itemstack.field_1615_a)<a name="line.381"></a>
+<FONT color="green">382</FONT>                    {<a name="line.382"></a>
+<FONT color="green">383</FONT>                        i1 = itemstack.field_1615_a;<a name="line.383"></a>
+<FONT color="green">384</FONT>                    }<a name="line.384"></a>
+<FONT color="green">385</FONT>    <a name="line.385"></a>
+<FONT color="green">386</FONT>                    itemstack.field_1615_a -= i1;<a name="line.386"></a>
+<FONT color="green">387</FONT>                    EntityItem entityitem = new EntityItem(world, (float)te.field_823_f + f, (float)te.field_822_g + f1, (float)te.field_821_h + f2, new ItemStack(itemstack.field_1617_c, i1, itemstack.func_21181_i()));<a name="line.387"></a>
+<FONT color="green">388</FONT>                    float f3 = 0.05F;<a name="line.388"></a>
+<FONT color="green">389</FONT>                    entityitem.field_608_an = (float) world.field_1037_n.nextGaussian() * f3;<a name="line.389"></a>
+<FONT color="green">390</FONT>                    entityitem.field_607_ao = (float) world.field_1037_n.nextGaussian() * f3 + 0.2F;<a name="line.390"></a>
+<FONT color="green">391</FONT>                    entityitem.field_606_ap = (float) world.field_1037_n.nextGaussian() * f3;<a name="line.391"></a>
+<FONT color="green">392</FONT>    <a name="line.392"></a>
+<FONT color="green">393</FONT>                    if (itemstack.func_40710_n())<a name="line.393"></a>
+<FONT color="green">394</FONT>                    {<a name="line.394"></a>
+<FONT color="green">395</FONT>                        entityitem.field_801_a.func_40706_d((NBTTagCompound) itemstack.func_40709_o().func_40195_b());<a name="line.395"></a>
+<FONT color="green">396</FONT>                    }<a name="line.396"></a>
+<FONT color="green">397</FONT>    <a name="line.397"></a>
+<FONT color="green">398</FONT>                    world.func_674_a(entityitem);<a name="line.398"></a>
+<FONT color="green">399</FONT>                }<a name="line.399"></a>
+<FONT color="green">400</FONT>            }<a name="line.400"></a>
+<FONT color="green">401</FONT>    */    }<a name="line.401"></a>
+<FONT color="green">402</FONT>    <a name="line.402"></a>
+<FONT color="green">403</FONT>        /**<a name="line.403"></a>
+<FONT color="green">404</FONT>         * Get a list of all BaseMod loaded into the system<a name="line.404"></a>
+<FONT color="green">405</FONT>         * {@link ModLoaderModContainer#findAll}<a name="line.405"></a>
+<FONT color="green">406</FONT>         *<a name="line.406"></a>
+<FONT color="green">407</FONT>         * @return A list containing all loaded ModLoader mods<a name="line.407"></a>
+<FONT color="green">408</FONT>         */<a name="line.408"></a>
+<FONT color="green">409</FONT>        public static List&lt;BaseMod&gt; getLoadedMods()<a name="line.409"></a>
+<FONT color="green">410</FONT>        {<a name="line.410"></a>
+<FONT color="green">411</FONT>            return ModLoaderModContainer.findAll(BaseMod.class);<a name="line.411"></a>
+<FONT color="green">412</FONT>        }<a name="line.412"></a>
+<FONT color="green">413</FONT>    <a name="line.413"></a>
+<FONT color="green">414</FONT>        /**<a name="line.414"></a>
+<FONT color="green">415</FONT>         * Get a logger instance {@link FMLCommonHandler#getFMLLogger()}<a name="line.415"></a>
+<FONT color="green">416</FONT>         *<a name="line.416"></a>
+<FONT color="green">417</FONT>         * @return The current logger<a name="line.417"></a>
+<FONT color="green">418</FONT>         */<a name="line.418"></a>
+<FONT color="green">419</FONT>        public static Logger getLogger()<a name="line.419"></a>
+<FONT color="green">420</FONT>        {<a name="line.420"></a>
+<FONT color="green">421</FONT>            return FMLLog.getLogger();<a name="line.421"></a>
+<FONT color="green">422</FONT>        }<a name="line.422"></a>
+<FONT color="green">423</FONT>    <a name="line.423"></a>
+<FONT color="green">424</FONT>        @SideOnly(CLIENT)<a name="line.424"></a>
+<FONT color="green">425</FONT>        public static Minecraft getMinecraftInstance()<a name="line.425"></a>
+<FONT color="green">426</FONT>        {<a name="line.426"></a>
+<FONT color="green">427</FONT>            return FMLClientHandler.instance().getClient();<a name="line.427"></a>
+<FONT color="green">428</FONT>        }<a name="line.428"></a>
+<FONT color="green">429</FONT>    <a name="line.429"></a>
+<FONT color="green">430</FONT>        public static MinecraftServer getMinecraftServerInstance()<a name="line.430"></a>
+<FONT color="green">431</FONT>        {<a name="line.431"></a>
+<FONT color="green">432</FONT>            return FMLCommonHandler.instance().getMinecraftServerInstance();<a name="line.432"></a>
+<FONT color="green">433</FONT>        }<a name="line.433"></a>
+<FONT color="green">434</FONT>    <a name="line.434"></a>
+<FONT color="green">435</FONT>        /**<a name="line.435"></a>
+<FONT color="green">436</FONT>         * Get a value from a field using reflection<a name="line.436"></a>
+<FONT color="green">437</FONT>         * {@link ObfuscationReflectionHelper#getPrivateValue(Class, Object, int)}<a name="line.437"></a>
+<FONT color="green">438</FONT>         *<a name="line.438"></a>
+<FONT color="green">439</FONT>         * @param instanceclass<a name="line.439"></a>
+<FONT color="green">440</FONT>         * @param instance<a name="line.440"></a>
+<FONT color="green">441</FONT>         * @param fieldindex<a name="line.441"></a>
+<FONT color="green">442</FONT>         * @return The value in the specified field.<a name="line.442"></a>
+<FONT color="green">443</FONT>         */<a name="line.443"></a>
+<FONT color="green">444</FONT>        public static &lt;T, E&gt; T getPrivateValue(Class&lt;? super E&gt; instanceclass, E instance, int fieldindex)<a name="line.444"></a>
+<FONT color="green">445</FONT>        {<a name="line.445"></a>
+<FONT color="green">446</FONT>            return ObfuscationReflectionHelper.getPrivateValue(instanceclass, instance, fieldindex);<a name="line.446"></a>
+<FONT color="green">447</FONT>        }<a name="line.447"></a>
+<FONT color="green">448</FONT>    <a name="line.448"></a>
+<FONT color="green">449</FONT>        /**<a name="line.449"></a>
+<FONT color="green">450</FONT>         * Get a value from a field using reflection<a name="line.450"></a>
+<FONT color="green">451</FONT>         * {@link ObfuscationReflectionHelper#getPrivateValue(Class, Object, String[])}<a name="line.451"></a>
+<FONT color="green">452</FONT>         *<a name="line.452"></a>
+<FONT color="green">453</FONT>         * @param instanceclass<a name="line.453"></a>
+<FONT color="green">454</FONT>         * @param instance<a name="line.454"></a>
+<FONT color="green">455</FONT>         * @param field<a name="line.455"></a>
+<FONT color="green">456</FONT>         * @return The value in the specified field.<a name="line.456"></a>
+<FONT color="green">457</FONT>         */<a name="line.457"></a>
+<FONT color="green">458</FONT>        public static &lt;T, E&gt; T getPrivateValue(Class&lt;? super E&gt; instanceclass, E instance, String field)<a name="line.458"></a>
+<FONT color="green">459</FONT>        {<a name="line.459"></a>
+<FONT color="green">460</FONT>            return ObfuscationReflectionHelper.getPrivateValue(instanceclass, instance, field);<a name="line.460"></a>
+<FONT color="green">461</FONT>        }<a name="line.461"></a>
+<FONT color="green">462</FONT>    <a name="line.462"></a>
+<FONT color="green">463</FONT>        /**<a name="line.463"></a>
+<FONT color="green">464</FONT>         * Stubbed method on the server to return a unique model id<a name="line.464"></a>
+<FONT color="green">465</FONT>         *<a name="line.465"></a>
+<FONT color="green">466</FONT>         */<a name="line.466"></a>
+<FONT color="green">467</FONT>        @SideOnly(CLIENT)<a name="line.467"></a>
+<FONT color="green">468</FONT>        public static int getUniqueBlockModelID(BaseMod mod, boolean inventoryRenderer)<a name="line.468"></a>
+<FONT color="green">469</FONT>        {<a name="line.469"></a>
+<FONT color="green">470</FONT>            return ModLoaderClientHelper.obtainBlockModelIdFor(mod, inventoryRenderer);<a name="line.470"></a>
+<FONT color="green">471</FONT>        }<a name="line.471"></a>
+<FONT color="green">472</FONT>    <a name="line.472"></a>
+<FONT color="green">473</FONT>        /**<a name="line.473"></a>
+<FONT color="green">474</FONT>         * Get a new unique entity id<a name="line.474"></a>
+<FONT color="green">475</FONT>         * {@link EntityRegistry#findGlobalUniqueEntityId()}<a name="line.475"></a>
+<FONT color="green">476</FONT>         *<a name="line.476"></a>
+<FONT color="green">477</FONT>         * @return A unique entity ID<a name="line.477"></a>
+<FONT color="green">478</FONT>         */<a name="line.478"></a>
+<FONT color="green">479</FONT>        public static int getUniqueEntityId()<a name="line.479"></a>
+<FONT color="green">480</FONT>        {<a name="line.480"></a>
+<FONT color="green">481</FONT>            return EntityRegistry.findGlobalUniqueEntityId();<a name="line.481"></a>
+<FONT color="green">482</FONT>        }<a name="line.482"></a>
+<FONT color="green">483</FONT>    <a name="line.483"></a>
+<FONT color="green">484</FONT>        @SideOnly(CLIENT)<a name="line.484"></a>
+<FONT color="green">485</FONT>        public static int getUniqueSpriteIndex(String path)<a name="line.485"></a>
+<FONT color="green">486</FONT>        {<a name="line.486"></a>
+<FONT color="green">487</FONT>            return SpriteHelper.getUniqueSpriteIndex(path);<a name="line.487"></a>
+<FONT color="green">488</FONT>        }<a name="line.488"></a>
+<FONT color="green">489</FONT>    <a name="line.489"></a>
+<FONT color="green">490</FONT>        /**<a name="line.490"></a>
+<FONT color="green">491</FONT>         * To properly implement packet 250 protocol you should always check your<a name="line.491"></a>
+<FONT color="green">492</FONT>         * channel is active prior to sending the packet<a name="line.492"></a>
+<FONT color="green">493</FONT>         *<a name="line.493"></a>
+<FONT color="green">494</FONT>         * @param player<a name="line.494"></a>
+<FONT color="green">495</FONT>         * @param channel<a name="line.495"></a>
+<FONT color="green">496</FONT>         * @return If the channel is registered to the current connection.<a name="line.496"></a>
+<FONT color="green">497</FONT>         */<a name="line.497"></a>
+<FONT color="green">498</FONT>        public static boolean isChannelActive(EntityPlayer player, String channel)<a name="line.498"></a>
+<FONT color="green">499</FONT>        {<a name="line.499"></a>
+<FONT color="green">500</FONT>            return NetworkRegistry.instance().isChannelActive(channel, (Player)player);<a name="line.500"></a>
+<FONT color="green">501</FONT>        }<a name="line.501"></a>
+<FONT color="green">502</FONT>    <a name="line.502"></a>
+<FONT color="green">503</FONT>        @SideOnly(CLIENT)<a name="line.503"></a>
+<FONT color="green">504</FONT>        public static boolean isGUIOpen(Class&lt;? extends GuiScreen&gt; gui)<a name="line.504"></a>
+<FONT color="green">505</FONT>        {<a name="line.505"></a>
+<FONT color="green">506</FONT>            return FMLClientHandler.instance().getClient().currentScreen != null &amp;&amp; FMLClientHandler.instance().getClient().currentScreen.equals(gui);<a name="line.506"></a>
+<FONT color="green">507</FONT>        }<a name="line.507"></a>
+<FONT color="green">508</FONT>    <a name="line.508"></a>
+<FONT color="green">509</FONT>        /**<a name="line.509"></a>
+<FONT color="green">510</FONT>         * Is the named mod loaded?<a name="line.510"></a>
+<FONT color="green">511</FONT>         * {@link Loader#isModLoaded(String)}<a name="line.511"></a>
+<FONT color="green">512</FONT>         *<a name="line.512"></a>
+<FONT color="green">513</FONT>         * @param modname<a name="line.513"></a>
+<FONT color="green">514</FONT>         * @return If the specified mod is loaded<a name="line.514"></a>
+<FONT color="green">515</FONT>         */<a name="line.515"></a>
+<FONT color="green">516</FONT>        public static boolean isModLoaded(String modname)<a name="line.516"></a>
+<FONT color="green">517</FONT>        {<a name="line.517"></a>
+<FONT color="green">518</FONT>            return Loader.isModLoaded(modname);<a name="line.518"></a>
+<FONT color="green">519</FONT>        }<a name="line.519"></a>
+<FONT color="green">520</FONT>    <a name="line.520"></a>
+<FONT color="green">521</FONT>        /**<a name="line.521"></a>
+<FONT color="green">522</FONT>         * Implemented elsewhere<a name="line.522"></a>
+<FONT color="green">523</FONT>         */<a name="line.523"></a>
+<FONT color="green">524</FONT>        @Deprecated<a name="line.524"></a>
+<FONT color="green">525</FONT>        public static void loadConfig()<a name="line.525"></a>
+<FONT color="green">526</FONT>        {<a name="line.526"></a>
+<FONT color="green">527</FONT>        }<a name="line.527"></a>
+<FONT color="green">528</FONT>    <a name="line.528"></a>
+<FONT color="green">529</FONT>        @SideOnly(CLIENT)<a name="line.529"></a>
+<FONT color="green">530</FONT>        public static BufferedImage loadImage(RenderEngine renderEngine, String path) throws Exception<a name="line.530"></a>
+<FONT color="green">531</FONT>        {<a name="line.531"></a>
+<FONT color="green">532</FONT>            return TextureFXManager.instance().loadImageFromTexturePack(renderEngine, path);<a name="line.532"></a>
+<FONT color="green">533</FONT>        }<a name="line.533"></a>
+<FONT color="green">534</FONT>    <a name="line.534"></a>
+<FONT color="green">535</FONT>        /**<a name="line.535"></a>
+<FONT color="green">536</FONT>         * Call in from elsewhere. Unimplemented here.<a name="line.536"></a>
+<FONT color="green">537</FONT>         * @param player<a name="line.537"></a>
+<FONT color="green">538</FONT>         * @param item<a name="line.538"></a>
+<FONT color="green">539</FONT>         */<a name="line.539"></a>
+<FONT color="green">540</FONT>        @Deprecated<a name="line.540"></a>
+<FONT color="green">541</FONT>        public static void onItemPickup(EntityPlayer player, ItemStack item)<a name="line.541"></a>
+<FONT color="green">542</FONT>        {<a name="line.542"></a>
+<FONT color="green">543</FONT>        }<a name="line.543"></a>
+<FONT color="green">544</FONT>        /**<a name="line.544"></a>
+<FONT color="green">545</FONT>         * Call in from elsewhere. Unimplemented here.<a name="line.545"></a>
+<FONT color="green">546</FONT>         */<a name="line.546"></a>
+<FONT color="green">547</FONT>        @Deprecated<a name="line.547"></a>
+<FONT color="green">548</FONT>        @SideOnly(CLIENT)<a name="line.548"></a>
+<FONT color="green">549</FONT>        public static void onTick(float tick, Minecraft game)<a name="line.549"></a>
+<FONT color="green">550</FONT>        {<a name="line.550"></a>
+<FONT color="green">551</FONT>        }<a name="line.551"></a>
+<FONT color="green">552</FONT>    <a name="line.552"></a>
+<FONT color="green">553</FONT>        @SideOnly(CLIENT)<a name="line.553"></a>
+<FONT color="green">554</FONT>        public static void openGUI(EntityPlayer player, GuiScreen gui)<a name="line.554"></a>
+<FONT color="green">555</FONT>        {<a name="line.555"></a>
+<FONT color="green">556</FONT>            FMLClientHandler.instance().displayGuiScreen(player, gui);<a name="line.556"></a>
+<FONT color="green">557</FONT>        }<a name="line.557"></a>
+<FONT color="green">558</FONT>    <a name="line.558"></a>
+<FONT color="green">559</FONT>        @Deprecated<a name="line.559"></a>
+<FONT color="green">560</FONT>        public static void populateChunk(IChunkProvider generator, int chunkX, int chunkZ, World world)<a name="line.560"></a>
+<FONT color="green">561</FONT>        {<a name="line.561"></a>
+<FONT color="green">562</FONT>        }<a name="line.562"></a>
+<FONT color="green">563</FONT>    <a name="line.563"></a>
+<FONT color="green">564</FONT>        /**<a name="line.564"></a>
+<FONT color="green">565</FONT>         * This method is a call in hook from modified external code. Implemented elsewhere.<a name="line.565"></a>
+<FONT color="green">566</FONT>         * {@link FMLNetworkHandler#handlePacket250(Packet250CustomPayload, NetworkManager, NetHandler)}<a name="line.566"></a>
+<FONT color="green">567</FONT>         *<a name="line.567"></a>
+<FONT color="green">568</FONT>         * @param packet<a name="line.568"></a>
+<FONT color="green">569</FONT>         */<a name="line.569"></a>
+<FONT color="green">570</FONT>        @Deprecated<a name="line.570"></a>
+<FONT color="green">571</FONT>        public static void receivePacket(Packet250CustomPayload packet)<a name="line.571"></a>
+<FONT color="green">572</FONT>        {<a name="line.572"></a>
+<FONT color="green">573</FONT>        }<a name="line.573"></a>
+<FONT color="green">574</FONT>    <a name="line.574"></a>
+<FONT color="green">575</FONT>        @Deprecated<a name="line.575"></a>
+<FONT color="green">576</FONT>        @SideOnly(CLIENT)<a name="line.576"></a>
+<FONT color="green">577</FONT>        public static KeyBinding[] registerAllKeys(KeyBinding[] keys)<a name="line.577"></a>
+<FONT color="green">578</FONT>        {<a name="line.578"></a>
+<FONT color="green">579</FONT>            return keys;<a name="line.579"></a>
+<FONT color="green">580</FONT>        }<a name="line.580"></a>
+<FONT color="green">581</FONT>    <a name="line.581"></a>
+<FONT color="green">582</FONT>        @Deprecated<a name="line.582"></a>
+<FONT color="green">583</FONT>        @SideOnly(CLIENT)<a name="line.583"></a>
+<FONT color="green">584</FONT>        public static void registerAllTextureOverrides(RenderEngine cache)<a name="line.584"></a>
+<FONT color="green">585</FONT>        {<a name="line.585"></a>
+<FONT color="green">586</FONT>        }<a name="line.586"></a>
+<FONT color="green">587</FONT>    <a name="line.587"></a>
+<FONT color="green">588</FONT>        /**<a name="line.588"></a>
+<FONT color="green">589</FONT>         * Register a new block<a name="line.589"></a>
+<FONT color="green">590</FONT>         *<a name="line.590"></a>
+<FONT color="green">591</FONT>         * @param block<a name="line.591"></a>
+<FONT color="green">592</FONT>         */<a name="line.592"></a>
+<FONT color="green">593</FONT>        public static void registerBlock(Block block)<a name="line.593"></a>
+<FONT color="green">594</FONT>        {<a name="line.594"></a>
+<FONT color="green">595</FONT>            GameRegistry.registerBlock(block);<a name="line.595"></a>
+<FONT color="green">596</FONT>        }<a name="line.596"></a>
+<FONT color="green">597</FONT>    <a name="line.597"></a>
+<FONT color="green">598</FONT>        /**<a name="line.598"></a>
+<FONT color="green">599</FONT>         * Register a new block<a name="line.599"></a>
+<FONT color="green">600</FONT>         *<a name="line.600"></a>
+<FONT color="green">601</FONT>         * @param block<a name="line.601"></a>
+<FONT color="green">602</FONT>         * @param itemclass<a name="line.602"></a>
+<FONT color="green">603</FONT>         */<a name="line.603"></a>
+<FONT color="green">604</FONT>        public static void registerBlock(Block block, Class&lt;? extends ItemBlock&gt; itemclass)<a name="line.604"></a>
+<FONT color="green">605</FONT>        {<a name="line.605"></a>
+<FONT color="green">606</FONT>            GameRegistry.registerBlock(block, itemclass);<a name="line.606"></a>
+<FONT color="green">607</FONT>        }<a name="line.607"></a>
+<FONT color="green">608</FONT>    <a name="line.608"></a>
+<FONT color="green">609</FONT>        public static void registerContainerID(BaseMod mod, int id)<a name="line.609"></a>
+<FONT color="green">610</FONT>        {<a name="line.610"></a>
+<FONT color="green">611</FONT>            ModLoaderHelper.buildGuiHelper(mod, id);<a name="line.611"></a>
+<FONT color="green">612</FONT>        }<a name="line.612"></a>
+<FONT color="green">613</FONT>        /**<a name="line.613"></a>
+<FONT color="green">614</FONT>         * Register a new entity ID<a name="line.614"></a>
+<FONT color="green">615</FONT>         *<a name="line.615"></a>
+<FONT color="green">616</FONT>         * @param entityClass<a name="line.616"></a>
+<FONT color="green">617</FONT>         * @param entityName<a name="line.617"></a>
+<FONT color="green">618</FONT>         * @param id<a name="line.618"></a>
+<FONT color="green">619</FONT>         */<a name="line.619"></a>
+<FONT color="green">620</FONT>        public static void registerEntityID(Class&lt;? extends Entity&gt; entityClass, String entityName, int id)<a name="line.620"></a>
+<FONT color="green">621</FONT>        {<a name="line.621"></a>
+<FONT color="green">622</FONT>            EntityRegistry.registerGlobalEntityID(entityClass, entityName, id);<a name="line.622"></a>
+<FONT color="green">623</FONT>        }<a name="line.623"></a>
+<FONT color="green">624</FONT>    <a name="line.624"></a>
+<FONT color="green">625</FONT>        /**<a name="line.625"></a>
+<FONT color="green">626</FONT>         * Register a new entity ID<a name="line.626"></a>
+<FONT color="green">627</FONT>         *<a name="line.627"></a>
+<FONT color="green">628</FONT>         * @param entityClass<a name="line.628"></a>
+<FONT color="green">629</FONT>         * @param entityName<a name="line.629"></a>
+<FONT color="green">630</FONT>         * @param id<a name="line.630"></a>
+<FONT color="green">631</FONT>         * @param background<a name="line.631"></a>
+<FONT color="green">632</FONT>         * @param foreground<a name="line.632"></a>
+<FONT color="green">633</FONT>         */<a name="line.633"></a>
+<FONT color="green">634</FONT>        public static void registerEntityID(Class&lt;? extends Entity&gt; entityClass, String entityName, int id, int background, int foreground)<a name="line.634"></a>
+<FONT color="green">635</FONT>        {<a name="line.635"></a>
+<FONT color="green">636</FONT>            EntityRegistry.registerGlobalEntityID(entityClass, entityName, id, background, foreground);<a name="line.636"></a>
+<FONT color="green">637</FONT>        }<a name="line.637"></a>
+<FONT color="green">638</FONT>    <a name="line.638"></a>
+<FONT color="green">639</FONT>        @SideOnly(CLIENT)<a name="line.639"></a>
+<FONT color="green">640</FONT>        public static void registerKey(BaseMod mod, KeyBinding keyHandler, boolean allowRepeat)<a name="line.640"></a>
+<FONT color="green">641</FONT>        {<a name="line.641"></a>
+<FONT color="green">642</FONT>            ModLoaderClientHelper.registerKeyBinding(mod, keyHandler, allowRepeat);<a name="line.642"></a>
+<FONT color="green">643</FONT>        }<a name="line.643"></a>
+<FONT color="green">644</FONT>    <a name="line.644"></a>
+<FONT color="green">645</FONT>        /**<a name="line.645"></a>
+<FONT color="green">646</FONT>         * Register the mod for packets on this channel.<a name="line.646"></a>
+<FONT color="green">647</FONT>         * {@link NetworkRegistry#registerChannel(IPacketHandler, String)}<a name="line.647"></a>
+<FONT color="green">648</FONT>         *<a name="line.648"></a>
+<FONT color="green">649</FONT>         * @param mod<a name="line.649"></a>
+<FONT color="green">650</FONT>         * @param channel<a name="line.650"></a>
+<FONT color="green">651</FONT>         */<a name="line.651"></a>
+<FONT color="green">652</FONT>        public static void registerPacketChannel(BaseMod mod, String channel)<a name="line.652"></a>
+<FONT color="green">653</FONT>        {<a name="line.653"></a>
+<FONT color="green">654</FONT>            NetworkRegistry.instance().registerChannel(ModLoaderHelper.buildPacketHandlerFor(mod), channel);<a name="line.654"></a>
+<FONT color="green">655</FONT>        }<a name="line.655"></a>
+<FONT color="green">656</FONT>    <a name="line.656"></a>
+<FONT color="green">657</FONT>        /**<a name="line.657"></a>
+<FONT color="green">658</FONT>         * Register a new tile entity class<a name="line.658"></a>
+<FONT color="green">659</FONT>         *<a name="line.659"></a>
+<FONT color="green">660</FONT>         * @param tileEntityClass<a name="line.660"></a>
+<FONT color="green">661</FONT>         * @param id<a name="line.661"></a>
+<FONT color="green">662</FONT>         */<a name="line.662"></a>
+<FONT color="green">663</FONT>        public static void registerTileEntity(Class&lt;? extends TileEntity&gt; tileEntityClass, String id)<a name="line.663"></a>
+<FONT color="green">664</FONT>        {<a name="line.664"></a>
+<FONT color="green">665</FONT>            GameRegistry.registerTileEntity(tileEntityClass, id);<a name="line.665"></a>
+<FONT color="green">666</FONT>        }<a name="line.666"></a>
+<FONT color="green">667</FONT>    <a name="line.667"></a>
+<FONT color="green">668</FONT>        @SideOnly(CLIENT)<a name="line.668"></a>
+<FONT color="green">669</FONT>        public static void registerTileEntity(Class&lt;? extends TileEntity&gt; tileEntityClass, String id, TileEntitySpecialRenderer renderer)<a name="line.669"></a>
+<FONT color="green">670</FONT>        {<a name="line.670"></a>
+<FONT color="green">671</FONT>            ClientRegistry.registerTileEntity(tileEntityClass, id, renderer);<a name="line.671"></a>
+<FONT color="green">672</FONT>        }<a name="line.672"></a>
+<FONT color="green">673</FONT>    <a name="line.673"></a>
+<FONT color="green">674</FONT>        /**<a name="line.674"></a>
+<FONT color="green">675</FONT>         * Remove a biome from the list of generated biomes<a name="line.675"></a>
+<FONT color="green">676</FONT>         *<a name="line.676"></a>
+<FONT color="green">677</FONT>         * @param biome<a name="line.677"></a>
+<FONT color="green">678</FONT>         */<a name="line.678"></a>
+<FONT color="green">679</FONT>        public static void removeBiome(BiomeGenBase biome)<a name="line.679"></a>
+<FONT color="green">680</FONT>        {<a name="line.680"></a>
+<FONT color="green">681</FONT>            GameRegistry.removeBiome(biome);<a name="line.681"></a>
+<FONT color="green">682</FONT>        }<a name="line.682"></a>
+<FONT color="green">683</FONT>    <a name="line.683"></a>
+<FONT color="green">684</FONT>        /**<a name="line.684"></a>
+<FONT color="green">685</FONT>         * Remove a spawn<a name="line.685"></a>
+<FONT color="green">686</FONT>         *<a name="line.686"></a>
+<FONT color="green">687</FONT>         * @param entityClass<a name="line.687"></a>
+<FONT color="green">688</FONT>         * @param spawnList<a name="line.688"></a>
+<FONT color="green">689</FONT>         */<a name="line.689"></a>
+<FONT color="green">690</FONT>        public static void removeSpawn(Class&lt;? extends EntityLiving&gt; entityClass, EnumCreatureType spawnList)<a name="line.690"></a>
+<FONT color="green">691</FONT>        {<a name="line.691"></a>
+<FONT color="green">692</FONT>            EntityRegistry.removeSpawn(entityClass, spawnList, WorldType.base12Biomes);<a name="line.692"></a>
+<FONT color="green">693</FONT>        }<a name="line.693"></a>
+<FONT color="green">694</FONT>    <a name="line.694"></a>
+<FONT color="green">695</FONT>        /**<a name="line.695"></a>
+<FONT color="green">696</FONT>         * Remove a spawn<a name="line.696"></a>
+<FONT color="green">697</FONT>         *<a name="line.697"></a>
+<FONT color="green">698</FONT>         * @param entityClass<a name="line.698"></a>
+<FONT color="green">699</FONT>         * @param spawnList<a name="line.699"></a>
+<FONT color="green">700</FONT>         * @param biomes<a name="line.700"></a>
+<FONT color="green">701</FONT>         */<a name="line.701"></a>
+<FONT color="green">702</FONT>        public static void removeSpawn(Class&lt;? extends EntityLiving&gt; entityClass, EnumCreatureType spawnList, BiomeGenBase... biomes)<a name="line.702"></a>
+<FONT color="green">703</FONT>        {<a name="line.703"></a>
+<FONT color="green">704</FONT>            EntityRegistry.removeSpawn(entityClass, spawnList, biomes);<a name="line.704"></a>
+<FONT color="green">705</FONT>        }<a name="line.705"></a>
+<FONT color="green">706</FONT>    <a name="line.706"></a>
+<FONT color="green">707</FONT>        /**<a name="line.707"></a>
+<FONT color="green">708</FONT>         * Remove a spawn<a name="line.708"></a>
+<FONT color="green">709</FONT>         *<a name="line.709"></a>
+<FONT color="green">710</FONT>         * @param entityName<a name="line.710"></a>
+<FONT color="green">711</FONT>         * @param spawnList<a name="line.711"></a>
+<FONT color="green">712</FONT>         */<a name="line.712"></a>
+<FONT color="green">713</FONT>        public static void removeSpawn(String entityName, EnumCreatureType spawnList)<a name="line.713"></a>
+<FONT color="green">714</FONT>        {<a name="line.714"></a>
+<FONT color="green">715</FONT>            EntityRegistry.removeSpawn(entityName, spawnList, WorldType.base12Biomes);<a name="line.715"></a>
+<FONT color="green">716</FONT>        }<a name="line.716"></a>
+<FONT color="green">717</FONT>    <a name="line.717"></a>
+<FONT color="green">718</FONT>        /**<a name="line.718"></a>
+<FONT color="green">719</FONT>         * Remove a spawn<a name="line.719"></a>
+<FONT color="green">720</FONT>         *<a name="line.720"></a>
+<FONT color="green">721</FONT>         * @param entityName<a name="line.721"></a>
+<FONT color="green">722</FONT>         * @param spawnList<a name="line.722"></a>
+<FONT color="green">723</FONT>         * @param biomes<a name="line.723"></a>
+<FONT color="green">724</FONT>         */<a name="line.724"></a>
+<FONT color="green">725</FONT>        public static void removeSpawn(String entityName, EnumCreatureType spawnList, BiomeGenBase... biomes)<a name="line.725"></a>
+<FONT color="green">726</FONT>        {<a name="line.726"></a>
+<FONT color="green">727</FONT>            EntityRegistry.removeSpawn(entityName, spawnList, biomes);<a name="line.727"></a>
+<FONT color="green">728</FONT>        }<a name="line.728"></a>
+<FONT color="green">729</FONT>    <a name="line.729"></a>
+<FONT color="green">730</FONT>        @Deprecated<a name="line.730"></a>
+<FONT color="green">731</FONT>        @SideOnly(CLIENT)<a name="line.731"></a>
+<FONT color="green">732</FONT>        public static boolean renderBlockIsItemFull3D(int modelID)<a name="line.732"></a>
+<FONT color="green">733</FONT>        {<a name="line.733"></a>
+<FONT color="green">734</FONT>            return RenderingRegistry.instance().renderItemAsFull3DBlock(modelID);<a name="line.734"></a>
+<FONT color="green">735</FONT>        }<a name="line.735"></a>
+<FONT color="green">736</FONT>    <a name="line.736"></a>
+<FONT color="green">737</FONT>        @Deprecated<a name="line.737"></a>
+<FONT color="green">738</FONT>        @SideOnly(CLIENT)<a name="line.738"></a>
+<FONT color="green">739</FONT>        public static void renderInvBlock(RenderBlocks renderer, Block block, int metadata, int modelID)<a name="line.739"></a>
+<FONT color="green">740</FONT>        {<a name="line.740"></a>
+<FONT color="green">741</FONT>            RenderingRegistry.instance().renderInventoryBlock(renderer, block, metadata, modelID);<a name="line.741"></a>
+<FONT color="green">742</FONT>        }<a name="line.742"></a>
+<FONT color="green">743</FONT>    <a name="line.743"></a>
+<FONT color="green">744</FONT>        @Deprecated<a name="line.744"></a>
+<FONT color="green">745</FONT>        @SideOnly(CLIENT)<a name="line.745"></a>
+<FONT color="green">746</FONT>        public static boolean renderWorldBlock(RenderBlocks renderer, IBlockAccess world, int x, int y, int z, Block block, int modelID)<a name="line.746"></a>
+<FONT color="green">747</FONT>        {<a name="line.747"></a>
+<FONT color="green">748</FONT>            return RenderingRegistry.instance().renderWorldBlock(renderer, world, x, y, z, block, modelID);<a name="line.748"></a>
+<FONT color="green">749</FONT>        }<a name="line.749"></a>
+<FONT color="green">750</FONT>    <a name="line.750"></a>
+<FONT color="green">751</FONT>        /**<a name="line.751"></a>
+<FONT color="green">752</FONT>         * Configuration is handled elsewhere<a name="line.752"></a>
+<FONT color="green">753</FONT>         * {@link ModLoaderModContainer}<a name="line.753"></a>
+<FONT color="green">754</FONT>         */<a name="line.754"></a>
+<FONT color="green">755</FONT>        @Deprecated<a name="line.755"></a>
+<FONT color="green">756</FONT>        public static void saveConfig()<a name="line.756"></a>
+<FONT color="green">757</FONT>        {<a name="line.757"></a>
+<FONT color="green">758</FONT>        }<a name="line.758"></a>
+<FONT color="green">759</FONT>    <a name="line.759"></a>
+<FONT color="green">760</FONT>        /**<a name="line.760"></a>
+<FONT color="green">761</FONT>         * Send a packet from client to server<a name="line.761"></a>
+<FONT color="green">762</FONT>         *<a name="line.762"></a>
+<FONT color="green">763</FONT>         * @param packet<a name="line.763"></a>
+<FONT color="green">764</FONT>         */<a name="line.764"></a>
+<FONT color="green">765</FONT>        public static void sendPacket(Packet packet) {<a name="line.765"></a>
+<FONT color="green">766</FONT>            PacketDispatcher.sendPacketToServer(packet);<a name="line.766"></a>
+<FONT color="green">767</FONT>        }<a name="line.767"></a>
+<FONT color="green">768</FONT>        /**<a name="line.768"></a>
+<FONT color="green">769</FONT>         * Send a chat message to the server<a name="line.769"></a>
+<FONT color="green">770</FONT>         * {@link FMLNetworkHandler#handleChatMessage(NetHandler, Packet3Chat)}<a name="line.770"></a>
+<FONT color="green">771</FONT>         *<a name="line.771"></a>
+<FONT color="green">772</FONT>         * @param text<a name="line.772"></a>
+<FONT color="green">773</FONT>         */<a name="line.773"></a>
+<FONT color="green">774</FONT>        @Deprecated<a name="line.774"></a>
+<FONT color="green">775</FONT>        public static void serverChat(String text)<a name="line.775"></a>
+<FONT color="green">776</FONT>        {<a name="line.776"></a>
+<FONT color="green">777</FONT>            //TODO<a name="line.777"></a>
+<FONT color="green">778</FONT>        }<a name="line.778"></a>
+<FONT color="green">779</FONT>    <a name="line.779"></a>
+<FONT color="green">780</FONT>        @Deprecated<a name="line.780"></a>
+<FONT color="green">781</FONT>        @SideOnly(CLIENT)<a name="line.781"></a>
+<FONT color="green">782</FONT>        public static void serverLogin(NetClientHandler handler, Packet1Login loginPacket)<a name="line.782"></a>
+<FONT color="green">783</FONT>        {<a name="line.783"></a>
+<FONT color="green">784</FONT>            //TODO<a name="line.784"></a>
+<FONT color="green">785</FONT>        }<a name="line.785"></a>
+<FONT color="green">786</FONT>    <a name="line.786"></a>
+<FONT color="green">787</FONT>        public static void serverSendPacket(NetServerHandler handler, Packet packet)<a name="line.787"></a>
+<FONT color="green">788</FONT>        {<a name="line.788"></a>
+<FONT color="green">789</FONT>            if (handler != null)<a name="line.789"></a>
+<FONT color="green">790</FONT>            {<a name="line.790"></a>
+<FONT color="green">791</FONT>                PacketDispatcher.sendPacketToPlayer(packet, (Player)handler.getPlayer());<a name="line.791"></a>
+<FONT color="green">792</FONT>            }<a name="line.792"></a>
+<FONT color="green">793</FONT>        }<a name="line.793"></a>
+<FONT color="green">794</FONT>        public static void serverOpenWindow(EntityPlayerMP player, Container container, int ID, int x, int y, int z)<a name="line.794"></a>
+<FONT color="green">795</FONT>        {<a name="line.795"></a>
+<FONT color="green">796</FONT>            ModLoaderHelper.openGui(ID, player, container, x, y, z);<a name="line.796"></a>
+<FONT color="green">797</FONT>        }<a name="line.797"></a>
+<FONT color="green">798</FONT>    <a name="line.798"></a>
+<FONT color="green">799</FONT>        /**<a name="line.799"></a>
+<FONT color="green">800</FONT>         * Indicate that you want to receive ticks<a name="line.800"></a>
+<FONT color="green">801</FONT>         *<a name="line.801"></a>
+<FONT color="green">802</FONT>         * @param mod receiving the events<a name="line.802"></a>
+<FONT color="green">803</FONT>         * @param enable indicates whether you want to recieve them or not<a name="line.803"></a>
+<FONT color="green">804</FONT>         * @param useClock don't receive render subticks, just world ticks<a name="line.804"></a>
+<FONT color="green">805</FONT>         */<a name="line.805"></a>
+<FONT color="green">806</FONT>        public static void setInGameHook(BaseMod mod, boolean enable, boolean useClock)<a name="line.806"></a>
+<FONT color="green">807</FONT>        {<a name="line.807"></a>
+<FONT color="green">808</FONT>            ModLoaderHelper.updateStandardTicks(mod, enable, useClock);<a name="line.808"></a>
+<FONT color="green">809</FONT>        }<a name="line.809"></a>
+<FONT color="green">810</FONT>    <a name="line.810"></a>
+<FONT color="green">811</FONT>    <a name="line.811"></a>
+<FONT color="green">812</FONT>        public static void setInGUIHook(BaseMod mod, boolean enable, boolean useClock)<a name="line.812"></a>
+<FONT color="green">813</FONT>        {<a name="line.813"></a>
+<FONT color="green">814</FONT>            ModLoaderHelper.updateGUITicks(mod, enable, useClock);<a name="line.814"></a>
+<FONT color="green">815</FONT>        }<a name="line.815"></a>
+<FONT color="green">816</FONT>    <a name="line.816"></a>
+<FONT color="green">817</FONT>        /**<a name="line.817"></a>
+<FONT color="green">818</FONT>         * Set a private field to a value using reflection<a name="line.818"></a>
+<FONT color="green">819</FONT>         * {@link ObfuscationReflectionHelper#setPrivateValue(Class, Object, int, Object)}<a name="line.819"></a>
+<FONT color="green">820</FONT>         *<a name="line.820"></a>
+<FONT color="green">821</FONT>         * @param instanceclass<a name="line.821"></a>
+<FONT color="green">822</FONT>         * @param instance<a name="line.822"></a>
+<FONT color="green">823</FONT>         * @param fieldindex<a name="line.823"></a>
+<FONT color="green">824</FONT>         * @param value<a name="line.824"></a>
+<FONT color="green">825</FONT>         */<a name="line.825"></a>
+<FONT color="green">826</FONT>        public static &lt;T, E&gt; void setPrivateValue(Class&lt;? super T&gt; instanceclass, T instance, int fieldindex, E value)<a name="line.826"></a>
+<FONT color="green">827</FONT>        {<a name="line.827"></a>
+<FONT color="green">828</FONT>            ObfuscationReflectionHelper.setPrivateValue(instanceclass, instance, value, fieldindex);<a name="line.828"></a>
+<FONT color="green">829</FONT>        }<a name="line.829"></a>
+<FONT color="green">830</FONT>    <a name="line.830"></a>
+<FONT color="green">831</FONT>        /**<a name="line.831"></a>
+<FONT color="green">832</FONT>         * Set a private field to a value using reflection<a name="line.832"></a>
+<FONT color="green">833</FONT>         * {@link ObfuscationReflectionHelper#setPrivateValue(Class, Object, String, Object)}<a name="line.833"></a>
+<FONT color="green">834</FONT>         *<a name="line.834"></a>
+<FONT color="green">835</FONT>         * @param instanceclass<a name="line.835"></a>
+<FONT color="green">836</FONT>         * @param instance<a name="line.836"></a>
+<FONT color="green">837</FONT>         * @param field<a name="line.837"></a>
+<FONT color="green">838</FONT>         * @param value<a name="line.838"></a>
+<FONT color="green">839</FONT>         */<a name="line.839"></a>
+<FONT color="green">840</FONT>        public static &lt;T, E&gt; void setPrivateValue(Class&lt;? super T&gt; instanceclass, T instance, String field, E value)<a name="line.840"></a>
+<FONT color="green">841</FONT>        {<a name="line.841"></a>
+<FONT color="green">842</FONT>            ObfuscationReflectionHelper.setPrivateValue(instanceclass, instance, value, field);<a name="line.842"></a>
+<FONT color="green">843</FONT>        }<a name="line.843"></a>
+<FONT color="green">844</FONT>    <a name="line.844"></a>
+<FONT color="green">845</FONT>        /**<a name="line.845"></a>
+<FONT color="green">846</FONT>         * This method is a call in hook from modified external code. Implemented elsewhere.<a name="line.846"></a>
+<FONT color="green">847</FONT>         *<a name="line.847"></a>
+<FONT color="green">848</FONT>         * @param player<a name="line.848"></a>
+<FONT color="green">849</FONT>         * @param item<a name="line.849"></a>
+<FONT color="green">850</FONT>         * @param matrix<a name="line.850"></a>
+<FONT color="green">851</FONT>         */<a name="line.851"></a>
+<FONT color="green">852</FONT>        @Deprecated<a name="line.852"></a>
+<FONT color="green">853</FONT>        public static void takenFromCrafting(EntityPlayer player, ItemStack item, IInventory matrix)<a name="line.853"></a>
+<FONT color="green">854</FONT>        {<a name="line.854"></a>
+<FONT color="green">855</FONT>        }<a name="line.855"></a>
+<FONT color="green">856</FONT>    <a name="line.856"></a>
+<FONT color="green">857</FONT>        /**<a name="line.857"></a>
+<FONT color="green">858</FONT>         * This method is a call in hook from modified external code. Implemented elsewhere.<a name="line.858"></a>
+<FONT color="green">859</FONT>         *<a name="line.859"></a>
+<FONT color="green">860</FONT>         * @param player<a name="line.860"></a>
+<FONT color="green">861</FONT>         * @param item<a name="line.861"></a>
+<FONT color="green">862</FONT>         */<a name="line.862"></a>
+<FONT color="green">863</FONT>        @Deprecated<a name="line.863"></a>
+<FONT color="green">864</FONT>        public static void takenFromFurnace(EntityPlayer player, ItemStack item)<a name="line.864"></a>
+<FONT color="green">865</FONT>        {<a name="line.865"></a>
+<FONT color="green">866</FONT>        }<a name="line.866"></a>
+<FONT color="green">867</FONT>    <a name="line.867"></a>
+<FONT color="green">868</FONT>        /**<a name="line.868"></a>
+<FONT color="green">869</FONT>         * Throw the offered exception. Likely will stop the game.<a name="line.869"></a>
+<FONT color="green">870</FONT>         *<a name="line.870"></a>
+<FONT color="green">871</FONT>         * @param message<a name="line.871"></a>
+<FONT color="green">872</FONT>         * @param e<a name="line.872"></a>
+<FONT color="green">873</FONT>         */<a name="line.873"></a>
+<FONT color="green">874</FONT>        public static void throwException(String message, Throwable e)<a name="line.874"></a>
+<FONT color="green">875</FONT>        {<a name="line.875"></a>
+<FONT color="green">876</FONT>            FMLCommonHandler.instance().raiseException(e, message, true);<a name="line.876"></a>
+<FONT color="green">877</FONT>        }<a name="line.877"></a>
+<FONT color="green">878</FONT>    <a name="line.878"></a>
+<FONT color="green">879</FONT>        public static void throwException(Throwable e)<a name="line.879"></a>
+<FONT color="green">880</FONT>        {<a name="line.880"></a>
+<FONT color="green">881</FONT>            throwException("Exception in ModLoader", e);<a name="line.881"></a>
+<FONT color="green">882</FONT>        }<a name="line.882"></a>
+<FONT color="green">883</FONT>    }<a name="line.883"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

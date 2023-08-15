@@ -1,0 +1,113 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class RenderWolf extends RenderLiving<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        public RenderWolf(ModelBase par1ModelBase, float par2)<a name="line.9"></a>
+<FONT color="green">010</FONT>        {<a name="line.10"></a>
+<FONT color="green">011</FONT>            super(par1ModelBase, par2);<a name="line.11"></a>
+<FONT color="green">012</FONT>        }<a name="line.12"></a>
+<FONT color="green">013</FONT>    <a name="line.13"></a>
+<FONT color="green">014</FONT>        public void renderWolf(EntityWolf par1EntityWolf, double par2, double par4, double par6, float par8, float par9)<a name="line.14"></a>
+<FONT color="green">015</FONT>        {<a name="line.15"></a>
+<FONT color="green">016</FONT>            super.doRenderLiving(par1EntityWolf, par2, par4, par6, par8, par9);<a name="line.16"></a>
+<FONT color="green">017</FONT>        }<a name="line.17"></a>
+<FONT color="green">018</FONT>    <a name="line.18"></a>
+<FONT color="green">019</FONT>        protected float getTailRotation(EntityWolf par1EntityWolf, float par2)<a name="line.19"></a>
+<FONT color="green">020</FONT>        {<a name="line.20"></a>
+<FONT color="green">021</FONT>            return par1EntityWolf.getTailRotation();<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        /**<a name="line.24"></a>
+<FONT color="green">025</FONT>         * Defines what float the third param in setRotationAngles of ModelBase is<a name="line.25"></a>
+<FONT color="green">026</FONT>         */<a name="line.26"></a>
+<FONT color="green">027</FONT>        protected float handleRotationFloat(EntityLiving par1EntityLiving, float par2)<a name="line.27"></a>
+<FONT color="green">028</FONT>        {<a name="line.28"></a>
+<FONT color="green">029</FONT>            return this.getTailRotation((EntityWolf)par1EntityLiving, par2);<a name="line.29"></a>
+<FONT color="green">030</FONT>        }<a name="line.30"></a>
+<FONT color="green">031</FONT>    <a name="line.31"></a>
+<FONT color="green">032</FONT>        public void doRenderLiving(EntityLiving par1EntityLiving, double par2, double par4, double par6, float par8, float par9)<a name="line.32"></a>
+<FONT color="green">033</FONT>        {<a name="line.33"></a>
+<FONT color="green">034</FONT>            this.renderWolf((EntityWolf)par1EntityLiving, par2, par4, par6, par8, par9);<a name="line.34"></a>
+<FONT color="green">035</FONT>        }<a name="line.35"></a>
+<FONT color="green">036</FONT>    <a name="line.36"></a>
+<FONT color="green">037</FONT>        /**<a name="line.37"></a>
+<FONT color="green">038</FONT>         * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then<a name="line.38"></a>
+<FONT color="green">039</FONT>         * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic<a name="line.39"></a>
+<FONT color="green">040</FONT>         * (Render&lt;T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,<a name="line.40"></a>
+<FONT color="green">041</FONT>         * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.<a name="line.41"></a>
+<FONT color="green">042</FONT>         */<a name="line.42"></a>
+<FONT color="green">043</FONT>        public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9)<a name="line.43"></a>
+<FONT color="green">044</FONT>        {<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.renderWolf((EntityWolf)par1Entity, par2, par4, par6, par8, par9);<a name="line.45"></a>
+<FONT color="green">046</FONT>        }<a name="line.46"></a>
+<FONT color="green">047</FONT>    }<a name="line.47"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

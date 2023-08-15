@@ -1,0 +1,94 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import java.util.Comparator;<a name="line.3"></a>
+<FONT color="green">004</FONT>    <a name="line.4"></a>
+<FONT color="green">005</FONT>    public class EntityAINearestAttackableTargetSorter implements Comparator<a name="line.5"></a>
+<FONT color="green">006</FONT>    {<a name="line.6"></a>
+<FONT color="green">007</FONT>        private Entity theEntity;<a name="line.7"></a>
+<FONT color="green">008</FONT>    <a name="line.8"></a>
+<FONT color="green">009</FONT>        final EntityAINearestAttackableTarget parent;<a name="line.9"></a>
+<FONT color="green">010</FONT>    <a name="line.10"></a>
+<FONT color="green">011</FONT>        public EntityAINearestAttackableTargetSorter(EntityAINearestAttackableTarget par1EntityAINearestAttackableTarget, Entity par2Entity)<a name="line.11"></a>
+<FONT color="green">012</FONT>        {<a name="line.12"></a>
+<FONT color="green">013</FONT>            this.parent = par1EntityAINearestAttackableTarget;<a name="line.13"></a>
+<FONT color="green">014</FONT>            this.theEntity = par2Entity;<a name="line.14"></a>
+<FONT color="green">015</FONT>        }<a name="line.15"></a>
+<FONT color="green">016</FONT>    <a name="line.16"></a>
+<FONT color="green">017</FONT>        public int compareDistanceSq(Entity par1Entity, Entity par2Entity)<a name="line.17"></a>
+<FONT color="green">018</FONT>        {<a name="line.18"></a>
+<FONT color="green">019</FONT>            double var3 = this.theEntity.getDistanceSqToEntity(par1Entity);<a name="line.19"></a>
+<FONT color="green">020</FONT>            double var5 = this.theEntity.getDistanceSqToEntity(par2Entity);<a name="line.20"></a>
+<FONT color="green">021</FONT>            return var3 &lt; var5 ? -1 : (var3 &gt; var5 ? 1 : 0);<a name="line.21"></a>
+<FONT color="green">022</FONT>        }<a name="line.22"></a>
+<FONT color="green">023</FONT>    <a name="line.23"></a>
+<FONT color="green">024</FONT>        public int compare(Object par1Obj, Object par2Obj)<a name="line.24"></a>
+<FONT color="green">025</FONT>        {<a name="line.25"></a>
+<FONT color="green">026</FONT>            return this.compareDistanceSq((Entity)par1Obj, (Entity)par2Obj);<a name="line.26"></a>
+<FONT color="green">027</FONT>        }<a name="line.27"></a>
+<FONT color="green">028</FONT>    }<a name="line.28"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

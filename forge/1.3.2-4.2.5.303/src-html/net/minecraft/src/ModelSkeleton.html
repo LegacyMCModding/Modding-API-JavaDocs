@@ -1,0 +1,104 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelSkeleton extends ModelZombie<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        public ModelSkeleton()<a name="line.9"></a>
+<FONT color="green">010</FONT>        {<a name="line.10"></a>
+<FONT color="green">011</FONT>            float var1 = 0.0F;<a name="line.11"></a>
+<FONT color="green">012</FONT>            this.bipedRightArm = new ModelRenderer(this, 40, 16);<a name="line.12"></a>
+<FONT color="green">013</FONT>            this.bipedRightArm.addBox(-1.0F, -2.0F, -1.0F, 2, 12, 2, var1);<a name="line.13"></a>
+<FONT color="green">014</FONT>            this.bipedRightArm.setRotationPoint(-5.0F, 2.0F, 0.0F);<a name="line.14"></a>
+<FONT color="green">015</FONT>            this.bipedLeftArm = new ModelRenderer(this, 40, 16);<a name="line.15"></a>
+<FONT color="green">016</FONT>            this.bipedLeftArm.mirror = true;<a name="line.16"></a>
+<FONT color="green">017</FONT>            this.bipedLeftArm.addBox(-1.0F, -2.0F, -1.0F, 2, 12, 2, var1);<a name="line.17"></a>
+<FONT color="green">018</FONT>            this.bipedLeftArm.setRotationPoint(5.0F, 2.0F, 0.0F);<a name="line.18"></a>
+<FONT color="green">019</FONT>            this.bipedRightLeg = new ModelRenderer(this, 0, 16);<a name="line.19"></a>
+<FONT color="green">020</FONT>            this.bipedRightLeg.addBox(-1.0F, 0.0F, -1.0F, 2, 12, 2, var1);<a name="line.20"></a>
+<FONT color="green">021</FONT>            this.bipedRightLeg.setRotationPoint(-2.0F, 12.0F, 0.0F);<a name="line.21"></a>
+<FONT color="green">022</FONT>            this.bipedLeftLeg = new ModelRenderer(this, 0, 16);<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.bipedLeftLeg.mirror = true;<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.bipedLeftLeg.addBox(-1.0F, 0.0F, -1.0F, 2, 12, 2, var1);<a name="line.24"></a>
+<FONT color="green">025</FONT>            this.bipedLeftLeg.setRotationPoint(2.0F, 12.0F, 0.0F);<a name="line.25"></a>
+<FONT color="green">026</FONT>        }<a name="line.26"></a>
+<FONT color="green">027</FONT>    <a name="line.27"></a>
+<FONT color="green">028</FONT>        /**<a name="line.28"></a>
+<FONT color="green">029</FONT>         * Sets the model's various rotation angles. For bipeds, par1 and par2 are used for animating the movement of arms<a name="line.29"></a>
+<FONT color="green">030</FONT>         * and legs, where par1 represents the time(so that arms and legs swing back and forth) and par2 represents how<a name="line.30"></a>
+<FONT color="green">031</FONT>         * "far" arms and legs can swing at most.<a name="line.31"></a>
+<FONT color="green">032</FONT>         */<a name="line.32"></a>
+<FONT color="green">033</FONT>        public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6)<a name="line.33"></a>
+<FONT color="green">034</FONT>        {<a name="line.34"></a>
+<FONT color="green">035</FONT>            this.aimedBow = true;<a name="line.35"></a>
+<FONT color="green">036</FONT>            super.setRotationAngles(par1, par2, par3, par4, par5, par6);<a name="line.36"></a>
+<FONT color="green">037</FONT>        }<a name="line.37"></a>
+<FONT color="green">038</FONT>    }<a name="line.38"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>

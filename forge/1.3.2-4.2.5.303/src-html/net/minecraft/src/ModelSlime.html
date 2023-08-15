@@ -1,0 +1,120 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package net.minecraft.src;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import cpw.mods.fml.common.Side;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import cpw.mods.fml.common.asm.SideOnly;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    @SideOnly(Side.CLIENT)<a name="line.6"></a>
+<FONT color="green">007</FONT>    public class ModelSlime extends ModelBase<a name="line.7"></a>
+<FONT color="green">008</FONT>    {<a name="line.8"></a>
+<FONT color="green">009</FONT>        /** The slime's bodies, both the inside box and the outside box */<a name="line.9"></a>
+<FONT color="green">010</FONT>        ModelRenderer slimeBodies;<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>        /** The slime's right eye */<a name="line.12"></a>
+<FONT color="green">013</FONT>        ModelRenderer slimeRightEye;<a name="line.13"></a>
+<FONT color="green">014</FONT>    <a name="line.14"></a>
+<FONT color="green">015</FONT>        /** The slime's left eye */<a name="line.15"></a>
+<FONT color="green">016</FONT>        ModelRenderer slimeLeftEye;<a name="line.16"></a>
+<FONT color="green">017</FONT>    <a name="line.17"></a>
+<FONT color="green">018</FONT>        /** The slime's mouth */<a name="line.18"></a>
+<FONT color="green">019</FONT>        ModelRenderer slimeMouth;<a name="line.19"></a>
+<FONT color="green">020</FONT>    <a name="line.20"></a>
+<FONT color="green">021</FONT>        public ModelSlime(int par1)<a name="line.21"></a>
+<FONT color="green">022</FONT>        {<a name="line.22"></a>
+<FONT color="green">023</FONT>            this.slimeBodies = new ModelRenderer(this, 0, par1);<a name="line.23"></a>
+<FONT color="green">024</FONT>            this.slimeBodies.addBox(-4.0F, 16.0F, -4.0F, 8, 8, 8);<a name="line.24"></a>
+<FONT color="green">025</FONT>    <a name="line.25"></a>
+<FONT color="green">026</FONT>            if (par1 &gt; 0)<a name="line.26"></a>
+<FONT color="green">027</FONT>            {<a name="line.27"></a>
+<FONT color="green">028</FONT>                this.slimeBodies = new ModelRenderer(this, 0, par1);<a name="line.28"></a>
+<FONT color="green">029</FONT>                this.slimeBodies.addBox(-3.0F, 17.0F, -3.0F, 6, 6, 6);<a name="line.29"></a>
+<FONT color="green">030</FONT>                this.slimeRightEye = new ModelRenderer(this, 32, 0);<a name="line.30"></a>
+<FONT color="green">031</FONT>                this.slimeRightEye.addBox(-3.25F, 18.0F, -3.5F, 2, 2, 2);<a name="line.31"></a>
+<FONT color="green">032</FONT>                this.slimeLeftEye = new ModelRenderer(this, 32, 4);<a name="line.32"></a>
+<FONT color="green">033</FONT>                this.slimeLeftEye.addBox(1.25F, 18.0F, -3.5F, 2, 2, 2);<a name="line.33"></a>
+<FONT color="green">034</FONT>                this.slimeMouth = new ModelRenderer(this, 32, 8);<a name="line.34"></a>
+<FONT color="green">035</FONT>                this.slimeMouth.addBox(0.0F, 21.0F, -3.5F, 1, 1, 1);<a name="line.35"></a>
+<FONT color="green">036</FONT>            }<a name="line.36"></a>
+<FONT color="green">037</FONT>        }<a name="line.37"></a>
+<FONT color="green">038</FONT>    <a name="line.38"></a>
+<FONT color="green">039</FONT>        /**<a name="line.39"></a>
+<FONT color="green">040</FONT>         * Sets the models various rotation angles then renders the model.<a name="line.40"></a>
+<FONT color="green">041</FONT>         */<a name="line.41"></a>
+<FONT color="green">042</FONT>        public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)<a name="line.42"></a>
+<FONT color="green">043</FONT>        {<a name="line.43"></a>
+<FONT color="green">044</FONT>            this.setRotationAngles(par2, par3, par4, par5, par6, par7);<a name="line.44"></a>
+<FONT color="green">045</FONT>            this.slimeBodies.render(par7);<a name="line.45"></a>
+<FONT color="green">046</FONT>    <a name="line.46"></a>
+<FONT color="green">047</FONT>            if (this.slimeRightEye != null)<a name="line.47"></a>
+<FONT color="green">048</FONT>            {<a name="line.48"></a>
+<FONT color="green">049</FONT>                this.slimeRightEye.render(par7);<a name="line.49"></a>
+<FONT color="green">050</FONT>                this.slimeLeftEye.render(par7);<a name="line.50"></a>
+<FONT color="green">051</FONT>                this.slimeMouth.render(par7);<a name="line.51"></a>
+<FONT color="green">052</FONT>            }<a name="line.52"></a>
+<FONT color="green">053</FONT>        }<a name="line.53"></a>
+<FONT color="green">054</FONT>    }<a name="line.54"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
