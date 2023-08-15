@@ -2,7 +2,7 @@
 
 JavaDoc for various Minecraft modding APIs.  
 
-* [Forge (pre-1.8 only)](forge/index.md)
+* [Minecraft Forge](forge/index.md)
 * [ModLoader](modloader/index.md)
 * [Hey0 Admin Mod (aka hMod)](hMod/index.md)
 <!--* [ModLoaderMP (b1.4_01 - 1.5.2)](modloadermp/index.md)-->
