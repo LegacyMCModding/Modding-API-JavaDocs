@@ -2,7 +2,7 @@
 
 This repository contains API reference for different Minecraft modding APIs that are considered "Legacy". All the pages in the subfolders were generated via the Oracle's [JavaDoc tool](https://www.oracle.com/java/technologies/javase/javadoc-tool.html). If you have any questions regarding the contents of this repository, create an issue on GitHub or DM me on Discord: `@vladthemountain`.  
 
-**Official** means that the JavaDocs have been published by the creator(-s) of the corresponding API/loader. **Generated** means that the JavaDocs were generated from sources by LegacyMC repository maintainers and/or contributors. **Patched** JavaDocs are usually based on generated or official ones, but contain information added by the community.
+**Official** means that the JavaDocs have been published by the creator(-s) of the corresponding API/loader. **Generated** means that the JavaDocs were generated from sources by LegacyMCModding repository maintainer(-s) and/or contributors. **Patched** JavaDocs are based on generated or official ones, but contain information added by the community.
 
 ### Mod loaders  
 * [Minecraft Forge](forge/index.md)
@@ -18,7 +18,7 @@ This repository contains API reference for different Minecraft modding APIs that
 
 ## Contributing
 
-If you want to contribute to the repository - that's great! We accept both submissions of patched versions of the JavaDocs via [Pull Requests](https://github.com/LegacyMCModding/Modding-API-JavaDocs/pulls) and submissions of projects (or their versions) which should be added to the repository via [Issues](https://github.com/LegacyMCModding/Modding-API-JavaDocs/issues).
+If you want to contribute to the repository - that's great! I accept both submissions of patched versions of the JavaDocs via [Pull Requests](https://github.com/LegacyMCModding/Modding-API-JavaDocs/pulls) and submissions of projects (or their versions) which should be added to the repository via [Issues](https://github.com/LegacyMCModding/Modding-API-JavaDocs/issues).
 
 ## Changelog
 
