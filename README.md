@@ -19,7 +19,7 @@ This repository contains API reference for different Minecraft modding APIs that
 ## Changelog
 
 <div>
-  <b>Aug 16, 2023</b> - Added Spoutcraft <code>1.5.2</code>
+  <b>Aug 16, 2023</b> - Added Spoutcraft <code>1.5.2</code>; Forge <code>1.7.10 - 10.13.4.1614</code>
 </div>
 <br>
 <div>
