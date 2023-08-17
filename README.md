@@ -23,6 +23,10 @@ If you want to contribute to the repository - that's great! I accept both submis
 ## Changelog
 
 <div>
+  <b>Aug 17, 2023</b> - Added LiteLoader <code>1.12.0_0</code>
+</div>
+<br>
+<div>
   <b>Aug 16, 2023</b> - Added Spoutcraft <code>1.5.2</code>; Forge <code>1.7.10 - 10.13.4.1614</code>
 </div>
 <br>
