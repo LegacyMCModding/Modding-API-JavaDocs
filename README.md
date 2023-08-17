@@ -1,6 +1,6 @@
 ## About
 
-This repository contains API reference for different Minecraft modding APIs that are considered "Legacy". All the pages in the subfolders were generated via the Oracle's [JavaDoc tool](https://www.oracle.com/java/technologies/javase/javadoc-tool.html). If you have any questions regarding the contents of this repository, create an issue on GitHub or DM me on Discord: `@vladthemountain`.  
+This repository contains API reference for different Minecraft modding APIs for "Legacy" versions (1.12.2 and below) of Minecraft: Java Edition. All the pages in the subfolders were generated via the Oracle's [JavaDoc tool](https://www.oracle.com/java/technologies/javase/javadoc-tool.html). If you have any questions regarding the contents of this repository, create an issue on GitHub or DM me on Discord: `@vladthemountain`.  
 
 **Official** means that the JavaDocs have been published by the creator(-s) of the corresponding API/loader. **Generated** means that the JavaDocs were generated from sources by LegacyMCModding repository maintainer(-s) and/or contributors. **Patched** JavaDocs are based on generated or official ones, but contain information added by the community.
 
