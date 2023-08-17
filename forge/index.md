@@ -16,3 +16,4 @@
 * `1.1 - 1.3.4.29`: [Client API](generated/1.1-1.3.4.29/client/index.html), [Server API](generated/1.1-1.3.4.29/server/index.html)
 * `1.2.3 - 1.4.1.64`: [Client API](generated/1.2.3-1.4.1.64/client/index.html), [Server API](generated/1.2.3-1.4.1.64/server/index.html)
 * `1.7.10 - 10.13.4.1614`: [API](generated/1.7.10-10.13.4.1614/index.html)
+* `1.12.2 - 14.23.5.2860`: [API](generated/1.12.2-14.23.5.2860/index.html)
