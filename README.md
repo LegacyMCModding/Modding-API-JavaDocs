@@ -23,7 +23,7 @@ If you want to contribute to the repository - that's great! I accept both submis
 ## Changelog
 
 <div>
-  <b>Aug 17, 2023</b> - Added LiteLoader <code>1.12.0_0</code>
+  <b>Aug 17, 2023</b> - Added LiteLoader <code>1.8.0</code>, <code>1.12.0_0</code>
 </div>
 <br>
 <div>
