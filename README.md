@@ -2,26 +2,28 @@
 
 This repository contains API reference for different Minecraft modding APIs for "Legacy" versions (1.12.2 and below) of Minecraft: Java Edition. All the pages in the subfolders were generated via the Oracle's [JavaDoc tool](https://www.oracle.com/java/technologies/javase/javadoc-tool.html). If you have any questions regarding the contents of this repository, create an issue on GitHub or DM me on Discord: `@vladthemountain`.  
 
-**Official** means that the JavaDocs have been published by the creator(-s) of the corresponding API/loader. **Generated** means that the JavaDocs were generated from sources by LegacyMCModding repository maintainer(-s) and/or contributors. **Patched** JavaDocs are based on generated or official ones, but contain information added by the community.
-
 ### Mod loaders  
-* [Minecraft Forge](forge/index.md)
-* [LiteLoader](liteloader/index.md)
-* [ModLoader](modloader/index.md)
+* [Minecraft Forge](https://legacymcmodding.github.io/Forge-JavaDoc/index.md)
+* [LiteLoader](https://legacymcmodding.github.io/LiteLoader-JavaDoc/index.md)
+* [ModLoader](https://legacymcmodding.github.io/ModLoader-JavaDoc/index.md)
 <!--* [ModLoaderMP](modloadermp/index.md)-->
 
 ### Plugin loaders  
-* [Hey0 Admin Mod (aka hMod)](hMod/index.md)
+* [Hey0 Admin Mod (aka hMod)](https://legacymcmodding.github.io/hMod-JavaDoc/index.md)
 
 ### APIs
-* [Spoutcraft](spoutcraft/index.md)
+* [Spoutcraft](https://legacymcmodding.github.io/SpoutCraft-JavaDoc/index.md)
 
 ## Contributing
 
-If you want to contribute to the repository - that's great! I accept both submissions of patched versions of the JavaDocs via [Pull Requests](https://github.com/LegacyMCModding/Modding-API-JavaDocs/pulls) and submissions of projects (or their versions) which should be added to the repository via [Issues](https://github.com/LegacyMCModding/Modding-API-JavaDocs/issues).
+If you want to contribute to the repositories - that's great! I accept both submissions of patched versions of the JavaDocs via Pull Requests to respective documentations' repositories and submissions of projects (or their versions) which should be added via this repository's [Issues](https://github.com/LegacyMCModding/Modding-API-JavaDocs/issues).
 
 ## Changelog
 
+<div>
+  <b>Aug 20, 2024</b> - Split the documentation into separate repositories
+</div>
+<br>
 <div>
   <b>Aug 17, 2023</b> - Added LiteLoader <code>1.8.0</code>, <code>1.12.0_0</code>; Forge <code>1.12.2 - 14.23.5.2860</code>
 </div>
