@@ -3,16 +3,16 @@
 This repository contains API reference for different Minecraft modding APIs for "Legacy" versions (1.12.2 and below) of Minecraft: Java Edition. All the pages in the subfolders were generated via the Oracle's [JavaDoc tool](https://www.oracle.com/java/technologies/javase/javadoc-tool.html). If you have any questions regarding the contents of this repository, create an issue on GitHub or DM me on Discord: `@vladthemountain`.  
 
 ### Mod loaders  
-* [Minecraft Forge](https://legacymcmodding.github.io/Forge-JavaDoc/index.md)
-* [LiteLoader](https://legacymcmodding.github.io/LiteLoader-JavaDoc/index.md)
-* [ModLoader](https://legacymcmodding.github.io/ModLoader-JavaDoc/index.md)
+* [Minecraft Forge](https://legacymcmodding.github.io/Forge-JavaDoc/index)
+* [LiteLoader](https://legacymcmodding.github.io/LiteLoader-JavaDoc/index)
+* [ModLoader](https://legacymcmodding.github.io/ModLoader-JavaDoc/index)
 <!--* [ModLoaderMP](modloadermp/index.md)-->
 
 ### Plugin loaders  
-* [Hey0 Admin Mod (aka hMod)](https://legacymcmodding.github.io/hMod-JavaDoc/index.md)
+* [Hey0 Admin Mod (aka hMod)](https://legacymcmodding.github.io/hMod-JavaDoc/index)
 
 ### APIs
-* [Spoutcraft](https://legacymcmodding.github.io/SpoutCraft-JavaDoc/index.md)
+* [Spoutcraft](https://legacymcmodding.github.io/SpoutCraft-JavaDoc/index)
 
 ## Contributing
 
